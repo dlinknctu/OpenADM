@@ -6,7 +6,7 @@ import java.util.Set;
 public interface IOmniUIService extends IFloodlightService {
 
 		/* 
-		 * @brief: getSwitch infomation, include (dpid, flow tables)
+		 * @brief: getSwitch infomation, include (dpid, flow tables,flow)
 		 * 
 		 */
 	    public Set<SwitchInfo> getSwitches();
@@ -15,9 +15,4 @@ public interface IOmniUIService extends IFloodlightService {
 		 *
 		 */
 	    public Set<LinkInfoForOmniUI> getLinks();
-		/*
-		 * @brife: getPorts infomation, include (ports count[packet/type], attached dpid..)
-		 *
-		 */
-	    public Set<PortInfo> getPorts();
 }

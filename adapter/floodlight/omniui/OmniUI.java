@@ -88,8 +88,4 @@ public class OmniUI implements IOmniUIService,IFloodlightModule  {
 		return null;
 	}
 	
-	public Set<PortInfo> getPorts(){
-
-		return null;
-	}
 }
