@@ -22,7 +22,7 @@ import org.openflow.util.HexString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OmniUI implements IOmniUIService,IFloodlightModule  {
+public class OmniUI implements IFloodlightModule  {
 	
 	protected IFloodlightProviderService floodlightProvider;
 	protected IRestApiService restApi;
@@ -32,17 +32,13 @@ public class OmniUI implements IOmniUIService,IFloodlightModule  {
 	@Override
 	public Collection<Class<? extends IFloodlightService>> getModuleServices() {
 		// TODO Auto-generated method stub
-		Collection<Class<? extends IFloodlightService>> l = new ArrayList<Class<? extends IFloodlightService>>();
-		l.add(IOmniUIService.class);
-		return l;
+		return null;
 	}
 
 	@Override
 	public Map<Class<? extends IFloodlightService>, IFloodlightService> getServiceImpls() {
 		// TODO Auto-generated method stub
-		Map<Class<? extends IFloodlightService>, IFloodlightService> m = new HashMap<Class<? extends IFloodlightService>, IFloodlightService>();
-		m.put(IOmniUIService.class,this);
-		return m;
+		return null;
 	}
 
 	/*
@@ -73,19 +69,4 @@ public class OmniUI implements IOmniUIService,IFloodlightModule  {
 		restApi.addRestletRoutable(new OmniUIWebRoutable());
 	}
 
-
-	/*  IOmniUIService implementation
-	 *  
-	 *
-	 */
-
-    public Set<SwitchInfo> getSwitches(){
-
-		return null;
-	}
-
-	public Set<LinkInfoForOmniUI> getLinks(){
-		return null;
-	}
-	
 }
