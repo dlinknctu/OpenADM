@@ -16,10 +16,10 @@ import net.floodlightcontroller.routing.Link;
 @JsonSerialize(using=LinkInfoForOmniUI.class)
 public class LinkInfoForOmniUI extends JsonSerializer<LinkInfoForOmniUI> {
 	
-	public long srcDpid;
-	public long dstDpid;
-	public short srcPort;
-	public short dstPort;
+	private long srcDpid;
+	private long dstDpid;
+	private short srcPort;
+	private short dstPort;
     // Do NOT delete this, it's required for the serializer
     public LinkInfoForOmniUI() {}
 
@@ -30,15 +30,15 @@ public class LinkInfoForOmniUI extends JsonSerializer<LinkInfoForOmniUI> {
 		this.dstPort = link.getDstPort();
 	}
     @Override
-    public void serialize(LinkInfoForOmniUI linktype, JsonGenerator jgen, SerializerProvider arg2)
+    public void serialize(LinkInfoForOmniUI linkinfo, JsonGenerator jgen, SerializerProvider arg2)
             throws IOException, JsonProcessingException {
         // You ****MUST*** use lwt for the fields as it's actually a different object.
      
 		jgen.writeStartObject();
-        jgen.writeStringField("src-switch", HexString.toHexString(linktype.srcDpid));
-		jgen.writeNumberField("src-port", linktype.srcPort);
-		jgen.writeStringField("dst-switch", HexString.toHexString(linktype.dstDpid));
-		jgen.writeNumberField("dst-port", linktype.dstPort);
+        jgen.writeStringField("src-switch", linkinfo.getSrcDpidHexString());
+		jgen.writeNumberField("src-port", linkinfo.getSrcPort());
+		jgen.writeStringField("dst-switch", linkinfo.getDstDpidHexString());
+		jgen.writeNumberField("dst-port", linkinfo.getDstPort());
 		jgen.writeEndObject();
     }
 
@@ -46,4 +46,24 @@ public class LinkInfoForOmniUI extends JsonSerializer<LinkInfoForOmniUI> {
     public Class<LinkInfoForOmniUI> handledType() {
         return LinkInfoForOmniUI.class;
     }
+
+	//getter
+	public long getSrcDpid(){
+		return this.srcDpid;
+	}
+	public String getSrcDpidHexString(){
+		return HexString.toHexString(this.srcDpid);
+	}
+	public long getDstDpid(){
+		return this.dstDpid;
+	}
+	public String getDstDpidHexString(){
+		return HexString.toHexString(this.dstDpid);
+	}
+	public long getSrcPort(){
+		return this.srcPort;
+	}
+	public long getDstPort(){
+		return this.dstPort;
+	}
 }
