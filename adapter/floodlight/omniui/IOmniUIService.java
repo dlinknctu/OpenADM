@@ -14,7 +14,7 @@ public interface IOmniUIService extends IFloodlightService {
 		 * @brief: getLink infomation, include (source/dest dpid, source/dest port)
 		 *
 		 */
-	    public Set<LinkInfo> getLinks();
+	    public Set<LinkInfoForOmniUI> getLinks();
 		/*
 		 * @brife: getPorts infomation, include (ports count[packet/type], attached dpid..)
 		 *

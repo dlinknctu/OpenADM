@@ -84,7 +84,7 @@ public class OmniUI implements IOmniUIService,IFloodlightModule  {
 		return null;
 	}
 
-	public Set<LinkInfo> getLinks(){
+	public Set<LinkInfoForOmniUI> getLinks(){
 		return null;
 	}
 	
