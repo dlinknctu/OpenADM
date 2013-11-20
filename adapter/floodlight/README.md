@@ -13,10 +13,3 @@ A floodlight adapter module for OmniUI
 - Modfiy the floodlight config file, default is `src/main/resources/floodlightdefault.properties`
     * append `net.floodlightcontroller.omniui.OmniUI` to the options `floodlight.modules`
 
-
-##Usage##
-- Use RESTAPI 
-    * /wm/omniui/swtich/json
-    * /wm/omniui/link/json
-    * /wm/omniui/port/json
-    
