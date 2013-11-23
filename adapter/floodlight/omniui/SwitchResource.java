@@ -50,6 +50,9 @@ public class SwitchResource extends ServerResource {
 		List<QueryThread> pandingRemoveThreads = new ArrayList<QueryThread>(switchDpids.size());
 		Map<Long, SwitchInfo > resultMap = new HashMap< Long , SwitchInfo>();
 		
+
+		OFStatisticsType [] queryTypes = {OFStatisticsType.PORT, OFStatisticsType.FLOW};
+
 		//For each switch, use a thread to query statistics
 		List<SwitchInfo> resultList = new ArrayList<SwitchInfo>();
 		for(Long dpid: switchDpids){
@@ -61,10 +64,13 @@ public class SwitchResource extends ServerResource {
 			resultMap.put(dpid,swi);
 			
 
-			// Create concurrent thread to query switch inforamtion.
-			QueryThread portThread = new QueryThread(dpid,sw,OFStatisticsType.PORT);
-			activeThreads.add(portThread);
-			portThread.start();
+			// Create concurrent thread to query switch inforamtion
+			//
+			for(OFStatisticsType type : queryTypes){
+				QueryThread thread = new QueryThread(dpid,sw,type);
+				activeThreads.add(thread);
+				thread.start();
+			}
 		}
 
 		for(int sleepCycles=0; sleepCycles < 10; sleepCycles++){
@@ -122,7 +128,6 @@ public class SwitchResource extends ServerResource {
 		}
 		@Override
 		public void run(){
-			//table_id=0xff, means all table;
 			if(this.sw!=null){
 				Future<List<OFStatistics>> future;
 				OFStatisticsRequest req = new OFStatisticsRequest();
@@ -136,6 +141,21 @@ public class SwitchResource extends ServerResource {
 					specificReq.setPortNumber(OFPort.OFPP_NONE.getValue());
 					req.setStatistics(Collections.singletonList((OFStatistics)specificReq));
 					requestLength += specificReq.getLength();
+				}
+				else if (type == OFStatisticsType.FLOW){
+	                
+					OFFlowStatisticsRequest specificReq = new OFFlowStatisticsRequest();
+	                OFMatch match = new OFMatch();
+                	//Query all flow for eacth table
+					//use wildcards as 0xffffffff to match all flow
+					//use tableId as 0xff to find all table.
+					//set output port as OFPP_NONE, means no restriction for matching rules.
+					match.setWildcards(0xffffffff);
+            	    specificReq.setMatch(match);
+        	        specificReq.setOutPort(OFPort.OFPP_NONE.getValue());
+    	            specificReq.setTableId((byte) 0xff);
+	                req.setStatistics(Collections.singletonList((OFStatistics)specificReq));
+	                requestLength += specificReq.getLength();
 				}
 				req.setLengthU(requestLength);
 				try{

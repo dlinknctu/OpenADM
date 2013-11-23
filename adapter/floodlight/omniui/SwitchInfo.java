@@ -11,7 +11,8 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.openflow.util.HexString;
-
+import org.openflow.protocol.OFMatch;
+import org.openflow.protocol.action.*;
 import org.openflow.protocol.statistics.*;
 
 @JsonSerialize(using=SwitchInfo.class)
@@ -20,7 +21,7 @@ public class SwitchInfo extends JsonSerializer<SwitchInfo> {
 	public String name;
 	public Long dpid;
 	public List< OFPortStatisticsReply > portList;
-	public List< FlowTableInfo > flowtable;
+	public List< OFFlowStatisticsReply > flowList;
 
     // Do NOT delete this, it's required for the serializer
     public SwitchInfo() {}
@@ -29,44 +30,130 @@ public class SwitchInfo extends JsonSerializer<SwitchInfo> {
 		this.dpid=dpid;
 	}
 
+    private String intToIp(int i) {
+        return ((i >> 24 ) & 0xFF) + "." +
+               ((i >> 16 ) & 0xFF) + "." +
+               ((i >>  8 ) & 0xFF) + "." +
+               ( i        & 0xFF);
+    }
 
 	//Port 
 	private void setOFStatisticsPort(List<OFStatistics> portInfo){
 		this.portList = new ArrayList<OFPortStatisticsReply>(portInfo.size());
-		for(OFStatistics parent: portInfo){
-			portList.add( ((OFPortStatisticsReply)parent));
+		for(OFStatistics ofs: portInfo){
+			portList.add( ((OFPortStatisticsReply)ofs));
 		}
 	}
 	public void serializePort(JsonGenerator jgen){
-		for(OFPortStatisticsReply port: portList){
+		if(portList != null){
 			try{
-				jgen.writeNumberField("PortNumber:",(int)((port.getPortNumber())&(0xffff)));
-				jgen.writeNumberField("recvPackets",port.getreceivePackets());
-				jgen.writeNumberField("transmitPackets",port.getTransmitPackets());
-				jgen.writeNumberField("recvBytes",port.getReceiveBytes());
-				jgen.writeNumberField("transmitBytes",port.getTransmitBytes());
+				jgen.writeFieldName("ports");
+				jgen.writeStartArray();
+				for(OFPortStatisticsReply port: portList){
+					jgen.writeStartObject();
+					jgen.writeNumberField("PortNumber:",(int)((port.getPortNumber())&(0xffff)));
+					jgen.writeNumberField("recvPackets",port.getreceivePackets());
+					jgen.writeNumberField("transmitPackets",port.getTransmitPackets());
+					jgen.writeNumberField("recvBytes",port.getReceiveBytes());
+					jgen.writeNumberField("transmitBytes",port.getTransmitBytes());
+					jgen.writeEndObject();
+				}
+				jgen.writeEndArray();
 			}
 			catch (IOException e){
 
+				
 			}
 		}
 	}
 
 	//Flow tables
-	public void setOFStatisticsType(OFStatisticsType type,List<OFStatistics> infomation) {
-		if(type == OFStatisticsType.PORT){
-			setOFStatisticsPort(infomation);
+	private void setOFStatisticsFlow(List<OFStatistics> flowInfo){
+		this.flowList = new ArrayList<OFFlowStatisticsReply>(flowInfo.size());
+		for(OFStatistics ofs: flowInfo){
+			flowList.add( ((OFFlowStatisticsReply)ofs));
+		}
+	}
+	
+	public void serializeFlow(JsonGenerator jgen){
+		if(flowList != null){
+			try{
+				jgen.writeFieldName("flows");
+				jgen.writeStartArray();
+				for(OFFlowStatisticsReply flow: flowList){
+					jgen.writeStartObject();
+					OFMatch match = flow.getMatch();
+					jgen.writeNumberField("ingreePort",(int)(match.getInputPort()&0xffff));
+					jgen.writeStringField("srcMac",HexString.toHexString(match.getDataLayerSource()));
+					jgen.writeStringField("dstMac",HexString.toHexString(match.getDataLayerDestination()));
+			        jgen.writeStringField("dstIP", intToIp(match.getNetworkDestination()));
+		  	      	jgen.writeNumberField("dstIPMask", match.getNetworkDestinationMaskLen());
+			        jgen.writeNumberField("netProtocol", match.getNetworkProtocol());
+			        jgen.writeStringField("srcIP", intToIp(match.getNetworkSource()));
+			        jgen.writeNumberField("srcIPMask", match.getNetworkSourceMaskLen());
+			        jgen.writeNumberField("dstPort", match.getTransportDestination());
+			        jgen.writeNumberField("srcPort", match.getTransportSource());
+					jgen.writeNumberField("vlan", match.getDataLayerVirtualLan());
+			        jgen.writeNumberField("wildcards", match.getWildcards());	
+					jgen.writeNumberField("counterByte", flow.getPacketCount());
+					jgen.writeNumberField("counterPacket", flow.getByteCount());
+					jgen.writeNumberField("idleTimeout", (int)(flow.getIdleTimeout()&0xffff));
+					jgen.writeNumberField("hardTimeout", (int)(flow.getHardTimeout()&0xffff));
+					serializeAction(jgen, flow.getActions());
+					jgen.writeEndObject();
+				}
+				jgen.writeEndArray();
+			}
+			catch (IOException e){
+				
+			}
+		}
+	}
+	//OFAction
+	private void serializeAction(JsonGenerator jgen, List<OFAction> actionList){
+		if(actionList!=null){
+			try{
+				jgen.writeFieldName("actions");
+				jgen.writeStartArray();
+				for(OFAction action: actionList){
+					OFActionType type = action.getType();
+					jgen.writeStartObject();
+					String str = action.toString();
+					//Foramt = type[value]
+					int index1,index2;
+					index1 = str.indexOf('[');
+					index2 = str.lastIndexOf(']');
+					jgen.writeStringField("type",str.substring(0,index1));
+					jgen.writeStringField("value",str.substring(index1+1,index2));
+					jgen.writeEndObject();
+				}
+
+				jgen.writeEndArray();
+			}
+			catch (IOException e){
+
+
+			}
 		}
 
+	}
+	public void setOFStatisticsType(OFStatisticsType type,List<OFStatistics> information) {
+		if(type == OFStatisticsType.PORT){
+			setOFStatisticsPort(information);
+		}
+		else if(type == OFStatisticsType.FLOW){
+			setOFStatisticsFlow(information);
+		}
 	}
 			
 	@Override
     public void serialize(SwitchInfo swi, JsonGenerator jgen, SerializerProvider arg2)
             throws IOException, JsonProcessingException {
-        jgen.writeStartObject();
-		jgen.writeNumberField("dpid :",swi.dpid);
-        swi.serializePort(jgen);
-		jgen.writeEndObject();
+    	    jgen.writeStartObject();
+			jgen.writeNumberField("dpid",swi.dpid);
+			swi.serializeFlow(jgen);
+			swi.serializePort(jgen);
+			jgen.writeEndObject();
     }
 
     @Override
