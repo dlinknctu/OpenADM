@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>OmniUI</title>
+		<link rel="stylesheet" href="css/omniui.css">
+	</head>
+	<body>
+	   <div id="wrapper">
+        	<div id="header">
+        		<p>OmniUI</p>
+        	</div>
+        	
+        	<div id="contentliquid">
+        		<div id="content"></div>
+        	</div>
+        	
+        	<div id="leftcolumn">
+        		<p>Selected Node DPID</p>
+        		<p id="dpid"></p>
+        	</div>
+
+        	<div id="rightcolumn">
+            <!-- port table !-->
+				<table>
+					<th width=20%>rxPackets</th>
+			      <th width=20%>rxBytes</th> 
+			      <th width=20%>PortNumber</th>
+			      <th width=20%>txPackets</th>
+			      <th width=20%>txBytes</th>
+			      <tbody id="ports"></tbody>
+				</table>
+        </div>
+
+        <div id="footer">
+				<!-- flow table !-->
+				<table>
+					<th width=8%>wildcards</th>
+					<th width=8%>dstIP</th>
+					<th width=8%>srcMac</th>
+					<th width=5%>counterByte</th>
+					<th width=5%>srcPort</th>
+					<th width=5%>ingreePort</th>
+					<th width=8%>dstMac</th>
+					<th width=8%>actions</th>
+					<th width=8%>srcIPMask</th>
+					<th width=5%>vlan</th>
+					<th width=8%>dstIPMask</th>
+					<th width=5%>counterPacket</th>
+					<th width=5%>dstPort</th>
+					<th width=5%>hardTimeout</th>
+					<th width=5%>idleTimeout</th>
+					<th width=5%>netProtocol</th>
+					<tbody id="flows"></tbody>
+				</table>
+        	</div>
+    	</div>
+	</body>
+	<script type="text/javascript" src="js/d3.v3.js"></script>
+	<script type="text/javascript" src="js/topograph.js"></script>
+	<script type="text/javascript" src="js/omniui.js"></script>
+	<script type="text/javascript" src="js/jquery-1.10.2.js"></script>
+</html>
