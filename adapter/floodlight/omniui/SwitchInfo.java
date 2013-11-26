@@ -51,7 +51,7 @@ public class SwitchInfo extends JsonSerializer<SwitchInfo> {
 				jgen.writeStartArray();
 				for(OFPortStatisticsReply port: portList){
 					jgen.writeStartObject();
-					jgen.writeNumberField("PortNumber:",(int)((port.getPortNumber())&(0xffff)));
+					jgen.writeNumberField("PortNumber",(int)((port.getPortNumber())&(0xffff)));
 					jgen.writeNumberField("recvPackets",port.getreceivePackets());
 					jgen.writeNumberField("transmitPackets",port.getTransmitPackets());
 					jgen.writeNumberField("recvBytes",port.getReceiveBytes());
@@ -150,7 +150,7 @@ public class SwitchInfo extends JsonSerializer<SwitchInfo> {
     public void serialize(SwitchInfo swi, JsonGenerator jgen, SerializerProvider arg2)
             throws IOException, JsonProcessingException {
     	    jgen.writeStartObject();
-			jgen.writeNumberField("dpid",swi.dpid);
+			jgen.writeStringField("dpid",HexString.toHexString(swi.dpid));
 			swi.serializeFlow(jgen);
 			swi.serializePort(jgen);
 			jgen.writeEndObject();
