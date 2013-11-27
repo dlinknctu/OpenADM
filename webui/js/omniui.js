@@ -87,6 +87,7 @@ function mouseclick() {
 	// generate leftcolumn from dpid
 	$("#info").empty().append("DPID <br/>" + node.id + "<br/><br/> Port Count <br/>" + ports.length + "<br/><br/> Flow Count <br/>" + flows.length);
 
+	/*
 	// generate footer from the flow table
 	$("#flows").empty();
 	for(var i in flows) {
@@ -102,6 +103,7 @@ function mouseclick() {
 		<td>" + flows[i].srcIPMask + "</td>\
 		<td>" + flows[i].vlan + "</td>\
 		<td>" + flows[i].dstIPMask + "</td>\
+		<td>" + flows[i].srcIP + "</td>\
 		<td>" + flows[i].counterPacket + "</td>\
 		<td>" + flows[i].dstPort + "</td>\
 		<td>" + flows[i].hardTimeout + "</td>\
@@ -109,6 +111,7 @@ function mouseclick() {
 		<td>" + flows[i].netProtocol + "</td>\
 		</tr>");
 	}
+	*/
 
 	// generate rightcolumn from the port table
 	$("#ports").empty();
