@@ -53,7 +53,7 @@ p {
     float: left;
     margin-left: -400px;
     height: 480px;
-    overflow: scroll;
+    overflow: auto;
 }
 
 #footer {
