@@ -114,9 +114,9 @@ function mouseclick() {
 	$("#ports").empty();
 	for(var i in ports) {
 		$("#ports").append("<tr>\
+		<td>" + ports[i].PortNumber + "</td>\
 		<td>" + ports[i].recvPackets + "</td>\
 		<td>" + ports[i].recvBytes + "</td>\
-		<td>" + ports[i].PortNumber + "</td>\
 		<td>" + ports[i].transmitPackets + "</td>\
 		<td>" + ports[i].transmitBytes + "</td>\
 		</tr>");
