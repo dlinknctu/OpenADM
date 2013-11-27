@@ -19,7 +19,6 @@ class AdapterTest():
 			response = json.loads(response)
 			self.switch=[]
 			#get switch flow table infomation	
-			print len(response)
 			for a in response:
 				tmp = {}
 				tmp['ports'] = a['ports']
