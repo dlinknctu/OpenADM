@@ -85,7 +85,7 @@ function mouseclick() {
 	ports = node.ports;
 
 	// generate leftcolumn from dpid
-	$("#dpid").empty().append(node.id);
+	$("#info").empty().append("DPID <br/>" + node.id + "<br/><br/> Port Count <br/>" + ports.length + "<br/><br/> Flow Count <br/>" + flows.length);
 
 	// generate footer from the flow table
 	$("#flows").empty();
