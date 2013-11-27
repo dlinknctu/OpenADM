@@ -65,7 +65,6 @@ public class OmniUI implements IFloodlightModule  {
 	@Override
 	public void startUp(FloodlightModuleContext context) {
 		// TODO Auto-generated method stub
-		logger.info("QQQQQQQQQQQQQQQQQQ");
 		restApi.addRestletRoutable(new OmniUIWebRoutable());
 	}
 

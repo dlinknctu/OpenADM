@@ -6,7 +6,7 @@ A floodlight adapter module for OmniUI
 
 
 ##Install##
-- Copy the omniui directory into floodlight/src/main/java/net/floodlight/
+- Copy the omniui directory into floodlight/src/main/java/net/floodlightcontroller/
 
 - Append the `net.floodlightcontroller.omniui.OmniUI` into   
   `src/main/resources/META-INF/services/net.floodlightcontroller.core.module.IFloodlightModule`
