@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>OmniUI</title>
+		<link rel="stylesheet" href="css/omniui.css">
+	</head>
+	<body>
+	   <div id="wrapper">
+        	<div id="header">
+        		<p>OmniUI</p>
+        	</div>
+        	
+        	<div id="contentliquid">
+        		<div id="content"></div>
+        	</div>
+        	
+        	<div id="leftcolumn">
+        		<p id="info"></p>
+        	</div>
+
+        	<div id="rightcolumn">
+            <!-- port table !-->
+						<table id="porttable">
+							<thead>
+						    <th data-sort="int" width=20%>PortNumber</th>
+								<th data-sort="int" width=20%>rxPackets</th>
+					      <th data-sort="int" width=20%>rxBytes</th> 
+					      <th data-sort="int" width=20%>txPackets</th>
+					      <th data-sort="int" width=20%>txBytes</th>
+				    	</thead>
+				      <tbody id="ports"></tbody>
+						</table>
+        </div>
+
+        <div id="footer">
+				<!-- flow table !-->
+				<table id="flowtable">
+					<thead>
+						<th data-sort="string" width=8%>wildcards</th>
+						<th data-sort="string" width=8%>dstIP</th>
+						<th data-sort="string" width=8%>srcMac</th>
+						<th data-sort="int" width=5%>counterByte</th>
+						<th data-sort="int" width=5%>srcPort</th>
+						<th data-sort="int" width=5%>ingreePort</th>
+						<th data-sort="string" width=8%>dstMac</th>
+						<th data-sort="string" width=8%>actions</th>
+						<th data-sort="string" width=8%>srcIPMask</th>
+						<th data-sort="int" width=5%>vlan</th>
+						<th data-sort="string" width=8%>dstIPMask</th>
+						<th data-sort="string" width=8%>srcIP</th>
+						<th data-sort="int" width=5%>counterPacket</th>
+						<th data-sort="int" width=5%>dstPort</th>
+						<th data-sort="int" width=5%>hardTimeout</th>
+						<th data-sort="int" width=5%>idleTimeout</th>
+						<th data-sort="int" width=5%>netProtocol</th>
+					</thead>
+					<tbody id="flows"></tbody>
+				</table>
+        	</div>
+    	</div>
+	</body>
+	<script type="text/javascript" src="js/d3.v3.js"></script>
+	<script type="text/javascript" src="js/topograph.js"></script>
+	<script type="text/javascript" src="js/omniui.js"></script>
+	<script type="text/javascript" src="js/jquery-1.10.2.js"></script>
+	<script type="text/javascript" src="js/stupidtable.min.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#porttable").stupidtable();
+			$("#flowtable").stupidtable();
+		});
+	</script>
+</html>
