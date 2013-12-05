@@ -279,5 +279,16 @@ setInterval(function() {
 */
 
 //load topo now
-d3.json("topology.json", updateTopo);
+$.ajax({
+	type: "GET",
+   url: "topology.json",
+   dataType: "jsonp",
+   jsonpCallback: "omniui",
+   success: function(json){
+       updateTopo(json);
+   },
+   error: function(){
+       alert('Fail loading JSONP');
+   }
+});
 
