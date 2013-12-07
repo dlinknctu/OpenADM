@@ -1,0 +1,17 @@
+{
+	"LogFile":"core.log",
+	"Core":{
+		"ip":"localhost",
+		"port":"5566"
+	},
+	"WebUI":{
+		"ip":"localhost",	
+		"port":"5567"
+	},
+	"Controller":{	
+		"ip":"localhost",	
+		"port":"8080",
+		"interval":"4"
+     }
+}
+
