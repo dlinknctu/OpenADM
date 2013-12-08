@@ -10,6 +10,10 @@
 
             howMany = 0;
             for(i = 0, f = filters[0]; i < filters.length; f = filters[++i]) {
+                if(!f.word) {
+                    ++howMany;
+                    continue;
+                }
                 var index = 0;
                 $table.find('thead > tr > th').each(function(i) {
                     if($(this).text() == f.column) {
@@ -18,7 +22,7 @@
                     }
                 });
                 var text = tr.find('td:eq(' + index + ')').text();
-                if(text.indexOf(f.word) != -1)
+                if(text.toLowerCase().indexOf(f.word.toLowerCase()) != -1)
                     ++howMany;
             }
             if(howMany == filters.length)
@@ -35,7 +39,7 @@ $('#wildcards').keyup(function() {
         { column: 'wildcards', word: this.value },
         { column: 'dstIP', word: $('#dstIP').val() },
         { column: 'srcMac', word: $('#srcMac').val() },
-        { column: 'counterByte', word: $('#srcPort').val() },
+        { column: 'counterByte', word: $('#counterByte').val() },
         { column: 'srcPort', word: $('#srcPort').val() },
         { column: 'ingreePort', word: $('#ingreePort').val() },
         { column: 'dstMac', word: $('#dstMac').val() },
@@ -57,7 +61,7 @@ $('#dstIP').keyup(function() {
         { column: 'wildcards', word: $('#wildcards').val() },
         { column: 'dstIP', word: this.value },
         { column: 'srcMac', word: $('#srcMac').val() },
-        { column: 'counterByte', word: $('#srcPort').val() },
+        { column: 'counterByte', word: $('#counterByte').val() },
         { column: 'srcPort', word: $('#srcPort').val() },
         { column: 'ingreePort', word: $('#ingreePort').val() },
         { column: 'dstMac', word: $('#dstMac').val() },
@@ -76,15 +80,45 @@ $('#dstIP').keyup(function() {
 $('#srcMac').keyup(function() {
     var t = $('table');
     $('#flowtable').multiFilter([
-        { column: 'srcMac',  word: this.value        },
-        { column: 'counterByte', word: $('#counterByte').val() }
+        { column: 'wildcards', word: $('#wildcards').val() },
+        { column: 'dstIP', word: $('#dstIP').val() },
+        { column: 'srcMac', word: this.value },
+        { column: 'counterByte', word: $('#counterByte').val() },
+        { column: 'srcPort', word: $('#srcPort').val() },
+        { column: 'ingreePort', word: $('#ingreePort').val() },
+        { column: 'dstMac', word: $('#dstMac').val() },
+        { column: 'actions', word: $('#actions').val() },
+        { column: 'srcIPMask', word: $('#srcIPMask').val() },
+        { column: 'vlan', word: $('#vlan').val() },
+        { column: 'dstIPMask', word: $('#dstIPMask').val() },
+        { column: 'srcIP', word: $('#srcIP').val() },
+        { column: 'counterPacket', word: $('#counterPacket').val() },
+        { column: 'dstPort', word: $('#dstPort').val() },
+        { column: 'hardTimeout', word: $('#hardTimeout').val() },
+        { column: 'idleTimeout', word: $('#idleTimeout').val() },
+        { column: 'netProtocol', word: $('#netProtocol').val() }
     ]);
 });
 $('#counterByte').keyup(function() {
     var t = $('table');
     $('#flowtable').multiFilter([
+        { column: 'wildcards', word: $('#wildcards').val() },
+        { column: 'dstIP', word: $('#dstIP').val() },
         { column: 'srcMac',  word: $('#srcMac').val() },
-        { column: 'counterByte', word: this.value       }
+        { column: 'counterByte', word: this.value },
+        { column: 'srcPort', word: $('#srcPort').val() },
+        { column: 'ingreePort', word: $('#ingreePort').val() },
+        { column: 'dstMac', word: $('#dstMac').val() },
+        { column: 'actions', word: $('#actions').val() },
+        { column: 'srcIPMask', word: $('#srcIPMask').val() },
+        { column: 'vlan', word: $('#vlan').val() },
+        { column: 'dstIPMask', word: $('#dstIPMask').val() },
+        { column: 'srcIP', word: $('#srcIP').val() },
+        { column: 'counterPacket', word: $('#counterPacket').val() },
+        { column: 'dstPort', word: $('#dstPort').val() },
+        { column: 'hardTimeout', word: $('#hardTimeout').val() },
+        { column: 'idleTimeout', word: $('#idleTimeout').val() },
+        { column: 'netProtocol', word: $('#netProtocol').val() }
     ]);
 });
 $('#srcPort').keyup(function() {
@@ -93,7 +127,7 @@ $('#srcPort').keyup(function() {
         { column: 'wildcards', word: $('#wildcards').val() },
         { column: 'dstIP', word: $('#dstIP').val() },
         { column: 'srcMac', word: $('#srcMac').val() },
-        { column: 'counterByte', word: $('#srcPort').val() },
+        { column: 'counterByte', word: $('#counterByte').val() },
         { column: 'srcPort', word: this.value },
         { column: 'ingreePort', word: $('#ingreePort').val() },
         { column: 'dstMac', word: $('#dstMac').val() },
@@ -115,7 +149,7 @@ $('#ingreePort').keyup(function() {
         { column: 'wildcards', word: $('#wildcards').val() },
         { column: 'dstIP', word: $('#dstIP').val() },
         { column: 'srcMac', word: $('#srcMac').val() },
-        { column: 'counterByte', word: $('#srcPort').val() },
+        { column: 'counterByte', word: $('#counterByte').val() },
         { column: 'srcPort', word: $('#srcPort').val() },
         { column: 'ingreePort', word: this.value },
         { column: 'dstMac', word: $('#dstMac').val() },
@@ -137,7 +171,7 @@ $('#dstMac').keyup(function() {
         { column: 'wildcards', word: $('#wildcards').val() },
         { column: 'dstIP', word: $('#dstIP').val() },
         { column: 'srcMac', word: $('#srcMac').val() },
-        { column: 'counterByte', word: $('#srcPort').val() },
+        { column: 'counterByte', word: $('#counterByte').val() },
         { column: 'srcPort', word: $('#srcPort').val() },
         { column: 'ingreePort', word: $('#ingreePort').val() },
         { column: 'dstMac', word: this.value },
@@ -159,7 +193,7 @@ $('#actions').keyup(function() {
         { column: 'wildcards', word: $('#wildcards').val() },
         { column: 'dstIP', word: $('#dstIP').val() },
         { column: 'srcMac', word: $('#srcMac').val() },
-        { column: 'counterByte', word: $('#srcPort').val() },
+        { column: 'counterByte', word: $('#counterByte').val() },
         { column: 'srcPort', word: $('#srcPort').val() },
         { column: 'ingreePort', word: $('#ingreePort').val() },
         { column: 'dstMac', word: $('#dstMac').val() },
@@ -181,7 +215,7 @@ $('#srcIPMask').keyup(function() {
         { column: 'wildcards', word: $('#wildcards').val() },
         { column: 'dstIP', word: $('#dstIP').val() },
         { column: 'srcMac', word: $('#srcMac').val() },
-        { column: 'counterByte', word: $('#srcPort').val() },
+        { column: 'counterByte', word: $('#counterByte').val() },
         { column: 'srcPort', word: $('#srcPort').val() },
         { column: 'ingreePort', word: $('#ingreePort').val() },
         { column: 'dstMac', word: $('#dstMac').val() },
@@ -203,7 +237,7 @@ $('#vlan').keyup(function() {
         { column: 'wildcards', word: $('#wildcards').val() },
         { column: 'dstIP', word: $('#dstIP').val() },
         { column: 'srcMac', word: $('#srcMac').val() },
-        { column: 'counterByte', word: $('#srcPort').val() },
+        { column: 'counterByte', word: $('#counterByte').val() },
         { column: 'srcPort', word: $('#srcPort').val() },
         { column: 'ingreePort', word: $('#ingreePort').val() },
         { column: 'dstMac', word: $('#dstMac').val() },
@@ -225,7 +259,7 @@ $('#dstIPMask').keyup(function() {
         { column: 'wildcards', word: $('#wildcards').val() },
         { column: 'dstIP', word: $('#dstIP').val() },
         { column: 'srcMac', word: $('#srcMac').val() },
-        { column: 'counterByte', word: $('#srcPort').val() },
+        { column: 'counterByte', word: $('#counterByte').val() },
         { column: 'srcPort', word: $('#srcPort').val() },
         { column: 'ingreePort', word: $('#ingreePort').val() },
         { column: 'dstMac', word: $('#dstMac').val() },
@@ -247,7 +281,7 @@ $('#srcIP').keyup(function() {
         { column: 'wildcards', word: $('#wildcards').val() },
         { column: 'dstIP', word: $('#dstIP').val() },
         { column: 'srcMac', word: $('#srcMac').val() },
-        { column: 'counterByte', word: $('#srcPort').val() },
+        { column: 'counterByte', word: $('#counterByte').val() },
         { column: 'srcPort', word: $('#srcPort').val() },
         { column: 'ingreePort', word: $('#ingreePort').val() },
         { column: 'dstMac', word: $('#dstMac').val() },
@@ -269,7 +303,7 @@ $('#counterPacket').keyup(function() {
         { column: 'wildcards', word: $('#wildcards').val() },
         { column: 'dstIP', word: $('#dstIP').val() },
         { column: 'srcMac', word: $('#srcMac').val() },
-        { column: 'counterByte', word: $('#srcPort').val() },
+        { column: 'counterByte', word: $('#counterByte').val() },
         { column: 'srcPort', word: $('#srcPort').val() },
         { column: 'ingreePort', word: $('#ingreePort').val() },
         { column: 'dstMac', word: $('#dstMac').val() },
@@ -291,7 +325,7 @@ $('#dstPort').keyup(function() {
         { column: 'wildcards', word: $('#wildcards').val() },
         { column: 'dstIP', word: $('#dstIP').val() },
         { column: 'srcMac', word: $('#srcMac').val() },
-        { column: 'counterByte', word: $('#srcPort').val() },
+        { column: 'counterByte', word: $('#counterByte').val() },
         { column: 'srcPort', word: $('#srcPort').val() },
         { column: 'ingreePort', word: $('#ingreePort').val() },
         { column: 'dstMac', word: $('#dstMac').val() },
@@ -313,7 +347,7 @@ $('#hardTimeout').keyup(function() {
         { column: 'wildcards', word: $('#wildcards').val() },
         { column: 'dstIP', word: $('#dstIP').val() },
         { column: 'srcMac', word: $('#srcMac').val() },
-        { column: 'counterByte', word: $('#srcPort').val() },
+        { column: 'counterByte', word: $('#counterByte').val() },
         { column: 'srcPort', word: $('#srcPort').val() },
         { column: 'ingreePort', word: $('#ingreePort').val() },
         { column: 'dstMac', word: $('#dstMac').val() },
@@ -335,7 +369,7 @@ $('#idleTimeout').keyup(function() {
         { column: 'wildcards', word: $('#wildcards').val() },
         { column: 'dstIP', word: $('#dstIP').val() },
         { column: 'srcMac', word: $('#srcMac').val() },
-        { column: 'counterByte', word: $('#srcPort').val() },
+        { column: 'counterByte', word: $('#counterByte').val() },
         { column: 'srcPort', word: $('#srcPort').val() },
         { column: 'ingreePort', word: $('#ingreePort').val() },
         { column: 'dstMac', word: $('#dstMac').val() },
@@ -357,7 +391,7 @@ $('#netProtocol').keyup(function() {
         { column: 'wildcards', word: $('#wildcards').val() },
         { column: 'dstIP', word: $('#dstIP').val() },
         { column: 'srcMac', word: $('#srcMac').val() },
-        { column: 'counterByte', word: $('#srcPort').val() },
+        { column: 'counterByte', word: $('#counterByte').val() },
         { column: 'srcPort', word: $('#srcPort').val() },
         { column: 'ingreePort', word: $('#ingreePort').val() },
         { column: 'dstMac', word: $('#dstMac').val() },
