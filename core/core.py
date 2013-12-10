@@ -1,62 +1,88 @@
 import json
-from controlleradapter import ControllerAdapter
-from uipusher import UIPusher
+import sys
+import os
+import time
+import signal
+from importlib import import_module
 import logging
+import threading
+from threading import Thread
 logger = logging.getLogger(__name__)
 
 
-def main():
-	#Load config file
-	with open('config.json','r') as input:
-		data = input.read()
-	config = json.loads(data)
-
-	#Default values
-
-	logFile = 'log.txt'
-	logLevel = logging.ERROR
-	restIP = 'localhost'
-	restPort = '5566'
-	webUIIP = 'localhost'
-	webUIPort = '5567'
-	controllerIP = 'localhost'
-	controllerPort = '8080'
-	controllerInterval = 5
-	#Set Logger
-	if config.has_key("LogFile"):
-		logFile = config['LogFile']
-	logging.basicConfig(filename = logFile, level = logLevel, format = '%(asctime)s - %(levelname)s: %(message)s') 
-	#Get Core setting
-	if config.has_key("Core"):
-		if config["Core"].has_key("ip"):
-			restIP = config["Core"]["ip"]
-		if config["Core"].has_key("port"):
-			restPort = config["Core"]["port"]
-	logger.debug('restIP =%s  restPort = %s' % (restIP,restPort))
-	#Get UI settingn
-	if config.has_key("WebUI"):
-		if config["WebUI"].has_key("ip"):
-			webUIIP = config["WebUI"]["ip"]
-		if config["WebUI"].has_key("port"):
-			webUIPort = config["WebUI"]["port"]
-	logger.debug('webUI IP =%s  webUI Port = %s' % (webUIIP,webUIPort))
-	#Get Controller setting
-	if config.has_key("Controller"):
-		if config["Controller"].has_key("ip"):
-			controllerIP = config["Controller"]["ip"]
-		if config["Controller"].has_key("port"):
-			controllerPort = config["Controller"]["port"]
-		if config["Controller"].has_key("interval"):
-			controllerInterval = config["Controller"]["interval"]
-	logger.debug('controllerIP =%s  controllerPort = %s' % (controllerIP,controllerPort))
-
-	#initial 
-	controlleradapter = ControllerAdapter(controllerIP,controllerPort,controllerInterval)
-	uipusher = UIPusher(webUIIP,webUIPort)
+class EventHandler:
+	def __init__(self,eventName,handler):
+		self.eventName = eventName
+		self.handler = handler
 	
-	#register event handler
-	controlleradapter.register_Topology_Request(uipusher.controllerHandler)
-	#event loop
-	controlleradapter.periodicInquiry()
+class Core:
+	def __init__(self):
+		#Local members
+		self.handlers = []
+		self.threads  = []
+		self.events   = []
+		#Load config file
+		with open('config.json','r') as input:
+			data = input.read()
+		config = json.loads(data)
+		#Default values
+		logFile = 'log.txt'
+		logLevel = logging.ERROR
+		#Set Logger
+		if config.has_key("LogFile"):
+			logFile = config['LogFile']
+		logging.basicConfig(filename = logFile, level = logLevel, format = '%(asctime)s - %(levelname)s: %(message)s') 
+
+		#Loading module
+		sys.modules['plugins'] = plugins = type(sys)('plugins')
+		plugins.__path__ = []
+		plugins.__path__.append (os.path.join(sys.path[0],"modules"))
+		with open('module.config','r') as input:
+			modules = input.readlines()
+		for module in modules:
+			instance = import_module('plugins.' + module[:-1])
+			if(config.has_key(module[:-1])):
+				instance.getInstance(self,config[module[:-1]])
+			else:
+				instance.getInstance(self,0)
+				
+	#Regist	Event	
+	def registerEventHandler(self,eventName,handler):
+		self.handlers.append(EventHandler(eventName,handler))
+	
+	def registerEvent(self,eventName,generator,interval):
+		thread = Thread(target=self.iterate, args=(eventName,generator,interval))
+		self.threads.append(thread)
+		thread.start()
+	def iterate(self,eventName,generator,interval):
+		while True:
+			event = generator()
+			for handler in self.handlers:
+				if(handler.eventName == eventName):
+					handler.handler(event)
+			time.sleep(interval)
+
+class Watcher:
+	def __init__(self):
+		self.child = os.fork()
+		if self.child ==0 :
+			return
+		else:
+			self.watch()
+	def watch(self):
+		try:
+			os.wait()
+		except KeyboardInterrupt:
+			print "Ctrl-c received! Sending kill to threads..."
+			self.kill()
+		sys.exit()
+	def kill(self):
+		try:
+			os.kill(self.child,signal.SIGKILL)
+		except OSError: pass
+
+def main():
+	Watcher()
+	Core()
 if __name__ ==  "__main__":
 	main()
