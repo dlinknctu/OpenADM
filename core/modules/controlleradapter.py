@@ -1,32 +1,43 @@
 import urllib2
 import logging
 import json
-import time
 from threading import Thread
+import core
 logger = logging.getLogger(__name__)
 
+
+
 class ControllerAdapter:
-	def __init__(self,ip,port,interval):
-		logger.debug('IP =%s  port = %s  interval = %s' % (ip,port,interval))
-		self.controllerIP = ip
-		self.controllerPort = port
-		self.timerInterval = int(interval)
+	def __init__(self,core,parm):
+		#members
+		self.controllerIP = "localhost"
+		self.controllerPort = "8080"
+		self.timerInterval = 5
 		self.switchUrl="http://"+self.controllerIP+":"+self.controllerPort+"/wm/omniui/switch/json"
 		self.linkUrl="http://"+self.controllerIP+":"+self.controllerPort+"/wm/omniui/link/json"
 		self.switches=[]
 		self.links=[]
 		self.inquiryHandler=[]
+
+		#load config
+		if(parm):
+			if(parm.has_key("ip")):
+				self.controllerIP = parm["ip"]
+			if(parm.has_key("port")):
+				self.controllerPort = parm["port"]
+			if(parm.has_key("interval")):
+				self.timerInterval = int(parm["interval"])
+		logger.debug('IP =%s  port = %s  interval = %s' % (self.controllerIP,self.controllerPort,self.timerInterval))
+		core.registerEvent("controlleradapter",self.periodicInquiry,self.timerInterval)
 	def inquirySwitch(self):
 		try:
 			response = urllib2.urlopen(self.switchUrl).read()
-		except KeyboardInterrupt:
-			raise KeyboardInterrupt
 		except:
 			logger.error("connection error for inquiring switches")
 			return
 		try:
 			data = json.loads(response)
-			self.switches=[]
+			self.switches= []
 			for switch in data:
 				tmp = {}
 				tmp['dpid'] = switch['dpid']
@@ -38,14 +49,12 @@ class ControllerAdapter:
 	def inquiryLink(self):
 		try:
 			response = urllib2.urlopen(self.linkUrl).read()
-		except KeyboardInterrupt:
-			raise KeyboardInterrupt
 		except:
-			logger.error("connection error for inquiring switches")
+			logger.error("connection error for inquiring links")
 			return
 		try:
 			data = json.loads(response)
-			self.links=[]
+			self.links = []
 			for link in data:
 				tmp = {}
 				tmp['source'] = link['src-switch']
@@ -56,16 +65,12 @@ class ControllerAdapter:
 		except:
 			logger.error("json parse error for links")
 	def periodicInquiry(self):
-		try:
-			while True:
-				self.inquiryLink()
-				self.inquirySwitch()
-				self.notifyHandler()
-				time.sleep(self.timerInterval)
-		except KeyboardInterrupt:
-			print "receive Ctrl+C, terminate process"
-	def register_Topology_Request(self,handler):
-		self.inquiryHandler.append(handler)
-	def notifyHandler(self):
-		for handler in self.inquiryHandler:
-			handler(self.switches,self.links)
+		self.inquiryLink()
+		self.inquirySwitch()
+		tmp = {}
+		tmp['nodes'] = self.switches
+		tmp['links'] = self.links
+		return tmp
+
+def getInstance(core,parm):
+	return ControllerAdapter(core,parm)
