@@ -1,17 +1,17 @@
 {
 	"LogFile":"core.log",
-	"Core":{
+	"restserver":{
 		"ip":"localhost",
 		"port":"5566"
 	},
-	"WebUI":{
+	"uipusher":{
 		"ip":"localhost",	
 		"port":"5567"
 	},
-	"Controller":{	
+	"controlleradapter":{	
 		"ip":"localhost",	
 		"port":"8080",
 		"interval":"4"
-     }
+    }
 }
 
