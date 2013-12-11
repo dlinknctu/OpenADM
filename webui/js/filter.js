@@ -33,8 +33,31 @@
     };
 })(jQuery);
 
+var preFilter = function(flow) {
+    var match = 1;
 
-var filtering = function($selc) {
+    match += flow.wildcards.toString().indexOf($('#wildcards').val());
+    match += flow.dstIP.toString().indexOf($('#dstIP').val());
+    match += flow.srcMac.toString().indexOf($('#srcMac').val());
+    match += flow.counterByte.toString().indexOf($('#counterByte').val());
+    match += flow.srcPort.toString().indexOf($('#srcPort').val());
+    match += flow.ingreePort.toString().indexOf($('#ingreePort').val());
+    match += flow.dstMac.toString().indexOf($('#dstMac').val());
+    match += flow.actions.toString().indexOf($('#actions').val());
+    match += flow.srcIPMask.toString().indexOf($('#srcIPMask').val());
+    match += flow.vlan.toString().indexOf($('#vlan').val());
+    match += flow.dstIPMask.toString().indexOf($('#dstIPMask').val());
+    match += flow.srcIP.toString().indexOf($('#srcIP').val());
+    match += flow.counterPacket.toString().indexOf($('#counterPacket').val());
+    match += flow.dstPort.toString().indexOf($('#dstPort').val());
+    match += flow.hardTimeout.toString().indexOf($('#hardTimeout').val());
+    match += flow.idleTimeout.toString().indexOf($('#idleTimeout').val());
+    match += flow.netProtocol.toString().indexOf($('#netProtocol').val());
+
+    return match;
+}
+
+var postFilter = function($selc) {
     //var t = $('table');
 
     var index = 0;
@@ -82,53 +105,53 @@ var filtering = function($selc) {
 }
 
 $('#wildcards').keyup(function() {
-    filtering($(this));
+    postFilter($(this));
 });
 $('#dstIP').keyup(function() {
-    filtering($(this));
+    postFilter($(this));
 });
 $('#srcMac').keyup(function() {
-    filtering($(this));
+    postFilter($(this));
 });
 $('#counterByte').keyup(function() {
-    filtering($(this));
+    postFilter($(this));
 });
 $('#srcPort').keyup(function() {
-    filtering($(this));
+    postFilter($(this));
 });
 $('#ingreePort').keyup(function() {
-    filtering($(this));
+    postFilter($(this));
 });
 $('#dstMac').keyup(function() {
-    filtering($(this));
+    postFilter($(this));
 });
 $('#actions').keyup(function() {
-    filtering($(this));
+    postFilter($(this));
 });
 $('#srcIPMask').keyup(function() {
-    filtering($(this));
+    postFilter($(this));
 });
 $('#vlan').keyup(function() {
-    filtering($(this));
+    postFilter($(this));
 });
 $('#dstIPMask').keyup(function() {
-    filtering($(this));
+    postFilter($(this));
 });
 $('#srcIP').keyup(function() {
-    filtering($(this));
+    postFilter($(this));
 });
 $('#counterPacket').keyup(function() {
-    filtering($(this));
+    postFilter($(this));
 });
 $('#dstPort').keyup(function() {
-    filtering($(this));
+    postFilter($(this));
 });
 $('#hardTimeout').keyup(function() {
-    filtering($(this));
+    postFilter($(this));
 });
 $('#idleTimeout').keyup(function() {
-    filtering($(this));
+    postFilter($(this));
 });
 $('#netProtocol').keyup(function() {
-    filtering($(this));
+    postFilter($(this));
 });
