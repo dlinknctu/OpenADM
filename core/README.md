@@ -8,27 +8,17 @@ OmniUI Core
 
 ## How to write a module ##
 ####configuration####
-- write your configuration in **config.json** with json,
-- Example:  assume your module call **hello**.py 
+- write your configuration in **config.json** with json format, the key must same as you class name.
+- Example:  assume your module call **hello**.py and your class names **Hello**. 
 
 ```
 config.json
 ----------
 ....
-"hello":{
+"Hello":{
     "data1": "Hello,",
     "data2": ",Bye"
 }
-```
-####module load#####
-- Append your module name into **module.config**, our module will load all modules in this files.
-- Example:  assume your module call **hello**.py 
-```
-module.config
----
-controlleradapter
-uipusher
-hello
 ```
 ####Write your module code####
 - Put your code in **modules directory**
@@ -52,16 +42,11 @@ Assume you write a module **hello.py** and **echo.py**
 
 **config.json**
 ```
-"hello":{
+"Hello":{
     "word": "Good!!"
 }
-```
-
-**modules.config**
-```
-....
-hello
-echo
+"Echo":{
+}
 ```
 
 
@@ -76,9 +61,6 @@ class Hello:
         core.registerEvent("saySomething", self.saySomething,4)
     def saySomething(self):
         return word.
-
-def getInstance(core,parm):
-    return Hello(core,parm)
 ```
 
 
@@ -89,9 +71,6 @@ class Echo:
         core.registerEventHandler("saySomething", self.repeat)
     def repeat(self,event):
         print event
-
-def getInstance(core,parm):
-    return Echo(core,parm)
 ```
 
 
