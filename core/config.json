@@ -1,14 +1,10 @@
 {
 	"LogFile":"core.log",
-	"restserver":{
-		"ip":"localhost",
-		"port":"5566"
-	},
-	"uipusher":{
+	"UIPusher":{
 		"ip":"localhost",	
 		"port":"5567"
 	},
-	"controlleradapter":{	
+	"ControllerAdapter":{	
 		"ip":"localhost",	
 		"port":"8080",
 		"interval":"4"
