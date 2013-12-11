@@ -37,14 +37,13 @@ class Core:
 		sys.modules['plugins'] = plugins = type(sys)('plugins')
 		plugins.__path__ = []
 		plugins.__path__.append (os.path.join(sys.path[0],"modules"))
-		with open('module.config','r') as input:
-			modules = input.readlines()
-		for module in modules:
-			instance = import_module('plugins.' + module[:-1])
-			if(config.has_key(module[:-1])):
-				instance.getInstance(self,config[module[:-1]])
-			else:
-				instance.getInstance(self,0)
+		for module in config:
+			if module != "LogFile": #Module name and load it.
+				instance = import_module('plugins.' + module.lower())
+				if(config.has_key(module)):
+					getattr(instance,module)(self,config[module])
+				else:
+					getattr(instance,module)(self,0)
 				
 	#Regist	Event	
 	def registerEventHandler(self,eventName,handler):
