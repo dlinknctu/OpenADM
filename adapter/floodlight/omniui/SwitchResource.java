@@ -56,8 +56,6 @@ public class SwitchResource extends ServerResource {
 		//For each switch, use a thread to query statistics
 		List<SwitchInfo> resultList = new ArrayList<SwitchInfo>();
 		for(Long dpid: switchDpids){
-			log.error("dpid = {}",dpid);
-			
 			// Create SwitchInfo object, use a Map to store.
 			IOFSwitch sw = floodlightProvider.getSwitch(dpid);
 			SwitchInfo swi = new SwitchInfo(dpid);
@@ -99,7 +97,6 @@ public class SwitchResource extends ServerResource {
 		for(Long dpid: resultMap.keySet()){
 			resultList.add(resultMap.get(dpid));
 		}
-		log.error("size = {}",resultList.size());
         return resultList;
     }
 
@@ -136,7 +133,6 @@ public class SwitchResource extends ServerResource {
 				if (type == OFStatisticsType.PORT){
 					//Query Port information foe each port,
 					//so use the OFPP_NONE as the port_number
-					log.error("Port request {}", sw.toString());
 					OFPortStatisticsRequest specificReq = new OFPortStatisticsRequest();
 					specificReq.setPortNumber(OFPort.OFPP_NONE.getValue());
 					req.setStatistics(Collections.singletonList((OFStatistics)specificReq));
@@ -164,7 +160,6 @@ public class SwitchResource extends ServerResource {
 				}
 				catch (Exception e){
 					log.error("err = {}",e.toString());
-
 				}
 			}
 		}
