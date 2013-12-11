@@ -72,5 +72,3 @@ class ControllerAdapter:
 		tmp['links'] = self.links
 		return tmp
 
-def getInstance(core,parm):
-	return ControllerAdapter(core,parm)

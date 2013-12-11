@@ -9,5 +9,3 @@ class UIPusher:
 	def controllerHandler(self,event):
 		print event
 
-def getInstance(core,parm):
-	return UIPusher(core,parm)
