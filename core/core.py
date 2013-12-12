@@ -31,37 +31,42 @@ class Core:
 		#Default values
 		logFile = 'log.txt'
 		logLevel = logging.ERROR
+		restIP = 'localhost'
+		restPort = 5567
 		#Set Logger
 		if config.has_key("LogFile"):
 			logFile = config['LogFile']
 		logging.basicConfig(filename = logFile, level = logLevel, format = '%(asctime)s - %(levelname)s: %(message)s') 
-
 		#Loading module
 		sys.modules['plugins'] = plugins = type(sys)('plugins')
 		plugins.__path__ = []
 		plugins.__path__.append (os.path.join(sys.path[0],"modules"))
 		for module in config:
-			if module != "LogFile": #Module name and load it.
+			if module != "LogFile" and module != "REST": # load modules other than LogFile and REST
 				instance = import_module('plugins.' + module.lower())
 				if(config.has_key(module)):
 					getattr(instance,module)(self,config[module])
 				else:
 					getattr(instance,module)(self,0)
-
 		# Start REST service
-		@route('/info/:request', method='GET')
-		def restRouter(request):
-			if request in restHandlers:
-				return restHandlers[request]()
-			else:
-				abort(404, "Not found: '/info/%s'" % request)
-		run(host="localhost", port=5567, quiet=True)
+		if config.has_key("REST"):
+			restIP = config['REST']['ip']
+			restPort = config['REST']['port']
+
+			@route('/info/:request', method='GET')
+			def restRouter(request):
+				if request in restHandlers:
+					return restHandlers[request]()
+				else:
+					abort(404, "Not found: '/info/%s'" % request)
+			run(host=restIP, port=restPort, quiet=True)
+
 
 	#Register REST API
 	def registerRestApi(self, requestName, handler):
 		restHandlers[requestName] = handler
 
-	#Register	Event	
+	#Register Event	
 	def registerEventHandler(self,eventName,handler):
 		self.eventHandlers.append(EventHandler(eventName,handler))
 	

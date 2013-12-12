@@ -87,7 +87,6 @@ function mouseclick() {
 	// generate leftcolumn from dpid
 	$("#info").empty().append("DPID <br/>" + node.id + "<br/><br/> Port Count <br/>" + ports.length + "<br/><br/> Flow Count <br/>" + flows.length);
 
-	/*
 	// generate footer from the flow table
 	$("#flows").empty();
 	for(var i in flows) {
@@ -111,7 +110,6 @@ function mouseclick() {
 		<td>" + flows[i].netProtocol + "</td>\
 		</tr>");
 	}
-	*/
 
 	// generate rightcolumn from the port table
 	$("#ports").empty();
@@ -271,24 +269,20 @@ function updateTopo(json) {
 
 }
 
-//start a timer to load topo.json every 3 secons
-/*
-setInterval(function() {
-	d3.json("topology.json", updateTopo);
-}, 1000);
-*/
+function loadJSONP(){
+	$.ajax({
+		type: "GET",
+	   url: "http://localhost:5567/info/topology",
+	   dataType: "jsonp",
+	   jsonpCallback: "omniui",
+	   success: function(json){
+	       updateTopo(json);
+	   },
+	   error: function(){
+	       alert('Fail loading JSONP');
+	   }
+	});
+}
 
 //load topo now
-$.ajax({
-	type: "GET",
-   url: "topology.json",
-   dataType: "jsonp",
-   jsonpCallback: "omniui",
-   success: function(json){
-       updateTopo(json);
-   },
-   error: function(){
-       alert('Fail loading JSONP');
-   }
-});
-
+loadJSONP();

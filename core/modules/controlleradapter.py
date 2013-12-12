@@ -67,8 +67,7 @@ class ControllerAdapter:
 	def periodicInquiry(self):
 		self.inquiryLink()
 		self.inquirySwitch()
-		tmp = {}
-		tmp['nodes'] = self.switches
-		tmp['links'] = self.links
-		return tmp
-
+		result = {}
+		result['nodes'] = self.switches
+		result['links'] = self.links
+		return json.dumps(result, separators=(',',':'))
