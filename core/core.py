@@ -7,6 +7,7 @@ from importlib import import_module
 import logging
 import threading
 from threading import Thread
+from bottle import route, run, abort
 logger = logging.getLogger(__name__)
 
 
@@ -18,9 +19,11 @@ class EventHandler:
 class Core:
 	def __init__(self):
 		#Local members
-		self.handlers = []
+		self.eventHandlers = []
 		self.threads  = []
 		self.events   = []
+		global restHandlers # Necessary for bottle to access restHandlers
+		restHandlers = {}
 		#Load config file
 		with open('config.json','r') as input:
 			data = input.read()
@@ -44,19 +47,33 @@ class Core:
 					getattr(instance,module)(self,config[module])
 				else:
 					getattr(instance,module)(self,0)
-				
-	#Regist	Event	
+
+		# Start REST service
+		@route('/info/:request', method='GET')
+		def restRouter(request):
+			if request in restHandlers:
+				return restHandlers[request]()
+			else:
+				abort(404, "Not found: '/info/%s'" % request)
+		run(host="localhost", port=5567, quiet=True)
+
+	#Register REST API
+	def registerRestApi(self, requestName, handler):
+		restHandlers[requestName] = handler
+
+	#Register	Event	
 	def registerEventHandler(self,eventName,handler):
-		self.handlers.append(EventHandler(eventName,handler))
+		self.eventHandlers.append(EventHandler(eventName,handler))
 	
 	def registerEvent(self,eventName,generator,interval):
 		thread = Thread(target=self.iterate, args=(eventName,generator,interval))
 		self.threads.append(thread)
 		thread.start()
+
 	def iterate(self,eventName,generator,interval):
 		while True:
 			event = generator()
-			for handler in self.handlers:
+			for handler in self.eventHandlers:
 				if(handler.eventName == eventName):
 					handler.handler(event)
 			time.sleep(interval)
