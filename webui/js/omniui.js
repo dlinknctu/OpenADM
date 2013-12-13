@@ -96,7 +96,7 @@ function mouseclick() {
 		<td>" + flows[i].srcMac + "</td>\
 		<td>" + flows[i].counterByte + "</td>\
 		<td>" + flows[i].srcPort + "</td>\
-		<td>" + flows[i].ingreePort + "</td>\
+		<td>" + flows[i].ingressPort + "</td>\
 		<td>" + flows[i].dstMac + "</td>\
 		<td>" + flows[i].actions[0].type + " " + flows[i].actions[0].value + "</td>\
 		<td>" + flows[i].srcIPMask + "</td>\
@@ -273,7 +273,8 @@ function updateTopo(json) {
 function loadJSONP(){
 	$.ajax({
 		type: "GET",
-	   url: "http://localhost:5567/info/topology",
+	   //url: "http://localhost:5567/info/topology",
+	   url: "http://www.zspbsd.twbbs.org/~starbops/OmniUI/webui/topology.json",
 	   dataType: "jsonp",
 	   jsonpCallback: "omniui",
 	   success: function(json){

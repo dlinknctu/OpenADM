@@ -1,6 +1,6 @@
 (function ($) {
     var fields = [ 'wildcards', 'dstIP', 'srcMac', 'counterByte', 'srcPort',
-                   'ingreePort', 'dstMac', 'actions', 'srcIPMask', 'vlan',
+                   'ingressPort', 'dstMac', 'actions', 'srcIPMask', 'vlan',
                    'dstIPMask', 'srcIP', 'counterPacket', 'dstPort',
                    'hardTimeout', 'idleTimeout', 'netProtocol' ];
 
