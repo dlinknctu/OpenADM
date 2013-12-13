@@ -38,23 +38,44 @@
 				<!-- flow table !-->
 				<table id="flowtable">
 					<thead>
-						<th data-sort="string" width=8%>wildcards</th>
-						<th data-sort="string" width=8%>dstIP</th>
-						<th data-sort="string" width=8%>srcMac</th>
-						<th data-sort="int" width=5%>counterByte</th>
-						<th data-sort="int" width=5%>srcPort</th>
-						<th data-sort="int" width=5%>ingreePort</th>
-						<th data-sort="string" width=8%>dstMac</th>
-						<th data-sort="string" width=8%>actions</th>
-						<th data-sort="string" width=8%>srcIPMask</th>
-						<th data-sort="int" width=5%>vlan</th>
-						<th data-sort="string" width=8%>dstIPMask</th>
-						<th data-sort="string" width=8%>srcIP</th>
-						<th data-sort="int" width=5%>counterPacket</th>
-						<th data-sort="int" width=5%>dstPort</th>
-						<th data-sort="int" width=5%>hardTimeout</th>
-						<th data-sort="int" width=5%>idleTimeout</th>
-						<th data-sort="int" width=5%>netProtocol</th>
+						<tr>
+							<th data-sort="string" width=8%>wildcards</th>
+							<th data-sort="string" width=8%>dstIP</th>
+							<th data-sort="string" width=8%>srcMac</th>
+							<th data-sort="int" width=5%>counterByte</th>
+							<th data-sort="int" width=5%>srcPort</th>
+							<th data-sort="int" width=5%>ingreePort</th>
+							<th data-sort="string" width=8%>dstMac</th>
+							<th data-sort="string" width=8%>actions</th>
+							<th data-sort="string" width=8%>srcIPMask</th>
+							<th data-sort="int" width=5%>vlan</th>
+							<th data-sort="string" width=8%>dstIPMask</th>
+							<th data-sort="string" width=8%>srcIP</th>
+							<th data-sort="int" width=5%>counterPacket</th>
+							<th data-sort="int" width=5%>dstPort</th>
+							<th data-sort="int" width=5%>hardTimeout</th>
+							<th data-sort="int" width=5%>idleTimeout</th>
+							<th data-sort="int" width=5%>netProtocol</th>
+						</tr>
+						<tr>
+							<th><input type="text" id="wildcards" style="width: 90%;" /></th>
+							<th><input type="text" id="dstIP" style="width: 90%;" /></th>
+							<th><input type="text" id="srcMac" style="width: 90%;" /></th>
+							<th><input type="text" id="counterByte" style="width: 90%;" /></th>
+							<th><input type="text" id="srcPort" style="width: 90%;" /></th>
+							<th><input type="text" id="ingreePort" style="width: 90%;" /></th>
+							<th><input type="text" id="dstMac" style="width: 90%;" /></th>
+							<th><input type="text" id="actions" style="width: 90%;" /></th>
+							<th><input type="text" id="srcIPMask" style="width: 90%;" /></th>
+							<th><input type="text" id="vlan" style="width: 90%;" /></th>
+							<th><input type="text" id="dstIPMask" style="width: 90%;" /></th>
+							<th><input type="text" id="srcIP" style="width: 90%;" /></th>
+							<th><input type="text" id="counterPacket" style="width: 90%;" /></th>
+							<th><input type="text" id="dstPort" style="width: 90%;" /></th>
+							<th><input type="text" id="hardTimeout" style="width: 90%;" /></th>
+							<th><input type="text" id="idleTimeout" style="width: 90%;" /></th>
+							<th><input type="text" id="netProtocol" style="width: 90%;" /></th>
+						</tr>
 					</thead>
 					<tbody id="flows"></tbody>
 				</table>
@@ -66,6 +87,7 @@
 	<script type="text/javascript" src="js/topograph.js"></script>
 	<script type="text/javascript" src="js/omniui.js"></script>
 	<script type="text/javascript" src="js/stupidtable.min.js"></script>
+	<script type="text/javascript" src="js/filter.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function() {
 			$("#porttable").stupidtable();
