@@ -1,0 +1,13 @@
+{
+	"LogFile": "core.log",
+	"REST": {
+		"ip": "localhost",	
+		"port": "5567"
+	},
+	"UIPusher": {},
+	"ControllerAdapter": {	
+		"ip": "localhost",	
+		"port": "8080",
+		"interval": "3"
+    }
+}

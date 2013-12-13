@@ -16,6 +16,7 @@
         	</div>
         	
         	<div id="leftcolumn">
+        		<button id="reload" type="botton">Reload</button>
         		<p id="info"></p>
         	</div>
 
@@ -91,6 +92,10 @@
 		$(document).ready(function() {
 			$("#porttable").stupidtable();
 			$("#flowtable").stupidtable();
+			$("#reload").click(function() {
+				loadJSONP();
+				$("#info").empty();
+			});
 		});
 	</script>
 </html>

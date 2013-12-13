@@ -15,9 +15,13 @@ import org.openflow.protocol.OFMatch;
 import org.openflow.protocol.action.*;
 import org.openflow.protocol.statistics.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
 @JsonSerialize(using=SwitchInfo.class)
 public class SwitchInfo extends JsonSerializer<SwitchInfo> {
-	
+	protected static Logger log = LoggerFactory.getLogger(SwitchInfo.class);
 	public String name;
 	public Long dpid;
 	public List< OFPortStatisticsReply > portList;
@@ -61,8 +65,7 @@ public class SwitchInfo extends JsonSerializer<SwitchInfo> {
 				jgen.writeEndArray();
 			}
 			catch (IOException e){
-
-				
+				log.error("serialize port error {}",e.toString());
 			}
 		}
 	}
@@ -105,7 +108,7 @@ public class SwitchInfo extends JsonSerializer<SwitchInfo> {
 				jgen.writeEndArray();
 			}
 			catch (IOException e){
-				
+				log.error("serialize flow error {}",e.toString());
 			}
 		}
 	}
@@ -131,8 +134,7 @@ public class SwitchInfo extends JsonSerializer<SwitchInfo> {
 				jgen.writeEndArray();
 			}
 			catch (IOException e){
-
-
+				log.error("serialize flow action error{}",e.toString());
 			}
 		}
 

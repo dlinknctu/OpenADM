@@ -270,13 +270,20 @@ function updateTopo(json) {
 
 }
 
-//start a timer to load topo.json every 3 secons
-/*
-setInterval(function() {
-	d3.json("topology.json", updateTopo);
-}, 1000);
-*/
+function loadJSONP(){
+	$.ajax({
+		type: "GET",
+	   url: "http://localhost:5567/info/topology",
+	   dataType: "jsonp",
+	   jsonpCallback: "omniui",
+	   success: function(json){
+	       updateTopo(json);
+	   },
+	   error: function(){
+	       alert('Fail loading JSONP');
+	   }
+	});
+}
 
 //load topo now
-d3.json("topology.json", updateTopo);
-
+loadJSONP();
