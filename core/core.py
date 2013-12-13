@@ -22,7 +22,7 @@ class Core:
 		self.threads  = []
 		self.events   = []
 		#Load config file
-		with open('config.json','r') as input:
+		with open(os.path.join(sys.path[0],'config.json'),'r') as input:
 			data = input.read()
 		config = json.loads(data)
 		#Default values
