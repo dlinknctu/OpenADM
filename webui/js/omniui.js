@@ -110,6 +110,7 @@ function mouseclick() {
         <td>" + flows[i].netProtocol + "</td>\
         </tr>");
 	}
+    preMatching($('#flows tr'), $('#flowtable input:text'));
 
 	// generate rightcolumn from the port table
 	$("#ports").empty();
