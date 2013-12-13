@@ -90,27 +90,27 @@ function mouseclick() {
 	// generate footer from the flow table
 	$("#flows").empty();
 	for(var i in flows) {
-        $("#flows").append("<tr>\
-        <td>" + flows[i].wildcards + "</td>\
-        <td>" + flows[i].dstIP + "</td>\
-        <td>" + flows[i].srcMac + "</td>\
-        <td>" + flows[i].counterByte + "</td>\
-        <td>" + flows[i].srcPort + "</td>\
-        <td>" + flows[i].ingreePort + "</td>\
-        <td>" + flows[i].dstMac + "</td>\
-        <td>" + flows[i].actions[0].type + " " + flows[i].actions[0].value + "</td>\
-        <td>" + flows[i].srcIPMask + "</td>\
-        <td>" + flows[i].vlan + "</td>\
-        <td>" + flows[i].dstIPMask + "</td>\
-        <td>" + flows[i].srcIP + "</td>\
-        <td>" + flows[i].counterPacket + "</td>\
-        <td>" + flows[i].dstPort + "</td>\
-        <td>" + flows[i].hardTimeout + "</td>\
-        <td>" + flows[i].idleTimeout + "</td>\
-        <td>" + flows[i].netProtocol + "</td>\
-        </tr>");
+		$("#flows").append("<tr>\
+		<td>" + flows[i].wildcards + "</td>\
+		<td>" + flows[i].dstIP + "</td>\
+		<td>" + flows[i].srcMac + "</td>\
+		<td>" + flows[i].counterByte + "</td>\
+		<td>" + flows[i].srcPort + "</td>\
+		<td>" + flows[i].ingreePort + "</td>\
+		<td>" + flows[i].dstMac + "</td>\
+		<td>" + flows[i].actions[0].type + " " + flows[i].actions[0].value + "</td>\
+		<td>" + flows[i].srcIPMask + "</td>\
+		<td>" + flows[i].vlan + "</td>\
+		<td>" + flows[i].dstIPMask + "</td>\
+		<td>" + flows[i].srcIP + "</td>\
+		<td>" + flows[i].counterPacket + "</td>\
+		<td>" + flows[i].dstPort + "</td>\
+		<td>" + flows[i].hardTimeout + "</td>\
+		<td>" + flows[i].idleTimeout + "</td>\
+		<td>" + flows[i].netProtocol + "</td>\
+		</tr>");
 	}
-    preMatching($('#flows tr'), $('#flowtable input:text'));
+	preMatching($('#flows tr'), $('#flowtable input:text'));
 
 	// generate rightcolumn from the port table
 	$("#ports").empty();
