@@ -59,13 +59,13 @@ Assume you write a module **hello.py** and **echo.py**
 ``` python
 class Hello:
     def __init__(self,core,parm):
-        if(parm.has_key['word']):
-            word = parm['word']
+        if(parm.has_key('word')):
+            self.word = parm['word']
         else:
-            word = "hello"
+            self.word = "hello"
         core.registerEvent("saySomething", self.saySomething,4)
     def saySomething(self):
-        return word.
+        return self.word.
 ```
 
 
