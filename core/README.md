@@ -65,7 +65,7 @@ class Hello:
             self.word = "hello"
         core.registerEvent("saySomething", self.saySomething,4)
     def saySomething(self):
-        return self.word.
+        return self.word
 ```
 
 
