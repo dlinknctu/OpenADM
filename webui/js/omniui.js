@@ -273,8 +273,7 @@ function updateTopo(json) {
 function loadJSONP(){
 	$.ajax({
 		type: "GET",
-	   //url: "http://localhost:5567/info/topology",
-	   url: "http://www.zspbsd.twbbs.org/~starbops/OmniUI/webui/topology.json",
+	   url: "http://localhost:5567/info/topology",
 	   dataType: "jsonp",
 	   jsonpCallback: "omniui",
 	   success: function(json){
