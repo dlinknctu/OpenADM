@@ -27,10 +27,18 @@
                 var index = fields.indexOf(this.id),
                     tdText = $thisTr.children('td').eq(index).text(),
                     inputText = this.value;
-                if(tdText.indexOf(inputText) == -1)
-                    $thisTr.addClass('Mismatched_' + index);
-                else
+                if(inputText === "")
                     $thisTr.removeClass('Mismatched_' + index);
+                else if(fieldTypes[fields[index]] === "int")
+                    if(tdText != inputText)
+                        $thisTr.addClass('Mismatched_' + index);
+                    else
+                        $thisTr.removeClass('Mismatched_' + index);
+                else
+                    if(tdText.indexOf(inputText) == -1)
+                        $thisTr.addClass('Mismatched_' + index);
+                    else
+                        $thisTr.removeClass('Mismatched_' + index);
             });
         });
 
@@ -39,10 +47,19 @@
 
     var postMatching = function(value, index, $tr) {
         $tr.each(function() {
-            if($(this).children('td').eq(index).text().indexOf(value) == -1)
-                $(this).addClass('Mismatched_' + index);
-            else
+            var tdText = $(this).children('td').eq(index).text();
+            if(value === "")
                 $(this).removeClass('Mismatched_' + index);
+            else if(fieldTypes[fields[index]] === "int")
+                if(tdText != value)
+                    $(this).addClass('Mismatched_' + index);
+                else
+                    $(this).removeClass('Mismatched_' + index);
+            else
+                if(tdText.indexOf(value) == -1)
+                    $(this).addClass('Mismatched_' + index);
+                else
+                    $(this).removeClass('Mismatched_' + index);
         });
 
         togglePrecense($tr);
