@@ -1,9 +1,6 @@
 (function ($) {
-    var fields = [ 'wildcards', 'dstIP', 'srcMac', 'counterByte', 'srcPort',
-                   'ingressPort', 'dstMac', 'actions', 'srcIPMask', 'vlan',
-                   'dstIPMask', 'srcIP', 'counterPacket', 'dstPort',
-                   'hardTimeout', 'idleTimeout', 'netProtocol' ];
-
+    var fields = [];
+    var fieldTypes = {};
     var checkClass = function($elem) {
         for(var i = 0; i < fields.length; i++)
             if($elem.hasClass('Mismatched_' + i))
@@ -52,6 +49,14 @@
     }
 
     $().ready(function() {
+        (function() {
+            $header = $('#flowtable thead tr:first-child');
+            $header.children('th').each(function() {
+                fields.push($(this).text());
+                fieldTypes[$(this).text()] = $(this).attr('data-sort');
+            });
+        }());
+
         $('input').keyup(function() {
             postMatching(
                 $(this).val(),
