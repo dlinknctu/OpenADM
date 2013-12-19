@@ -93,9 +93,7 @@ public class SwitchAddMethod {
             if (jp.getText().equals("")) 
                 continue;
             
-            if (n == "name")
-                entry.put(SwitchAddResource.COLUMN_NAME, jp.getText());
-            else if (n == "switch")
+            if (n == "switch")
                 entry.put(SwitchAddResource.COLUMN_SWITCH, jp.getText());
             else if (n == "actions")
                 entry.put(SwitchAddResource.COLUMN_ACTIONS, jp.getText());
@@ -137,34 +135,30 @@ public class SwitchAddMethod {
 	//public static Map<String, Map<String, OFFlowMod>> parseRow(Map<String, Object> row, Map<String, Map<String, OFFlowMod>> entries) {
 	public static void parseRow(Map<String, Object> row, Map<String, Map<String, OFFlowMod>> entries) {
         String switchName = null;
-        String entryName = null;
 
         StringBuffer matchString = new StringBuffer();
 
         OFFlowMod flowMod = (OFFlowMod) floodlightProvider.getOFMessageFactory()
                 .getMessage(OFType.FLOW_MOD);
 
-        if (!row.containsKey(SwitchAddResource.COLUMN_SWITCH) || !row.containsKey(SwitchAddResource.COLUMN_NAME)) {
+        if (!row.containsKey(SwitchAddResource.COLUMN_SWITCH)) {
             log.debug(
-                    "skipping entry with missing required 'switch' or 'name' entry: {}",
-                    row);
-            //return entries;	//1219
+                    "skipping entry with missing required 'switch' entry: {}", row);
 			return;
         }
         // most error checking done with ClassCastException
         try {
             // first, snag the required entries, for debugging info
             switchName = (String) row.get(SwitchAddResource.COLUMN_SWITCH);
-            entryName = (String) row.get(SwitchAddResource.COLUMN_NAME);
+           
             if (!entries.containsKey(switchName))
                 entries.put(switchName, new HashMap<String, OFFlowMod>());
-            initDefaultFlowMod(flowMod, entryName);	//1219
+            initDefaultFlowMod(flowMod);	//1219
 
             for (String key : row.keySet()) {
                 if (row.get(key) == null)
                     continue;
-                if (key.equals(SwitchAddResource.COLUMN_SWITCH) || key.equals(SwitchAddResource.COLUMN_NAME)
-                        || key.equals("id"))
+                if (key.equals(SwitchAddResource.COLUMN_SWITCH) || key.equals("id"))
                     continue; // already handled
                 // explicitly ignore timeouts and wildcards
                 if (key.equals(SwitchAddResource.COLUMN_HARD_TIMEOUT) || key.equals(SwitchAddResource.COLUMN_IDLE_TIMEOUT) ||
@@ -172,20 +166,18 @@ public class SwitchAddMethod {
                     continue;
                 if (key.equals(SwitchAddResource.COLUMN_ACTIVE)) {
                     if  (!Boolean.valueOf((String) row.get(SwitchAddResource.COLUMN_ACTIVE))) {
-                        log.debug("skipping inactive entry {} for switch {}",
-                                entryName, switchName);
-                        entries.get(switchName).put(entryName, null);  // mark this an inactive
+                        log.debug("skipping inactive entry for switch {}", switchName);
+                        //entries.get(switchName).put(entryName, null);  // mark this an inactive
                         //break;	//1219
 						return;
                     }
                 } else if (key.equals(SwitchAddResource.COLUMN_ACTIONS)){
-                    //parseActionString(flowMod, (String) row.get(SwitchAddResource.COLUMN_ACTIONS), log);
-					continue;	//1219
+                    ActionParse.parseActionString(flowMod, (String) row.get(SwitchAddResource.COLUMN_ACTIONS), log);
+					//continue;	//1219
                 } else if (key.equals(SwitchAddResource.COLUMN_COOKIE)) {
                     flowMod.setCookie(
                             computeEntryCookie(flowMod,
-                                    Integer.valueOf((String) row.get(SwitchAddResource.COLUMN_COOKIE)),
-                                    entryName));
+                                    Integer.valueOf((String) row.get(SwitchAddResource.COLUMN_COOKIE))));
                 } else if (key.equals(SwitchAddResource.COLUMN_PRIORITY)) {
                     flowMod.setPriority(U16.t(Integer.valueOf((String) row.get(SwitchAddResource.COLUMN_PRIORITY))));
                 } else { // the rest of the keys are for OFMatch().fromString()
@@ -195,10 +187,10 @@ public class SwitchAddMethod {
                 }
             }
         } catch (ClassCastException e) {
-            if (entryName != null && switchName != null) {
+            if (switchName != null) {
                 log.warn(
-                        "Skipping entry {} on switch {} with bad data : "
-                                + e.getMessage(), entryName, switchName);
+                        "Skipping switch {} with bad data : "
+                                + e.getMessage(), switchName);
             } else {
                 log.warn("Skipping entry with bad data: {} :: {} ",
                         e.getMessage(), e.getStackTrace());
@@ -211,30 +203,30 @@ public class SwitchAddMethod {
             ofMatch.fromString(match);
         } catch (IllegalArgumentException e) {
             log.debug(
-                    "ignoring flow entry {} on switch {} with illegal OFMatch() key: "
-                            + match, entryName, switchName);
+                    "ignoring flow entry on switch {} with illegal OFMatch() key: "
+                            + match, switchName);
             //return entries;	//1219
 			return;
         }
         flowMod.setMatch(ofMatch);
-
-        entries.get(switchName).put(entryName, flowMod);
+		String entry_number = Integer.toString(entries.get(switchName).size());
+        entries.get(switchName).put(entry_number, flowMod);
 		
 		//return entries;	//1219
     }
 
-	public static void initDefaultFlowMod(OFFlowMod fm, String entryName) {
+	public static void initDefaultFlowMod(OFFlowMod fm) {
         fm.setIdleTimeout((short) 0);   // infinite
         fm.setHardTimeout((short) 0);   // infinite
         fm.setBufferId(OFPacketOut.BUFFER_ID_NONE);
         fm.setCommand((short) 0);
         fm.setFlags((short) 0);
         fm.setOutPort(OFPort.OFPP_NONE.getValue());
-        fm.setCookie(computeEntryCookie(fm, 0, entryName));  
+        fm.setCookie(computeEntryCookie(fm, 0));  
         fm.setPriority(Short.MAX_VALUE);
     }	
  
-	public static long computeEntryCookie(OFFlowMod fm, int userCookie, String name) {
+	public static long computeEntryCookie(OFFlowMod fm, int userCookie) {
         // flow-specific hash is next 20 bits LOOK! who knows if this 
         /*
         int prime = 211;

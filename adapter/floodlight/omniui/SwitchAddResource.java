@@ -172,17 +172,17 @@ public class SwitchAddResource extends ServerResource {
 			//entriesFromStorage = SwitchAddMethod.parseRow(rowValues,entriesFromStorage);
 			SwitchAddMethod.parseRow(rowValues,entriesFromStorage);
 			for (String switchid : entriesFromStorage.keySet()) {
-				for (String entryname : entriesFromStorage.get(switchid).keySet())
+				for (String entrynumber : entriesFromStorage.get(switchid).keySet())
 				{
-					if(entriesFromStorage.get(switchid).get(entryname) != null)
+					if(entriesFromStorage.get(switchid).get(entrynumber) != null)
 					{
-						SwitchAddMethod.writeFlowModToSwitch(HexString.toLong(switchid),entriesFromStorage.get(switchid).get(entryname));
+						SwitchAddMethod.writeFlowModToSwitch(HexString.toLong(switchid),entriesFromStorage.get(switchid).get(entrynumber));
 					}
 				}
 			}
 			//
 			
-            return ("{\"status\" : \"" + status + "\"}");
+            return ("{\"status\" : \"" + status + " "+entriesFromStorage.size()+" "+entriesFromStorage.get("00:00:00:00:00:00:00:03").size()+"\"}");
         } catch (IOException e) {
             log.error("Error parsing push flow mod request: " + fmJson, e);
             return "{\"status\" : \"Error! Could not parse flod mod, see log for details.\"}";
