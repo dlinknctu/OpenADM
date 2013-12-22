@@ -219,7 +219,7 @@ public class SwitchAddMethod {
         fm.setIdleTimeout((short) 0);   // infinite
         fm.setHardTimeout((short) 0);   // infinite
         fm.setBufferId(OFPacketOut.BUFFER_ID_NONE);
-        fm.setCommand((short) 0);
+        fm.setCommand(OFFlowMod.OFPFC_MODIFY);
         fm.setFlags((short) 0);
         fm.setOutPort(OFPort.OFPP_NONE.getValue());
         fm.setCookie(computeEntryCookie(fm, 0));  

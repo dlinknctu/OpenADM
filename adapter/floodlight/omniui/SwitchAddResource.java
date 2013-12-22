@@ -128,7 +128,7 @@ public class SwitchAddResource extends ServerResource {
         return true;
     }
 	
-	protected static Map<String, Map<String, OFFlowMod>> entriesFromStorage = new ConcurrentHashMap<String, Map<String, OFFlowMod>>();	///?
+	protected Map<String, Map<String, OFFlowMod>> entriesFromStorage = new ConcurrentHashMap<String, Map<String, OFFlowMod>>();	///?
 	//Map<String, Map<String, OFFlowMod>> entries = new ConcurrentHashMap<String, Map<String, OFFlowMod>>(); //?
 	//HashMap<String, Map<String, OFFlowMod>> entriesToAdd = new HashMap<String, Map<String, OFFlowMod>>(); //?
 	
@@ -182,7 +182,7 @@ public class SwitchAddResource extends ServerResource {
 			}
 			//
 			
-            return ("{\"status\" : \"" + status + " "+entriesFromStorage.size()+" "+entriesFromStorage.get("00:00:00:00:00:00:00:03").size()+"\"}");
+            return ("{\"status\" : \"" + status +"\"}");
         } catch (IOException e) {
             log.error("Error parsing push flow mod request: " + fmJson, e);
             return "{\"status\" : \"Error! Could not parse flod mod, see log for details.\"}";
