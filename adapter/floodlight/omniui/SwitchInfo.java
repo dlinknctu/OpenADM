@@ -86,7 +86,7 @@ public class SwitchInfo extends JsonSerializer<SwitchInfo> {
 				for(OFFlowStatisticsReply flow: flowList){
 					jgen.writeStartObject();
 					OFMatch match = flow.getMatch();
-					jgen.writeNumberField("ingreePort",(int)(match.getInputPort()&0xffff));
+					jgen.writeNumberField("ingressPort",(int)(match.getInputPort()&0xffff));
 					jgen.writeStringField("srcMac",HexString.toHexString(match.getDataLayerSource()));
 					jgen.writeStringField("dstMac",HexString.toHexString(match.getDataLayerDestination()));
 			        jgen.writeStringField("dstIP", intToIp(match.getNetworkDestination()));
