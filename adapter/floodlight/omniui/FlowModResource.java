@@ -58,11 +58,11 @@ import net.floodlightcontroller.storage.IStorageSourceService;
  * @author alexreimers
  *
  */
-@LogMessageCategory("SwitchAddResource")
-public class SwitchAddResource extends ServerResource {
-    protected static Logger log = LoggerFactory.getLogger(SwitchAddResource.class);
+@LogMessageCategory("FlowModResource")
+public class FlowModResource extends ServerResource {
+    protected static Logger log = LoggerFactory.getLogger(FlowModResource.class);
 
-	public static final String TABLE_NAME = "controller_switchaddtable";	//1219
+	public static final String TABLE_NAME = "controller_FlowModtable";	//1219
     public static final String COLUMN_NAME = "name";
     public static final String COLUMN_SWITCH = "switch_id";
     public static final String COLUMN_ACTIVE = "active";
@@ -152,11 +152,11 @@ public class SwitchAddResource extends ServerResource {
 		IFloodlightProviderService floodlightProvider =
                 (IFloodlightProviderService)getContext().getAttributes().
                     get(IFloodlightProviderService.class.getCanonicalName());
-		SwitchAddMethod.setprovider(floodlightProvider);
+		FlowModMethod.setprovider(floodlightProvider);
 		
         Map<String, Object> rowValues;
         try {
-            rowValues = SwitchAddMethod.jsonToStorageEntry(fmJson);
+            rowValues = FlowModMethod.jsonToStorageEntry(fmJson);
             String status = null;
             if (!checkMatchIp(rowValues)) {
                 status = "Warning! Pushing a static flow entry that matches IP " +
@@ -170,14 +170,14 @@ public class SwitchAddResource extends ServerResource {
 			
 			//1219
 			
-			//entriesFromStorage = SwitchAddMethod.parseRow(rowValues,entriesFromStorage);
-			SwitchAddMethod.parseRow(rowValues,entriesFromStorage);
+			//entriesFromStorage = FlowModMethod.parseRow(rowValues,entriesFromStorage);
+			FlowModMethod.parseRow(rowValues,entriesFromStorage);
 			for (String switchid : entriesFromStorage.keySet()) {
 				for (String entrynumber : entriesFromStorage.get(switchid).keySet())
 				{
 					if(entriesFromStorage.get(switchid).get(entrynumber) != null)
 					{
-						SwitchAddMethod.writeFlowModToSwitch(HexString.toLong(switchid),entriesFromStorage.get(switchid).get(entrynumber));
+						FlowModMethod.writeFlowModToSwitch(HexString.toLong(switchid),entriesFromStorage.get(switchid).get(entrynumber));
 					}
 				}
 			}

@@ -54,9 +54,9 @@ import org.restlet.resource.ServerResource; //?
  * Represents static flow entries to be maintained by the controller on the 
  * switches. 
  */
-@LogMessageCategory("SwitchAddMethod")
-public class SwitchAddMethod {
-    protected static Logger log = LoggerFactory.getLogger(SwitchAddMethod.class);
+@LogMessageCategory("FlowModMethod")
+public class FlowModMethod {
+    protected static Logger log = LoggerFactory.getLogger(FlowModMethod.class);
 	public static IFloodlightProviderService floodlightProvider;	//1219
 	/*public static IFloodlightProviderService floodlightProvider =
                 (IFloodlightProviderService)getContext().getAttributes().
@@ -94,39 +94,39 @@ public class SwitchAddMethod {
                 continue;
             
             if (n == "switch")
-                entry.put(SwitchAddResource.COLUMN_SWITCH, jp.getText());
+                entry.put(FlowModResource.COLUMN_SWITCH, jp.getText());
             else if (n == "actions")
-                entry.put(SwitchAddResource.COLUMN_ACTIONS, jp.getText());
+                entry.put(FlowModResource.COLUMN_ACTIONS, jp.getText());
             else if (n == "priority")
-                entry.put(SwitchAddResource.COLUMN_PRIORITY, jp.getText());
+                entry.put(FlowModResource.COLUMN_PRIORITY, jp.getText());
             else if (n == "active")
-                entry.put(SwitchAddResource.COLUMN_ACTIVE, jp.getText());
+                entry.put(FlowModResource.COLUMN_ACTIVE, jp.getText());
             else if (n == "wildcards")
-                entry.put(SwitchAddResource.COLUMN_WILDCARD, jp.getText());
+                entry.put(FlowModResource.COLUMN_WILDCARD, jp.getText());
             else if (n == "ingress-port")
-                entry.put(SwitchAddResource.COLUMN_IN_PORT, jp.getText());
+                entry.put(FlowModResource.COLUMN_IN_PORT, jp.getText());
             else if (n == "src-mac")
-                entry.put(SwitchAddResource.COLUMN_DL_SRC, jp.getText());
+                entry.put(FlowModResource.COLUMN_DL_SRC, jp.getText());
             else if (n == "dst-mac")
-                entry.put(SwitchAddResource.COLUMN_DL_DST, jp.getText());
+                entry.put(FlowModResource.COLUMN_DL_DST, jp.getText());
             else if (n == "vlan-id")
-                entry.put(SwitchAddResource.COLUMN_DL_VLAN, jp.getText());
+                entry.put(FlowModResource.COLUMN_DL_VLAN, jp.getText());
             else if (n == "vlan-priority")
-                entry.put(SwitchAddResource.COLUMN_DL_VLAN_PCP, jp.getText());
+                entry.put(FlowModResource.COLUMN_DL_VLAN_PCP, jp.getText());
             else if (n == "ether-type")
-                entry.put(SwitchAddResource.COLUMN_DL_TYPE, jp.getText());
+                entry.put(FlowModResource.COLUMN_DL_TYPE, jp.getText());
             else if (n == "tos-bits")
-                entry.put(SwitchAddResource.COLUMN_NW_TOS, jp.getText());
+                entry.put(FlowModResource.COLUMN_NW_TOS, jp.getText());
             else if (n == "protocol")
-                entry.put(SwitchAddResource.COLUMN_NW_PROTO, jp.getText());
+                entry.put(FlowModResource.COLUMN_NW_PROTO, jp.getText());
             else if (n == "src-ip")
-                entry.put(SwitchAddResource.COLUMN_NW_SRC, jp.getText());
+                entry.put(FlowModResource.COLUMN_NW_SRC, jp.getText());
             else if (n == "dst-ip")
-                entry.put(SwitchAddResource.COLUMN_NW_DST, jp.getText());
+                entry.put(FlowModResource.COLUMN_NW_DST, jp.getText());
             else if (n == "src-port")
-                entry.put(SwitchAddResource.COLUMN_TP_SRC, jp.getText());
+                entry.put(FlowModResource.COLUMN_TP_SRC, jp.getText());
             else if (n == "dst-port")
-                entry.put(SwitchAddResource.COLUMN_TP_DST, jp.getText());
+                entry.put(FlowModResource.COLUMN_TP_DST, jp.getText());
 			else if (n == "command")
 				entry.put("of_command", jp.getText());
         }
@@ -143,7 +143,7 @@ public class SwitchAddMethod {
         OFFlowMod flowMod = (OFFlowMod) floodlightProvider.getOFMessageFactory()
                 .getMessage(OFType.FLOW_MOD);
 
-        if (!row.containsKey(SwitchAddResource.COLUMN_SWITCH)) {
+        if (!row.containsKey(FlowModResource.COLUMN_SWITCH)) {
             log.debug(
                     "skipping entry with missing required 'switch' entry: {}", row);
 			return;
@@ -151,7 +151,7 @@ public class SwitchAddMethod {
         // most error checking done with ClassCastException
         try {
             // first, snag the required entries, for debugging info
-            switchName = (String) row.get(SwitchAddResource.COLUMN_SWITCH);
+            switchName = (String) row.get(FlowModResource.COLUMN_SWITCH);
            
             if (!entries.containsKey(switchName))
                 entries.put(switchName, new HashMap<String, OFFlowMod>());
@@ -160,28 +160,28 @@ public class SwitchAddMethod {
             for (String key : row.keySet()) {
                 if (row.get(key) == null)
                     continue;
-                if (key.equals(SwitchAddResource.COLUMN_SWITCH) || key.equals("id"))
+                if (key.equals(FlowModResource.COLUMN_SWITCH) || key.equals("id"))
                     continue; // already handled
                 // explicitly ignore timeouts and wildcards
-                if (key.equals(SwitchAddResource.COLUMN_HARD_TIMEOUT) || key.equals(SwitchAddResource.COLUMN_IDLE_TIMEOUT) ||
-                        key.equals(SwitchAddResource.COLUMN_WILDCARD))
+                if (key.equals(FlowModResource.COLUMN_HARD_TIMEOUT) || key.equals(FlowModResource.COLUMN_IDLE_TIMEOUT) ||
+                        key.equals(FlowModResource.COLUMN_WILDCARD))
                     continue;
-                if (key.equals(SwitchAddResource.COLUMN_ACTIVE)) {
-                    if  (!Boolean.valueOf((String) row.get(SwitchAddResource.COLUMN_ACTIVE))) {
+                if (key.equals(FlowModResource.COLUMN_ACTIVE)) {
+                    if  (!Boolean.valueOf((String) row.get(FlowModResource.COLUMN_ACTIVE))) {
                         log.debug("skipping inactive entry for switch {}", switchName);
                         //entries.get(switchName).put(entryName, null);  // mark this an inactive
                         //break;	//1219
 						return;
                     }
-                } else if (key.equals(SwitchAddResource.COLUMN_ACTIONS)){
-                    ActionParse.parseActionString(flowMod, (String) row.get(SwitchAddResource.COLUMN_ACTIONS), log);
+                } else if (key.equals(FlowModResource.COLUMN_ACTIONS)){
+                    ActionParse.parseActionString(flowMod, (String) row.get(FlowModResource.COLUMN_ACTIONS), log);
 					//continue;	//1219
-                } else if (key.equals(SwitchAddResource.COLUMN_COOKIE)) {
+                } else if (key.equals(FlowModResource.COLUMN_COOKIE)) {
                     flowMod.setCookie(
                             computeEntryCookie(flowMod,
-                                    Integer.valueOf((String) row.get(SwitchAddResource.COLUMN_COOKIE))));
-                } else if (key.equals(SwitchAddResource.COLUMN_PRIORITY)) {
-                    flowMod.setPriority(U16.t(Integer.valueOf((String) row.get(SwitchAddResource.COLUMN_PRIORITY))));
+                                    Integer.valueOf((String) row.get(FlowModResource.COLUMN_COOKIE))));
+                } else if (key.equals(FlowModResource.COLUMN_PRIORITY)) {
+                    flowMod.setPriority(U16.t(Integer.valueOf((String) row.get(FlowModResource.COLUMN_PRIORITY))));
 				} else if(key.equals("of_command")) {
 					String commandna = (String) row.get("of_command");
 					if(commandna.equals("ADD"))
