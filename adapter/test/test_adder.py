@@ -6,16 +6,8 @@ class SwitchAdder(object):
     def __init__(self, server):
         self.server = server
 
-    def get(self):
-        ret = self.rest_call({}, 'GET')
-        return json.loads(ret[2])
-
     def set(self, data):
         ret = self.rest_call(data, 'POST')
-        return ret[0] == 200
-
-    def remove(self, objtype, data):
-        ret = self.rest_call(data, 'DELETE')
         return ret[0] == 200
 
     def rest_call(self, data, action):
@@ -43,7 +35,8 @@ flow1 = {
     #"ether-type":"2048",
     #"src-ip":"140.113.10.10",
     "active":"true",
-    "actions":"output=2"
+    "actions":"output=2",
+    "command":"ADD"
     }
 
 pusher.set(flow1)

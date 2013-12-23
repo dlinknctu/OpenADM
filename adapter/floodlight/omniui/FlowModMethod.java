@@ -127,6 +127,8 @@ public class SwitchAddMethod {
                 entry.put(SwitchAddResource.COLUMN_TP_SRC, jp.getText());
             else if (n == "dst-port")
                 entry.put(SwitchAddResource.COLUMN_TP_DST, jp.getText());
+			else if (n == "command")
+				entry.put("of_command", jp.getText());
         }
         
         return entry;
@@ -180,6 +182,19 @@ public class SwitchAddMethod {
                                     Integer.valueOf((String) row.get(SwitchAddResource.COLUMN_COOKIE))));
                 } else if (key.equals(SwitchAddResource.COLUMN_PRIORITY)) {
                     flowMod.setPriority(U16.t(Integer.valueOf((String) row.get(SwitchAddResource.COLUMN_PRIORITY))));
+				} else if(key.equals("of_command")) {
+					String commandna = (String) row.get("of_command");
+					if(commandna.equals("ADD"))
+						flowMod.setCommand(OFFlowMod.OFPFC_ADD);
+					else if(commandna.equals("DEL"))
+						flowMod.setCommand(OFFlowMod.OFPFC_DELETE);
+					else if(commandna.equals("MOD_ST"))
+						flowMod.setCommand(OFFlowMod.OFPFC_MODIFY_STRICT);
+					else if(commandna.equals("DEL_ST"))
+						flowMod.setCommand(OFFlowMod.OFPFC_DELETE_STRICT);
+					else
+						flowMod.setCommand(OFFlowMod.OFPFC_MODIFY);
+						
                 } else { // the rest of the keys are for OFMatch().fromString()
                     if (matchString.length() > 0)
                         matchString.append(",");
