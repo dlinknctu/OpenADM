@@ -129,6 +129,10 @@ public class FlowModMethod {
                 entry.put(FlowModResource.COLUMN_TP_DST, jp.getText());
 			else if (n == "command")
 				entry.put("of_command", jp.getText());
+			else if (n == "idle-t")
+				entry.put(FlowModResource.COLUMN_IDLE_TIMEOUT, jp.getText());
+			else if (n == "hard-t")
+				entry.put(FlowModResource.COLUMN_HARD_TIMEOUT, jp.getText());	
         }
         
         return entry;
@@ -163,10 +167,13 @@ public class FlowModMethod {
                 if (key.equals(FlowModResource.COLUMN_SWITCH) || key.equals("id"))
                     continue; // already handled
                 // explicitly ignore timeouts and wildcards
-                if (key.equals(FlowModResource.COLUMN_HARD_TIMEOUT) || key.equals(FlowModResource.COLUMN_IDLE_TIMEOUT) ||
-                        key.equals(FlowModResource.COLUMN_WILDCARD))
+                if (key.equals(FlowModResource.COLUMN_WILDCARD))
                     continue;
-                if (key.equals(FlowModResource.COLUMN_ACTIVE)) {
+				else if(key.equals(FlowModResource.COLUMN_HARD_TIMEOUT)){
+					flowMod.setHardTimeout(U16.t(Integer.valueOf((String) row.get(FlowModResource.COLUMN_HARD_TIMEOUT))));
+				}else if(key.equals(FlowModResource.COLUMN_IDLE_TIMEOUT)){
+					flowMod.setIdleTimeout(U16.t(Integer.valueOf((String) row.get(FlowModResource.COLUMN_IDLE_TIMEOUT))));
+				}else if (key.equals(FlowModResource.COLUMN_ACTIVE)) {
                     if  (!Boolean.valueOf((String) row.get(FlowModResource.COLUMN_ACTIVE))) {
                         log.debug("skipping inactive entry for switch {}", switchName);
                         //entries.get(switchName).put(entryName, null);  // mark this an inactive
