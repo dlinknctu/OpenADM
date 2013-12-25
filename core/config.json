@@ -9,5 +9,5 @@
 		"ip": "localhost",	
 		"port": "8080",
 		"interval": "3"
-    }
+  }
 }
