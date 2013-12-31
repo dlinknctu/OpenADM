@@ -7,7 +7,7 @@ from importlib import import_module
 import logging
 import threading
 from threading import Thread
-from bottle import route, run, abort
+from bottle import route, run, abort, request
 logger = logging.getLogger(__name__)
 
 
@@ -53,10 +53,15 @@ class Core:
 			restIP = config['REST']['ip']
 			restPort = config['REST']['port']
 
-			@route('/info/:request', method='GET')
-			def restRouter(request):
-				if request in restHandlers:
-					return restHandlers[request]()
+			@route('/info/:req', method=['GET','POST'])
+			def restRouter(req):
+				if req in restHandlers :
+					if req == "flowmod" :
+						data = json.dumps(request.body.read())
+						#print data
+						return restHandlers[req](data)
+					else:
+						return restHandlers[req]()
 				else:
 					abort(404, "Not found: '/info/%s'" % request)
 			run(host=restIP, port=restPort, quiet=True)
