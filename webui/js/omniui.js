@@ -273,7 +273,7 @@ function updateTopo(json) {
 function loadJSONP(){
 	$.ajax({
 		type: "GET",
-	   url: "http://192.168.56.101:5567/info/topology",
+	   url: "http://localhost:5567/info/topology",
 	   dataType: "jsonp",
 	   jsonpCallback: "omniui",
 	   success: function(json){
@@ -288,20 +288,10 @@ function loadJSONP(){
 function sendJSONP(){
 	$.ajax({
 		type: "POST",
-		url: "http://192.168.56.101:5567/info/flowmod",
+		url: "http://localhost:5567/info/flowmod",
 		data:  JSON.stringify(flow1)
 	});
 }
-
-var flow1 = {
-    'switch':"00:00:00:00:00:00:00:02",
-    "cookie":"0",
-    "priority":"3000",
-    "ingress-port":"1",
-    "active":"true",
-    "actions":"output=2",
-    "command":"MOD"
-    };
 
 //load topo now
 loadJSONP();
