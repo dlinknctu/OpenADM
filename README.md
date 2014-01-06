@@ -18,3 +18,5 @@ OmniUI is a debugging and performance evaluation tool for Software-Defined Netwo
 - Install web UI
     1. Install a web server (e.g. Apache)
     2. Simply copy `/webui` into root directory of website
+- Install MongoDB 
+	1. Please refer to [Install MongoDB](http://docs.mongodb.org/manual/installation/)
