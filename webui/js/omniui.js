@@ -272,7 +272,7 @@ function updateTopo(json) {
 
 function loadJSONP(){
 	$.ajax({
-		type: "GET",
+	   type: "GET",
 	   url: "http://localhost:5567/info/topology",
 	   dataType: "jsonp",
 	   jsonpCallback: "omniui",
@@ -287,9 +287,17 @@ function loadJSONP(){
 
 function sendJSONP(){
 	$.ajax({
-		type: "POST",
+		type: "GET",
+		dataType: "jsonp",
 		url: "http://localhost:5567/info/flowmod",
-		data:  JSON.stringify(flow1)
+		data:  JSON.stringify(flow1),	// flow1: data input
+		jsonpCallback: "omniui",
+		success: function(ret){
+			console.log(ret);
+		},
+		error: function(ret){
+			console.log(ret);
+		} 
 	});
 }
 
