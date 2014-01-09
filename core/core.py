@@ -57,8 +57,10 @@ class Core:
 			def restRouter(req):
 				if req in restHandlers :
 					if req == "flowmod" :
-						data = json.dumps(request.body.read())
-						#print data
+						data0 = request.query_string
+						data1 = data0.split("&")[1]
+						data2 = data1.replace('%22','"')
+						data = json.dumps(data2)
 						return restHandlers[req](data)
 					else:
 						return restHandlers[req]()
