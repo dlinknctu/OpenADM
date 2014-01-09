@@ -28,12 +28,12 @@ class SwitchAdder(object):
 pusher = SwitchAdder('localhost')
 
 flow1 = {
-    'switch':"00:00:00:00:00:00:00:01",
+    "switch":"00:00:00:00:00:00:00:01",
     "cookie":"0",
     "priority":"3000",
-    "ingress-port":"1",
+    "ingressPort":"1",
     #"ether-type":"2048",
-    #"src-ip":"140.113.10.10",
+    #"srcIP":"140.113.10.10",
     "active":"true",
     "actions":"output=2",
     "command":"ADD"

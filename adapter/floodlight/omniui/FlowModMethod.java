@@ -116,9 +116,9 @@ public class FlowModMethod {
                 entry.put(FlowModResource.COLUMN_NW_TOS, jp.getText());
             else if (n == "netProtocol")
                 entry.put(FlowModResource.COLUMN_NW_PROTO, jp.getText());
-            else if (n == "srcIp")
+            else if (n == "srcIP")
                 entry.put(FlowModResource.COLUMN_NW_SRC, jp.getText());
-            else if (n == "dstIp")
+            else if (n == "dstIP")
                 entry.put(FlowModResource.COLUMN_NW_DST, jp.getText());
             else if (n == "srcPort")
                 entry.put(FlowModResource.COLUMN_TP_SRC, jp.getText());
