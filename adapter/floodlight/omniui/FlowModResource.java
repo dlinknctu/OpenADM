@@ -3,7 +3,7 @@ package net.floodlightcontroller.omniui;
 import java.io.IOException;
 import java.util.Map;
 
-//1219
+//
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Map.Entry;
@@ -49,8 +49,6 @@ import org.slf4j.LoggerFactory;
 
 import net.floodlightcontroller.core.annotations.LogMessageCategory;
 import net.floodlightcontroller.core.annotations.LogMessageDoc;
-//import net.floodlightcontroller.staticflowentry.StaticFlowEntries;
-//import net.floodlightcontroller.staticflowentry.StaticFlowEntryPusher;
 import net.floodlightcontroller.storage.IStorageSourceService;
 
 /**
@@ -62,7 +60,7 @@ import net.floodlightcontroller.storage.IStorageSourceService;
 public class FlowModResource extends ServerResource {
     protected static Logger log = LoggerFactory.getLogger(FlowModResource.class);
 
-	public static final String TABLE_NAME = "controller_FlowModtable";	//1219
+	public static final String TABLE_NAME = "controller_FlowModtable";
     public static final String COLUMN_NAME = "name";
     public static final String COLUMN_SWITCH = "switch_id";
     public static final String COLUMN_ACTIVE = "active";
@@ -128,10 +126,8 @@ public class FlowModResource extends ServerResource {
         return true;
     }
 	
-	protected Map<String, Map<String, OFFlowMod>> entriesFromStorage = new ConcurrentHashMap<String, Map<String, OFFlowMod>>();	///?
+	protected Map<String, Map<String, OFFlowMod>> entriesFromStorage = new ConcurrentHashMap<String, Map<String, OFFlowMod>>();
 	protected Map<String, Map<String, OFFlowMod>> entriesFromStorage2 = new ConcurrentHashMap<String, Map<String, OFFlowMod>>();
-	//Map<String, Map<String, OFFlowMod>> entries = new ConcurrentHashMap<String, Map<String, OFFlowMod>>(); //?
-	//HashMap<String, Map<String, OFFlowMod>> entriesToAdd = new HashMap<String, Map<String, OFFlowMod>>(); //?
 	
     /**
      * Takes a Static Flow Pusher string in JSON format and parses it into
@@ -168,9 +164,7 @@ public class FlowModResource extends ServerResource {
             }
             storageSource.insertRowAsync(TABLE_NAME, rowValues);
 			
-			//1219
-			
-			//entriesFromStorage = FlowModMethod.parseRow(rowValues,entriesFromStorage);
+			//
 			FlowModMethod.parseRow(rowValues,entriesFromStorage);
 			for (String switchid : entriesFromStorage.keySet()) {
 				for (String entrynumber : entriesFromStorage.get(switchid).keySet())
@@ -182,6 +176,7 @@ public class FlowModResource extends ServerResource {
 				}
 			}
 			//
+			
             return ("{\"status\" : \"" + status +"\"}");
         } catch (IOException e) {
             log.error("Error parsing push flow mod request: " + fmJson, e);

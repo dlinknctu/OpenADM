@@ -42,12 +42,12 @@ import org.openflow.protocol.action.OFActionVirtualLanIdentifier;
 import org.openflow.protocol.action.OFActionVirtualLanPriorityCodePoint;
 import org.openflow.util.HexString;
 
-//1219
+//
 import org.openflow.protocol.OFType;
 import net.floodlightcontroller.core.IOFSwitch;
 import net.floodlightcontroller.core.IFloodlightProviderService;
 import org.openflow.util.U16;
-import org.restlet.resource.ServerResource; //?
+import org.restlet.resource.ServerResource; 
 //
 
 /**
@@ -57,10 +57,7 @@ import org.restlet.resource.ServerResource; //?
 @LogMessageCategory("FlowModMethod")
 public class FlowModMethod {
     protected static Logger log = LoggerFactory.getLogger(FlowModMethod.class);
-	public static IFloodlightProviderService floodlightProvider;	//1219
-	/*public static IFloodlightProviderService floodlightProvider =
-                (IFloodlightProviderService)getContext().getAttributes().
-                    get(IFloodlightProviderService.class.getCanonicalName());*/
+	public static IFloodlightProviderService floodlightProvider;
 	
 	public static void setprovider(IFloodlightProviderService pro)
 	{
@@ -103,11 +100,11 @@ public class FlowModMethod {
                 entry.put(FlowModResource.COLUMN_ACTIVE, jp.getText());
             else if (n == "wildcards")
                 entry.put(FlowModResource.COLUMN_WILDCARD, jp.getText());
-            else if (n == "ingress-port")
+            else if (n == "ingressPort")
                 entry.put(FlowModResource.COLUMN_IN_PORT, jp.getText());
-            else if (n == "src-mac")
+            else if (n == "srcMac")
                 entry.put(FlowModResource.COLUMN_DL_SRC, jp.getText());
-            else if (n == "dst-mac")
+            else if (n == "dstMac")
                 entry.put(FlowModResource.COLUMN_DL_DST, jp.getText());
             else if (n == "vlan-id")
                 entry.put(FlowModResource.COLUMN_DL_VLAN, jp.getText());
@@ -117,28 +114,27 @@ public class FlowModMethod {
                 entry.put(FlowModResource.COLUMN_DL_TYPE, jp.getText());
             else if (n == "tos-bits")
                 entry.put(FlowModResource.COLUMN_NW_TOS, jp.getText());
-            else if (n == "protocol")
+            else if (n == "netProtocol")
                 entry.put(FlowModResource.COLUMN_NW_PROTO, jp.getText());
-            else if (n == "src-ip")
+            else if (n == "srcIP")
                 entry.put(FlowModResource.COLUMN_NW_SRC, jp.getText());
-            else if (n == "dst-ip")
+            else if (n == "dstIP")
                 entry.put(FlowModResource.COLUMN_NW_DST, jp.getText());
-            else if (n == "src-port")
+            else if (n == "srcPort")
                 entry.put(FlowModResource.COLUMN_TP_SRC, jp.getText());
-            else if (n == "dst-port")
+            else if (n == "dstPort")
                 entry.put(FlowModResource.COLUMN_TP_DST, jp.getText());
 			else if (n == "command")
 				entry.put("of_command", jp.getText());
-			else if (n == "idle-t")
+			else if (n == "idleTimeout")
 				entry.put(FlowModResource.COLUMN_IDLE_TIMEOUT, jp.getText());
-			else if (n == "hard-t")
+			else if (n == "hardTimeout")
 				entry.put(FlowModResource.COLUMN_HARD_TIMEOUT, jp.getText());	
         }
         
         return entry;
     }
 	
-	//public static Map<String, Map<String, OFFlowMod>> parseRow(Map<String, Object> row, Map<String, Map<String, OFFlowMod>> entries) {
 	public static void parseRow(Map<String, Object> row, Map<String, Map<String, OFFlowMod>> entries) {
         String switchName = null;
 
@@ -159,7 +155,7 @@ public class FlowModMethod {
            
             if (!entries.containsKey(switchName))
                 entries.put(switchName, new HashMap<String, OFFlowMod>());
-            initDefaultFlowMod(flowMod);	//1219
+            initDefaultFlowMod(flowMod);
 
             for (String key : row.keySet()) {
                 if (row.get(key) == null)
@@ -176,13 +172,10 @@ public class FlowModMethod {
 				}else if (key.equals(FlowModResource.COLUMN_ACTIVE)) {
                     if  (!Boolean.valueOf((String) row.get(FlowModResource.COLUMN_ACTIVE))) {
                         log.debug("skipping inactive entry for switch {}", switchName);
-                        //entries.get(switchName).put(entryName, null);  // mark this an inactive
-                        //break;	//1219
 						return;
                     }
                 } else if (key.equals(FlowModResource.COLUMN_ACTIONS)){
                     ActionParse.parseActionString(flowMod, (String) row.get(FlowModResource.COLUMN_ACTIONS), log);
-					//continue;	//1219
                 } else if (key.equals(FlowModResource.COLUMN_COOKIE)) {
                     flowMod.setCookie(
                             computeEntryCookie(flowMod,
@@ -227,14 +220,12 @@ public class FlowModMethod {
             log.debug(
                     "ignoring flow entry on switch {} with illegal OFMatch() key: "
                             + match, switchName);
-            //return entries;	//1219
 			return;
         }
         flowMod.setMatch(ofMatch);
 		String entry_number = Integer.toString(entries.get(switchName).size());
         entries.get(switchName).put(entry_number, flowMod);
 		
-		//return entries;	//1219
     }
 
 	public static void initDefaultFlowMod(OFFlowMod fm) {
