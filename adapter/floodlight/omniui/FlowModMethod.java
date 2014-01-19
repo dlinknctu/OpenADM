@@ -135,7 +135,7 @@ public class FlowModMethod {
         return entry;
     }
 	
-	public static void parseRow(Map<String, Object> row, Map<String, Map<String, OFFlowMod>> entries) {
+	public static void parseRow(Map<String, Object> row, Map<String, Map<String, OFFlowMod>> entries, Map<String, Map<String, OFFlowMod>> entries2) {
         String switchName = null;
 
         StringBuffer matchString = new StringBuffer();
@@ -155,6 +155,8 @@ public class FlowModMethod {
            
             if (!entries.containsKey(switchName))
                 entries.put(switchName, new HashMap<String, OFFlowMod>());
+			if (!entries2.containsKey(switchName))
+                entries2.put(switchName, new HashMap<String, OFFlowMod>());
             initDefaultFlowMod(flowMod);
 
             for (String key : row.keySet()) {
@@ -225,6 +227,8 @@ public class FlowModMethod {
         flowMod.setMatch(ofMatch);
 		String entry_number = Integer.toString(entries.get(switchName).size());
         entries.get(switchName).put(entry_number, flowMod);
+		String entry_number2 = Integer.toString(entries2.get(switchName).size());
+        entries2.get(switchName).put(entry_number2, flowMod);
 		
     }
 

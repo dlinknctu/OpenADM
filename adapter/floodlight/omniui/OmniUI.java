@@ -17,6 +17,8 @@ import net.floodlightcontroller.core.IOFMessageListener;
 import net.floodlightcontroller.core.IOFSwitch;
 
 import net.floodlightcontroller.core.IFloodlightProviderService;
+import net.floodlightcontroller.core.IOFSwitchListener;
+import net.floodlightcontroller.core.ImmutablePort;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.Set;
@@ -24,7 +26,7 @@ import org.openflow.util.HexString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OmniUI implements IFloodlightModule,IOFMessageListener  {
+public class OmniUI implements IFloodlightModule,IOFMessageListener,IOFSwitchListener  {
 	
 	protected IFloodlightProviderService floodlightProvider;
 	protected IRestApiService restApi;
@@ -85,6 +87,7 @@ public class OmniUI implements IFloodlightModule,IOFMessageListener  {
 	public void startUp(FloodlightModuleContext context) {
 		// TODO Auto-generated method stub
 		floodlightProvider.addOFMessageListener(OFType.FLOW_MOD, this);
+		floodlightProvider.addOFSwitchListener(this);
 		restApi.addRestletRoutable(new OmniUIWebRoutable());
 	}
 	
@@ -94,4 +97,35 @@ public class OmniUI implements IFloodlightModule,IOFMessageListener  {
 		logger.info("FLOW MOD MSG : {}",msg);
 		return Command.CONTINUE;
 	}
+	
+	
+    @Override
+    public void switchAdded(long switchId) {
+        logger.info("SWITCH ADD : {}",HexString.toHexString(switchId));
+        FlowModResource.sendEntriesToSwitch(switchId);
+    }
+
+    @Override
+    public void switchRemoved(long switchId) {
+        // do NOT delete from our internal state; we're tracking the rules,
+        // not the switches
+    }
+
+    @Override
+    public void switchActivated(long switchId) {
+        // no-op
+    }
+
+    @Override
+    public void switchChanged(long switchId) {
+        // no-op
+    }
+
+    @Override
+    public void switchPortChanged(long switchId,
+                                  ImmutablePort port,
+                                  IOFSwitch.PortChangeType type) {
+        // no-op
+    }
+
 }
