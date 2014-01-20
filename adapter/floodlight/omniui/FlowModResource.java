@@ -177,7 +177,13 @@ public class FlowModResource extends ServerResource {
 			}
 			//
 			
-            return ("{\"status\" : \"" + status +"\"}");
+            if(trydelete==true){
+				trydelete=false;
+				if(removed==true){ removed=false; return ("{\"status\" : \"" + "Flow Deleted Successful" +"\"}"); }
+				else return ("{\"status\" : \"" + "Flow Deleted Failed" +"\"}");
+			}
+			else return ("{\"status\" : \"" + status +"\"}");
+			
         } catch (IOException e) {
             log.error("Error parsing push flow mod request: " + fmJson, e);
             return "{\"status\" : \"Error! Could not parse flod mod, see log for details.\"}";
@@ -199,5 +205,8 @@ public class FlowModResource extends ServerResource {
             }
         }
     }
-
+	static boolean removed = false, trydelete = false;
+    static void setMsg(){
+		removed = true;
+	}
 }

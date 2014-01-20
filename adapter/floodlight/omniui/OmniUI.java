@@ -19,6 +19,7 @@ import net.floodlightcontroller.core.IOFSwitch;
 import net.floodlightcontroller.core.IFloodlightProviderService;
 import net.floodlightcontroller.core.IOFSwitchListener;
 import net.floodlightcontroller.core.ImmutablePort;
+import org.openflow.protocol.OFFlowRemoved;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.Set;
@@ -102,7 +103,11 @@ public class OmniUI implements IFloodlightModule,IOFMessageListener,IOFSwitchLis
 			logger.info("FLOW MOD MSG : {}",msg);
 			return Command.CONTINUE;
 		case FLOW_REMOVED:
-            logger.info("FLOW REMOVED MSG : {}",msg);
+			OFFlowRemoved msg2 = (OFFlowRemoved) msg;
+			if (msg2.getReason() == OFFlowRemoved.OFFlowRemovedReason.OFPRR_DELETE){
+				logger.info("FLOW REMOVED MSG : {} ; from switch : {}",msg2,sw);
+				FlowModResource.setMsg();
+			}
 			return Command.CONTINUE;
         default:
             return Command.CONTINUE;

@@ -188,12 +188,16 @@ public class FlowModMethod {
 					String commandna = (String) row.get("of_command");
 					if(commandna.equals("ADD"))
 						flowMod.setCommand(OFFlowMod.OFPFC_ADD);
-					else if(commandna.equals("DEL"))
+					else if(commandna.equals("DEL")){
 						flowMod.setCommand(OFFlowMod.OFPFC_DELETE);
+						FlowModResource.trydelete=true;
+					}	
 					else if(commandna.equals("MOD_ST"))
 						flowMod.setCommand(OFFlowMod.OFPFC_MODIFY_STRICT);
-					else if(commandna.equals("DEL_ST"))
+					else if(commandna.equals("DEL_ST")){
 						flowMod.setCommand(OFFlowMod.OFPFC_DELETE_STRICT);
+						FlowModResource.trydelete=true;
+					}
 					else
 						flowMod.setCommand(OFFlowMod.OFPFC_MODIFY);
 						
