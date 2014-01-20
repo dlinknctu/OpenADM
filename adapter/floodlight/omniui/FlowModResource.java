@@ -45,7 +45,7 @@ import org.restlet.resource.Post;
 import org.restlet.resource.ServerResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import java.util.Collections;
 
 import net.floodlightcontroller.core.annotations.LogMessageCategory;
 import net.floodlightcontroller.core.annotations.LogMessageDoc;
@@ -127,7 +127,7 @@ public class FlowModResource extends ServerResource {
     }
 	
 	protected Map<String, Map<String, OFFlowMod>> entriesFromStorage = new ConcurrentHashMap<String, Map<String, OFFlowMod>>();
-	protected Map<String, Map<String, OFFlowMod>> entriesFromStorage2 = new ConcurrentHashMap<String, Map<String, OFFlowMod>>();
+	static protected Map<String, Map<String, OFFlowMod>> entriesFromStorage2 = new ConcurrentHashMap<String, Map<String, OFFlowMod>>();
 	
     /**
      * Takes a Static Flow Pusher string in JSON format and parses it into
@@ -165,7 +165,7 @@ public class FlowModResource extends ServerResource {
             storageSource.insertRowAsync(TABLE_NAME, rowValues);
 			
 			//
-			FlowModMethod.parseRow(rowValues,entriesFromStorage);
+			FlowModMethod.parseRow(rowValues,entriesFromStorage,entriesFromStorage2);
 			for (String switchid : entriesFromStorage.keySet()) {
 				for (String entrynumber : entriesFromStorage.get(switchid).keySet())
 				{
@@ -181,6 +181,22 @@ public class FlowModResource extends ServerResource {
         } catch (IOException e) {
             log.error("Error parsing push flow mod request: " + fmJson, e);
             return "{\"status\" : \"Error! Could not parse flod mod, see log for details.\"}";
+        }
+    }
+	
+	static void sendEntriesToSwitch(long switchId) {
+        String stringId = HexString.toHexString(switchId);
+
+        if ((entriesFromStorage2 != null) && (entriesFromStorage2.containsKey(stringId))) {
+            Map<String, OFFlowMod> entries = entriesFromStorage2.get(stringId);
+            ArrayList<String> sortedList = new ArrayList<String>(entries.keySet());
+            Collections.sort(sortedList);
+            for (String entryName : sortedList) {
+                OFFlowMod flowMod = entries.get(entryName);
+                if (flowMod != null) {
+                    FlowModMethod.writeFlowModToSwitch(switchId, flowMod);
+                }
+            }
         }
     }
 
