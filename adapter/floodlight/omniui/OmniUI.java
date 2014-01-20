@@ -31,11 +31,12 @@ public class OmniUI implements IFloodlightModule,IOFMessageListener,IOFSwitchLis
 	protected IFloodlightProviderService floodlightProvider;
 	protected IRestApiService restApi;
 	protected static Logger logger;
+	public static final String StaticFlowName = "omniui";
 
 	@Override
 	public String getName() {
 		// TODO Auto-generated method stub
-		return null;
+		return StaticFlowName;
 	}
 
 	@Override
@@ -47,7 +48,8 @@ public class OmniUI implements IFloodlightModule,IOFMessageListener,IOFSwitchLis
 	@Override
 	public boolean isCallbackOrderingPostreq(OFType type, String name) {
 		// TODO Auto-generated method stub
-		return false;
+		return(type.equals(OFType.FLOW_REMOVED) && name.equals("staticflowentry"));
+		//return false;
 	}
 
 	@Override
@@ -87,6 +89,7 @@ public class OmniUI implements IFloodlightModule,IOFMessageListener,IOFSwitchLis
 	public void startUp(FloodlightModuleContext context) {
 		// TODO Auto-generated method stub
 		floodlightProvider.addOFMessageListener(OFType.FLOW_MOD, this);
+		floodlightProvider.addOFMessageListener(OFType.FLOW_REMOVED, this);
 		floodlightProvider.addOFSwitchListener(this);
 		restApi.addRestletRoutable(new OmniUIWebRoutable());
 	}
@@ -94,10 +97,17 @@ public class OmniUI implements IFloodlightModule,IOFMessageListener,IOFSwitchLis
 	@Override
 	public net.floodlightcontroller.core.IListener.Command receive(IOFSwitch sw, OFMessage msg, FloodlightContext cntx) {
 	
-		logger.info("FLOW MOD MSG : {}",msg);
-		return Command.CONTINUE;
+		switch (msg.getType()) {
+        case FLOW_MOD:
+			logger.info("FLOW MOD MSG : {}",msg);
+			return Command.CONTINUE;
+		case FLOW_REMOVED:
+            logger.info("FLOW REMOVED MSG : {}",msg);
+			return Command.CONTINUE;
+        default:
+            return Command.CONTINUE;
+		}
 	}
-	
 	
     @Override
     public void switchAdded(long switchId) {

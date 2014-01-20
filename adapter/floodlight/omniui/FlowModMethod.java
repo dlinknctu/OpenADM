@@ -237,8 +237,9 @@ public class FlowModMethod {
         fm.setHardTimeout((short) 0);   // infinite
         fm.setBufferId(OFPacketOut.BUFFER_ID_NONE);
         fm.setCommand(OFFlowMod.OFPFC_MODIFY);
-        fm.setFlags((short) 0);
-        fm.setOutPort(OFPort.OFPP_NONE.getValue());
+        //fm.setFlags((short) 0);
+        fm.setFlags(OFFlowMod.OFPFF_SEND_FLOW_REM);
+		fm.setOutPort(OFPort.OFPP_NONE.getValue());
         fm.setCookie(computeEntryCookie(fm, 0));  
         fm.setPriority(Short.MAX_VALUE);
     }	
