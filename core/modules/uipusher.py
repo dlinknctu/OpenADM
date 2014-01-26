@@ -16,10 +16,9 @@ class UIPusher:
 		core.registerRestApi("topology", self.topologyHandler)
 		core.registerRestApi("stat", self.statisticHandler)
 		
-		##db test
-		self.client = MongoClient("140.113.215.200",27017)
-		self.db = self.client.omniui
-		self.hourly = self.db.hourly
+		##db connection
+		self.client = MongoClient(parm['dbip'],int(parm['dbport']))
+		self.db = self.client[parm['db']]
 
 		self.intervalList=['hourly','daily','weekly','monthly','annually']
 

@@ -55,7 +55,7 @@ class Core:
 
 			@hook('after_request')
 			def enable_cors():
-			    response.headers['Access-Control-Allow-Origin'] = '*'
+				response.headers['Access-Control-Allow-Origin'] = 'http://localhost'
 
 			@route('/info/:request', method='GET')
 			def restRouter(request):
