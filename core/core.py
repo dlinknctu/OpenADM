@@ -7,7 +7,7 @@ from importlib import import_module
 import logging
 import threading
 from threading import Thread
-from bottle import route, run, abort
+from bottle import route, run, abort, hook, response
 logger = logging.getLogger(__name__)
 
 
@@ -52,6 +52,10 @@ class Core:
 		if config.has_key("REST"):
 			restIP = config['REST']['ip']
 			restPort = config['REST']['port']
+
+			@hook('after_request')
+			def enable_cors():
+			    response.headers['Access-Control-Allow-Origin'] = 'http://localhost'
 
 			@route('/info/:request', method='GET')
 			def restRouter(request):
