@@ -43,6 +43,12 @@ function svgplot(resp){
 		data = d3.tsv.parse(resp);
 	  color.domain(d3.keys(data[0]).filter(function(key) { return key !== "Time"; }));
 
+	  // if there is no result returned
+	  if(data.length == 0) {
+			alert("No result found.");
+			return;
+	  }
+
 	  data.forEach(function(d) {
 	    d.Time = parseDate(d.Time);
 	  });

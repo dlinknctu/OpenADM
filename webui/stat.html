@@ -15,6 +15,26 @@
 					svgclear();
 				});
 				$("#update").click(function(event) {
+					// check if necessary field is missing
+					var isMissing = 0;
+					if(!$("#from").val()) {
+						$("#from").css({'background-color' : '#FFAAAA'});
+						isMissing = 1;
+					}
+					if(!$("#to").val()) {
+						$("#to").css({'background-color' : '#FFAAAA'});
+						isMissing = 1;
+					}
+					if(!$("#dpid").val()) {
+						$("#dpid").css({'background-color' : '#FFAAAA'});
+						isMissing = 1;
+					}
+					if(isMissing ==1 ) { return; }
+					else {
+						$("#from").css({'background-color' : '#FFFFFF'});
+						$("#to").css({'background-color' : '#FFFFFF'});
+						$("#dpid").css({'background-color' : '#FFFFFF'});
+					}
 					svgclear();
 				  var url = $("#statform").attr("action");
 			    var data = {};
@@ -24,9 +44,9 @@
 			        data['pattern'][this.name] = this.value || '';
 			    });
 			    // push from, to, DPID and interval into json
-			    data['from'] = $("#from").val() || '';
-			    data['to'] = $("#to").val() || '';
-			    data['dpid'] = $("#dpid").val() || '';
+			    data['from'] = $("#from").val();
+			    data['to'] = $("#to").val();
+			    data['dpid'] = $("#dpid").val();
 			    data['interval'] = $('input[name=interval]:checked').val();
 			    json = JSON.stringify(data)
 					$.post(url, json).done(function(resp) {
