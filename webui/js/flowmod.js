@@ -159,5 +159,5 @@ function pruneFields(f) {
         f["ether-type"] = "2048";
     }
 
-    return f;
+    return JSON.parse(JSON.stringify(f));
 }
