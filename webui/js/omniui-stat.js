@@ -2,8 +2,8 @@ var margin = {top: 30, right: 50, bottom: 50, left: 150},
   width = 960 - margin.left - margin.right,
   height = 500 - margin.top - margin.bottom;
 
-var yscale = 1000;
-var yscaletext = "KB/intvl.";
+var yscale = 1000000;
+var yscaletext = "MB/intvl.";
 
 var parseDate = d3.time.format("%Y-%m-%d %H:%M").parse;
 
