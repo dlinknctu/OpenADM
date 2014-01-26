@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>OmniUI</title>
+		<link rel="stylesheet" href="css/omniui-stat.css">
+		<link rel="stylesheet" href="css/ui-lightness/jquery-ui-1.10.4.custom.css">
+		<script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
+		<script type="text/javascript" src="js/jquery-ui-1.10.4.custom.min.js"></script>
+		<script type="text/javascript">
+			$(document).ready(function() {
+				$("#radio").buttonset();
+				$("#query").click(function(event) {
+				  var url = $("#statform").attr("action");
+			    var data = {};
+			    data['pattern'] = {};
+			    // push flow pattern into json
+			    $.each($("#statform").serializeArray(), function() {
+			        data['pattern'][this.name] = this.value || '';
+			    });
+			    // push from, to and interval into json
+			    data['from'] = $("#from").val() || '';
+			    data['to'] = $("#to").val() || '';
+			    data['interval'] = $('input[name=interval]:checked').val();
+			    json = JSON.stringify(data)
+					$.post(url, json).done(function(resp) {
+						// parse resp
+				  });
+				});
+				$("#from").datepicker({
+					dateFormat: "yy-mm-dd",
+		      changeMonth: true,
+		      numberOfMonths: 3,
+		      onClose: function( selectedDate ) {
+		        $("#to").datepicker("option", "minDate", selectedDate);
+		        $("#to").datepicker("show");
+		      }
+		    });
+		    $("#to").datepicker({
+					dateFormat: "yy-mm-dd",
+		      changeMonth: true,
+		      numberOfMonths: 3,
+		      onClose: function( selectedDate ) {
+		        $("#from").datepicker("option", "maxDate", selectedDate);
+		      }
+		    });
+			});
+		</script>
+	</head>
+	<body>
+		<div id="wrapper">
+			<div id="header">
+				<p>OmniUI</p>
+			</div>
+			<div id="contentliquid">
+				<div id="content">
+					<form id="statform" action="http://140.113.214.93:5567/stat">
+						<table>
+							<thead>
+								<tr>
+									<th data-sort="string" width=8%>wildcards</th>
+									<th data-sort="string" width=8%>dstIP</th>
+									<th data-sort="string" width=8%>srcMac</th>
+									<th data-sort="int" width=5%>srcPort</th>
+									<th data-sort="int" width=5%>ingressPort</th>
+									<th data-sort="string" width=8%>dstMac</th>
+									<th data-sort="string" width=8%>actions</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td><input type="text" name="wildcards" id="wildcards" style="width: 90%;" /></td>
+									<td><input type="text" name="dstIP" id="dstIP" style="width: 90%;" /></td>
+									<td><input type="text" name="srcMac" id="srcMac" style="width: 90%;" /></td>
+									<td><input type="text" name="srcPort" id="srcPort" style="width: 90%;" /></td>
+									<td><input type="text" name="ingressPort" id="ingressPort" style="width: 90%;" /></td>
+									<td><input type="text" name="dstMac" id="dstMac" style="width: 90%;" /></td>
+									<td><input type="text" name="actions" id="actions" style="width: 90%;" /></td>
+								</tr>
+							</tbody>
+							<thead>
+								<tr>
+									<th data-sort="string" width=8%>srcIPMask</th>
+									<th data-sort="int" width=5%>vlan</th>
+									<th data-sort="string" width=8%>dstIPMask</th>
+									<th data-sort="string" width=8%>srcIP</th>
+									<th data-sort="int" width=5%>dstPort</th>
+									<th data-sort="int" width=5%>hardTimeout</th>
+									<th data-sort="int" width=5%>idleTimeout</th>
+									<th data-sort="int" width=5%>netProtocol</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td><input type="text" name="srcIPMask" id="srcIPMask" style="width: 90%;" /></td>
+									<td><input type="text" name="vlan" id="vlan" style="width: 90%;" /></td>
+									<td><input type="text" name="dstIPMask" id="dstIPMask" style="width: 90%;" /></td>
+									<td><input type="text" name="srcIP" id="srcIP" style="width: 90%;" /></td>
+									<td><input type="text" name="dstPort" id="dstPort" style="width: 90%;" /></td>
+									<td><input type="text" name="hardTimeout" id="hardTimeout" style="width: 90%;" /></td>
+									<td><input type="text" name="idleTimeout" id="idleTimeout" style="width: 90%;" /></td>
+									<td><input type="text" name="netProtocol" id="netProtocol" style="width: 90%;" /></td>
+								</tr>
+							</tbody>
+						</table>
+					</form>
+					<div align="center">
+						<label for="from">From</label>
+						<input type="text" id="from" name="from">
+						<label for="to">To</label>
+						<input type="text" id="to" name="to">
+					  <div id="radio">
+					    <input type="radio" id="radio1" name="interval" value="0" checked="checked"><label for="radio1">Hourly</label>
+					    <input type="radio" id="radio2" name="interval" value="1"><label for="radio2">Daily</label>
+					    <input type="radio" id="radio3" name="interval" value="2"><label for="radio3">Weekly</label>
+					    <input type="radio" id="radio4" name="interval" value="3"><label for="radio4">Monthly</label>
+					    <input type="radio" id="radio5" name="interval" value="4"><label for="radio5">Annually</label>
+					  </div>
+        		<button id="query" type="botton">Query</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

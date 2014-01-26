@@ -1,0 +1,39 @@
+@import url("reset.css");
+
+body {
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: 0.9em;
+    color:#333;
+}
+
+p {
+    padding: 10px;
+}
+
+#wrapper {
+    width: 100%;
+    min-width: 1400px;
+    max-width: 2000px;
+    margin: 0 auto;
+}
+
+#header {
+    text-align: center;
+    font-size: 30px;
+    color: #FFFFFF;
+    float: left;
+    height: 50px;
+    width: 100%;
+    background: #33BB33;
+}
+
+#contentliquid {
+    float: left;
+    width: 100%;
+}
+
+#content {
+    background: #DDDDDD;
+    margin-left: 0px;
+    margin-right: 0px;
+}
