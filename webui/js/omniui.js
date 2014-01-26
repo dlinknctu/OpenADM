@@ -98,7 +98,7 @@ function mouseclick() {
 		<td>" + flows[i].srcPort + "</td>\
 		<td>" + flows[i].ingressPort + "</td>\
 		<td>" + flows[i].dstMac + "</td>\
-		<td>" + flows[i].actions[0].type + " " + flows[i].actions[0].value + "</td>\
+		<td>" + (flows[i].actions[0]? flows[i].actions[0].type + " " + flows[i].actions[0].value: "") + "</td>\
 		<td>" + flows[i].srcIPMask + "</td>\
 		<td>" + flows[i].vlan + "</td>\
 		<td>" + flows[i].dstIPMask + "</td>\
@@ -108,6 +108,7 @@ function mouseclick() {
 		<td>" + flows[i].hardTimeout + "</td>\
 		<td>" + flows[i].idleTimeout + "</td>\
 		<td>" + flows[i].netProtocol + "</td>\
+		<td><button onclick='modFlow(" + i + ");'>Modify</button><button onclick='delFlow(" + i + ");'>Delete</button></td>\
 		</tr>");
 	}
 	preMatching($('#flows tr'), $('#flowtable input:text'));
@@ -285,18 +286,21 @@ function loadJSONP(){
 	});
 }
 
-function sendJSONP(){
+function sendJSONP(f){
 	$.ajax({
 		type: "GET",
 		dataType: "jsonp",
 		url: "http://localhost:5567/info/flowmod",
-		data:  JSON.stringify(flow1),	// flow1: data input
+		data:  JSON.stringify(f),
 		jsonpCallback: "omniui",
 		success: function(ret){
 			console.log(ret);
+            resp = jQuery.parseJSON(ret[2]);
+            alert(resp["status"]);
 		},
 		error: function(ret){
 			console.log(ret);
+            alert(ret[2]);
 		} 
 	});
 }
