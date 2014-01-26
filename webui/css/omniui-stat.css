@@ -37,3 +37,21 @@ p {
     margin-left: 0px;
     margin-right: 0px;
 }
+
+/* css for d3 */
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}

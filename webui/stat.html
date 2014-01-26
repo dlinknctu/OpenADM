@@ -7,10 +7,15 @@
 		<link rel="stylesheet" href="css/ui-lightness/jquery-ui-1.10.4.custom.css">
 		<script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
 		<script type="text/javascript" src="js/jquery-ui-1.10.4.custom.min.js"></script>
+		<script type="text/javascript" src="js/d3.v3.min.js"></script>
 		<script type="text/javascript">
 			$(document).ready(function() {
 				$("#radio").buttonset();
+				$("#clear").click(function(event) {
+					svgclear();
+				});
 				$("#query").click(function(event) {
+					svgplot();
 				  var url = $("#statform").attr("action");
 			    var data = {};
 			    data['pattern'] = {};
@@ -117,9 +122,11 @@
 					    <input type="radio" id="radio5" name="interval" value="4"><label for="radio5">Annually</label>
 					  </div>
         		<button id="query" type="botton">Query</button>
+        		<button id="clear" type="botton">Clear</button>
 					</div>
 				</div>
 			</div>
 		</div>
 	</body>
+	<script type="text/javascript" src="js/omniui-stat.js"></script>
 </html>
