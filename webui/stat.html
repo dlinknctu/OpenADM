@@ -14,8 +14,8 @@
 				$("#clear").click(function(event) {
 					svgclear();
 				});
-				$("#query").click(function(event) {
-					svgplot();
+				$("#update").click(function(event) {
+					svgclear();
 				  var url = $("#statform").attr("action");
 			    var data = {};
 			    data['pattern'] = {};
@@ -29,7 +29,7 @@
 			    data['interval'] = $('input[name=interval]:checked').val();
 			    json = JSON.stringify(data)
 					$.post(url, json).done(function(resp) {
-						// parse resp
+						svgplot(resp);
 				  });
 				});
 				$("#from").datepicker({
@@ -59,7 +59,7 @@
 			</div>
 			<div id="contentliquid">
 				<div id="content">
-					<form id="statform" action="http://140.113.214.93:5567/stat">
+					<form id="statform" action="http://localhost:5567/stat">
 						<table>
 							<thead>
 								<tr>
@@ -121,7 +121,7 @@
 					    <input type="radio" id="radio4" name="interval" value="3"><label for="radio4">Monthly</label>
 					    <input type="radio" id="radio5" name="interval" value="4"><label for="radio5">Annually</label>
 					  </div>
-        		<button id="query" type="botton">Query</button>
+        		<button id="update" type="botton">Update</button>
         		<button id="clear" type="botton">Clear</button>
 					</div>
 				</div>
