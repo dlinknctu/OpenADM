@@ -11,6 +11,7 @@ p {
 }
 
 #wrapper {
+    background: #DDDDDD;
     width: 100%;
     min-width: 1400px;
     max-width: 2000px;
@@ -27,15 +28,22 @@ p {
     background: #33BB33;
 }
 
-#contentliquid {
-    float: left;
-    width: 100%;
-}
-
 #content {
-    background: #DDDDDD;
     margin-left: 0px;
     margin-right: 0px;
+}
+
+#statformlist {
+  padding-top: 50px;
+}
+
+#statform {
+  background: #CCCCCC;
+  margin: 10px;
+  padding: 10px;
+  border-width: 2px;
+  border-color: #AAAAAA;
+  border-style: dashed;
 }
 
 /* css for d3 */

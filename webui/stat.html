@@ -10,49 +10,75 @@
 		<script type="text/javascript" src="js/d3.v3.min.js"></script>
 		<script type="text/javascript">
 			$(document).ready(function() {
+				var url = "http://140.113.214.93:5567/stat"
+				
 				$("#radio").buttonset();
-				$("#clear").click(function(event) {
-					svgclear();
+
+				$("#addform").click(function(event) {
+					var newform = $("#statform").clone();
+					newform.append('<div align="center"><button type="button" class="removebtn">Remove</button></div>');
+					newform.appendTo("#statformlist")
+					$(".removebtn").click(function(event){
+						$(this).parent().parent().empty().remove();
+					});
 				});
+
 				$("#update").click(function(event) {
-					// check if necessary field is missing
+					// check if 'from' is missing
 					var isMissing = 0;
 					if(!$("#from").val()) {
 						$("#from").css({'background-color' : '#FFAAAA'});
 						isMissing = 1;
 					}
+					else {
+						$("#from").css({'background-color' : '#FFFFFF'});
+					}
+					// check if 'to' is missing
 					if(!$("#to").val()) {
 						$("#to").css({'background-color' : '#FFAAAA'});
 						isMissing = 1;
 					}
-					if(!$("#dpid").val()) {
-						$("#dpid").css({'background-color' : '#FFAAAA'});
-						isMissing = 1;
-					}
-					if(isMissing ==1 ) { return; }
 					else {
-						$("#from").css({'background-color' : '#FFFFFF'});
 						$("#to").css({'background-color' : '#FFFFFF'});
-						$("#dpid").css({'background-color' : '#FFFFFF'});
 					}
+					// check if each 'dpid' is missing
+					$(".dpid").each(function(){
+						if(!$(this).val()) {
+							$(this).css({'background-color' : '#FFAAAA'});
+							isMissing = 1;
+						}
+						else {
+							$(this).css({'background-color' : '#FFFFFF'});
+						}
+					});
+					// stop querying if any necessary filed is missing
+					if(isMissing ==1) { return; }
+
+					// clear and redraw
 					svgclear();
-				  var url = $("#statform").attr("action");
 			    var data = {};
-			    data['pattern'] = {};
-			    // push flow pattern into json
-			    $.each($("#statform").serializeArray(), function() {
-			        data['pattern'][this.name] = this.value || '';
+					data['pattern'] = [];
+
+			    $("#statformlist").children().each(function(){
+			    	var pattern = {};
+			    	$.each($("#statform").serializeArray(), function() {
+			        pattern[this.name] = this.value || '';
+			    	});
+			    	data['pattern'].push(pattern);
 			    });
 			    // push from, to, DPID and interval into json
 			    data['from'] = $("#from").val();
 			    data['to'] = $("#to").val();
-			    data['dpid'] = $("#dpid").val();
 			    data['interval'] = $('input[name=interval]:checked').val();
-			    json = JSON.stringify(data)
+
+			    console.log(data);
+			    // JSON translation
+			    json = JSON.stringify(data);
 					$.post(url, json).done(function(resp) {
 						svgplot(resp);
 				  });
 				});
+
 				$("#from").datepicker({
 					dateFormat: "yy-mm-dd",
 		      changeMonth: true,
@@ -62,6 +88,7 @@
 		        $("#to").datepicker("show");
 		      }
 		    });
+
 		    $("#to").datepicker({
 					dateFormat: "yy-mm-dd",
 		      changeMonth: true,
@@ -78,78 +105,80 @@
 			<div id="header">
 				<p>OmniUI</p>
 			</div>
-			<div id="contentliquid">
-				<div id="content">
-					<form id="statform" action="http://localhost:5567/stat">
+			<div id="content">
+				<div id="statformlist">
+					<form id="statform">
 						<table>
 							<thead>
 								<tr>
-									<th data-sort="string" width=8%>wildcards</th>
-									<th data-sort="string" width=8%>dstIP</th>
-									<th data-sort="string" width=8%>srcMac</th>
-									<th data-sort="int" width=5%>srcPort</th>
-									<th data-sort="int" width=5%>ingressPort</th>
-									<th data-sort="string" width=8%>dstMac</th>
-									<th data-sort="string" width=8%>actions</th>
+									<th data-sort="string" width=8%>dpid</th>
+									<th data-sort="string" width=5%>srcMac</th>
+									<th data-sort="string" width=5%>srcIP</th>
+									<th data-sort="string" width=5%>srcIPMask</th>
+									<th data-sort="int" width=3%>srcPort</th>
+									<th data-sort="int" width=3%>ingressPort</th>
+									<th data-sort="string" width=3%>wildcards</th>
+									<th data-sort="int" width=3%>netProtocol</th>
 								</tr>
 							</thead>
 							<tbody>
 								<tr>
-									<td><input type="text" name="wildcards" id="wildcards" style="width: 90%;" /></td>
-									<td><input type="text" name="dstIP" id="dstIP" style="width: 90%;" /></td>
-									<td><input type="text" name="srcMac" id="srcMac" style="width: 90%;" /></td>
-									<td><input type="text" name="srcPort" id="srcPort" style="width: 90%;" /></td>
-									<td><input type="text" name="ingressPort" id="ingressPort" style="width: 90%;" /></td>
-									<td><input type="text" name="dstMac" id="dstMac" style="width: 90%;" /></td>
-									<td><input type="text" name="actions" id="actions" style="width: 90%;" /></td>
+									<td><input type="text" name="dpid" class="dpid" style="width: 90%;" /></td>
+									<td><input type="text" name="srcMac" class="srcMac" style="width: 90%;" /></td>
+									<td><input type="text" name="srcIP" class="srcIP" style="width: 90%;" /></td>
+									<td><input type="text" name="srcIPMask" class="srcIPMask" style="width: 90%;" /></td>
+									<td><input type="text" name="srcPort" class="srcPort" style="width: 90%;" /></td>
+									<td><input type="text" name="ingressPort" class="ingressPort" style="width: 90%;" /></td>
+									<td><input type="text" name="wildcards" class="wildcards" style="width: 90%;" /></td>
+									<td><input type="text" name="netProtocol" class="netProtocol" style="width: 90%;" /></td>
+									
 								</tr>
 							</tbody>
 							<thead>
 								<tr>
-									<th data-sort="string" width=8%>srcIPMask</th>
-									<th data-sort="int" width=5%>vlan</th>
-									<th data-sort="string" width=8%>dstIPMask</th>
-									<th data-sort="string" width=8%>srcIP</th>
-									<th data-sort="int" width=5%>dstPort</th>
-									<th data-sort="int" width=5%>hardTimeout</th>
-									<th data-sort="int" width=5%>idleTimeout</th>
-									<th data-sort="int" width=5%>netProtocol</th>
+									<th data-sort="string" width=5%>actions</th>
+									<th data-sort="string" width=5%>dstMac</th>
+									<th data-sort="string" width=5%>dstIP</th>
+									<th data-sort="string" width=5%>dstIPMask</th>
+									<th data-sort="int" width=3%>dstPort</th>
+									<th data-sort="int" width=3%>vlan</th>
+									<th data-sort="int" width=3%>hardTimeout</th>
+									<th data-sort="int" width=3%>idleTimeout</th>
 								</tr>
 							</thead>
 							<tbody>
 								<tr>
-									<td><input type="text" name="srcIPMask" id="srcIPMask" style="width: 90%;" /></td>
-									<td><input type="text" name="vlan" id="vlan" style="width: 90%;" /></td>
-									<td><input type="text" name="dstIPMask" id="dstIPMask" style="width: 90%;" /></td>
-									<td><input type="text" name="srcIP" id="srcIP" style="width: 90%;" /></td>
-									<td><input type="text" name="dstPort" id="dstPort" style="width: 90%;" /></td>
-									<td><input type="text" name="hardTimeout" id="hardTimeout" style="width: 90%;" /></td>
-									<td><input type="text" name="idleTimeout" id="idleTimeout" style="width: 90%;" /></td>
-									<td><input type="text" name="netProtocol" id="netProtocol" style="width: 90%;" /></td>
+									<td><input type="text" name="actions" class="actions" style="width: 90%;" /></td>
+									<td><input type="text" name="dstMac" class="dstMac" style="width: 90%;" /></td>
+									<td><input type="text" name="dstIP" class="dstIP" style="width: 90%;" /></td>
+									<td><input type="text" name="dstIPMask" class="dstIPMask" style="width: 90%;" /></td>
+									<td><input type="text" name="dstPort" class="dstPort" style="width: 90%;" /></td>
+									<td><input type="text" name="vlan" class="vlan" style="width: 90%;" /></td>
+									<td><input type="text" name="hardTimeout" class="hardTimeout" style="width: 90%;" /></td>
+									<td><input type="text" name="idleTimeout" class="idleTimeout" style="width: 90%;" /></td>
 								</tr>
 							</tbody>
 						</table>
 					</form>
-					<div align="center">
-						<label for="dpid">DPID</label>
-						<input type="text" id="dpid" name="dpid" size="50px">
-						<label for="from">From</label>
-						<input type="text" id="from" name="from">
-						<label for="to">To</label>
-						<input type="text" id="to" name="to">
-					  <div id="radio">
-					    <input type="radio" id="radio1" name="interval" value="0" checked="checked"><label for="radio1">Hourly</label>
-					    <input type="radio" id="radio2" name="interval" value="1"><label for="radio2">Daily</label>
-					    <!-- TODO: weekly is not support yet !-->
-					    <input type="radio" id="radio3" name="interval" value="2" disabled="True"><label for="radio3">Weekly</label>
-					    <input type="radio" id="radio4" name="interval" value="3"><label for="radio4">Monthly</label>
-					    <input type="radio" id="radio5" name="interval" value="4"><label for="radio5">Annually</label>
-					  </div>
-        		<button id="update" type="botton">Update</button>
-        		<button id="clear" type="botton">Clear</button>
-					</div>
+				</div>
+				<div align="center">
+					<label for="from">From</label>
+					<input type="text" id="from" name="from">
+					<label for="to">To</label>
+					<input type="text" id="to" name="to">
+				  <div id="radio">
+				    <input type="radio" id="radio1" name="interval" value="0" checked="checked"><label for="radio1">Hourly</label>
+				    <input type="radio" id="radio2" name="interval" value="1"><label for="radio2">Daily</label>
+				    <!-- TODO: weekly is not support yet !-->
+				    <input type="radio" id="radio3" name="interval" value="2" disabled="True"><label for="radio3">Weekly</label>
+				    <input type="radio" id="radio4" name="interval" value="3"><label for="radio4">Monthly</label>
+				    <input type="radio" id="radio5" name="interval" value="4"><label for="radio5">Annually</label>
+				  </div>
+					<button id="addform" type="button">Append</button>
+	    		<button id="update" type="botton">Update</button>
 				</div>
 			</div>
+		
 		</div>
 	</body>
 	<script type="text/javascript" src="js/omniui-stat.js"></script>
