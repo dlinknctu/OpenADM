@@ -146,7 +146,7 @@ function redraw(nodes, links) {
 
 	// update existing links
 	path.style('marker-start', function(d) { return ''; })
-		.style('marker-end', function(d) { return ''; });
+		.style('marker-end', function(d) { return ''; })
 
 	// add new links
 	path.enter().append('svg:path')
