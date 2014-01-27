@@ -286,23 +286,13 @@ function loadJSONP(){
 	});
 }
 
-function sendJSONP(f){
-	$.ajax({
-		type: "GET",
-		dataType: "jsonp",
-		url: "http://localhost:5567/info/flowmod",
-		data:  JSON.stringify(f),
-		jsonpCallback: "omniui",
-		success: function(ret){
-			console.log(ret);
-            resp = jQuery.parseJSON(ret[2]);
-            alert(resp["status"]);
-		},
-		error: function(ret){
-			console.log(ret);
-            alert(ret[2]);
-		} 
-	});
+function sendFlow(f){
+    var url = "http://localhost:5567/flowmod";
+    var data = JSON.stringify(f);
+    $.post(url, JSON.stringify(f)).done(function(resp) {
+        var statusString = JSON.parse(resp)[2];
+        alert(JSON.parse(statusString)["status"]);
+    });
 }
 
 //load topo now

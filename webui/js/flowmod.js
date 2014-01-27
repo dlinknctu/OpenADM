@@ -22,7 +22,7 @@ $(function() {
                         delete flow["dstPort"];
                     }
                     console.log(JSON.stringify(flow));
-                    sendJSONP(flow);
+                    sendFlow(flow);
                 }
                 $(this).dialog("close");
             },
@@ -43,7 +43,7 @@ $(function() {
                         delete flow["dstPort"];
                     }
                     console.log(JSON.stringify(flow));
-                    sendJSONP(flow);
+                    sendFlow(flow);
                 }
                 $(this).dialog("close");
             },
@@ -65,7 +65,7 @@ $(function() {
                 var flow = $(this).data("flow");
                 flow["actions"] = $("#_actions").val();
                 console.log(JSON.stringify(flow));
-                sendJSONP(flow);
+                sendFlow(flow);
                 $(this).dialog("close");
             },
             Cancel: function() {
@@ -116,7 +116,7 @@ function delFlow(i) {
     }
 
     console.log(JSON.stringify(flow));
-    sendJSONP(flow);
+    sendFlow(flow);
 }
 
 function pruneFields(f) {

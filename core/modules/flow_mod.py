@@ -19,7 +19,7 @@ class Flow_mod:
 
 	def flowHandler(self,data):
 		# return JSONP format
-		body = json.loads(data)
+		body = json.dumps(data)
 		conn = httplib.HTTPConnection(self.IP,self.Port)
 		conn.request('POST',self.path,body,self.headers)
 		response = conn.getresponse()
@@ -27,4 +27,4 @@ class Flow_mod:
 		ret[0] == 200
 		conn.close()
 		msg = json.dumps(ret)
-		return "omniui(%s);" % msg
+		return msg
