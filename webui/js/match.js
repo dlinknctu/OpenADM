@@ -37,7 +37,7 @@ function getflowmsg(f){
 		//console.log("get successful");
 			for(var j in flows)
 			{
-				//console.log(flows[j]);
+				console.log(f["switch"]);
 				startmatch(f,flows[j]);
 			}
 	}else console.log("switch not exist");
@@ -138,11 +138,7 @@ function startmatch(f2,flow2){
 }
 
 function nexthop(f3,flow3){
-	//var title = $("circle.node title").text();
-	//console.log("!!!!!title!!!!!");
-	//console.log(title);
 	var node = $("circle.node");
-	//console.log(node);
 	var length = node.length;
 	for(var k=0;k<length;k++)
 	{
@@ -155,33 +151,39 @@ function nexthop(f3,flow3){
 			for(var i in myGraph.links)
 			{
 				console.log("!!!!!!!!link!!!!!!!!!");
+				console.log(myGraph.links[i]);
 				var src = myGraph.links[i].source.id;
-				//console.log(src);
 				var dst = myGraph.links[i].target.id;
-				//console.log(dst);
 				var srcp = myGraph.links[i].sourcePort;
-				//console.log(srcp);
 				var dstp = myGraph.links[i].targetPort;
-				//console.log(dstp);
 				if(src==f3["switch"] && flow3.actions[0] && srcp==flow3.actions[0].value){
-					//console.log(dst);
-					//console.log(dstp);
-					f3["switch"]=dst;
-					f3["ingressPort"]=dstp;
+					var ff={};
+					for(var key in f3)
+					{
+						if(key=="switch") ff[key]=dst;
+						else if(key=="ingressPort") ff["ingressPort"]=dstp;
+						else ff[key]=f3[key];
+					}
 					linkchangecolor(src,srcp,dst,dstp);
-					getflowmsg(f3);
+					getflowmsg(ff);
+					break;
 					
 				}else if(dst==f3["switch"] && flow3.actions[0] && dstp==flow3.actions[0].value){
-					//console.log(src);
-					//console.log(srcp);
-					f3["switch"]=src;
-					f3["ingressPort"]=srcp;
+					var ff={};
+					for(var key in f3)
+					{
+						if(key=="switch") ff[key]=src;
+						else if(key=="ingressPort") ff["ingressPort"]=srcp;
+						else ff[key]=f3[key];
+					}
 					linkchangecolor(src,srcp,dst,dstp);
-					getflowmsg(f3);
+					getflowmsg(ff);
+					break;
 				}else{
 					console.log("no next hop");
 				}
 			}
+			break;
 		}
 	}	
 }
