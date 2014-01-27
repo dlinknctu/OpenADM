@@ -289,10 +289,12 @@ function loadJSONP(){
 function sendFlow(f){
     var url = "http://localhost:5567/flowmod";
     var data = JSON.stringify(f);
-    $.post(url, JSON.stringify(f)).done(function(resp) {
-        var statusString = JSON.parse(resp)[2];
-        alert(JSON.parse(statusString)["status"]);
-    });
+    var callback = function(data) {
+        var stat = JSON.parse(data[2]);
+        console.log(data);
+        alert(stat["status"]);
+    };
+    $.post(url, JSON.stringify(f), callback, "json");
 }
 
 //load topo now
