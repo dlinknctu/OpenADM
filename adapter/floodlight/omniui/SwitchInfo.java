@@ -98,10 +98,12 @@ public class SwitchInfo extends JsonSerializer<SwitchInfo> {
 			        jgen.writeNumberField("srcPort", match.getTransportSource());
 					jgen.writeNumberField("vlan", match.getDataLayerVirtualLan());
 			        jgen.writeNumberField("wildcards", match.getWildcards());	
-					jgen.writeNumberField("counterByte", flow.getPacketCount());
-					jgen.writeNumberField("counterPacket", flow.getByteCount());
+					jgen.writeNumberField("counterByte", flow.getByteCount());
+					jgen.writeNumberField("counterPacket", flow.getPacketCount());
 					jgen.writeNumberField("idleTimeout", (int)(flow.getIdleTimeout()&0xffff));
 					jgen.writeNumberField("hardTimeout", (int)(flow.getHardTimeout()&0xffff));
+					jgen.writeNumberField("priority", (int)(flow.getPriority()&0xffff));
+					jgen.writeNumberField("tos-bits", match.getNetworkTypeOfService());
 					serializeAction(jgen, flow.getActions());
 					jgen.writeEndObject();
 				}

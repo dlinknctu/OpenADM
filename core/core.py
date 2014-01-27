@@ -7,7 +7,7 @@ from importlib import import_module
 import logging
 import threading
 from threading import Thread
-from bottle import route, run, abort, request
+from bottle import route, run, abort, hook, response
 logger = logging.getLogger(__name__)
 
 
@@ -53,17 +53,14 @@ class Core:
 			restIP = config['REST']['ip']
 			restPort = config['REST']['port']
 
-			@route('/info/:req', method=['GET','POST'])
-			def restRouter(req):
-				if req in restHandlers :
-					if req == "flowmod" :
-						data0 = request.query_string
-						data1 = data0.split("&")[1]
-						data2 = data1.replace('%22','"')
-						data = json.dumps(data2)
-						return restHandlers[req](data)
-					else:
-						return restHandlers[req]()
+			@hook('after_request')
+			def enable_cors():
+			    response.headers['Access-Control-Allow-Origin'] = 'http://localhost'
+
+			@route('/info/:request', method='GET')
+			def restRouter(request):
+				if request in restHandlers:
+					return restHandlers[request]()
 				else:
 					abort(404, "Not found: '/info/%s'" % request)
 			run(host=restIP, port=restPort, quiet=True)
