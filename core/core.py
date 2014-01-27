@@ -7,7 +7,7 @@ from importlib import import_module
 import logging
 import threading
 from threading import Thread
-from bottle import route, run, abort, hook, response
+from bottle import route, run, abort, hook, response, request
 logger = logging.getLogger(__name__)
 
 
@@ -55,12 +55,19 @@ class Core:
 
 			@hook('after_request')
 			def enable_cors():
-			    response.headers['Access-Control-Allow-Origin'] = 'http://localhost'
+				response.headers['Access-Control-Allow-Origin'] = 'http://localhost'
 
 			@route('/info/:request', method='GET')
 			def restRouter(request):
 				if request in restHandlers:
 					return restHandlers[request]()
+				else:
+					abort(404, "Not found: '/info/%s'" % request)
+
+			@route('/stat', method='POST')
+			def StatHandler():
+				if 'stat' in restHandlers:
+					return restHandlers['stat'](request)
 				else:
 					abort(404, "Not found: '/info/%s'" % request)
 			run(host=restIP, port=restPort, quiet=True)

@@ -4,7 +4,11 @@
 		"ip": "localhost",	
 		"port": "5567"
 	},
-	"UIPusher": {},
+	"UIPusher": {
+		"dbip":"localhost",
+		"dbport":"27017",
+		"db":"omniui"
+	},
 	"ControllerAdapter": {	
 		"ip": "localhost",	
 		"port": "8080",
