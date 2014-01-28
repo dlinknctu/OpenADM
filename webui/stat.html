@@ -56,47 +56,47 @@
 
 					// clear and redraw
 					svgclear();
-			    var data = {};
+					var data = {};
 					data['pattern'] = [];
 
-			    $("#statformlist").children().each(function(){
-			    	var pattern = {};
-			    	$.each($("#statform").serializeArray(), function() {
-			        pattern[this.name] = this.value || '';
-			    	});
-			    	data['pattern'].push(pattern);
-			    });
-			    // push from, to, DPID and interval into json
-			    data['from'] = $("#from").val();
-			    data['to'] = $("#to").val();
-			    data['interval'] = $('input[name=interval]:checked').val();
+					$("#statformlist").children().each(function(){
+						var pattern = {};
+						$.each($("#statform").serializeArray(), function() {
+							pattern[this.name] = this.value || '';
+						});
+						data['pattern'].push(pattern);
+					});
+					// push from, to, DPID and interval into json
+					data['from'] = $("#from").val();
+					data['to'] = $("#to").val();
+					data['interval'] = $('input[name=interval]:checked').val();
 
-			    console.log(data);
-			    // JSON translation
-			    json = JSON.stringify(data);
+					console.log(data);
+					// JSON translation
+					json = JSON.stringify(data);
 					$.post(url, json).done(function(resp) {
 						svgplot(resp);
-				  });
+					});
 				});
 
 				$("#from").datepicker({
 					dateFormat: "yy-mm-dd",
-		      changeMonth: true,
-		      numberOfMonths: 3,
-		      onClose: function( selectedDate ) {
-		        $("#to").datepicker("option", "minDate", selectedDate);
-		        $("#to").datepicker("show");
-		      }
-		    });
+					changeMonth: true,
+					numberOfMonths: 3,
+					onClose: function( selectedDate ) {
+						$("#to").datepicker("option", "minDate", selectedDate);
+						$("#to").datepicker("show");
+					}
+				});
 
-		    $("#to").datepicker({
+				$("#to").datepicker({
 					dateFormat: "yy-mm-dd",
-		      changeMonth: true,
-		      numberOfMonths: 3,
-		      onClose: function( selectedDate ) {
-		        $("#from").datepicker("option", "maxDate", selectedDate);
-		      }
-		    });
+					changeMonth: true,
+					numberOfMonths: 3,
+					onClose: function( selectedDate ) {
+						$("#from").datepicker("option", "maxDate", selectedDate);
+					}
+				});
 			});
 		</script>
 	</head>
@@ -166,16 +166,16 @@
 					<input type="text" id="from" name="from">
 					<label for="to">To</label>
 					<input type="text" id="to" name="to">
-				  <div id="radio">
-				    <input type="radio" id="radio1" name="interval" value="0" checked="checked"><label for="radio1">Hourly</label>
-				    <input type="radio" id="radio2" name="interval" value="1"><label for="radio2">Daily</label>
-				    <!-- TODO: weekly is not support yet !-->
-				    <input type="radio" id="radio3" name="interval" value="2" disabled="True"><label for="radio3">Weekly</label>
-				    <input type="radio" id="radio4" name="interval" value="3"><label for="radio4">Monthly</label>
-				    <input type="radio" id="radio5" name="interval" value="4"><label for="radio5">Annually</label>
-				  </div>
+					<div id="radio">
+						<input type="radio" id="radio1" name="interval" value="0" checked="checked"><label for="radio1">Hourly</label>
+						<input type="radio" id="radio2" name="interval" value="1"><label for="radio2">Daily</label>
+						<!-- TODO: weekly is not support yet !-->
+						<input type="radio" id="radio3" name="interval" value="2" disabled="True"><label for="radio3">Weekly</label>
+						<input type="radio" id="radio4" name="interval" value="3"><label for="radio4">Monthly</label>
+						<input type="radio" id="radio5" name="interval" value="4"><label for="radio5">Annually</label>
+					</div>
 					<button id="addform" type="button">Append</button>
-	    		<button id="update" type="botton">Update</button>
+					<button id="update" type="botton">Update</button>
 				</div>
 			</div>
 		
