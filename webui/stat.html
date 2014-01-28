@@ -61,7 +61,7 @@
 
 					$("#statformlist").children().each(function(){
 						var pattern = {};
-						$.each($("#statform").serializeArray(), function() {
+						$.each($(this).serializeArray(), function() {
 							pattern[this.name] = this.value || '';
 						});
 						data['pattern'].push(pattern);
