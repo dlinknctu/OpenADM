@@ -90,6 +90,11 @@ function mouseclick() {
 	// generate footer from the flow table
 	$("#flows").empty();
 	for(var i in flows) {
+        var actions = flows[i].actions;
+        var actionsStrArr = [];
+        for(var j in actions) {
+            actionsStrArr.push(actions[j].type + " " + actions[j].value);
+        }
 		$("#flows").append("<tr>\
 		<td>" + flows[i].wildcards + "</td>\
 		<td>" + flows[i].dstIP + "</td>\
@@ -98,7 +103,7 @@ function mouseclick() {
 		<td>" + flows[i].srcPort + "</td>\
 		<td>" + flows[i].ingressPort + "</td>\
 		<td>" + flows[i].dstMac + "</td>\
-		<td>" + (flows[i].actions[0]? flows[i].actions[0].type + " " + flows[i].actions[0].value: "") + "</td>\
+		<td>" + actionsStrArr.toString() + "</td>\
 		<td>" + flows[i].srcIPMask + "</td>\
 		<td>" + flows[i].vlan + "</td>\
 		<td>" + flows[i].dstIPMask + "</td>\

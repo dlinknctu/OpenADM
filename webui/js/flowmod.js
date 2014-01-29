@@ -85,11 +85,13 @@ $(function() {
 
 function modFlow(i) {
     var flow = pruneFields(flows[i]);
-    //flow = pruneFields(flow);
     flow["switch"] = node.id;
-    if(flow["actions"][0]) {
-        flow["actions"] =  flow["actions"][0].type.toLowerCase() + "=" + flow["actions"][0].value;
+    var actions = flow.actions;
+    var actionsStrArr = [];
+    for(var j in actions) {
+        actionsStrArr.push(actions[j].type + "=" + actions[j].value);
     }
+    flow["actions"] = actionsStrArr.toString();
     flow["command"] = "MOD_ST";
     $("#_actions").val(flow["actions"]);
     if(!(flow["ether-type"] && flow["netProtocol"])) {
