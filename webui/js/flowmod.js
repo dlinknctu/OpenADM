@@ -80,6 +80,7 @@ $(function() {
     });
     $("#send").click(function() {
         $("#send-dialog").dialog("open");
+        $('.ui-widget-overlay').css('background', 'gray');
     });
 });
 
@@ -104,6 +105,7 @@ function modFlow(i) {
     }
 
     $("#actions-dialog").data("flow", flow).dialog("open");
+    $('.ui-widget-overlay').css('background', 'gray');
 }
 
 function delFlow(i) {
