@@ -29,21 +29,35 @@ $("#match-dialog").dialog({
         $("#match-dialog").dialog("open");
     });
 
+
 function getflowmsg(f){
 	var node = myGraph.findNode(f["switch"]);
 	if(node) 
 	{
+		var compare={};
 		var flows = myGraph.findNode(f["switch"]).flows;
 		//console.log("get successful");
 			for(var j in flows)
 			{
 				console.log(flows[j]);
-				startmatch(f,flows[j]);
+				startmatch(f,flows[j],j,compare);
+			}
+			console.log(compare);
+			var max_p=0;	//max priority
+			for(var z in compare)
+			{
+				var y=parseInt(compare[z]);
+				if(y>=max_p) max_p=y;
+			}
+			var max_p_s=max_p.toString();
+			for(var z in compare)
+			{
+				if(compare[z]==max_p_s) nexthop(f,flows[z]);
 			}
 	}else console.log("switch not exist");
 }
 
-function startmatch(f2,flow2){
+function startmatch(f2,flow2,j2,compare2){
 	if(flow2.srcMac!="00:00:00:00:00:00")
 	{
 		if("srcMac" in f2)
@@ -122,6 +136,17 @@ function startmatch(f2,flow2){
 			return;
 		}
 	}
+	if(flow2.netProtocol!="0")
+	{
+		if("netProtocol" in f2){
+			console.log("HAVE NETPROTOCOL");
+			if(flow2.netProtocol == f2["netProtocol"]) console.log("match netProtocol");
+			else{ console.log("match netProtocol failed"); return; }
+			}else{
+				console.log("NOT HAVE NETPROTOCOL");
+				return;
+			}
+	}
 	if(flow2.vlan!="0")
 	{
 		if("vlan" in f2){
@@ -133,11 +158,11 @@ function startmatch(f2,flow2){
 			return;
 		}
 	}
-	if(flow2["tos-bits"]!="0")
+	if(flow2.tosBits!="0")
 	{
 		if("tos-bits" in f2){
 			console.log("HAVE TOSBITS");
-			if(flow2["tos-bits"] == f2["tos-bits"]) console.log("match tos-bits");
+			if(flow2.tosBits == f2["tos-bits"]) console.log("match tos-bits");
 			else{ console.log("match tos-bits failed"); return; }
 		}else{
 			console.log("NOT HAVE TOSBITS");
@@ -145,7 +170,8 @@ function startmatch(f2,flow2){
 		}
 	}
 	console.log("######congratulation######");
-	nexthop(f2,flow2);
+	compare2[j2]=flow2.priority;
+	//nexthop(f2,flow2);
 }
 
 function nexthop(f3,flow3){
