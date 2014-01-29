@@ -11,7 +11,7 @@ $("#match-dialog").dialog({
                         item[$(this).text()] = $input.eq(i).val();
                     }
                 });
-				//console.log(item);
+				console.log(item);
 				getflowmsg(item);
                 $(this).dialog("close");
             },
@@ -37,7 +37,7 @@ function getflowmsg(f){
 		//console.log("get successful");
 			for(var j in flows)
 			{
-				console.log(f["switch"]);
+				console.log(flows[j]);
 				startmatch(f,flows[j]);
 			}
 	}else console.log("switch not exist");
@@ -122,14 +122,25 @@ function startmatch(f2,flow2){
 			return;
 		}
 	}
-	if(flow2.netProtocol!="0")
+	if(flow2.vlan!="0")
 	{
-		if("netProtocol" in f2){
-			console.log("HAVE NETPROTOCOL");
-			if(flow2.netProtocol == f2["netProtocol"]) console.log("match netProtocol");
-			else{ console.log("match netProtocol failed"); return; }
+		if("vlan" in f2){
+			console.log("HAVE VLAN");
+			if(flow2.vlan == f2["vlan"]) console.log("match vlan");
+			else{ console.log("match vlan failed"); return; }
 		}else{
-			console.log("NOT HAVE NETPROTOCOL");
+			console.log("NOT HAVE VLAN");
+			return;
+		}
+	}
+	if(flow2["tos-bits"]!="0")
+	{
+		if("tos-bits" in f2){
+			console.log("HAVE TOSBITS");
+			if(flow2["tos-bits"] == f2["tos-bits"]) console.log("match tos-bits");
+			else{ console.log("match tos-bits failed"); return; }
+		}else{
+			console.log("NOT HAVE TOSBITS");
 			return;
 		}
 	}
@@ -150,8 +161,8 @@ function nexthop(f3,flow3){
 			
 			for(var i in myGraph.links)
 			{
-				console.log("!!!!!!!!link!!!!!!!!!");
-				console.log(myGraph.links[i]);
+				//console.log("!!!!!!!!link!!!!!!!!!");
+				//console.log(myGraph.links[i]);
 				var src = myGraph.links[i].source.id;
 				var dst = myGraph.links[i].target.id;
 				var srcp = myGraph.links[i].sourcePort;
@@ -179,6 +190,31 @@ function nexthop(f3,flow3){
 					linkchangecolor(src,srcp,dst,dstp);
 					getflowmsg(ff);
 					break;
+				}else if(src==f3["switch"] && flow3.actions[0] && flow3.actions[0].value=="-5"){	//flood
+					console.log("!!!!!!flood!!!!!");
+					if(srcp==f3["ingressPort"]) continue;
+					var ff={};
+					for(var key in f3)
+					{
+						if(key=="switch") ff[key]=dst;
+						else if(key=="ingressPort") ff["ingressPort"]=dstp;
+						else ff[key]=f3[key];
+					}
+					linkchangecolor(src,srcp,dst,dstp);
+					getflowmsg(ff);
+					
+				}else if(dst==f3["switch"] && flow3.actions[0] && flow3.actions[0].value=="-5"){	//flood
+					console.log("!!!!!!flood!!!!!");
+					if(dstp==f3["ingressPort"]) continue;
+					var ff={};
+					for(var key in f3)
+					{
+						if(key=="switch") ff[key]=src;
+						else if(key=="ingressPort") ff["ingressPort"]=srcp;
+						else ff[key]=f3[key];
+					}
+					linkchangecolor(src,srcp,dst,dstp);
+					getflowmsg(ff);
 				}else{
 					console.log("no next hop");
 				}
