@@ -90,6 +90,11 @@ function mouseclick() {
 	// generate footer from the flow table
 	$("#flows").empty();
 	for(var i in flows) {
+        var actions = flows[i].actions;
+        var actionsStrArr = [];
+        for(var j in actions) {
+            actionsStrArr.push(actions[j].type + " " + actions[j].value);
+        }
 		$("#flows").append("<tr>\
 		<td>" + flows[i].wildcards + "</td>\
 		<td>" + flows[i].dstIP + "</td>\
@@ -98,7 +103,7 @@ function mouseclick() {
 		<td>" + flows[i].srcPort + "</td>\
 		<td>" + flows[i].ingressPort + "</td>\
 		<td>" + flows[i].dstMac + "</td>\
-		<td>" + flows[i].actions[0].type + " " + flows[i].actions[0].value + "</td>\
+		<td>" + actionsStrArr.toString() + "</td>\
 		<td>" + flows[i].srcIPMask + "</td>\
 		<td>" + flows[i].vlan + "</td>\
 		<td>" + flows[i].dstIPMask + "</td>\
@@ -108,6 +113,7 @@ function mouseclick() {
 		<td>" + flows[i].hardTimeout + "</td>\
 		<td>" + flows[i].idleTimeout + "</td>\
 		<td>" + flows[i].netProtocol + "</td>\
+		<td><button onclick='modFlow(" + i + ");'>Modify</button><button onclick='delFlow(" + i + ");'>Delete</button></td>\
 		</tr>");
 	}
 	preMatching($('#flows tr'), $('#flowtable input:text'));
@@ -272,7 +278,7 @@ function updateTopo(json) {
 
 function loadJSONP(){
 	$.ajax({
-		type: "GET",
+	   type: "GET",
 	   url: "http://localhost:5567/info/topology",
 	   dataType: "jsonp",
 	   jsonpCallback: "omniui",
@@ -283,6 +289,17 @@ function loadJSONP(){
 	       alert('Fail loading JSONP');
 	   }
 	});
+}
+
+function sendFlow(f){
+    var url = "http://localhost:5567/flowmod";
+    var data = JSON.stringify(f);
+    var callback = function(data) {
+        var stat = JSON.parse(data[2]);
+        console.log(data);
+        alert(stat["status"]);
+    };
+    $.post(url, JSON.stringify(f), callback, "json");
 }
 
 //load topo now

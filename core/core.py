@@ -7,7 +7,7 @@ from importlib import import_module
 import logging
 import threading
 from threading import Thread
-from bottle import route, run, abort, hook, response
+from bottle import route, run, abort, hook, request, response
 logger = logging.getLogger(__name__)
 
 
@@ -63,6 +63,14 @@ class Core:
 					return restHandlers[request]()
 				else:
 					abort(404, "Not found: '/info/%s'" % request)
+
+                        @route('/flowmod', method='POST')
+                        def flowmodHandler():
+                            if 'flowmod' in restHandlers:
+                                data = json.load(request.body)
+                                return restHandlers['flowmod'](data)
+                            else:
+                                abort(404, "Not found: '/flowmod'")
 			run(host=restIP, port=restPort, quiet=True)
 
 
