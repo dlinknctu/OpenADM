@@ -22,7 +22,7 @@ $(function() {
                         delete flow["dstPort"];
                     }
                     console.log(JSON.stringify(flow));
-                    sendJSONP(flow);
+                    sendFlow(flow);
                 }
                 $(this).dialog("close");
             },
@@ -43,7 +43,7 @@ $(function() {
                         delete flow["dstPort"];
                     }
                     console.log(JSON.stringify(flow));
-                    sendJSONP(flow);
+                    sendFlow(flow);
                 }
                 $(this).dialog("close");
             },
@@ -65,7 +65,7 @@ $(function() {
                 var flow = $(this).data("flow");
                 flow["actions"] = $("#_actions").val();
                 console.log(JSON.stringify(flow));
-                sendJSONP(flow);
+                sendFlow(flow);
                 $(this).dialog("close");
             },
             Cancel: function() {
@@ -80,16 +80,19 @@ $(function() {
     });
     $("#send").click(function() {
         $("#send-dialog").dialog("open");
+        $('.ui-widget-overlay').css('background', 'gray');
     });
 });
 
 function modFlow(i) {
     var flow = pruneFields(flows[i]);
-    //flow = pruneFields(flow);
     flow["switch"] = node.id;
-    if(flow["actions"][0]) {
-        flow["actions"] =  flow["actions"][0].type.toLowerCase() + "=" + flow["actions"][0].value;
+    var actions = flow.actions;
+    var actionsStrArr = [];
+    for(var j in actions) {
+        actionsStrArr.push(actions[j].type + "=" + actions[j].value);
     }
+    flow["actions"] = actionsStrArr.toString();
     flow["command"] = "MOD_ST";
     $("#_actions").val(flow["actions"]);
     if(!(flow["ether-type"] && flow["netProtocol"])) {
@@ -102,6 +105,7 @@ function modFlow(i) {
     }
 
     $("#actions-dialog").data("flow", flow).dialog("open");
+    $('.ui-widget-overlay').css('background', 'gray');
 }
 
 function delFlow(i) {
@@ -116,7 +120,7 @@ function delFlow(i) {
     }
 
     console.log(JSON.stringify(flow));
-    sendJSONP(flow);
+    sendFlow(flow);
 }
 
 function pruneFields(f) {
@@ -159,5 +163,5 @@ function pruneFields(f) {
         f["ether-type"] = "2048";
     }
 
-    return f;
+    return JSON.parse(JSON.stringify(f));
 }

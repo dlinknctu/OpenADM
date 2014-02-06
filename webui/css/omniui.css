@@ -126,6 +126,10 @@ td {
  background-color: #f3f3f3;
 }
 
+.dialog {
+    display: none;
+}
+
 label, fieldset > input {
     display: block;
     width: 90%;
