@@ -106,7 +106,7 @@ public class FlowModMethod {
                 entry.put(FlowModResource.COLUMN_DL_SRC, jp.getText());
             else if (n == "dstMac")
                 entry.put(FlowModResource.COLUMN_DL_DST, jp.getText());
-            else if (n == "vlan-id")
+            else if (n == "vlan")
                 entry.put(FlowModResource.COLUMN_DL_VLAN, jp.getText());
             else if (n == "vlan-priority")
                 entry.put(FlowModResource.COLUMN_DL_VLAN_PCP, jp.getText());
