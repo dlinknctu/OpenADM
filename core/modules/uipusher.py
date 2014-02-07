@@ -39,6 +39,8 @@ class UIPusher:
 		reduntTime = int(datetime.datetime.fromtimestamp(now).strftime('%M'))%10*60 + int(datetime.datetime.fromtimestamp(now).strftime('%S'))
 		data = json.loads(event)
 		self.count = self.count + 1
+		if int(now-reduntTime) != self.prevTime:
+			self.writeToDB()
 		for node in data['nodes']:
 			for flow in node['flows']:
 				key=flow.copy()
@@ -68,27 +70,30 @@ class UIPusher:
 					self.diff[hashkey] = [flow['counterByte'],flow['counterPacket'],flow['duration']]
 		self.prevTime = int(now-reduntTime)						
 		if self.count >= self.limit and len(self.cache) > 0:
-			self.count = 0
-			#access database
-			self.tmpcache = self.cache
-			self.cache={}
-			key={}
-			if len(self.tmpcache)==0:
-				return 
-			for hashkey in self.tmpcache:
-				key = self.tmpcache[hashkey][2]
-				exist = self.db[self.intervalList[0]].find_one(key)
-				tmp = key['date']
-				if exist is not None:
-					key['_id'] = exist['_id']
-					key['counterByte'] = self.tmpcache[hashkey][0] + exist['counterByte']
-					key['counterPacket'] = self.tmpcache[hashkey][1] + exist['counterPacket']
-				else:	
-					key['counterByte'] = self.tmpcache[hashkey][0] 
-					key['counterPacket'] = self.tmpcache[hashkey][1] 
-				key['duration'] = self.tmpcache[hashkey][3]
-				self.db[self.intervalList[0]].save(key)
+			self.writeToDB()
 		self.event = event
+	
+	def writeToDB(self):
+		self.count = 0
+		#access database
+		self.tmpcache = self.cache
+		self.cache={}
+		key={}
+		if len(self.tmpcache)==0:
+			return 
+		for hashkey in self.tmpcache:
+			key = self.tmpcache[hashkey][2]
+			exist = self.db[self.intervalList[0]].find_one(key)
+			tmp = key['date']
+			if exist is not None:
+				key['_id'] = exist['_id']
+				key['counterByte'] = self.tmpcache[hashkey][0] + exist['counterByte']
+				key['counterPacket'] = self.tmpcache[hashkey][1] + exist['counterPacket']
+			else:	
+				key['counterByte'] = self.tmpcache[hashkey][0] 
+				key['counterPacket'] = self.tmpcache[hashkey][1] 
+			key['duration'] = self.tmpcache[hashkey][3]
+			self.db[self.intervalList[0]].save(key)
 
 	def statisticHandler(self,request):
 		#parse json data
