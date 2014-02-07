@@ -15,7 +15,7 @@
 	"ControllerAdapter": {	
 		"ip": "localhost",	
 		"port": "8080",
-		"interval": "3"
+		"interval": "30"
     },
 	"Flow_mod": {}
 }
