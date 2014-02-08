@@ -4,11 +4,18 @@
 		"ip": "localhost",	
 		"port": "5567"
 	},
-	"UIPusher": {},
+	"UIPusher": {
+		"dbip":"140.113.215.200",
+		"dbport":"27017",
+		"db":"omniui",
+		"user":"xxxxxx",
+		"password":"xxxxxx",
+		"queryinterval":"5"
+	},
 	"ControllerAdapter": {	
 		"ip": "localhost",	
 		"port": "8080",
-		"interval": "3"
+		"interval": "30"
     },
 	"Flow_mod": {}
 }

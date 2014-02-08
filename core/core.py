@@ -71,6 +71,13 @@ class Core:
                                 return restHandlers['flowmod'](data)
                             else:
                                 abort(404, "Not found: '/flowmod'")
+
+			@route('/stat', method='POST')
+			def StatHandler():
+				if 'stat' in restHandlers:
+					return restHandlers['stat'](request)
+				else:
+					abort(404, "Not found: '/info/%s'" % request)
 			run(host=restIP, port=restPort, quiet=True)
 
 
