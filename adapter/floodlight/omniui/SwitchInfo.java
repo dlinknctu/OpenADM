@@ -105,6 +105,7 @@ public class SwitchInfo extends JsonSerializer<SwitchInfo> {
 					jgen.writeNumberField("hardTimeout", (int)(flow.getHardTimeout()&0xffff));
 					jgen.writeNumberField("priority", (int)(flow.getPriority()&0xffff));
 					jgen.writeNumberField("tos-bits", match.getNetworkTypeOfService());
+					jgen.writeNumberField("duration", flow.getDurationSeconds());
 					serializeAction(jgen, flow.getActions());
 					jgen.writeEndObject();
 				}
