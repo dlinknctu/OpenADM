@@ -174,7 +174,10 @@ function startmatch(f2,flow2,j2,compare2){
 	//nexthop(f2,flow2);
 }
 
-function nexthop(f3,flow3){
+function nexthop(ff3,flow3){
+	var f3={};
+	for(key in ff3) f3[key]=ff3[key];
+	
 	var node = $("circle.node");
 	var length = node.length;
 	for(var k=0;k<length;k++)
@@ -185,65 +188,100 @@ function nexthop(f3,flow3){
 			node[k].style.fill="#00cc00";
 			console.log("YAYAYAYAYAYA");
 			
-			for(var i in myGraph.links)
+			for(act in flow3.actions)
 			{
-				//console.log("!!!!!!!!link!!!!!!!!!");
-				//console.log(myGraph.links[i]);
-				var src = myGraph.links[i].source.id;
-				var dst = myGraph.links[i].target.id;
-				var srcp = myGraph.links[i].sourcePort;
-				var dstp = myGraph.links[i].targetPort;
-				if(src==f3["switch"] && flow3.actions[0] && srcp==flow3.actions[0].value){
-					var ff={};
-					for(var key in f3)
-					{
-						if(key=="switch") ff[key]=dst;
-						else if(key=="ingressPort") ff["ingressPort"]=dstp;
-						else ff[key]=f3[key];
+				if(flow3.actions[act].type!="OUTPUT")
+				{
+					//console.log(flow3.actions[act]);
+					switch(flow3.actions[act].type){
+						case "SET_TP_SRC":		//port
+							f3["srcPort"]=flow3.actions[act].value;
+							break;
+						case "SET_TP_DST":
+							f3["dstPort"]=flow3.actions[act].value;
+							break;
+						case "SET_NW_SRC":		//ip
+							f3["srcIP"]=flow3.actions[act].value;
+							break;
+						case "SET_NW_DST":
+							f3["dstIP"]=flow3.actions[act].value;
+							break;
+						case "SET_DL_SRC":		//mac
+							f3["srcMac"]=flow3.actions[act].value;
+							break;
+						case "SET_DL_DST":
+							f3["dstMac"]=flow3.actions[act].value;
+							break;
+						case "SET_NW_TOS":
+							f3["tos-bits"]=flow3.actions[act].value;
+							break;
+						default: 
+							console.log("no support this actions");
+							break;
 					}
-					linkchangecolor(src,srcp,dst,dstp);
-					getflowmsg(ff);
-					break;
-					
-				}else if(dst==f3["switch"] && flow3.actions[0] && dstp==flow3.actions[0].value){
-					var ff={};
-					for(var key in f3)
+				}else{													//actions = output
+					for(var i in myGraph.links)
 					{
-						if(key=="switch") ff[key]=src;
-						else if(key=="ingressPort") ff["ingressPort"]=srcp;
-						else ff[key]=f3[key];
+						//console.log("!!!!!!!!link!!!!!!!!!");
+						//console.log(myGraph.links[i]);
+						var src = myGraph.links[i].source.id;
+						var dst = myGraph.links[i].target.id;
+						var srcp = myGraph.links[i].sourcePort;
+						var dstp = myGraph.links[i].targetPort;
+						if(src==f3["switch"] && srcp==flow3.actions[act].value){
+							var ff={};
+							for(var key in f3)
+							{
+								if(key=="switch") ff[key]=dst;
+								else if(key=="ingressPort") ff["ingressPort"]=dstp;
+								else ff[key]=f3[key];
+							}
+							linkchangecolor(src,srcp,dst,dstp);
+							getflowmsg(ff);
+							break;
+							
+						}else if(dst==f3["switch"] && dstp==flow3.actions[act].value){
+							var ff={};
+							for(var key in f3)
+							{
+								if(key=="switch") ff[key]=src;
+								else if(key=="ingressPort") ff["ingressPort"]=srcp;
+								else ff[key]=f3[key];
+							}
+							linkchangecolor(src,srcp,dst,dstp);
+							getflowmsg(ff);
+							break;
+						}else if(src==f3["switch"] && flow3.actions[act].value=="-5"){	//flood
+							console.log("!!!!!!flood!!!!!");
+							if(srcp==f3["ingressPort"]) continue;
+							var ff={};
+							for(var key in f3)
+							{
+								if(key=="switch") ff[key]=dst;
+								else if(key=="ingressPort") ff["ingressPort"]=dstp;
+								else ff[key]=f3[key];
+							}
+							linkchangecolor(src,srcp,dst,dstp);
+							getflowmsg(ff);
+							
+						}else if(dst==f3["switch"] && flow3.actions[act].value=="-5"){	//flood
+							console.log("!!!!!!flood!!!!!");
+							if(dstp==f3["ingressPort"]) continue;
+							var ff={};
+							for(var key in f3)
+							{
+								if(key=="switch") ff[key]=src;
+								else if(key=="ingressPort") ff["ingressPort"]=srcp;
+								else ff[key]=f3[key];
+							}
+							linkchangecolor(src,srcp,dst,dstp);
+							getflowmsg(ff);
+						}else{
+							console.log("no next hop");
+						}
 					}
-					linkchangecolor(src,srcp,dst,dstp);
-					getflowmsg(ff);
-					break;
-				}else if(src==f3["switch"] && flow3.actions[0] && flow3.actions[0].value=="-5"){	//flood
-					console.log("!!!!!!flood!!!!!");
-					if(srcp==f3["ingressPort"]) continue;
-					var ff={};
-					for(var key in f3)
-					{
-						if(key=="switch") ff[key]=dst;
-						else if(key=="ingressPort") ff["ingressPort"]=dstp;
-						else ff[key]=f3[key];
-					}
-					linkchangecolor(src,srcp,dst,dstp);
-					getflowmsg(ff);
-					
-				}else if(dst==f3["switch"] && flow3.actions[0] && flow3.actions[0].value=="-5"){	//flood
-					console.log("!!!!!!flood!!!!!");
-					if(dstp==f3["ingressPort"]) continue;
-					var ff={};
-					for(var key in f3)
-					{
-						if(key=="switch") ff[key]=src;
-						else if(key=="ingressPort") ff["ingressPort"]=srcp;
-						else ff[key]=f3[key];
-					}
-					linkchangecolor(src,srcp,dst,dstp);
-					getflowmsg(ff);
-				}else{
-					console.log("no next hop");
 				}
+			//break;
 			}
 			break;
 		}
