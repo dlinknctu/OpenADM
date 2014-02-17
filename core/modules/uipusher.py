@@ -16,9 +16,6 @@ class UIPusher:
 		core.registerRestApi("topology", self.topologyHandler)
 		core.registerRestApi("stat", self.statisticHandler)
 
-		self.client = MongoClient(parm['dbip'],int(parm['dbport']))
-		self.db = self.client[parm['db']]
-		self.db.authenticate(parm['user'],parm['password'])
 		self.intervalList=['aahourly','daily','weekly','monthly','annually']
 
 		self.limit = int(parm['queryinterval'])
@@ -27,6 +24,13 @@ class UIPusher:
 		self.cache = {}
 		self.diff = {}
 		self.tmpcache = {}
+
+		try:
+			self.client = MongoClient(parm['dbip'],int(parm['dbport']))
+			self.db = self.client[parm['db']]
+			self.db.authenticate(parm['user'],parm['password'])
+		except:
+			print "database connection failed"
 
 	def topologyHandler(self):
 		# return JSONP format
