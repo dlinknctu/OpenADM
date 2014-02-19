@@ -16,7 +16,8 @@ class UIPusher:
 		core.registerRestApi("topology", self.topologyHandler)
 		core.registerRestApi("stat", self.statisticHandler)
 
-		self.intervalList=['aahourly','daily','weekly','monthly','annually']
+		self.intervalList=['hourly','daily','weekly','monthly','annually']
+		self.intervalList[0] = 'hourly'+str(datetime.datetime.today().strftime("%Y_%m_%d"))
 
 		self.limit = int(parm['queryinterval'])
 		self.count = 0
@@ -85,6 +86,9 @@ class UIPusher:
 		key={}
 		if len(self.tmpcache)==0:
 			return 
+		##update db name
+		self.intervalList[0] = 'hourly'+str(datetime.datetime.today().strftime("%Y_%m_%d"))
+		
 		for hashkey in self.tmpcache:
 			key = self.tmpcache[hashkey][2]
 			exist = self.db[self.intervalList[0]].find_one(key)
