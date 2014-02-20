@@ -18,6 +18,7 @@ class UIPusher:
 
 		self.intervalList=['hourly','daily','weekly','monthly','annually']
 		self.intervalList[0] = 'hourly'+str(datetime.datetime.today().strftime("%Y_%m_%d"))
+		self.enable = True if parm['enable'] == "true" else False
 
 		self.limit = int(parm['queryinterval'])
 		self.count = 0
@@ -26,56 +27,58 @@ class UIPusher:
 		self.diff = {}
 		self.tmpcache = {}
 		
-		try:
-			self.client = MongoClient(parm['dbip'],int(parm['dbport']))
-			self.db = self.client[parm['db']]
-			self.db.authenticate(parm['user'],parm['password'])
-		except:
-			print "database connection failed"
+		if self.enable:
+			try:
+				self.client = MongoClient(parm['dbip'],int(parm['dbport']))
+				self.db = self.client[parm['db']]
+				self.db.authenticate(parm['user'],parm['password'])
+			except:
+				print "database connection failed"
 
 	def topologyHandler(self):
 		# return JSONP format
 		return "omniui(%s);" % self.event
 
 	def controllerHandler(self,event):
-		#compute timestamp 
-		now = time.time()
-		#12:35:39 -> 12:30:00 
-		reduntTime = int(datetime.datetime.fromtimestamp(now).strftime('%M'))%10*60 + int(datetime.datetime.fromtimestamp(now).strftime('%S'))
-		data = json.loads(event)
-		self.count = self.count + 1
-		if int(now-reduntTime) != self.prevTime:
-			self.writeToDB()
-		for node in data['nodes']:
-			for flow in node['flows']:
-				key=flow.copy()
-				key.pop("counterByte",None)
-				key.pop("counterPacket",None)
-				key.pop("duration",None)
-				key['actions'] = "".join(["{0}:{1}".format(dic['type'],dic['value']) for dic in key['actions']])
-				key['dpid'] = str(node['dpid'])
-				key['date'] = int(now - reduntTime)
-				hashkey = frozenset(key.items())
-				if hashkey in self.cache:
-					if self.diff[hashkey][2] > flow['duration']:
-						tmpCB = flow['counterByte']
-						tmpCP = flow['counterPacket']
-					else:
-						tmpCB = flow['counterByte'] - self.diff[hashkey][0]
-						tmpCP = flow['counterPacket'] - self.diff[hashkey][1]
-					self.cache[hashkey][0] += tmpCB
-					self.cache[hashkey][1] += tmpCP
-					self.cache[hashkey][2] = key
-					self.cache[hashkey][3] = flow['duration']
-					self.diff[hashkey][0] = flow['counterByte']
-					self.diff[hashkey][1] = flow['counterPacket']
-					self.diff[hashkey][2] = flow['duration']
-				else:	
-					self.cache[hashkey] = [0,0,key,flow['duration']]
-					self.diff[hashkey] = [flow['counterByte'],flow['counterPacket'],flow['duration']]
-		self.prevTime = int(now-reduntTime)						
-		if self.count >= self.limit and len(self.cache) > 0:
-			self.writeToDB()
+		if self.enable:
+			#compute timestamp 
+			now = time.time()
+			#12:35:39 -> 12:30:00 
+			reduntTime = int(datetime.datetime.fromtimestamp(now).strftime('%M'))%10*60 + int(datetime.datetime.fromtimestamp(now).strftime('%S'))
+			data = json.loads(event)
+			self.count = self.count + 1
+			if int(now-reduntTime) != self.prevTime:
+				self.writeToDB()
+			for node in data['nodes']:
+				for flow in node['flows']:
+					key=flow.copy()
+					key.pop("counterByte",None)
+					key.pop("counterPacket",None)
+					key.pop("duration",None)
+					key['actions'] = "".join(["{0}:{1}".format(dic['type'],dic['value']) for dic in key['actions']])
+					key['dpid'] = str(node['dpid'])
+					key['date'] = int(now - reduntTime)
+					hashkey = frozenset(key.items())
+					if hashkey in self.cache:
+						if self.diff[hashkey][2] > flow['duration']:
+							tmpCB = flow['counterByte']
+							tmpCP = flow['counterPacket']
+						else:
+							tmpCB = flow['counterByte'] - self.diff[hashkey][0]
+							tmpCP = flow['counterPacket'] - self.diff[hashkey][1]
+						self.cache[hashkey][0] += tmpCB
+						self.cache[hashkey][1] += tmpCP
+						self.cache[hashkey][2] = key
+						self.cache[hashkey][3] = flow['duration']
+						self.diff[hashkey][0] = flow['counterByte']
+						self.diff[hashkey][1] = flow['counterPacket']
+						self.diff[hashkey][2] = flow['duration']
+					else:	
+						self.cache[hashkey] = [0,0,key,flow['duration']]
+						self.diff[hashkey] = [flow['counterByte'],flow['counterPacket'],flow['duration']]
+			self.prevTime = int(now-reduntTime)						
+			if self.count >= self.limit and len(self.cache) > 0:
+				self.writeToDB()
 		self.event = event
 	
 	def writeToDB(self):

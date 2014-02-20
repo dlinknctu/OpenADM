@@ -5,6 +5,7 @@
 		"port": "5567"
 	},
 	"UIPusher": {
+		"enable":"false",
 		"dbip":"140.113.215.200",
 		"dbport":"27017",
 		"db":"omniui",
