@@ -25,7 +25,7 @@ class UIPusher:
 		self.cache = {}
 		self.diff = {}
 		self.tmpcache = {}
-
+		
 		try:
 			self.client = MongoClient(parm['dbip'],int(parm['dbport']))
 			self.db = self.client[parm['db']]
@@ -40,7 +40,7 @@ class UIPusher:
 	def controllerHandler(self,event):
 		#compute timestamp 
 		now = time.time()
-		#12:35:39 -> 12:35:00 
+		#12:35:39 -> 12:30:00 
 		reduntTime = int(datetime.datetime.fromtimestamp(now).strftime('%M'))%10*60 + int(datetime.datetime.fromtimestamp(now).strftime('%S'))
 		data = json.loads(event)
 		self.count = self.count + 1
@@ -87,12 +87,14 @@ class UIPusher:
 		if len(self.tmpcache)==0:
 			return 
 		##update db name
-		self.intervalList[0] = 'hourly'+str(datetime.datetime.today().strftime("%Y_%m_%d"))
+		oneday = datetime.timedelta(days=1)
+		today = datetime.datetime.today()
+		self.intervalList[0] = 'hourly'+str(today.strftime("%Y_%m_%d"))
+		#self.intervalList[0] = 'hourly'+str(datetime.datetime.today().strftime("%Y_%m_%d"))
 		
 		for hashkey in self.tmpcache:
 			key = self.tmpcache[hashkey][2]
 			exist = self.db[self.intervalList[0]].find_one(key)
-			tmp = key['date']
 			if exist is not None:
 				key['_id'] = exist['_id']
 				key['counterByte'] = self.tmpcache[hashkey][0] + exist['counterByte']
@@ -106,39 +108,73 @@ class UIPusher:
 	def statisticHandler(self,request):
 		#parse json data
 		data = json.load(request.body)
-		#translate datetime to timestamp
-		fromTime = int(time.mktime(time.strptime(data['from'],'%Y-%m-%d')))
-		#1/26~1/27 means 1/26 00:00 to 1/27 23:59, so plus one day to toTime
-		toTime = int(time.mktime(time.strptime(data['to'],'%Y-%m-%d')))+86400
-		#use the interval code to obtain collection name
-		interval = self.intervalList[ int(data['interval'])]
 
-		#flow pattern,only match non-empty field
+		#declare variable
 		multiGroup = {}
 		output = "Time"
 		count = 1
-		for pattern in data['pattern']:
-			output+="\t"+str(count)
-			count = count +1
-			group= {}
-			key = {}
-			for field in pattern:
-				if pattern[field] !='':
-					key[field] = pattern[field]
-			key['date'] = {'$gte':fromTime,'$lt':toTime}
-			key['dpid'] = pattern['dpid']
-			#use date to group data
-			for entry in self.db[interval].find(key):
-				if entry['date'] in group:
-					group[entry['date']] =  group[entry['date']] + entry["counterByte"]
-				else:
-					group[entry['date']]=   entry["counterByte"]
-			#add group to multiGroup
-			for date in group:
-				if date in multiGroup:
-					multiGroup[date].append([group[date],count-1])
-				else:
-					multiGroup[date]=[[group[date],count-1]]
+		# for hourly query
+		if int(data['interval']) ==0:
+			fromTime =	datetime.datetime.strptime(data['from'],"%Y-%m-%d")
+			toTime =	datetime.datetime.strptime(data['to'],"%Y-%m-%d")
+			oneday = datetime.timedelta(days=1)
+			#1/26~1/27 means 1/26 00:00 to 1/27 23:59, so plus one day to toTime
+			toTime = toTime + oneday
+			keys=[]
+
+			for pattern in data['pattern']:
+				output+="\t"+str(count)
+				count = count +1
+				key={}
+				for field in pattern:
+					if pattern[field] !='':
+						key[field] = pattern[field]
+				currentTime = fromTime
+				group= {}
+				while currentTime != toTime:
+					tableName = "hourly"+currentTime.strftime("%Y_%m_%d")
+					currentTime = currentTime + oneday
+					for entry in self.db[tableName].find(key):
+						if entry['date'] in group:
+							group[entry['date']] = group[entry['date']] + entry["counterByte"]
+						else:
+							group[entry['date']] = entry["counterByte"]
+				for date in group:
+					if date in multiGroup:
+						multiGroup[date].append([group[date],count-1])
+					else:
+						multiGroup[date]=[[group[date],count-1]]
+		# for weekly,monthly...
+		else:
+			#translate datetime to timestamp
+			fromTime = int(time.mktime(time.strptime(data['from'],'%Y-%m-%d')))
+			#1/26~1/27 means 1/26 00:00 to 1/27 23:59, so plus one day to toTime
+			toTime = int(time.mktime(time.strptime(data['to'],'%Y-%m-%d')))+86400
+			#use the interval code to obtain collection name
+			interval = self.intervalList[ int(data['interval'])]
+	
+			#flow pattern,only match non-empty field
+			for pattern in data['pattern']:
+				output+="\t"+str(count)
+				count = count +1
+				group= {}
+				key = {}
+				for field in pattern:
+					if pattern[field] !='':
+						key[field] = pattern[field]
+				key['date'] = {'$gte':fromTime,'$lt':toTime}
+				#use date to group data
+				for entry in self.db[interval].find(key):
+					if entry['date'] in group:
+						group[entry['date']] = group[entry['date']] + entry["counterByte"]
+					else:
+						group[entry['date']] = entry["counterByte"]
+				#add group to multiGroup
+				for date in group:
+					if date in multiGroup:
+						multiGroup[date].append([group[date],count-1])
+					else:
+						multiGroup[date]=[[group[date],count-1]]
 		#tsv format  
 		output+="\n"
 		tmp=""
@@ -156,7 +192,6 @@ class UIPusher:
 					tmp+=("\t0")
 				if tmpIndex >= len(multiGroup[date]):
 					tmpIndex = 0
-
 			output+=tmp+"\n"
 		print output
 		return output
