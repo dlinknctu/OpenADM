@@ -31,16 +31,16 @@ $("#match-dialog").dialog({
 
 
 function getflowmsg(f){
-	var node = myGraph.findNode(f["switch"]);
-	if(node) 
+	var node1 = myGraph.findNode(f["switch"]);
+	if(node1) 
 	{
 		var compare={};
-		var flows = myGraph.findNode(f["switch"]).flows;
+		var flowss = myGraph.findNode(f["switch"]).flows;
 		//console.log("get successful");
-			for(var j in flows)
+			for(var j in flowss)
 			{
-				console.log(flows[j]);
-				startmatch(f,flows[j],j,compare);
+				console.log(flowss[j]);
+				startmatch(f,flowss[j],j,compare);
 			}
 			console.log(compare);
 			var max_p=0;	//max priority
@@ -52,7 +52,7 @@ function getflowmsg(f){
 			var max_p_s=max_p.toString();
 			for(var z in compare)
 			{
-				if(compare[z]==max_p_s) nexthop(f,flows[z]);
+				if(compare[z]==max_p_s) nexthop(f,flowss[z]);
 			}
 	}else console.log("switch not exist");
 }
@@ -178,14 +178,14 @@ function nexthop(ff3,flow3){
 	var f3={};
 	for(key in ff3) f3[key]=ff3[key];
 	
-	var node = $("circle.node");
-	var length = node.length;
+	var node2 = $("circle.node");
+	var length = node2.length;
 	for(var k=0;k<length;k++)
 	{
-		var nodeid = node[k].textContent;
+		var nodeid = node2[k].textContent;
 		if(nodeid == f3["switch"])
 		{
-			node[k].style.fill="#00cc00";
+			node2[k].style.fill="#00cc00";
 			console.log("YAYAYAYAYAYA");
 			
 			for(act in flow3.actions)
@@ -306,4 +306,22 @@ function clearlinkcolor(){
 	var link = $("path.link");
 	var length = link.length;
 	for(var k=0;k<length;k++) link[k].style.stroke="#000";
+}
+
+function highlight(i){
+	var hflow = {};
+	for(var k in flows[i]) hflow[k]=flows[i][k];
+    delete hflow["actions"];
+	delete hflow["hardTimeout"];
+	delete hflow["idleTimeout"];
+	delete hflow["counterByte"];
+    delete hflow["counterPacket"];
+    delete hflow["srcIPMask"];
+    delete hflow["dstIPMask"];
+	delete hflow["wildcards"];
+    hflow["switch"] = node.id;
+    for(var k in hflow) {
+        hflow[k] = hflow[k].toString();
+    }
+	getflowmsg(hflow);
 }
