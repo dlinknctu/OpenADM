@@ -90,11 +90,9 @@ class UIPusher:
 		if len(self.tmpcache)==0:
 			return 
 		##update db name
-		oneday = datetime.timedelta(days=1)
-		today = datetime.datetime.today()
-		self.intervalList[0] = 'hourly'+str(today.strftime("%Y_%m_%d"))
-		#self.intervalList[0] = 'hourly'+str(datetime.datetime.today().strftime("%Y_%m_%d"))
-		
+		prevTime = datetime.datetime.fromtimestamp(self.prevTime).strftime("%Y_%m_%d")
+		self.intervalList[0] = 'hourly'+str(prevTime)
+		print self.intervalList[0]
 		for hashkey in self.tmpcache:
 			key = self.tmpcache[hashkey][2]
 			exist = self.db[self.intervalList[0]].find_one(key)
