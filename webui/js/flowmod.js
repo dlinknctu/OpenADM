@@ -128,6 +128,9 @@ function pruneFields(f) {
     delete f["counterPacket"];
     delete f["srcIPMask"];
     delete f["dstIPMask"];
+	delete f["wildcards"];	//
+	delete f["idleTimeout"];	//
+	delete f["hardTimeout"];	//
     if(f["srcMac"] == "00:00:00:00:00:00") {
         delete f["srcMac"];
     }
@@ -146,11 +149,11 @@ function pruneFields(f) {
     if(f["dstPort"] == "0") {
         delete f["dstPort"];
     }
-    if(f["ingreePort"] == "0") {
-        delete f["ingreePort"];
+    if(f["ingressPort"] == "0") {
+        delete f["ingressPort"];
     }
-    if(f["tos-bits"] == "0") {
-        delete f["tos-bits"];
+    if(f["tosBits"] == "0") {
+        delete f["tosBits"];
     }
     if(f["vlan"] == "0") {
         delete f["vlan"];
@@ -159,7 +162,7 @@ function pruneFields(f) {
         delete f["netProtocol"];
     }
 
-    if((f["srcIP"]) || (f["dstIP"]) || f["tos-bits"] || f["netProtocol"]) {
+    if((f["srcIP"]) || (f["dstIP"]) || f["tosBits"] || f["netProtocol"]) {
         f["ether-type"] = "2048";
     }
 

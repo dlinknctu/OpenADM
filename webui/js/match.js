@@ -160,9 +160,9 @@ function startmatch(f2,flow2,j2,compare2){
 	}
 	if(flow2.tosBits!="0")
 	{
-		if("tos-bits" in f2){
+		if("tosBits" in f2){
 			console.log("HAVE TOSBITS");
-			if(flow2.tosBits == f2["tos-bits"]) console.log("match tos-bits");
+			if(flow2.tosBits == f2["tosBits"]) console.log("match tos-bits");
 			else{ console.log("match tos-bits failed"); return; }
 		}else{
 			console.log("NOT HAVE TOSBITS");
