@@ -25,6 +25,7 @@
 		"dbport":"27017",
 		"db":"omniui",
 		"user":"xxxxxx",
-		"password":"xxxxxx"
+		"password":"xxxxxx",
+		"interval": "86400"
 	}
 }

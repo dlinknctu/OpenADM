@@ -26,7 +26,6 @@ class UIPusher:
 		self.cache = {}
 		self.diff = {}
 		self.tmpcache = {}
-		
 		if self.enable:
 			try:
 				self.client = MongoClient(parm['dbip'],int(parm['dbport']))
