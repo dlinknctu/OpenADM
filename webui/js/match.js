@@ -302,13 +302,18 @@ function linkchangecolor(src,srcp,dst,dstp){
 	}
 }
 
-function clearlinkcolor(){
+function clearcolor(){
 	var link = $("path.link");
 	var length = link.length;
 	for(var k=0;k<length;k++) link[k].style.stroke="#000";
+	
+	var node3 = $("circle.node");
+	var length = node3.length;
+	for(var k=0;k<length;k++) node3[k].style.fill="#FF9900";
 }
 
 function highlight(i){
+	clearcolor();
 	var hflow = {};
 	for(var k in flows[i]) hflow[k]=flows[i][k];
     delete hflow["actions"];
