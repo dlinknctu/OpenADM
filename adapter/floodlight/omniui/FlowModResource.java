@@ -141,9 +141,6 @@ public class FlowModResource extends ServerResource {
         explanation="An invalid request was sent to static flow pusher",
         recommendation="Fix the format of the static flow mod request")
     public String store(String fmJson) {
-        IStorageSourceService storageSource =
-                (IStorageSourceService)getContext().getAttributes().
-                    get(IStorageSourceService.class.getCanonicalName());
 					
 		IFloodlightProviderService floodlightProvider =
                 (IFloodlightProviderService)getContext().getAttributes().
@@ -162,7 +159,6 @@ public class FlowModResource extends ServerResource {
             } else {
                 status = "Entry pushed";
             }
-            storageSource.insertRowAsync(TABLE_NAME, rowValues);
 			
 			//
 			FlowModMethod.parseRow(rowValues,entriesFromStorage,entriesFromStorage2);
