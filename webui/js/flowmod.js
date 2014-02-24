@@ -111,7 +111,7 @@ function modFlow(i) {
 function delFlow(i) {
     var flow = pruneFields(flows[i]);
     if(flow["actions"][0]) {
-        flow["actions"] = flow["actions"][0].type.toLowerCase() + "=" + flow["actions"][0].value;
+        flow["actions"] = flow["actions"][0].type + "=" + flow["actions"][0].value;
     }
     flow["command"] = "DEL_ST";
     flow["switch"] = node.id;

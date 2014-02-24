@@ -52,12 +52,12 @@ public class ActionParse{
         List<OFAction> actions = new LinkedList<OFAction>();
         int actionsLength = 0;
         if (actionstr != null) {
-            actionstr = actionstr.toLowerCase();
+            //actionstr = actionstr.toLowerCase();
             for (String subaction : actionstr.split(",")) {
                 String action = subaction.split("[=:]")[0];
                 SubActionStruct subaction_struct = null;
                 
-                if (action.equals("output")) {
+                if (action.equals("OUTPUT")) {
                     subaction_struct = decode_output(subaction, log);
                 }
                 else if (action.equals("enqueue")) {
@@ -72,25 +72,25 @@ public class ActionParse{
                 else if (action.equals("set-vlan-priority")) {
                     subaction_struct = decode_set_vlan_priority(subaction, log);
                 }
-                else if (action.equals("set-src-mac")) {
+                else if (action.equals("SET_DL_SRC")) {
                     subaction_struct = decode_set_src_mac(subaction, log);
                 }
-                else if (action.equals("set-dst-mac")) {
+                else if (action.equals("SET_DL_DST")) {
                     subaction_struct = decode_set_dst_mac(subaction, log);
                 }
-                else if (action.equals("set-tos-bits")) {
+                else if (action.equals("SET_NW_TOS")) {
                     subaction_struct = decode_set_tos_bits(subaction, log);
                 }
-                else if (action.equals("set-src-ip")) {
+                else if (action.equals("SET_NW_SRC")) {
                     subaction_struct = decode_set_src_ip(subaction, log);
                 }
-                else if (action.equals("set-dst-ip")) {
+                else if (action.equals("SET_NW_DST")) {
                     subaction_struct = decode_set_dst_ip(subaction, log);
                 }
-                else if (action.equals("set-src-port")) {
+                else if (action.equals("SET_TP_SRC")) {
                     subaction_struct = decode_set_src_port(subaction, log);
                 }
-                else if (action.equals("set-dst-port")) {
+                else if (action.equals("SET_TP_DST")) {
                     subaction_struct = decode_set_dst_port(subaction, log);
                 }
                 else {
@@ -117,7 +117,7 @@ public class ActionParse{
         SubActionStruct sa = null;
         Matcher n;
         
-        n = Pattern.compile("output=(?:((?:0x)?\\d+)|(all)|(controller)|(local)|(ingress-port)|(normal)|(flood))").matcher(subaction);
+        n = Pattern.compile("OUTPUT=(?:((?:0x)?\\d+)|(all)|(controller)|(local)|(ingress-port)|(normal)|(flood))").matcher(subaction);
         if (n.matches()) {
             OFActionOutput action = new OFActionOutput();
             action.setMaxLength((short) Short.MAX_VALUE);
@@ -285,7 +285,7 @@ public class ActionParse{
     
     private static SubActionStruct decode_set_src_mac(String subaction, Logger log) {
         SubActionStruct sa = null;
-        Matcher n = Pattern.compile("set-src-mac=(?:(\\p{XDigit}+)\\:(\\p{XDigit}+)\\:(\\p{XDigit}+)\\:(\\p{XDigit}+)\\:(\\p{XDigit}+)\\:(\\p{XDigit}+))").matcher(subaction); 
+        Matcher n = Pattern.compile("SET_DL_SRC=(?:(\\p{XDigit}+)\\:(\\p{XDigit}+)\\:(\\p{XDigit}+)\\:(\\p{XDigit}+)\\:(\\p{XDigit}+)\\:(\\p{XDigit}+))").matcher(subaction); 
 
         if (n.matches()) {
             byte[] macaddr = get_mac_addr(n, subaction, log);
@@ -309,7 +309,7 @@ public class ActionParse{
 
     private static SubActionStruct decode_set_dst_mac(String subaction, Logger log) {
         SubActionStruct sa = null;
-        Matcher n = Pattern.compile("set-dst-mac=(?:(\\p{XDigit}+)\\:(\\p{XDigit}+)\\:(\\p{XDigit}+)\\:(\\p{XDigit}+)\\:(\\p{XDigit}+)\\:(\\p{XDigit}+))").matcher(subaction);
+        Matcher n = Pattern.compile("SET_DL_DST=(?:(\\p{XDigit}+)\\:(\\p{XDigit}+)\\:(\\p{XDigit}+)\\:(\\p{XDigit}+)\\:(\\p{XDigit}+)\\:(\\p{XDigit}+))").matcher(subaction);
         
         if (n.matches()) {
             byte[] macaddr = get_mac_addr(n, subaction, log);            
@@ -333,7 +333,7 @@ public class ActionParse{
     
     private static SubActionStruct decode_set_tos_bits(String subaction, Logger log) {
         SubActionStruct sa = null;
-        Matcher n = Pattern.compile("set-tos-bits=((?:0x)?\\d+)").matcher(subaction); 
+        Matcher n = Pattern.compile("SET_NW_TOS=((?:0x)?\\d+)").matcher(subaction); 
 
         if (n.matches()) {
             if (n.group(1) != null) {
@@ -363,7 +363,7 @@ public class ActionParse{
     
     private static SubActionStruct decode_set_src_ip(String subaction, Logger log) {
         SubActionStruct sa = null;
-        Matcher n = Pattern.compile("set-src-ip=(?:(\\d+)\\.(\\d+)\\.(\\d+)\\.(\\d+))").matcher(subaction);
+        Matcher n = Pattern.compile("SET_NW_SRC=(?:(\\d+)\\.(\\d+)\\.(\\d+)\\.(\\d+))").matcher(subaction);
 
         if (n.matches()) {
             int ipaddr = get_ip_addr(n, subaction, log);
@@ -385,7 +385,7 @@ public class ActionParse{
 
     private static SubActionStruct decode_set_dst_ip(String subaction, Logger log) {
         SubActionStruct sa = null;
-        Matcher n = Pattern.compile("set-dst-ip=(?:(\\d+)\\.(\\d+)\\.(\\d+)\\.(\\d+))").matcher(subaction);
+        Matcher n = Pattern.compile("SET_NW_DST=(?:(\\d+)\\.(\\d+)\\.(\\d+)\\.(\\d+))").matcher(subaction);
 
         if (n.matches()) {
             int ipaddr = get_ip_addr(n, subaction, log);
@@ -407,7 +407,7 @@ public class ActionParse{
 
     private static SubActionStruct decode_set_src_port(String subaction, Logger log) {
         SubActionStruct sa = null;
-        Matcher n = Pattern.compile("set-src-port=((?:0x)?\\d+)").matcher(subaction); 
+        Matcher n = Pattern.compile("SET_TP_SRC=((?:0x)?\\d+)").matcher(subaction); 
 
         if (n.matches()) {
             if (n.group(1) != null) {
@@ -437,7 +437,7 @@ public class ActionParse{
 
     private static SubActionStruct decode_set_dst_port(String subaction, Logger log) {
         SubActionStruct sa = null;
-        Matcher n = Pattern.compile("set-dst-port=((?:0x)?\\d+)").matcher(subaction);
+        Matcher n = Pattern.compile("SET_TP_DST=((?:0x)?\\d+)").matcher(subaction);
 
         if (n.matches()) {
             if (n.group(1) != null) {
@@ -524,4 +524,4 @@ public class ActionParse{
     private static byte get_byte(String str) {
         return Integer.decode(str).byteValue();
     }
-}	
+}
