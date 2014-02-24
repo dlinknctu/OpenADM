@@ -11,20 +11,22 @@ class DbCollection:
 		self.prevWeekDay  = datetime.datetime.today() 
 		self.prevMonth = datetime.datetime.today()
 		self.prevYear = datetime.datetime.today()
+		self.enable = True if parm['enable'] == "true" or parm['enable'] == "True"  else False
 		self.isconnect = False
 		#	register event
 		core.registerEvent("dbcollection",self.dbcollection,self.timeInterval)
 		#	connect to db
-		try:
-			self.client = MongoClient(parm['dbip'],int(parm['dbport']))
-			self.db = self.client[parm['db']]
-			self.db.authenticate(parm['user'],parm['password'])
-			self.isconnect = True
-		except:
-			print "database connection failed for dbconnection"
+		if self.enable:
+			try:
+				self.client = MongoClient(parm['dbip'],int(parm['dbport']))
+				self.db = self.client[parm['db']]
+				self.db.authenticate(parm['user'],parm['password'])
+				self.isconnect = True
+			except:
+				print "database connection failed for dbconnection"
 
 	def dbcollection(self):
-		if self.isconnect:
+		if self.isconnect and self.enable:
 			self.hourlyToDaily()
 			self.dailyToWeekly()
 			self.weeklyToMonthly()

@@ -18,7 +18,7 @@ class UIPusher:
 
 		self.intervalList=['hourly','daily','weekly','monthly','annually']
 		self.intervalList[0] = 'hourly'+str(datetime.datetime.today().strftime("%Y_%m_%d"))
-		self.enable = True if parm['enable'] == "true" else False
+		self.enable = True if parm['enable'] == "true" or parm['enable'] == "True"  else False
 
 		self.limit = int(parm['queryinterval'])
 		self.count = 0
