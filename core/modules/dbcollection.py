@@ -11,7 +11,7 @@ class DbCollection:
 		self.prevWeekDay  = datetime.datetime.today() 
 		self.prevMonth = datetime.datetime.today()
 		self.prevYear = datetime.datetime.today()
-		self.enable = True if parm['enable'] == "true" else False
+		self.enable = True if parm['enable'] == "true" or parm['enable'] == "True"  else False
 		self.isconnect = False
 		#	register event
 		core.registerEvent("dbcollection",self.dbcollection,self.timeInterval)
