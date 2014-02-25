@@ -38,8 +38,8 @@ class UIPusher:
 
 	def topologyHandler(self):
 		# return JSONP format
-		self.core.invokeIPC("periodicInquiry")
-		return "omniui(%s);" % self.event
+		result = self.core.invokeIPC("periodicInquiry")
+		return "omniui(%s);" % result
 
 	def controllerHandler(self,event):
 		if self.enable:
