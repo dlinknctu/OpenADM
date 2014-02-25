@@ -16,6 +16,9 @@ $(function() {
                 });
                 if(!jQuery.isEmptyObject(flow)) {
                     flow["command"] = "MOD";
+                    flow["actions"] = flow["actions"].replace(/(.*)=/, function(a) {
+                        return a.toUpperCase();
+                    });
                     flow = pruneFields(flow);
                     if(!(flow["ether-type"] && flow["netProtocol"])) {
                         delete flow["srcPort"];
@@ -64,6 +67,9 @@ $(function() {
             "Modify": function() {
                 var flow = $(this).data("flow");
                 flow["actions"] = $("#_actions").val();
+                flow["actions"] = flow["actions"].replace(/(.*)=/, function(a) {
+                    return a.toUpperCase();
+                });
                 console.log(JSON.stringify(flow));
                 sendFlow(flow);
                 $(this).dialog("close");
