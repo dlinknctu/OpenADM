@@ -73,9 +73,7 @@ function mouseout() {
 }
 
 function mouseclick() {
-	if(lastSelectedItem) {
-		lastSelectedItem.select("circle").style('fill', "#FF9900");
-	}
+	clearcolor();
 	d3.select(this).select("circle").style('fill', "#33BBEE");
 	lastSelectedItem = d3.select(this);
 
@@ -90,6 +88,11 @@ function mouseclick() {
 	// generate footer from the flow table
 	$("#flows").empty();
 	for(var i in flows) {
+        var actions = flows[i].actions;
+        var actionsStrArr = [];
+        for(var j in actions) {
+            actionsStrArr.push(actions[j].type + " " + actions[j].value);
+        }
 		$("#flows").append("<tr>\
 		<td>" + flows[i].wildcards + "</td>\
 		<td>" + flows[i].dstIP + "</td>\
@@ -98,7 +101,7 @@ function mouseclick() {
 		<td>" + flows[i].srcPort + "</td>\
 		<td>" + flows[i].ingressPort + "</td>\
 		<td>" + flows[i].dstMac + "</td>\
-		<td>" + flows[i].actions[0].type + " " + flows[i].actions[0].value + "</td>\
+		<td>" + actionsStrArr.toString() + "</td>\
 		<td>" + flows[i].srcIPMask + "</td>\
 		<td>" + flows[i].vlan + "</td>\
 		<td>" + flows[i].dstIPMask + "</td>\
@@ -108,6 +111,7 @@ function mouseclick() {
 		<td>" + flows[i].hardTimeout + "</td>\
 		<td>" + flows[i].idleTimeout + "</td>\
 		<td>" + flows[i].netProtocol + "</td>\
+		<td><button onclick='modFlow(" + i + ");'>Modify</button><button onclick='delFlow(" + i + ");'>Delete</button><button onclick='highlight(" + i + ");'>Simulate</button></td>\
 		</tr>");
 	}
 	preMatching($('#flows tr'), $('#flowtable input:text'));
@@ -272,7 +276,7 @@ function updateTopo(json) {
 
 function loadJSONP(){
 	$.ajax({
-		type: "GET",
+	   type: "GET",
 	   url: "http://localhost:5567/info/topology",
 	   dataType: "jsonp",
 	   jsonpCallback: "omniui",
@@ -283,6 +287,41 @@ function loadJSONP(){
 	       alert('Fail loading JSONP');
 	   }
 	});
+}
+
+function sendFlow(f){
+    var opts = {
+        lines: 15, // The number of lines to draw
+        length: 9, // The length of each line
+        width: 3, // The line thickness
+        radius: 13, // The radius of the inner circle
+        corners: 1, // Corner roundness (0..1)
+        rotate: 0, // The rotation offset
+        direction: 1, // 1: clockwise, -1: counterclockwise
+        color: '#000', // #rgb or #rrggbb or array of colors
+        speed: 1, // Rounds per second
+        trail: 60, // Afterglow percentage
+        shadow: false, // Whether to render a shadow
+        hwaccel: false, // Whether to use hardware acceleration
+        className: 'spinner', // The CSS class to assign to the spinner
+        zIndex: 2e9, // The z-index (defaults to 2000000000)
+        top: 'auto', // Top position relative to parent in px
+        left: 'auto' // Left position relative to parent in px
+    };
+    var target = document.getElementById('waiting');
+    var spinner = new Spinner(opts);
+
+    var url = "http://localhost:5567/flowmod";
+    var data = JSON.stringify(f);
+    var callback = function(data) {
+        var stat = JSON.parse(data[2]);
+        console.log(data);
+        //alert(stat["status"]);
+        spinner.stop();
+        loadJSONP();
+    };
+    spinner.spin(target);
+    $.post(url, JSON.stringify(f), callback, "json");
 }
 
 //load topo now

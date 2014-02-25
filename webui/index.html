@@ -4,8 +4,59 @@
 		<meta charset="utf-8">
 		<title>OmniUI</title>
 		<link rel="stylesheet" href="css/omniui.css">
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
 	</head>
 	<body>
+        <div id="send-dialog" title="Flow Information" class="dialog">
+            <form>
+                <fieldset>
+                    <label for="i_switch">switch</label><input type="text" id="i_switch" /><br />
+                    <label for="i_priority">priority</label><input type="text" id="i_priority" /><br />
+                    <label for="i_active">active</label><input type="text" id="i_active" /><br />
+                    <label for="i_dstIP">dstIP</label><input type="text" id="i_dstIP" /><br />
+                    <label for="i_srcMac">srcMac</label><input type="text" id="i_srcMac" /><br />
+                    <label for="i_srcPort">srcPort</label><input type="text" id="i_srcPort" /><br />
+                    <label for="i_ingressPort">ingressPort</label><input type="text" id="i_ingressPort" /><br />
+                    <label for="i_dstMac">dstMac</label><input type="text" id="i_dstMac" /><br />
+                    <label for="i_actions">actions</label><input type="text" id="i_actions" /><br />
+                    <label for="i_vlan-id">vlan</label><input type="text" id="i_vlan-id" /><br />
+                    <label for="i_tos-bits">tosBits</label><input type="text" id="i_tos-bits" /><br />
+                    <label for="i_srcIP">srcIP</label><input type="text" id="i_srcIP" /><br />
+                    <label for="i_dstPort">dstPort</label><input type="text" id="i_dstPort" /><br />
+                    <label for="i_hardTimeout">hardTimeout</label><input type="text" id="i_hardTimeout" /><br />
+                    <label for="i_idleTimeout">idleTimeout</label><input type="text" id="i_idleTimeout" /><br />
+                    <label for="i_netProtocol">netProtocol</label><input type="text" id="i_netProtocol" /><br />
+                </fieldset>
+            </form>
+        </div>
+        <div id="actions-dialog" title="Actions" class="dialog">
+            <form>
+                <fieldset>
+                    <label for="_actions">actions</label><input type="text" id="_actions" />
+                </fieldset>
+            </form>
+        </div>
+		<div id="match-dialog" title="Match Information">
+            <form>
+                <fieldset>
+                    <label for="m_switch">switch</label><input type="text" id="m_switch" /><br />
+                    <label for="m_srcMac">srcMac</label><input type="text" id="m_srcMac" /><br />
+                    <label for="m_dstMac">dstMac</label><input type="text" id="m_dstMac" /><br />
+                    <label for="m_srcIP">srcIP</label><input type="text" id="m_srcIP" /><br />
+                    <label for="m_dstIP">dstIP</label><input type="text" id="m_dstIP" /><br />
+                    <label for="m_srcPort">srcPort</label><input type="text" id="m_srcPort" /><br />
+                    <label for="m_dstPort">dstPort</label><input type="text" id="m_dstPort" /><br />
+                    <label for="m_ingressPort">ingressPort</label><input type="text" id="m_ingressPort" /><br />
+                    <label for="m_netProtocol">netProtocol</label><input type="text" id="m_netProtocol" /><br />
+                    <label for="m_vlan">vlan</label><input type="text" id="m_vlan" /><br />
+                    <label for="m_tos-bits">tosBits</label><input type="text" id="m_tos-bits" /><br />
+                </fieldset>
+            </form>
+        </div>
+<<<<<<< HEAD
+=======
+        <div id="waiting"></div>
+>>>>>>> 11ef994cf8e7633808fc416c4caca08744c06d74
 	   <div id="wrapper">
         	<div id="header">
         		<p>OmniUI</p>
@@ -17,7 +68,9 @@
         	
         	<div id="leftcolumn">
         		<button id="reload" type="botton">Reload</button>
+        		<button id="send" type="botton">Edit Flows</button>
         		<p id="info"></p>
+				<button id="match" type="botton">Edit Match</button>
         	</div>
 
         	<div id="rightcolumn">
@@ -56,6 +109,7 @@
 							<th data-sort="int" width=5%>hardTimeout</th>
 							<th data-sort="int" width=5%>idleTimeout</th>
 							<th data-sort="int" width=5%>netProtocol</th>
+							<th width=5%>FlowMod</th>
 						</tr>
 						<tr>
 							<th><input type="text" id="wildcards" style="width: 90%;" /></th>
@@ -75,6 +129,7 @@
 							<th><input type="text" id="hardTimeout" style="width: 90%;" /></th>
 							<th><input type="text" id="idleTimeout" style="width: 90%;" /></th>
 							<th><input type="text" id="netProtocol" style="width: 90%;" /></th>
+                            <th></th>
 						</tr>
 					</thead>
 					<tbody id="flows"></tbody>
@@ -83,11 +138,18 @@
     	</div>
 	</body>
 	<script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
 	<script type="text/javascript" src="js/d3.v3.min.js"></script>
 	<script type="text/javascript" src="js/topograph.js"></script>
 	<script type="text/javascript" src="js/omniui.js"></script>
 	<script type="text/javascript" src="js/stupidtable.min.js"></script>
 	<script type="text/javascript" src="js/filter.js"></script>
+	<script type="text/javascript" src="js/flowmod.js"></script>
+	<script type="text/javascript" src="js/match.js"></script>
+<<<<<<< HEAD
+=======
+    <script type="text/javascript" src="js/spin.min.js"></script>
+>>>>>>> 11ef994cf8e7633808fc416c4caca08744c06d74
 	<script type="text/javascript">
 		$(document).ready(function() {
 			$("#porttable").stupidtable();
@@ -95,6 +157,7 @@
 			$("#reload").click(function() {
 				loadJSONP();
 				$("#info").empty();
+				clearcolor();
 			});
 		});
 	</script>

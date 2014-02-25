@@ -7,7 +7,7 @@ from importlib import import_module
 import logging
 import threading
 from threading import Thread
-from bottle import route, run, abort
+from bottle import route, run, abort, hook, request, response
 logger = logging.getLogger(__name__)
 
 
@@ -22,6 +22,7 @@ class Core:
 		self.eventHandlers = []
 		self.threads  = []
 		self.events   = []
+		self.ipcHandlers = {}
 		global restHandlers # Necessary for bottle to access restHandlers
 		restHandlers = {}
 		#Load config file
@@ -53,10 +54,29 @@ class Core:
 			restIP = config['REST']['ip']
 			restPort = config['REST']['port']
 
+			@hook('after_request')
+			def enable_cors():
+				response.headers['Access-Control-Allow-Origin'] = 'http://localhost'
+
 			@route('/info/:request', method='GET')
 			def restRouter(request):
 				if request in restHandlers:
 					return restHandlers[request]()
+				else:
+					abort(404, "Not found: '/info/%s'" % request)
+
+                        @route('/flowmod', method='POST')
+                        def flowmodHandler():
+                            if 'flowmod' in restHandlers:
+                                data = json.load(request.body)
+                                return restHandlers['flowmod'](data)
+                            else:
+                                abort(404, "Not found: '/flowmod'")
+
+			@route('/stat', method='POST')
+			def StatHandler():
+				if 'stat' in restHandlers:
+					return restHandlers['stat'](request)
 				else:
 					abort(404, "Not found: '/info/%s'" % request)
 			run(host=restIP, port=restPort, quiet=True)
@@ -74,6 +94,16 @@ class Core:
 		thread = Thread(target=self.iterate, args=(eventName,generator,interval))
 		self.threads.append(thread)
 		thread.start()
+
+	def registerIPC(self, ipcname, handler):
+		self.ipcHandlers[ipcname] = handler
+
+	def invokeIPC(self, ipcname):
+		if ipcname in self.ipcHandlers:
+			return  self.ipcHandlers[ipcname]()
+		else:
+			print "invokeIPC fail. %s not found" % ipcname
+			return None
 
 	def iterate(self,eventName,generator,interval):
 		while True:
