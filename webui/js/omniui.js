@@ -73,9 +73,7 @@ function mouseout() {
 }
 
 function mouseclick() {
-	if(lastSelectedItem) {
-		lastSelectedItem.select("circle").style('fill', "#FF9900");
-	}
+	clearcolor();
 	d3.select(this).select("circle").style('fill', "#33BBEE");
 	lastSelectedItem = d3.select(this);
 
