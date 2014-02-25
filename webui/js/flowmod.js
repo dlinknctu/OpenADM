@@ -166,5 +166,7 @@ function pruneFields(f) {
         f["ether-type"] = "2048";
     }
 
+    f["actions"] = f["actions"].replace(/(.*)=/, function(a) { return a.toUpperCase(); });
+
     return JSON.parse(JSON.stringify(f));
 }
