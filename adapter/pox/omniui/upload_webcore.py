@@ -77,7 +77,7 @@ except:
 # global var
 json_links = []
 json_switches = []
-
+payload = "null"
 
 
 
@@ -164,6 +164,11 @@ class CoreHandler (SplitRequestHandler):
   """
   A default page to say hi from POX.
   """
+  def do_POST (self):
+    """Serve a POST request."""
+    self.do_content(True)
+
+
   def do_GET (self):
     """Serve a GET request."""
     self.do_content(True)
@@ -180,10 +185,24 @@ class CoreHandler (SplitRequestHandler):
       self.send_favicon(is_get)
     elif self.path == "/wm/omniui/link/json":
       self.wfile.write(json_links)
-      
     elif self.path == "/wm/omniui/switch/json":
       core.flow_stats._send_ofp_stats_request()   #invoke request function in flow_stats component
       self.wfile.write(json_switches)
+    elif self.path == "/wm/omniui/add/json":
+      
+      global payload
+      l = self.headers.get("Content-Length", "")
+      if l == "":
+        data = json.loads(self.rfile.read())
+      else:
+        data = json.loads(self.rfile.read(int(l)))
+      payload = data
+      # print "payload====\n",payload
+      core.FlowModEvent_Generator._raise_FlowModEvent()
+
+
+
+
     else:
       # print "path",self.path
       self.send_error(404, "File not found on CoreHandler")
@@ -427,9 +446,9 @@ class SplitterRequestHandler (BaseHTTPRequestHandler):
 class SplitThreadedServer(ThreadingMixIn, HTTPServer):
   matches = [] # Tuples of (Prefix, TrimPrefix, Handler)
 
-#  def __init__ (self, *args, **kw):
-#    BaseHTTPRequestHandler.__init__(self, *args, **kw)
-#    self.matches = self.matches.sort(key=lambda e:len(e[0]),reverse=True)
+  #  def __init__ (self, *args, **kw):
+  #    BaseHTTPRequestHandler.__init__(self, *args, **kw)
+  #    self.matches = self.matches.sort(key=lambda e:len(e[0]),reverse=True)
 
   def set_handler (self, prefix, handler, args = None, trim_prefix = True):
     # Not very efficient
@@ -491,11 +510,6 @@ class StatsEvent_Listener (EventMixin):
     
     link = event.link
     link_dict ={}
-    # dpid1 = str_link.split()[0].split('.')[0]
-    # port1 = str_link.split()[0].split('.')[1]
-    # dpid2 = str_link.split()[2].split('.')[0]
-    # port2 = str_link.split()[2].split('.')[1]
-    
 
     sw1 = str(link).split()[0]     
     sw2 = str(link).split()[2]
@@ -523,7 +537,6 @@ class StatsEvent_Listener (EventMixin):
 
 
   def _json_format_translation(self):
-    # print "=============== translation !!!! ============="
     
     global json_switches
     global json_links
@@ -561,8 +574,11 @@ class StatsEvent_Listener (EventMixin):
               dpid_cannot_use.append(p_index['dpid'])
             
 
-              file_ports.append(p_index['ports'])
-              file_flows.append(f_index['flows'])
+              for p_index_i in p_index['ports']:
+                file_ports.append(p_index_i)
+              for f_index_i in f_index['flows']:
+                file_flows.append(f_index_i)
+
             
             
               p_temp = file_ports[:]
@@ -601,12 +617,34 @@ class StatsEvent_Listener (EventMixin):
 # ===================     modify part   ==================
 
 
+class FlowModEvent (Event):
+  def __init__ (self, payload):
+    Event.__init__(self)
+    # payload
+    self.payload = payload
+
+class FlowModEvent_Generator (EventMixin):
+  _eventMixin_events = set([FlowModEvent,])
+  def __init__ (self):
+    self.listenTo(core)
+    
+  def _handle_GoingUpEvent (self, event):
+    self.listenTo(core.openflow)
+    log.debug("Up...")
+
+  def _raise_FlowModEvent(self):
+    global payload
+    self.raiseEvent(FlowModEvent, payload = payload)
+
+
+
 
 def launch (address='', port=8080, static=False):
   httpd = SplitThreadedServer((address, int(port)), SplitterRequestHandler)
   core.register("WebServer", httpd)
   httpd.set_handler("/", CoreHandler, httpd, True)
   core.registerNew(StatsEvent_Listener)
+  core.registerNew(FlowModEvent_Generator)
 
   #httpd.set_handler("/foo", StaticContentHandler, {'root':'.'}, True)
   #httpd.set_handler("/f", StaticContentHandler, {'root':'pox'}, True)
