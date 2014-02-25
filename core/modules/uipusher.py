@@ -15,6 +15,8 @@ class UIPusher:
 		# register rest api
 		core.registerRestApi("topology", self.topologyHandler)
 		core.registerRestApi("stat", self.statisticHandler)
+		# save core for ipc use
+		self.core = core
 
 		self.intervalList=['hourly','daily','weekly','monthly','annually']
 		self.intervalList[0] = 'hourly'+str(datetime.datetime.today().strftime("%Y_%m_%d"))
@@ -36,6 +38,7 @@ class UIPusher:
 
 	def topologyHandler(self):
 		# return JSONP format
+		self.core.invokeIPC("periodicInquiry")
 		return "omniui(%s);" % self.event
 
 	def controllerHandler(self,event):

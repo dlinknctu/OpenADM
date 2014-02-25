@@ -22,6 +22,7 @@ class Core:
 		self.eventHandlers = []
 		self.threads  = []
 		self.events   = []
+		self.ipcHandlers = {}
 		global restHandlers # Necessary for bottle to access restHandlers
 		restHandlers = {}
 		#Load config file
@@ -55,7 +56,7 @@ class Core:
 
 			@hook('after_request')
 			def enable_cors():
-			    response.headers['Access-Control-Allow-Origin'] = 'http://localhost'
+				response.headers['Access-Control-Allow-Origin'] = 'http://localhost'
 
 			@route('/info/:request', method='GET')
 			def restRouter(request):
@@ -93,6 +94,16 @@ class Core:
 		thread = Thread(target=self.iterate, args=(eventName,generator,interval))
 		self.threads.append(thread)
 		thread.start()
+
+	def registerIPC(self, ipcname, handler):
+		self.ipcHandlers[ipcname] = handler
+
+	def invokeIPC(self, ipcname):
+		if ipcname in self.ipcHandlers:
+			return  self.ipcHandlers[ipcname]()
+		else:
+			print "invokeIPC fail. %s not found" % ipcname
+			return None
 
 	def iterate(self,eventName,generator,interval):
 		while True:

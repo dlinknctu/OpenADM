@@ -29,6 +29,8 @@ class ControllerAdapter:
 				self.timerInterval = int(parm["interval"])
 		logger.debug('IP =%s  port = %s  interval = %s' % (self.controllerIP,self.controllerPort,self.timerInterval))
 		core.registerEvent("controlleradapter",self.periodicInquiry,self.timerInterval)
+		core.registerIPC("periodicInquiry", self.periodicInquiry)
+
 	def inquirySwitch(self):
 		try:
 			response = urllib2.urlopen(self.switchUrl).read()
