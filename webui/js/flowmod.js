@@ -134,9 +134,7 @@ function pruneFields(f) {
     delete f["counterPacket"];
     delete f["srcIPMask"];
     delete f["dstIPMask"];
-	delete f["wildcards"];	//
-	delete f["idleTimeout"];	//
-	delete f["hardTimeout"];	//
+	delete f["wildcards"];
     if(f["srcMac"] == "00:00:00:00:00:00") {
         delete f["srcMac"];
     }
