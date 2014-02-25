@@ -112,7 +112,7 @@ public class FlowModMethod {
                 entry.put(FlowModResource.COLUMN_DL_VLAN_PCP, jp.getText());
             else if (n == "ether-type")
                 entry.put(FlowModResource.COLUMN_DL_TYPE, jp.getText());
-            else if (n == "tos-bits")
+            else if (n == "tosBits")
                 entry.put(FlowModResource.COLUMN_NW_TOS, jp.getText());
             else if (n == "netProtocol")
                 entry.put(FlowModResource.COLUMN_NW_PROTO, jp.getText());

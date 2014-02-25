@@ -113,7 +113,7 @@ function mouseclick() {
 		<td>" + flows[i].hardTimeout + "</td>\
 		<td>" + flows[i].idleTimeout + "</td>\
 		<td>" + flows[i].netProtocol + "</td>\
-		<td><button onclick='modFlow(" + i + ");'>Modify</button><button onclick='delFlow(" + i + ");'>Delete</button></td>\
+		<td><button onclick='modFlow(" + i + ");'>Modify</button><button onclick='delFlow(" + i + ");'>Delete</button><button onclick='highlight(" + i + ");'>Simulate</button></td>\
 		</tr>");
 	}
 	preMatching($('#flows tr'), $('#flowtable input:text'));

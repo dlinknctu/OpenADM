@@ -5,6 +5,7 @@
 		"port": "5567"
 	},
 	"UIPusher": {
+		"enable":"True",
 		"dbip":"140.113.215.200",
 		"dbport":"27017",
 		"db":"omniui",
@@ -17,5 +18,15 @@
 		"port": "8080",
 		"interval": "30"
     },
-	"Flow_mod": {}
+	"Flow_mod":	{
+	},
+	"DbCollection": {
+		"enable":"True",
+		"dbip":"140.113.215.200",
+		"dbport":"27017",
+		"db":"omniui",
+		"user":"xxxxxx",
+		"password":"xxxxxx",
+		"interval": "86400"
+	}
 }
