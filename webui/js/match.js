@@ -81,6 +81,17 @@ function startmatch(f2,flow2,j2,compare2){
 			return
 		}
 	}
+    if(flow2.dlType!="0")
+	{
+		if("dlType" in f2){
+			console.log("HAVE DLTYPE");
+			if(flow2.srcPort == f2["dlType"]) console.log("match dlType");
+			else{ console.log("match dlType failed"); return; }
+		}else{
+			console.log("NOT HAVE SRCPORT");
+			return;
+		}
+	}
 	if(flow2.srcIP!="0.0.0.0")
 	{
 		if("srcIP" in f2){
