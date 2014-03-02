@@ -20,7 +20,7 @@ $(function() {
                         return a.toUpperCase();
                     });
                     flow = pruneFields(flow);
-                    if(!(flow["ether-type"] && flow["netProtocol"])) {
+                    if(!(flow["dlType"] && flow["netProtocol"])) {
                         delete flow["srcPort"];
                         delete flow["dstPort"];
                     }
@@ -41,7 +41,7 @@ $(function() {
                 if(!jQuery.isEmptyObject(flow)) {
                     flow["command"] = "DEL";
                     flow = pruneFields(flow);
-                    if(!(flow["ether-type"] && flow["netProtocol"])) {
+                    if(!(flow["dlType"] && flow["netProtocol"])) {
                         delete flow["srcPort"];
                         delete flow["dstPort"];
                     }
@@ -101,7 +101,7 @@ function modFlow(i) {
     flow["actions"] = actionsStrArr.toString();
     flow["command"] = "MOD_ST";
     $("#_actions").val(flow["actions"]);
-    if(!(flow["ether-type"] && flow["netProtocol"])) {
+    if(!(flow["dlType"] && flow["netProtocol"])) {
         delete flow["srcPort"];
         delete flow["dstPort"];
     }
@@ -167,7 +167,7 @@ function pruneFields(f) {
     }
 
     if((f["srcIP"]) || (f["dstIP"]) || f["tosBits"] || f["netProtocol"]) {
-        f["ether-type"] = "2048";
+        f["dlType"] = "2048";
     }
 
     return JSON.parse(JSON.stringify(f));

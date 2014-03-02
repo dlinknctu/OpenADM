@@ -36,7 +36,6 @@ function getflowmsg(f){
 	{
 		var compare={};
 		var flowss = myGraph.findNode(f["switch"]).flows;
-		//console.log("get successful");
 			for(var j in flowss)
 			{
 				console.log(flowss[j]);
@@ -85,10 +84,10 @@ function startmatch(f2,flow2,j2,compare2){
 	{
 		if("dlType" in f2){
 			console.log("HAVE DLTYPE");
-			if(flow2.srcPort == f2["dlType"]) console.log("match dlType");
+			if(flow2.dlType == f2["dlType"]) console.log("match dlType");
 			else{ console.log("match dlType failed"); return; }
 		}else{
-			console.log("NOT HAVE SRCPORT");
+			console.log("NOT HAVE DLTYPE");
 			return;
 		}
 	}
@@ -180,7 +179,6 @@ function startmatch(f2,flow2,j2,compare2){
 			return;
 		}
 	}
-	console.log("######congratulation######");
 	compare2[j2]=flow2.priority;
 	//nexthop(f2,flow2);
 }
@@ -197,7 +195,6 @@ function nexthop(ff3,flow3){
 		if(nodeid == f3["switch"])
 		{
 			node2[k].style.fill="#00cc00";
-			console.log("YAYAYAYAYAYA");
 			
 			for(act in flow3.actions)
 			{
@@ -233,7 +230,6 @@ function nexthop(ff3,flow3){
 				}else{													//actions = output
 					for(var i in myGraph.links)
 					{
-						//console.log("!!!!!!!!link!!!!!!!!!");
 						//console.log(myGraph.links[i]);
 						var src = myGraph.links[i].source.id;
 						var dst = myGraph.links[i].target.id;
@@ -263,7 +259,6 @@ function nexthop(ff3,flow3){
 							getflowmsg(ff);
 							break;
 						}else if(src==f3["switch"] && flow3.actions[act].value=="-5"){	//flood
-							console.log("!!!!!!flood!!!!!");
 							if(srcp==f3["ingressPort"]) continue;
 							var ff={};
 							for(var key in f3)
@@ -276,7 +271,6 @@ function nexthop(ff3,flow3){
 							getflowmsg(ff);
 							
 						}else if(dst==f3["switch"] && flow3.actions[act].value=="-5"){	//flood
-							console.log("!!!!!!flood!!!!!");
 							if(dstp==f3["ingressPort"]) continue;
 							var ff={};
 							for(var key in f3)
@@ -292,7 +286,6 @@ function nexthop(ff3,flow3){
 						}
 					}
 				}
-			//break;
 			}
 			break;
 		}

@@ -101,13 +101,13 @@ function mouseclick() {
         <td>" + flows[i].dstMac + "</td>\
         <td>" + flows[i].dlType + "</td>\
         <td>" + flows[i].srcIP +"/"+ flows[i].srcIPMask + "</td>\
-		<td>" + flows[i].dstIP +"/"+ flows[i].dstIPMask + "</td>\
-		<td>" + flows[i].srcPort + "</td>\
-		<td>" + flows[i].dstPort + "</td>\
+        <td>" + flows[i].dstIP +"/"+ flows[i].dstIPMask + "</td>\
         <td>" + flows[i].netProtocol + "</td>\
+        <td>" + flows[i].srcPort + "</td>\
+        <td>" + flows[i].dstPort + "</td>\
         <td>" + actionsStrArr.toString() + "</td>\
+        <td>" + flows[i].counterPacket + "</td>\
         <td>" + flows[i].counterByte + "</td>\
-		<td>" + flows[i].counterPacket + "</td>\
         <td>" + flows[i].hardTimeout + "</td>\
 		<td>" + flows[i].idleTimeout + "</td>\
 		<td><button onclick='modFlow(" + i + ");'>Modify</button><button onclick='delFlow(" + i + ");'>Delete</button><button onclick='highlight(" + i + ");'>Simulate</button></td>\
