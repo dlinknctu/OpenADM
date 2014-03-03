@@ -5,7 +5,33 @@ $(function() {
         width: 350,
         modal: true,
         buttons: {
-            "Add/Mod Flow": function() {
+            "Add": function() {
+                var flow = {};
+                var $label = $("#send-dialog fieldset label");
+                var $input = $("#send-dialog fieldset input");
+                $label.each(function(i, l) {
+                    if($input.eq(i).val() != "") {
+                        flow[$(this).text()] = $input.eq(i).val();
+                    }
+                });
+                if(!jQuery.isEmptyObject(flow)) {
+                    flow["command"] = "ADD";
+                    if("actions" in flow) {
+                        flow["actions"] = flow["actions"].replace(/(.*)=/, function(a) {
+                            return a.toUpperCase();
+                        });
+                    }
+                    flow = pruneFields(flow);
+                    if(!(flow["ether-type"] && flow["netProtocol"])) {
+                        delete flow["srcPort"];
+                        delete flow["dstPort"];
+                    }
+                    console.log(JSON.stringify(flow));
+                    sendFlow(flow);
+                }
+                $(this).dialog("close");
+            },
+            "Modify": function() {
                 var flow = {};
                 var $label = $("#send-dialog fieldset label");
                 var $input = $("#send-dialog fieldset input");
@@ -31,7 +57,7 @@ $(function() {
                 }
                 $(this).dialog("close");
             },
-            "Del Flow": function() {
+            "Delete": function() {
                 var flow = {};
                 var $label = $("#send-dialog fieldset label");
                 var $input = $("#send-dialog fieldset input");

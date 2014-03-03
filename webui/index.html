@@ -53,10 +53,7 @@
                 </fieldset>
             </form>
         </div>
-<<<<<<< HEAD
-=======
         <div id="waiting"></div>
->>>>>>> 11ef994cf8e7633808fc416c4caca08744c06d74
 	   <div id="wrapper">
         	<div id="header">
         		<p>OmniUI</p>
@@ -146,15 +143,14 @@
 	<script type="text/javascript" src="js/filter.js"></script>
 	<script type="text/javascript" src="js/flowmod.js"></script>
 	<script type="text/javascript" src="js/match.js"></script>
-<<<<<<< HEAD
-=======
     <script type="text/javascript" src="js/spin.min.js"></script>
->>>>>>> 11ef994cf8e7633808fc416c4caca08744c06d74
 	<script type="text/javascript">
 		$(document).ready(function() {
+            spinner = new Spinner(opts);
 			$("#porttable").stupidtable();
 			$("#flowtable").stupidtable();
 			$("#reload").click(function() {
+                spinner.spin(target);
 				loadJSONP();
 				$("#info").empty();
 				clearcolor();
