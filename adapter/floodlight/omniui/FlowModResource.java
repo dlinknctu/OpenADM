@@ -50,7 +50,6 @@ import java.util.Collections;
 import net.floodlightcontroller.core.annotations.LogMessageCategory;
 import net.floodlightcontroller.core.annotations.LogMessageDoc;
 import net.floodlightcontroller.storage.IStorageSourceService;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Pushes a static flow entry to the storage source
@@ -169,14 +168,13 @@ public class FlowModResource extends ServerResource {
 					if(entriesFromStorage.get(switchid).get(entrynumber) != null)
 					{
 						FlowModMethod.writeFlowModToSwitch(HexString.toLong(switchid),entriesFromStorage.get(switchid).get(entrynumber));
+						
+						IOFSwitch ofSwitch2 = floodlightProvider.getSwitch(HexString.toLong(switchid));
+						OFMessage barrierMsg = floodlightProvider.getOFMessageFactory().getMessage(OFType.BARRIER_REQUEST);
+						barrierMsg.setXid(ofSwitch2.getNextTransactionId());
+						ofSwitch2.write(barrierMsg,null);
 					}
 				}
-			}
-			
-			try{
-				TimeUnit.SECONDS.sleep(2);
-			}catch (InterruptedException e) {
-				e.printStackTrace();
 			}
 			
             if(trydelete==true){
