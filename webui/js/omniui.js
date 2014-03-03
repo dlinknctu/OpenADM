@@ -319,14 +319,14 @@ function sendFlow(f){
 
     var url = "http://localhost:5567/flowmod";
     var data = JSON.stringify(f);
-    var callback = function(data) {
-        var stat = JSON.parse(data[2]);
-        console.log(data);
-        //alert(stat["status"]);
+    var callback = function(resp) {
+        var stat = JSON.parse(resp[2]);
+        console.log(resp);
         loadJSONP();
     };
+    console.log(data);
     spinner.spin(target);
-    $.post(url, JSON.stringify(f), callback, "json");
+    $.post(url, data, callback, "json");
 }
 
 //load topo now
