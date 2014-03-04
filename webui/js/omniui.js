@@ -114,7 +114,6 @@ function mouseclick() {
             actionsStrArr.push(actions[j].type + " " + actions[j].value);
         }
 		$("#flows").append("<tr>\
-		<td>" + flows[i].wildcards + "</td>\
         <td>" + flows[i].ingressPort + "</td>\
         <td>" + flows[i].vlan + "</td>\
         <td>" + flows[i].srcMac + "</td>\
@@ -322,6 +321,7 @@ function sendFlow(f){
         var stat = JSON.parse(resp[2]);
         console.log(resp);
         loadJSONP();
+        clearcolor();
     };
     console.log(data);
     spinner.spin(target);
