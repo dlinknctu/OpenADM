@@ -115,22 +115,21 @@ function mouseclick() {
         }
 		$("#flows").append("<tr>\
 		<td>" + flows[i].wildcards + "</td>\
-		<td>" + flows[i].dstIP + "</td>\
-		<td>" + flows[i].srcMac + "</td>\
-		<td>" + flows[i].counterByte + "</td>\
-		<td>" + flows[i].srcPort + "</td>\
-		<td>" + flows[i].ingressPort + "</td>\
-		<td>" + flows[i].dstMac + "</td>\
-		<td>" + actionsStrArr.toString() + "</td>\
-		<td>" + flows[i].srcIPMask + "</td>\
-		<td>" + flows[i].vlan + "</td>\
-		<td>" + flows[i].dstIPMask + "</td>\
-		<td>" + flows[i].srcIP + "</td>\
-		<td>" + flows[i].counterPacket + "</td>\
-		<td>" + flows[i].dstPort + "</td>\
-		<td>" + flows[i].hardTimeout + "</td>\
+        <td>" + flows[i].ingressPort + "</td>\
+        <td>" + flows[i].vlan + "</td>\
+        <td>" + flows[i].srcMac + "</td>\
+        <td>" + flows[i].dstMac + "</td>\
+        <td>" + flows[i].dlType + "</td>\
+        <td>" + flows[i].srcIP +"/"+ flows[i].srcIPMask + "</td>\
+        <td>" + flows[i].dstIP +"/"+ flows[i].dstIPMask + "</td>\
+        <td>" + flows[i].netProtocol + "</td>\
+        <td>" + flows[i].srcPort + "</td>\
+        <td>" + flows[i].dstPort + "</td>\
+        <td>" + actionsStrArr.toString() + "</td>\
+        <td>" + flows[i].counterPacket + "</td>\
+        <td>" + flows[i].counterByte + "</td>\
+        <td>" + flows[i].hardTimeout + "</td>\
 		<td>" + flows[i].idleTimeout + "</td>\
-		<td>" + flows[i].netProtocol + "</td>\
 		<td><button onclick='modFlow(" + i + ");'>Modify</button><button onclick='delFlow(" + i + ");'>Delete</button><button onclick='highlight(" + i + ");'>Simulate</button></td>\
 		</tr>");
 	}
