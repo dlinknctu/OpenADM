@@ -128,7 +128,7 @@ $(function() {
 });
 
 function modFlow(i) {
-    var flow = flows[i];
+    var flow = JSON.parse(JSON.stringify(flows[i]));
     flow["switch"] = node.id;
     var actions = flow.actions;
     var actionsStrArr = [];
