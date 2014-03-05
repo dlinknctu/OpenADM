@@ -1,3 +1,23 @@
+var defaultFlow = {
+    "switch": "00:00:00:00:00:00:00:01",
+    "ingressPort": "0",
+    "vlan": "0",
+    "srcMac": "00:00:00:00:00:00",
+    "dstMac": "00:00:00:00:00:00",
+    "dlType": "0",
+    "dstIP": "0.0.0.0/0",
+    "srcIP": "0.0.0.0/0",
+    "tosBits": "0",
+    "netProtocol": "0",
+    "srcPort": "0",
+    "dstPort": "0",
+    "actions": "",
+    "priority": "32767",
+    "active": "true",
+    "hardTimeout": "0",
+    "idleTimeout": "0"
+};
+
 $(function() {
     $("#send-dialog").dialog({
         autoOpen: false,
@@ -12,6 +32,8 @@ $(function() {
                 $label.each(function(i, l) {
                     if($input.eq(i).val() != "") {
                         flow[$(this).text()] = $input.eq(i).val();
+                    } else {
+                        flow[$(this).text()] = defaultFlow[$(this).text()];
                     }
                 });
                 if(!jQuery.isEmptyObject(flow)) {
@@ -32,6 +54,8 @@ $(function() {
                 $label.each(function(i, l) {
                     if($input.eq(i).val() != "") {
                         flow[$(this).text()] = $input.eq(i).val();
+                    } else {
+                        flow[$(this).text()] = defaultFlow[$(this).text()];
                     }
                 });
                 if(!jQuery.isEmptyObject(flow)) {
@@ -52,6 +76,8 @@ $(function() {
                 $label.each(function(i, l) {
                     if($input.eq(i).val() != "") {
                         flow[$(this).text()] = $input.eq(i).val();
+                    } else {
+                        flow[$(this).text()] = defaultFlow[$(this).text()];
                     }
                 });
                 if(!jQuery.isEmptyObject(flow)) {
