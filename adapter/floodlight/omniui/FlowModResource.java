@@ -168,10 +168,14 @@ public class FlowModResource extends ServerResource {
 					if(entriesFromStorage.get(switchid).get(entrynumber) != null)
 					{
 						FlowModMethod.writeFlowModToSwitch(HexString.toLong(switchid),entriesFromStorage.get(switchid).get(entrynumber));
+						
+						IOFSwitch ofSwitch2 = floodlightProvider.getSwitch(HexString.toLong(switchid));
+						OFMessage barrierMsg = floodlightProvider.getOFMessageFactory().getMessage(OFType.BARRIER_REQUEST);
+						barrierMsg.setXid(ofSwitch2.getNextTransactionId());
+						ofSwitch2.write(barrierMsg,null);
 					}
 				}
 			}
-			//
 			
             if(trydelete==true){
 				trydelete=false;
