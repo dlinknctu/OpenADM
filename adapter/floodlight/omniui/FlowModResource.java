@@ -91,7 +91,6 @@ public class FlowModResource extends ServerResource {
             COLUMN_DL_TYPE, COLUMN_NW_TOS, COLUMN_NW_PROTO, COLUMN_NW_SRC,
             COLUMN_NW_DST, COLUMN_TP_DST, COLUMN_TP_SRC, COLUMN_ACTIONS };
 	
-	
     /**
      * Checks to see if the user matches IP information without
      * checking for the correct ether-type (2048).
