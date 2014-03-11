@@ -43,6 +43,10 @@ $(function() {
                             return a.toUpperCase();
                         });
                     }
+                    var srcCIDR = flow["srcIP"].split(/\//);
+                    var dstCIDR = flow["dstIP"].split(/\//);
+                    flow["srcIPMask"] = (srcCIDR.length == 2)? srcCIDR[1]: "32";
+                    flow["dstIPMask"] = (dstCIDR.length == 2)? dstCIDR[1]: "32";
                     sendFlow(flow);
                 }
                 $(this).dialog("close");
@@ -54,8 +58,6 @@ $(function() {
                 $label.each(function(i, l) {
                     if($input.eq(i).val() != "") {
                         flow[$(this).text()] = $input.eq(i).val();
-                    } else {
-                        flow[$(this).text()] = defaultFlow[$(this).text()];
                     }
                 });
                 if(!jQuery.isEmptyObject(flow)) {
@@ -76,8 +78,6 @@ $(function() {
                 $label.each(function(i, l) {
                     if($input.eq(i).val() != "") {
                         flow[$(this).text()] = $input.eq(i).val();
-                    } else {
-                        flow[$(this).text()] = defaultFlow[$(this).text()];
                     }
                 });
                 if(!jQuery.isEmptyObject(flow)) {
@@ -138,6 +138,8 @@ function modFlow(i) {
     flow["actions"] = actionsStrArr.toString();
     flow["command"] = "MOD_ST";
     $("#_actions").val(flow["actions"]);
+    flow["srcIP"] += ("/" + flow["srcIPMask"]);
+    flow["dstIP"] += ("/" + flow["dstIPMask"]);
 
     for(var k in flow) {
         flow[k] = flow[k].toString();
@@ -154,6 +156,9 @@ function delFlow(i) {
     }
     flow["command"] = "DEL_ST";
     flow["switch"] = node.id;
+    flow["srcIP"] += ("/" + flow["srcIPMask"]);
+    flow["dstIP"] += ("/" + flow["dstIPMask"]);
+
     for(var k in flow) {
         flow[k] = flow[k].toString();
     }
