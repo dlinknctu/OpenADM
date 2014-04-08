@@ -112,6 +112,7 @@ public class OmniUI implements IFloodlightModule,IOFMessageListener,IOFSwitchLis
 			return Command.CONTINUE;
 		case BARRIER_REPLY:
 			logger.info("BARRIER REPLY : {}",msg);
+			FlowModResource.setMsg2();
 			return Command.CONTINUE;
         default:
             return Command.CONTINUE;
