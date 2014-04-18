@@ -1,6 +1,7 @@
 function UpdateShowcase(json) {
     var oxm_match = JSON.parse(json);
     console.log(oxm_match);
+    $("#showcase").empty();
 }
 
 function QueryUDSEntries() {
