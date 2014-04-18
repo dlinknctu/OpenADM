@@ -36,7 +36,7 @@ function UDSEntryMGMT(action, oxm_match) {
 
 function ParseInput() {
     var oxm_match = new Object();
-    $('input').each(function() {
+    $('#oxm-form').find('input').each(function() {
         if($(this).val() != '') {
             oxm_match[$(this).attr('id')] = $(this).val();
         }
