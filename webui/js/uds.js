@@ -1,17 +1,17 @@
-function UpdateShowcase(json) {
+function updateShowcase(json) {
     var oxm_match = JSON.parse(json);
     console.log(oxm_match);
     $('#showcase').empty();
 }
 
-function QueryUDSEntries() {
+function queryUdsEntries() {
     $.ajax({
         type: 'GET',
         url: 'http://localhost:5567/uds/json',
         dataType: 'jsonp',
         jsonpCallback: 'uds',
         success: function(json) {
-            UpdateShowcase(json);
+            updateShowcase(json);
             console.log(json);
         },
         error: function() {
@@ -20,7 +20,7 @@ function QueryUDSEntries() {
     });
 }
 
-function UDSEntryMGMT(action, oxm_match) {
+function udsEntryMgmt(action, oxm_match) {
     $.ajax({
         type: 'PUT',
         url: 'http://localhost:5567/uds/' + action,
@@ -34,7 +34,7 @@ function UDSEntryMGMT(action, oxm_match) {
     });
 }
 
-function ParseInput() {
+function parseInput() {
     var oxm_match = new Object();
     $('#oxm-form').find('input').each(function() {
         if($(this).val() != '') {
@@ -47,13 +47,13 @@ function ParseInput() {
 
 $(document).ready(function() {
     $('#reload').click(function() {
-        QueryUDSEntries();
+        queryUdsEntries();
     });
     $('#add-flow').click(function() {
-        UDSEntryMGMT('add', ParseInput());
+        udsEntryMgmt('add', parseInput());
     });
     $('#del-flow').click(function() {
-        UDSEntryMGMT('del', ParseInput());
+        udsEntryMgmt('del', parseInput());
     });
 });
 //oxm_match = {
