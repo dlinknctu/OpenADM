@@ -1,29 +1,29 @@
 function UpdateShowcase(json) {
     var oxm_match = JSON.parse(json);
     console.log(oxm_match);
-    $("#showcase").empty();
+    $('#showcase').empty();
 }
 
 function QueryUDSEntries() {
     $.ajax({
-        type: "GET",
-        url: "http://localhost:5567/uds/json",
-        dataType: "jsonp",
-        jsonpCallback: "uds",
+        type: 'GET',
+        url: 'http://localhost:5567/uds/json',
+        dataType: 'jsonp',
+        jsonpCallback: 'uds',
         success: function(json) {
             UpdateShowcase(json);
             console.log(json);
         },
         error: function() {
-            console.log("Fail to query UDS Entries.");
+            console.log('Fail to query UDS Entries.');
         }
     });
 }
 
 function UDSEntryMGMT(action, oxm_match) {
     $.ajax({
-        type: "PUT",
-        url: "http://localhost:5567/uds/" + action,
+        type: 'PUT',
+        url: 'http://localhost:5567/uds/' + action,
         data: oxm_match,
         success: function(resp) {
             console.log(resp);
@@ -36,9 +36,9 @@ function UDSEntryMGMT(action, oxm_match) {
 
 function ParseInput() {
     var oxm_match = new Object();
-    $("input").each(function() {
-        if($(this).val() != "") {
-            oxm_match[$(this).attr("id")] = $(this).val();
+    $('input').each(function() {
+        if($(this).val() != '') {
+            oxm_match[$(this).attr('id')] = $(this).val();
         }
     });
     console.log(oxm_match);
@@ -46,14 +46,14 @@ function ParseInput() {
 }
 
 $(document).ready(function() {
-    $("#reload").click(function() {
+    $('#reload').click(function() {
         QueryUDSEntries();
     });
-    $("#add-flow").click(function() {
-        UDSEntryMGMT("add", ParseInput());
+    $('#add-flow').click(function() {
+        UDSEntryMGMT('add', ParseInput());
     });
-    $("#del-flow").click(function() {
-        UDSEntryMGMT("del", ParseInput());
+    $('#del-flow').click(function() {
+        UDSEntryMGMT('del', ParseInput());
     });
 });
 //oxm_match = {
