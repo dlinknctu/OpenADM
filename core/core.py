@@ -34,21 +34,36 @@ class Core:
 		logLevel = logging.ERROR
 		restIP = 'localhost'
 		restPort = 5567
+		ControllerType = ''
 		#Set Logger
 		if config.has_key("LogFile"):
 			logFile = config['LogFile']
 		logging.basicConfig(filename = logFile, level = logLevel, format = '%(asctime)s - %(levelname)s: %(message)s') 
+		#Modulize the controller adapter
+		if config.has_key("ControllerType"):
+			ControllerType = str(config['ControllerType']) + "_modules" 
+		
+		"""
+		ControllerType must be named like this: 
+		NOX , POX , FloodLight , OpenDayLight , RYU , Trema ...etc, and core.py will append "_modules"
+
+		i.e. POX_modules , FloodLight_modules ...etc
+		"""
+		
 		#Loading module
 		sys.modules['plugins'] = plugins = type(sys)('plugins')
 		plugins.__path__ = []
-		plugins.__path__.append (os.path.join(sys.path[0],"modules"))
+		plugins.__path__.append (os.path.join(sys.path[0],ControllerType))
+
+		
 		for module in config:
-			if module != "LogFile" and module != "REST": # load modules other than LogFile and REST
+			if module != "LogFile" and module != "REST" and module != "ControllerType" : # load modules other than LogFile and REST
 				instance = import_module('plugins.' + module.lower())
 				if(config.has_key(module)):
 					getattr(instance,module)(self,config[module])
 				else:
 					getattr(instance,module)(self,0)
+
 		# Start REST service
 		if config.has_key("REST"):
 			restIP = config['REST']['ip']
@@ -56,7 +71,7 @@ class Core:
 
 			@hook('after_request')
 			def enable_cors():
-				response.headers['Access-Control-Allow-Origin'] = 'http://localhost'
+				response.headers['Access-Control-Allow-Origin'] = 'http://140.113.207.89'
 
 			@route('/info/:request', method='GET')
 			def restRouter(request):
@@ -79,7 +94,7 @@ class Core:
 					return restHandlers['stat'](request)
 				else:
 					abort(404, "Not found: '/info/%s'" % request)
-			run(host=restIP, port=restPort, quiet=True)
+			run(host="0.0.0.0", port=restPort, quiet=True)
 
 
 	#Register REST API

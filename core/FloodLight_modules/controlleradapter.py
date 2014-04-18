@@ -1,20 +1,16 @@
-import urllib2
+import httplib
 import logging
 import json
 from threading import Thread
 import core
 logger = logging.getLogger(__name__)
 
-
-
 class ControllerAdapter:
 	def __init__(self,core,parm):
-		#members
+		""" ControllerAdapter init"""
 		self.controllerIP = "localhost"
 		self.controllerPort = "8080"
 		self.timerInterval = 5
-		self.switchUrl="http://"+self.controllerIP+":"+self.controllerPort+"/wm/omniui/switch/json"
-		self.linkUrl="http://"+self.controllerIP+":"+self.controllerPort+"/wm/omniui/link/json"
 		self.switches=[]
 		self.links=[]
 		self.inquiryHandler=[]
@@ -33,10 +29,14 @@ class ControllerAdapter:
 
 	def inquirySwitch(self):
 		try:
-			response = urllib2.urlopen(self.switchUrl).read()
-		except:
-			logger.error("connection error for inquiring switches")
+			conn = httplib.HTTPConnection(self.controllerIP, int(self.controllerPort))
+			conn.request("GET", "/wm/omniui/switch/json")
+			response = conn.getresponse().read()
+		except Exception, e:
+			logger.error("connection error for inquiring switches: "+str(e))
 			return
+		finally:
+			conn.close()
 		try:
 			data = json.loads(response)
 			self.switches= []
@@ -46,14 +46,18 @@ class ControllerAdapter:
 				tmp['flows'] = switch['flows']
 				tmp['ports'] = switch['ports']
 				self.switches.append(tmp)
-		except:
-			logger.error("json parse error for switch")
+		except Exception, e:
+			logger.error("json parse error for switch: "+str(e))
 	def inquiryLink(self):
 		try:
-			response = urllib2.urlopen(self.linkUrl).read()
-		except:
-			logger.error("connection error for inquiring links")
+			conn = httplib.HTTPConnection(self.controllerIP, int(self.controllerPort))
+			conn.request("GET", "/wm/omniui/link/json")
+			response = conn.getresponse().read()
+		except Exception, e:
+			logger.error("connection error for inquiring links: "+str(e))
 			return
+		finally:
+			conn.close()
 		try:
 			data = json.loads(response)
 			self.links = []
@@ -64,8 +68,8 @@ class ControllerAdapter:
 				tmp['sourcePort'] = link['src-port']
 				tmp['targetPort'] = link['dst-port']
 				self.links.append(tmp)
-		except:
-			logger.error("json parse error for links")
+		except Exception, e:
+			logger.error("json parse error for links: "+str(e))
 	def periodicInquiry(self):
 		self.inquiryLink()
 		self.inquirySwitch()
@@ -73,3 +77,4 @@ class ControllerAdapter:
 		result['nodes'] = self.switches
 		result['links'] = self.links
 		return json.dumps(result, separators=(',',':'))
+
