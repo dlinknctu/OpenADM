@@ -60,7 +60,7 @@ public class ActionParse{
                 if (action.equals("OUTPUT")) {
                     subaction_struct = decode_output(subaction, log);
                 }
-                else if (action.equals("enqueue")) {
+                else if (action.equals("ENQUEUE")) {
                     subaction_struct = decode_enqueue(subaction, log);
                 }
                 else if (action.equals("strip-vlan")) {
@@ -162,7 +162,7 @@ public class ActionParse{
         SubActionStruct sa = null;
         Matcher n;
         
-        n = Pattern.compile("enqueue=(?:((?:0x)?\\d+)\\:((?:0x)?\\d+))").matcher(subaction);
+        n = Pattern.compile("ENQUEUE=(?:((?:0x)?\\d+)\\:((?:0x)?\\d+))").matcher(subaction);
         if (n.matches()) {
             short portnum = 0;
             if (n.group(1) != null) {

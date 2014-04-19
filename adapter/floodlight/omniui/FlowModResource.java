@@ -127,6 +127,7 @@ public class FlowModResource extends ServerResource {
 	
 	protected Map<String, Map<String, OFFlowMod>> entriesFromStorage = new ConcurrentHashMap<String, Map<String, OFFlowMod>>();
 	static protected Map<String, Map<String, OFFlowMod>> entriesFromStorage2 = new ConcurrentHashMap<String, Map<String, OFFlowMod>>();
+	static boolean removed = false, trydelete = false, barrier = false, cansend = false;
 	
     /**
      * Takes a Static Flow Pusher string in JSON format and parses it into
@@ -167,17 +168,27 @@ public class FlowModResource extends ServerResource {
 					if(entriesFromStorage.get(switchid).get(entrynumber) != null)
 					{
 						FlowModMethod.writeFlowModToSwitch(HexString.toLong(switchid),entriesFromStorage.get(switchid).get(entrynumber));
+						barrier = true;
+						IOFSwitch ofSwitch2 = floodlightProvider.getSwitch(HexString.toLong(switchid));
+						OFMessage barrierMsg = floodlightProvider.getOFMessageFactory().getMessage(OFType.BARRIER_REQUEST);
+						barrierMsg.setXid(ofSwitch2.getNextTransactionId());
+						ofSwitch2.write(barrierMsg,null);
 					}
 				}
 			}
-			//
+			long StartTime = System.currentTimeMillis(); 
+			while(cansend==false){
+				long EndTime = System.currentTimeMillis();
+				if((EndTime-StartTime)>=10000) break;
+			}
+			cansend = false;
 			
-            if(trydelete==true){
+			if(trydelete==true){
 				trydelete=false;
 				if(removed==true){ removed=false; return ("{\"status\" : \"" + "Flow Deleted Successful" +"\"}"); }
 				else return ("{\"status\" : \"" + "Flow Deleted Failed" +"\"}");
-			}
-			else return ("{\"status\" : \"" + status +"\"}");
+			}else return ("{\"status\" : \"" + status +"\"}");
+			
 			
         } catch (IOException e) {
             log.error("Error parsing push flow mod request: " + fmJson, e);
@@ -200,8 +211,16 @@ public class FlowModResource extends ServerResource {
             }
         }
     }
-	static boolean removed = false, trydelete = false;
+	
     static void setMsg(){
 		removed = true;
+	}
+	
+	static void setMsg2(){
+		if(barrier==true) 
+		{
+			cansend=true;
+			barrier=false;
+		}
 	}
 }
