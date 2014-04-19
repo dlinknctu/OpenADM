@@ -1,5 +1,5 @@
 {
-	"ControllerType":"POX",
+	"ControllerType":"pox",
 	"LogFile": "core.log",
 	"REST": {
 		"ip": "localhost",	

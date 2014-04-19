@@ -45,9 +45,9 @@ class Core:
 		
 		"""
 		ControllerType must be named like this: 
-		NOX , POX , FloodLight , OpenDayLight , RYU , Trema ...etc, and core.py will append "_modules"
+		nox , pox , floodlight , opendaylight , ryu , trema ...etc, and core.py will append "_modules"
 
-		i.e. POX_modules , FloodLight_modules ...etc
+		i.e. pox_modules , floodlight_modules ...etc
 		"""
 		
 		#Loading module
@@ -71,7 +71,7 @@ class Core:
 
 			@hook('after_request')
 			def enable_cors():
-				response.headers['Access-Control-Allow-Origin'] = 'http://140.113.207.89'
+				response.headers['Access-Control-Allow-Origin'] = 'http://localhost'
 
 			@route('/info/:request', method='GET')
 			def restRouter(request):
