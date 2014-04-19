@@ -610,6 +610,8 @@ class StatsEvent_Listener (EventMixin):
         json_switches = json.dumps(file_nodes[:])
         json_links = json.dumps(file_links[:])
 
+        print json_links
+
         dpid_cannot_use[:] = [] 
         dpid_used[:] = []
 
@@ -639,13 +641,29 @@ class FlowModEvent_Generator (EventMixin):
 
 
 
+
+class ReplyEvent_Listener (EventMixin):
+  def __init__ (self):
+    self.listenTo(core)
+
+  def _handle_GoingUpEvent (self, event):
+    self.listenTo(core.flow_modify)
+    log.debug("Up...")
+
+  def _handle_ReplyEvent (self, event):
+    print event.reply
+    return
+
+
+
+
 def launch (address='', port=8080, static=False):
   httpd = SplitThreadedServer((address, int(port)), SplitterRequestHandler)
   core.register("WebServer", httpd)
   httpd.set_handler("/", CoreHandler, httpd, True)
   core.registerNew(StatsEvent_Listener)
   core.registerNew(FlowModEvent_Generator)
-
+  core.registerNew(ReplyEvent_Listener)
   #httpd.set_handler("/foo", StaticContentHandler, {'root':'.'}, True)
   #httpd.set_handler("/f", StaticContentHandler, {'root':'pox'}, True)
   #httpd.set_handler("/cgis", SplitCGIRequestHandler, "pox/web/www_root")
