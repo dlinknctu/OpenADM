@@ -110,7 +110,7 @@ public class FlowModMethod {
                 entry.put(FlowModResource.COLUMN_DL_VLAN, jp.getText());
             else if (n == "vlan-priority")
                 entry.put(FlowModResource.COLUMN_DL_VLAN_PCP, jp.getText());
-            else if (n == "ether-type")
+            else if (n == "dlType")
                 entry.put(FlowModResource.COLUMN_DL_TYPE, jp.getText());
             else if (n == "tosBits")
                 entry.put(FlowModResource.COLUMN_NW_TOS, jp.getText());

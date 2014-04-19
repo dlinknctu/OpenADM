@@ -34,21 +34,36 @@ class Core:
 		logLevel = logging.ERROR
 		restIP = 'localhost'
 		restPort = 5567
+		ControllerType = ''
 		#Set Logger
 		if config.has_key("LogFile"):
 			logFile = config['LogFile']
 		logging.basicConfig(filename = logFile, level = logLevel, format = '%(asctime)s - %(levelname)s: %(message)s') 
+		#Modulize the controller adapter
+		if config.has_key("ControllerType"):
+			ControllerType = str(config['ControllerType']) + "_modules" 
+		
+		"""
+		ControllerType must be named like this: 
+		nox , pox , floodlight , opendaylight , ryu , trema ...etc, and core.py will append "_modules"
+
+		i.e. pox_modules , floodlight_modules ...etc
+		"""
+		
 		#Loading module
 		sys.modules['plugins'] = plugins = type(sys)('plugins')
 		plugins.__path__ = []
-		plugins.__path__.append (os.path.join(sys.path[0],"modules"))
+		plugins.__path__.append (os.path.join(sys.path[0],ControllerType))
+
+		
 		for module in config:
-			if module != "LogFile" and module != "REST": # load modules other than LogFile and REST
+			if module != "LogFile" and module != "REST" and module != "ControllerType" : # load modules other than LogFile and REST
 				instance = import_module('plugins.' + module.lower())
 				if(config.has_key(module)):
 					getattr(instance,module)(self,config[module])
 				else:
 					getattr(instance,module)(self,0)
+
 		# Start REST service
 		if config.has_key("REST"):
 			restIP = config['REST']['ip']
@@ -69,7 +84,8 @@ class Core:
                         def flowmodHandler():
                             if 'flowmod' in restHandlers:
                                 data = json.load(request.body)
-                                return restHandlers['flowmod'](data)
+                                data2 = json.dumps(data)
+                                return restHandlers['flowmod'](data2)
                             else:
                                 abort(404, "Not found: '/flowmod'")
 
@@ -78,8 +94,8 @@ class Core:
 				if 'stat' in restHandlers:
 					return restHandlers['stat'](request)
 				else:
-					abort(404, "Not found: '/info/%s'" % request)
-			run(host=restIP, port=restPort, quiet=True)
+					abort(404, "Not found: '/stat/%s'" % request)
+			run(host="0.0.0.0", port=restPort, quiet=True)
 
 
 	#Register REST API
