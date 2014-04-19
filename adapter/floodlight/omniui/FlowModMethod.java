@@ -111,7 +111,7 @@ public class FlowModMethod {
                 entry.put(FlowModResource.COLUMN_DL_DST, jp.getText());
             else if (n == "vlan")
                 entry.put(FlowModResource.COLUMN_DL_VLAN, jp.getText());
-            else if (n == "vlan-priority")
+            else if (n == "vlanP")
                 entry.put(FlowModResource.COLUMN_DL_VLAN_PCP, jp.getText());
             else if (n == "dlType")
                 entry.put(FlowModResource.COLUMN_DL_TYPE, jp.getText());
