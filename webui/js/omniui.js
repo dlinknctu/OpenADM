@@ -116,6 +116,7 @@ function mouseclick() {
 		$("#flows").append("<tr>\
         <td>" + flows[i].ingressPort + "</td>\
         <td>" + flows[i].vlan + "</td>\
+        <td>" + flows[i].vlanP + "</td>\
         <td>" + flows[i].srcMac + "</td>\
         <td>" + flows[i].dstMac + "</td>\
         <td>" + flows[i].dlType + "</td>\
