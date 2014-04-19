@@ -23,18 +23,18 @@ function queryUdsEntries() {
     $.ajax({
         type: 'GET',
         url: 'http://localhost:5567/uds/json',
-        dataType: 'json',
-        //dataType: 'jsonp',
-        //jsonpCallback: 'uds',
+        //dataType: 'json',
+        dataType: 'jsonp',
+        jsonpCallback: 'uds',
         success: function(json) {
             updateShowcase(json);
             toastr.success('Updated successfully.', 'RELOAD');
             console.log(json);
         },
-        error: function(resp) {
-            toastr.error('Fail to query UDS Entries.', 'RELOAD');
-            console.log(resp);
-        }
+        //error: function(resp) {
+        //    toastr.error('Fail to query UDS Entries.', 'RELOAD');
+        //    console.log(resp);
+        //}
     });
 }
 
