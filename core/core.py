@@ -84,7 +84,8 @@ class Core:
                         def flowmodHandler():
                             if 'flowmod' in restHandlers:
                                 data = json.load(request.body)
-                                return restHandlers['flowmod'](data)
+                                data2 = json.dumps(data)
+                                return restHandlers['flowmod'](data2)
                             else:
                                 abort(404, "Not found: '/flowmod'")
 
@@ -93,7 +94,7 @@ class Core:
 				if 'stat' in restHandlers:
 					return restHandlers['stat'](request)
 				else:
-					abort(404, "Not found: '/info/%s'" % request)
+					abort(404, "Not found: '/stat/%s'" % request)
 			run(host="0.0.0.0", port=restPort, quiet=True)
 
 
