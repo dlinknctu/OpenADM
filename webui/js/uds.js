@@ -75,6 +75,16 @@ $(document).ready(function() {
     $('#del-flow').click(function() {
         udsEntryMgmt('del', parseInput());
     });
+    $('.panel-title').click(function() {
+        var d = $(this).closest('.panel-heading').next();
+        var s = $(this).find('.glyphicon');
+        $(this).closest('.panel-group').find('.glyphicon')
+            .removeClass('glyphicon-chevron-up')
+            .addClass('glyphicon-chevron-down');
+        if(d.attr('class').split(' ').indexOf('in') == -1) {
+            s.removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
+        }
+    });
 });
 //oxm_match = {
 //    in_port: uint32_t,

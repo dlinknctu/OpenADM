@@ -9,8 +9,9 @@
     min-height: 700px;
     background: #77AA77;
 }
-/*
-.uds-title {
-    color: #FFFFFF;
+a {
+    text-decoration: none !important;
 }
-*/
+.input-group {
+    padding: 5px;
+}

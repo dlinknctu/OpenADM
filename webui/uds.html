@@ -35,327 +35,549 @@
             </button>
         </div>
         <div id="oxm-form">
+        <!-- Left Column -->
         <div class="col-md-4">
         <div class="panel-group" id="accordionOne">
             <div class="panel panel-info">
                 <div class="panel-heading">
-                    <h4 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#accordionOne" href="#in">
-                            in
-                        </a>
-                    </h4>
+                    <a data-toggle="collapse" data-parent="#accordionOne" href="#in">
+                        <h4 class="panel-title">
+                            <span class="glyphicon glyphicon-chevron-down"></span> in
+                        </h4>
+                    </a>
                 </div>
                 <div id="in" class="panel-collapse collapse">
                     <div class="panel-body">
-                        <p>in_port</p>
-                        <input id="in_port" type="text" />
-                        <p>in_phy_port</p>
-                        <input id="in_phy_port" type="text" />
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">in_port</button>
+                            </span>
+                            <input id="in_port" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">in_phy_port</button>
+                            </span>
+                            <input id="in_phy_port" class="form-control" type="text" />
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="panel panel-info">
                 <div class="panel-heading">
-                    <h4 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#accordionOne" href="#meta">
-                            metadata
-                        </a>
-                    </h4>
+                    <a data-toggle="collapse" data-parent="#accordionOne" href="#meta">
+                        <h4 class="panel-title">
+                            <span class="glyphicon glyphicon-chevron-down"></span> metadata
+                        </h4>
+                    </a>
                 </div>
                 <div id="meta" class="panel-collapse collapse">
                     <div class="panel-body">
-                        <p>metadata</p>
-                        <input id="metadata" type="text" />
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">metadata</button>
+                            </span>
+                            <input id="metadata" class="form-control" type="text" />
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="panel panel-info">
                 <div class="panel-heading">
-                    <h4 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#accordionOne" href="#eth">
-                            eth
-                        </a>
-                    </h4>
+                    <a data-toggle="collapse" data-parent="#accordionOne" href="#eth">
+                        <h4 class="panel-title">
+                            <span class="glyphicon glyphicon-chevron-down"></span> eth
+                        </h4>
+                    </a>
                 </div>
                 <div id="eth" class="panel-collapse collapse">
                     <div class="panel-body">
-                        <p>eth_dst</p>
-                        <input id="eth_dst" type="text" />
-                        <p>eth_dst_mask</p>
-                        <input id="eth_dst_mask" type="text" />
-                        <p>eth_src</p>
-                        <input id="eth_src" type="text" />
-                        <p>eth_src_mask</p>
-                        <input id="eth_src_mask" type="text" />
-                        <p>eth_type</p>
-                        <input id="eth_type" type="text" />
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">eth_dst</button>
+                            </span>
+                            <input id="eth_dst" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">eth_dst_mask</button>
+                            </span>
+                            <input id="eth_dst_mask" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">eth_src</button>
+                            </span>
+                            <input id="eth_src" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">eth_src_mask</button>
+                            </span>
+                            <input id="eth_src_mask" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">eth_type</button>
+                            </span>
+                            <input id="eth_type" class="form-control" type="text" />
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="panel panel-info">
                 <div class="panel-heading">
-                    <h4 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#accordionOne" href="#vlan">
-                            vlan
-                        </a>
-                    </h4>
+                    <a data-toggle="collapse" data-parent="#accordionOne" href="#vlan">
+                        <h4 class="panel-title">
+                            <span class="glyphicon glyphicon-chevron-down"></span> vlan
+                        </h4>
+                    </a>
                 </div>
                 <div id="vlan" class="panel-collapse collapse">
                     <div class="panel-body">
-                        <p>vlan_vid</p>
-                        <input id="vlan_vid" type="text" />
-                        <p>vlan_vid_mask</p>
-                        <input id="vlan_vid_mask" type="text" />
-                        <p>vlan_pcp</p>
-                        <input id="vlan_pcp" type="text" />
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">vlan_vid</button>
+                            </span>
+                            <input id="vlan_vid" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">vlan_vid_mask</button>
+                            </span>
+                            <input id="vlan_vid_mask" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">vlan_pcp</button>
+                            </span>
+                            <input id="vlan_pcp" class="form-control" type="text" />
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="panel panel-info">
                 <div class="panel-heading">
-                    <h4 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#accordionOne" href="#arp">
-                            arp
-                        </a>
-                    </h4>
+                    <a data-toggle="collapse" data-parent="#accordionOne" href="#arp">
+                        <h4 class="panel-title">
+                            <span class="glyphicon glyphicon-chevron-down"></span> arp
+                        </h4>
+                    </a>
                 </div>
                 <div id="arp" class="panel-collapse collapse">
                     <div class="panel-body">
-                        <p>arp_op</p>
-                        <input id="arp_op" type="text" />
-                        <p>arp_spa</p>
-                        <input id="arp_spa" type="text" />
-                        <p>arp_spa_mask</p>
-                        <input id="arp_spa_mask" type="text" />
-                        <p>arp_tpa</p>
-                        <input id="arp_tpa" type="text" />
-                        <p>arp_tpa_mask</p>
-                        <input id="arp_tpa_mask" type="text" />
-                        <p>arp_sha</p>
-                        <input id="arp_sha" type="text" />
-                        <p>arp_sha_mask</p>
-                        <input id="arp_sha_mask" type="text" />
-                        <p>arp_tha</p>
-                        <input id="arp_tha" type="text" />
-                        <p>arp_tha_mask</p>
-                        <input id="arp_tha_mask" type="text" />
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">arp_op</button>
+                            </span>
+                            <input id="arp_op" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">arp_spa</button>
+                            </span>
+                            <input id="arp_spa" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">arp_spa_mask</button>
+                            </span>
+                            <input id="arp_spa_mask" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">arp_tpa</button>
+                            </span>
+                            <input id="arp_tpa" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">arp_tpa_mask</button>
+                            </span>
+                            <input id="arp_tpa_mask" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">arp_sha</button>
+                            </span>
+                            <input id="arp_sha" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">arp_sha_mask</button>
+                            </span>
+                            <input id="arp_sha_mask" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">arp_tha</button>
+                            </span>
+                            <input id="arp_tha" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">arp_tha_mask</button>
+                            </span>
+                            <input id="arp_tha_mask" class="form-control" type="text" />
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="panel panel-warning">
                 <div class="panel-heading">
-                    <h4 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#accordionOne" href="#ip">
-                            ip
-                        </a>
-                    </h4>
+                    <a data-toggle="collapse" data-parent="#accordionOne" href="#ip">
+                        <h4 class="panel-title">
+                            <span class="glyphicon glyphicon-chevron-down"></span> ip
+                        </h4>
+                    </a>
                 </div>
                 <div id="ip" class="panel-collapse collapse">
                     <div class="panel-body">
-                        <p>ip_dscp</p>
-                        <input id="ip_dscp" type="text" />
-                        <p>ip_ecn</p>
-                        <input id="ip_ecn" type="text" />
-                        <p>ip_proto</p>
-                        <input id="ip_proto" type="text" />
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">ip_dscp</button>
+                            </span>
+                            <input id="ip_dscp" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">ip_ecn</button>
+                            </span>
+                            <input id="ip_ecn" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">ip_proto</button>
+                            </span>
+                            <input id="ip_proto" class="form-control" type="text" />
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="panel panel-warning">
                 <div class="panel-heading">
-                    <h4 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#accordionOne" href="#ipv4">
-                            ipv4
-                        </a>
-                    </h4>
+                    <a data-toggle="collapse" data-parent="#accordionOne" href="#ipv4">
+                        <h4 class="panel-title">
+                            <span class="glyphicon glyphicon-chevron-down"></span> ipv4
+                        </h4>
+                    </a>
                 </div>
                 <div id="ipv4" class="panel-collapse collapse">
                     <div class="panel-body">
-                        <p>ipv4_src</p>
-                        <input id="ipv4_src" type="text" />
-                        <p>ipv4_src_mask</p>
-                        <input id="ipv4_src_mask" type="text" />
-                        <p>ipv4_dst</p>
-                        <input id="ipv4_dst" type="text" />
-                        <p>ipv4_dst_mask</p>
-                        <input id="ipv4_dst_mask" type="text" />
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">ipv4_src</button>
+                            </span>
+                            <input id="ipv4_src" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">ipv4_src_mask</button>
+                            </span>
+                            <input id="ipv4_src_mask" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">ipv4_dst</button>
+                            </span>
+                            <input id="ipv4_dst" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">ipv4_dst_mask</button>
+                            </span>
+                            <input id="ipv4_dst_mask" class="form-control" type="text" />
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="panel panel-warning">
                 <div class="panel-heading">
-                    <h4 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#accordionOne" href="#ipv6">
-                            ipv6
-                        </a>
-                    </h4>
+                    <a data-toggle="collapse" data-parent="#accordionOne" href="#ipv6">
+                        <h4 class="panel-title">
+                            <span class="glyphicon glyphicon-chevron-down"></span> ipv6
+                        </h4>
+                    </a>
                 </div>
                 <div id="ipv6" class="panel-collapse collapse">
                     <div class="panel-body">
-                        <p>ipv6_src</p>
-                        <input id="ipv6_src" type="text" />
-                        <p>ipv6_src_mask</p>
-                        <input id="ipv6_src_mask" type="text" />
-                        <p>ipv6_dst</p>
-                        <input id="ipv6_dst" type="text" />
-                        <p>ipv6_dst_mask</p>
-                        <input id="ipv6_dst_mask" type="text" />
-                        <p>ipv6_flable</p>
-                        <input id="ipv6_flable" type="text" />
-                        <p>ipv6_flable_mask</p>
-                        <input id="ipv6_flable_mask" type="text" />
-                        <p>ipv6_nd_target</p>
-                        <input id="ipv6_nd_target" type="text" />
-                        <p>ipv6_nd_sll</p>
-                        <input id="ipv6_nd_sll" type="text" />
-                        <p>ipv6_nd_tll</p>
-                        <input id="ipv6_nd_tll" type="text" />
-                        <p>ipv6_exthdr</p>
-                        <input id="ipv6_exthdr" type="text" />
-                        <p>ipv6_exthdr_mask</p>
-                        <input id="ipv6_exthdr_mask" type="text" />
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">ipv6_src</button>
+                            </span>
+                            <input id="ipv6_src" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">ipv6_src_mask</button>
+                            </span>
+                            <input id="ipv6_src_mask" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">ipv6_dst</button>
+                            </span>
+                            <input id="ipv6_dst" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">ipv6_dst_mask</button>
+                            </span>
+                            <input id="ipv6_dst_mask" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">ipv6_flable</button>
+                            </span>
+                            <input id="ipv6_flable" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">ipv6_flable_mask</button>
+                            </span>
+                            <input id="ipv6_flable_mask" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">ipv6_nd_target</button>
+                            </span>
+                            <input id="ipv6_nd_target" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">ipv6_nd_sll</button>
+                            </span>
+                            <input id="ipv6_nd_sll" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">ipv6_nd_tll</button>
+                            </span>
+                            <input id="ipv6_nd_tll" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">ipv6_exthdr</button>
+                            </span>
+                            <input id="ipv6_exthdr" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">ipv6_exthdr_mask</button>
+                            </span>
+                            <input id="ipv6_exthdr_mask" class="form-control" type="text" />
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
         </div>
+        <!-- Right Column -->
         <div class="col-md-4">
         <div class="panel-group" id="accordionTwo">
             <div class="panel panel-success">
                 <div class="panel-heading">
-                    <h4 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#accordionTwo" href="#tcp">
-                            tcp
-                        </a>
-                    </h4>
+                    <a data-toggle="collapse" data-parent="#accordionTwo" href="#tcp">
+                        <h4 class="panel-title">
+                            <span class="glyphicon glyphicon-chevron-down"></span> tcp
+                        </h4>
+                    </a>
                 </div>
                 <div id="tcp" class="panel-collapse collapse">
                     <div class="panel-body">
-                        <p>tcp_src</p>
-                        <input id="tcp_src" type="text" />
-                        <p>tcp_dst</p>
-                        <input id="tcp_dst" type="text" />
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">tcp_src</button>
+                            </span>
+                            <input id="tcp_src" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">tcp_dst</button>
+                            </span>
+                            <input id="tcp_dst" class="form-control" type="text" />
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="panel panel-success">
                 <div class="panel-heading">
-                    <h4 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#accordionTwo" href="#udp">
-                            udp
-                        </a>
-                    </h4>
+                    <a data-toggle="collapse" data-parent="#accordionTwo" href="#udp">
+                        <h4 class="panel-title">
+                            <span class="glyphicon glyphicon-chevron-down"></span> udp
+                        </h4>
+                    </a>
                 </div>
                 <div id="udp" class="panel-collapse collapse">
                     <div class="panel-body">
-                        <p>udp_src</p>
-                        <input id="udp_src" type="text" />
-                        <p>udp_dst</p>
-                        <input id="udp_dst" type="text" />
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">udp_src</button>
+                            </span>
+                            <input id="udp_src" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">udp_dst</button>
+                            </span>
+                            <input id="udp_dst" class="form-control" type="text" />
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="panel panel-success">
                 <div class="panel-heading">
-                    <h4 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#accordionTwo" href="#sctp">
-                            sctp
-                        </a>
-                    </h4>
+                    <a data-toggle="collapse" data-parent="#accordionTwo" href="#sctp">
+                        <h4 class="panel-title">
+                            <span class="glyphicon glyphicon-chevron-down"></span> sctp
+                        </h4>
+                    </a>
                 </div>
                 <div id="sctp" class="panel-collapse collapse">
                     <div class="panel-body">
-                        <p>sctp_src</p>
-                        <input id="sctp_src" type="text" />
-                        <p>sctp_dst</p>
-                        <input id="sctp_dst" type="text" />
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">sctp_src</button>
+                            </span>
+                            <input id="sctp_src" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">sctp_dst</button>
+                            </span>
+                            <input id="sctp_dst" class="form-control" type="text" />
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="panel panel-success">
                 <div class="panel-heading">
-                    <h4 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#accordionTwo" href="#icmpv4">
-                            icmpv4
-                        </a>
-                    </h4>
+                    <a data-toggle="collapse" data-parent="#accordionTwo" href="#icmpv4">
+                        <h4 class="panel-title">
+                            <span class="glyphicon glyphicon-chevron-down"></span> icmpv4
+                        </h4>
+                    </a>
                 </div>
                 <div id="icmpv4" class="panel-collapse collapse">
                     <div class="panel-body">
-                        <p>icmpv4_type</p>
-                        <input id="icmpv4_type" type="text" />
-                        <p>icmpv4_code</p>
-                        <input id="icmpv4_code" type="text" />
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">icmpv4_type</button>
+                            </span>
+                            <input id="icmpv4_type" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">icmpv4_code</button>
+                            </span>
+                            <input id="icmpv4_code" class="form-control" type="text" />
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="panel panel-success">
                 <div class="panel-heading">
-                    <h4 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#accordionTwo" href="#icmpv6">
-                            icmpv6
-                        </a>
-                    </h4>
+                    <a data-toggle="collapse" data-parent="#accordionTwo" href="#icmpv6">
+                        <h4 class="panel-title">
+                            <span class="glyphicon glyphicon-chevron-down"></span> icmpv6
+                        </h4>
+                    </a>
                 </div>
                 <div id="icmpv6" class="panel-collapse collapse">
                     <div class="panel-body">
-                        <p>icmpv6_type</p>
-                        <input id="icmpv6_type" type="text" />
-                        <p>icmpv6_code</p>
-                        <input id="icmpv6_code" type="text" />
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">icmpv6_type</button>
+                            </span>
+                            <input id="icmpv6_type" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">icmpv6_code</button>
+                            </span>
+                            <input id="icmpv6_code" class="form-control" type="text" />
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="panel panel-success">
                 <div class="panel-heading">
-                    <h4 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#accordionTwo" href="#mpls">
-                            mpls
-                        </a>
-                    </h4>
+                    <a data-toggle="collapse" data-parent="#accordionTwo" href="#mpls">
+                        <h4 class="panel-title">
+                            <span class="glyphicon glyphicon-chevron-down"></span> mpls
+                        </h4>
+                    </a>
                 </div>
                 <div id="mpls" class="panel-collapse collapse">
                     <div class="panel-body">
-                        <p>mpls_label</p>
-                        <input id="mpls_label" type="text" />
-                        <p>mpls_tc</p>
-                        <input id="mpls_tc" type="text" />
-                        <p>mpls_bos</p>
-                        <input id="mpls_bos" type="text" />
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">mpls_label</button>
+                            </span>
+                            <input id="mpls_label" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">mpls_tc</button>
+                            </span>
+                            <input id="mpls_tc" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">mpls_bos</button>
+                            </span>
+                            <input id="mpls_bos" class="form-control" type="text" />
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="panel panel-success">
                 <div class="panel-heading">
-                    <h4 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#accordionTwo" href="#pbb">
-                            pbb
-                        </a>
-                    </h4>
+                    <a data-toggle="collapse" data-parent="#accordionTwo" href="#pbb">
+                        <h4 class="panel-title">
+                            <span class="glyphicon glyphicon-chevron-down"></span> pbb
+                        </h4>
+                    </a>
                 </div>
                 <div id="pbb" class="panel-collapse collapse">
                     <div class="panel-body">
-                        <p>pbb_isid</p>
-                        <input id="pbb_isid" type="text" />
-                        <p>pbb_isid_mask</p>
-                        <input id="pbb_isid_mask" type="text" />
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">pbb_isid</button>
+                            </span>
+                            <input id="pbb_isid" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">pbb_isid_mask</button>
+                            </span>
+                            <input id="pbb_isid_mask" class="form-control" type="text" />
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="panel panel-success">
                 <div class="panel-heading">
-                    <h4 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#accordionTwo" href="#tunnel">
-                            tunnel
-                        </a>
-                    </h4>
+                    <a data-toggle="collapse" data-parent="#accordionTwo" href="#tunnel">
+                        <h4 class="panel-title">
+                            <span class="glyphicon glyphicon-chevron-down"></span> tunnel
+                        </h4>
+                    </a>
                 </div>
                 <div id="tunnel" class="panel-collapse collapse">
                     <div class="panel-body">
-                        <p>tunnel_id</p>
-                        <input id="tunnel_id" type="text" />
-                        <p>tunnel_id_mask</p>
-                        <input id="tunnel_id_mask" type="text" />
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">tunnel_id</button>
+                            </span>
+                            <input id="tunnel_id" class="form-control" type="text" />
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                <button class="btn btn-default" type="button">tunnel_id_mask</button>
+                            </span>
+                            <input id="tunnel_id_mask" class="form-control" type="text" />
+                        </div>
                     </div>
                 </div>
             </div>
