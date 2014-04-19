@@ -1,3 +1,18 @@
+toastr.options = {
+    "closeButton": false,
+    "debug": false,
+    "positionClass": "toast-bottom-right",
+    "onclick": null,
+    "showDuration": "300",
+    "hideDuration": "1000",
+    "timeOut": "5000",
+    "extendedTimeOut": "1000",
+    "showEasing": "swing",
+    "hideEasing": "linear",
+    "showMethod": "fadeIn",
+    "hideMethod": "fadeOut"
+}
+
 function updateShowcase(json) {
     var oxm_match = JSON.parse(json);
     console.log(oxm_match);
@@ -8,14 +23,17 @@ function queryUdsEntries() {
     $.ajax({
         type: 'GET',
         url: 'http://localhost:5567/uds/json',
-        dataType: 'jsonp',
-        jsonpCallback: 'uds',
+        dataType: 'json',
+        //dataType: 'jsonp',
+        //jsonpCallback: 'uds',
         success: function(json) {
             updateShowcase(json);
+            toastr.success('Updated successfully.', 'RELOAD');
             console.log(json);
         },
-        error: function() {
-            console.log('Fail to query UDS Entries.');
+        error: function(resp) {
+            toastr.error('Fail to query UDS Entries.', 'RELOAD');
+            console.log(resp);
         }
     });
 }
@@ -26,9 +44,11 @@ function udsEntryMgmt(action, oxm_match) {
         url: 'http://localhost:5567/uds/' + action,
         data: oxm_match,
         success: function(resp) {
+            toastr.success('Flow added successfully.', action.toUpperCase() + ' FLOW');
             console.log(resp);
         },
         error: function(resp) {
+            toastr.error('Something went wrong.', action.toUpperCase() + ' FLOW');
             console.log(resp);
         }
     });
