@@ -79,10 +79,10 @@ $(document).ready(function() {
         var d = $(this).closest('.panel-heading').next();
         var s = $(this).find('.glyphicon');
         $(this).closest('.panel-group').find('.glyphicon')
-            .removeClass('glyphicon-chevron-up')
-            .addClass('glyphicon-chevron-down');
+            .removeClass('glyphicon-chevron-down')
+            .addClass('glyphicon-chevron-up');
         if(d.attr('class').split(' ').indexOf('in') == -1) {
-            s.removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
+            s.removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
         }
     });
 });
