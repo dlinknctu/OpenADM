@@ -2,6 +2,7 @@ var defaultFlow = {
     "switch": "00:00:00:00:00:00:00:01",
     "ingressPort": "0",
     "vlan": "0",
+    "vlanP": "0",
     "srcMac": "00:00:00:00:00:00",
     "dstMac": "00:00:00:00:00:00",
     "dlType": "0",
