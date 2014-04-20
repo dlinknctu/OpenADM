@@ -3,15 +3,14 @@
 	<head>
 		<meta charset="utf-8">
 		<title>OmniUI</title>
-		<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
-		<script src="http://code.jquery.com/jquery-1.10.2.js"></script>
-		<script src="http://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
 		<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-		<script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
 		<link rel="stylesheet" href="css/omniui-stat13.css">
-		<script type="text/javascript" src="js/d3.v3.min.js"></script>
-		<script type="text/javascript" src="js/omniui-stat.js"></script>
+		<link rel="stylesheet" href="css/ui-lightness/jquery-ui-1.10.4.custom.css">
+		<script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
+		<script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
 		<script type="text/javascript" src="js/omniui-stat13.js"></script>
+		<script type="text/javascript" src="js/jquery-ui-1.10.4.custom.min.js"></script>
+		<script type="text/javascript" src="js/d3.v3.min.js"></script>
 		<script type="text/javascript">
 			$(document).ready(function() {
 				var url = "http://lab.rascov.tw:5567/stat"
@@ -42,7 +41,7 @@
 							if(table_n==$(this).parent().attr('class'))
 								localStorage.removeItem(key);
 						}
-						console.log(localStorage);
+						//console.log(localStorage);
 						$(this).parent().parent().empty().remove();
 						$('.popover').remove();
 					});
@@ -174,9 +173,8 @@
 					// push from, to, DPID and interval into json
 					data['from'] = $("#from").val();
 					data['to'] = $("#to").val();
-					var select = $('input[name=interval]:checked').attr('id').split('@');
-					data['interval'] = select[1];
-
+					data['interval'] = $('input[name=interval]:checked').val();
+					
 					console.log(data);
 					// JSON translation
 					json = JSON.stringify(data);
@@ -247,12 +245,12 @@
 					<label for="to">To</label>
 					<input type="text" id="to" name="to">
 					<div id="radio">
-						<input type="radio" id="radio1@0" name="interval" value="0" checked="checked"><label for="radio1">Hourly</label>
-						<input type="radio" id="radio2@1" name="interval" value="1"><label for="radio2">Daily</label>
+						<input type="radio" id="radio1" name="interval" value="0" checked="checked"><label for="radio1">Hourly</label>
+						<input type="radio" id="radio2" name="interval" value="1"><label for="radio2">Daily</label>
 						<!-- TODO: weekly is not support yet !-->
-						<input type="radio" id="radio3@2" name="interval" value="2"><label for="radio3">Weekly</label>
-						<input type="radio" id="radio4@3" name="interval" value="3"><label for="radio4">Monthly</label>
-						<input type="radio" id="radio5@4" name="interval" value="4"><label for="radio5">Annually</label>
+						<input type="radio" id="radio3" name="interval" value="2"><label for="radio3">Weekly</label>
+						<input type="radio" id="radio4" name="interval" value="3"><label for="radio4">Monthly</label>
+						<input type="radio" id="radio5" name="interval" value="4"><label for="radio5">Annually</label>
 					</div>
 					<button id="addform" type="button">Append</button>
 					<button id="update" type="botton">Update</button>

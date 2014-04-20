@@ -41,6 +41,11 @@ table {
   padding-top: 50px;
 }
 
+#ui-datepicker-div select {
+  color: black;
+  font-weight: normal;
+}
+
 .statform {
   background: #CCCCCC;
   margin: 10px;
