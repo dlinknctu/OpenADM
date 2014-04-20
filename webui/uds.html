@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>OmniUI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>OmniUI - UDS</title>
     <!-- Load CSS files -->
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" />
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/2.0.1/css/toastr.min.css" />
@@ -15,7 +16,7 @@
 </head>
 <body>
     <!-- HEADER -->
-    <div class="container-fluid banner">
+    <div id="banner" class="container-fluid">
         <div class="row">
             <div class="col-md-4 col-md-offset-4">
                 <h1 class="text-center">OmniUI</h1>
@@ -23,9 +24,9 @@
         </div>
     </div><!-- End of HEADER -->
     <!-- TOOLBOX -->
-    <div class="container-fluid toolbox">
+    <div id="toolbox" class="container-fluid">
         <div class="row">
-            <div class="col-md-4">
+            <div id="console" class="col-md-3">
                 <h1 class="uds-title">UDS <small>User-Defined Statistics</small></h1>
                 <button id="reload" type="button" class="btn btn-default btn-lg">
                     <span class="glyphicon glyphicon-repeat"></span> Reload
@@ -40,8 +41,27 @@
             <!-- oxm-form contains two columns -->
             <div id="oxm-form">
             <!-- Left Column -->
-            <div class="col-md-4">
+            <div id="left-toolbox" class="col-md-3">
                 <div class="panel-group" id="accordionOne">
+                    <div class="panel panel-info">
+                        <div class="panel-heading">
+                            <a data-toggle="collapse" data-parent="#accordionOne" href="#dpid">
+                                <h4 class="panel-title">
+                                    <span class="glyphicon glyphicon-chevron-up"></span> dpid
+                                </h4>
+                            </a>
+                        </div>
+                        <div id="dpid" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                <div class="input-group">
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default" type="button">dpid</button>
+                                    </span>
+                                    <input id="dpid" class="form-control" type="text" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="panel panel-info">
                         <div class="panel-heading">
                             <a data-toggle="collapse" data-parent="#accordionOne" href="#in">
@@ -227,9 +247,14 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div><!-- End of Left Column -->
+            <!-- Mid Column -->
+            <div id="mid-toolbox" class="col-md-3">
+                <div class="panel-group" id="accordionTwo">
                     <div class="panel panel-warning">
                         <div class="panel-heading">
-                            <a data-toggle="collapse" data-parent="#accordionOne" href="#ip">
+                            <a data-toggle="collapse" data-parent="#accordionTwo" href="#ip">
                                 <h4 class="panel-title">
                                     <span class="glyphicon glyphicon-chevron-up"></span> ip
                                 </h4>
@@ -260,7 +285,7 @@
                     </div>
                     <div class="panel panel-warning">
                         <div class="panel-heading">
-                            <a data-toggle="collapse" data-parent="#accordionOne" href="#ipv4">
+                            <a data-toggle="collapse" data-parent="#accordionTwo" href="#ipv4">
                                 <h4 class="panel-title">
                                     <span class="glyphicon glyphicon-chevron-up"></span> ipv4
                                 </h4>
@@ -297,7 +322,7 @@
                     </div>
                     <div class="panel panel-warning">
                         <div class="panel-heading">
-                            <a data-toggle="collapse" data-parent="#accordionOne" href="#ipv6">
+                            <a data-toggle="collapse" data-parent="#accordionTwo" href="#ipv6">
                                 <h4 class="panel-title">
                                     <span class="glyphicon glyphicon-chevron-up"></span> ipv6
                                 </h4>
@@ -375,13 +400,13 @@
                         </div>
                     </div>
                 </div>
-            </div><!-- End of Left Column -->
+            </div><!-- End of Mid Column -->
             <!-- Right Column -->
-            <div class="col-md-4">
-                <div class="panel-group" id="accordionTwo">
+            <div id="right-toolbox" class="col-md-3">
+                <div class="panel-group" id="accordionThree">
                     <div class="panel panel-success">
                         <div class="panel-heading">
-                            <a data-toggle="collapse" data-parent="#accordionTwo" href="#tcp">
+                            <a data-toggle="collapse" data-parent="#accordionThree" href="#tcp">
                                 <h4 class="panel-title">
                                     <span class="glyphicon glyphicon-chevron-up"></span> tcp
                                 </h4>
@@ -406,7 +431,7 @@
                     </div>
                     <div class="panel panel-success">
                         <div class="panel-heading">
-                            <a data-toggle="collapse" data-parent="#accordionTwo" href="#udp">
+                            <a data-toggle="collapse" data-parent="#accordionThree" href="#udp">
                                 <h4 class="panel-title">
                                     <span class="glyphicon glyphicon-chevron-up"></span> udp
                                 </h4>
@@ -431,7 +456,7 @@
                     </div>
                     <div class="panel panel-success">
                         <div class="panel-heading">
-                            <a data-toggle="collapse" data-parent="#accordionTwo" href="#sctp">
+                            <a data-toggle="collapse" data-parent="#accordionThree" href="#sctp">
                                 <h4 class="panel-title">
                                     <span class="glyphicon glyphicon-chevron-up"></span> sctp
                                 </h4>
@@ -456,7 +481,7 @@
                     </div>
                     <div class="panel panel-success">
                         <div class="panel-heading">
-                            <a data-toggle="collapse" data-parent="#accordionTwo" href="#icmpv4">
+                            <a data-toggle="collapse" data-parent="#accordionThree" href="#icmpv4">
                                 <h4 class="panel-title">
                                     <span class="glyphicon glyphicon-chevron-up"></span> icmpv4
                                 </h4>
@@ -481,7 +506,7 @@
                     </div>
                     <div class="panel panel-success">
                         <div class="panel-heading">
-                            <a data-toggle="collapse" data-parent="#accordionTwo" href="#icmpv6">
+                            <a data-toggle="collapse" data-parent="#accordionThree" href="#icmpv6">
                                 <h4 class="panel-title">
                                     <span class="glyphicon glyphicon-chevron-up"></span> icmpv6
                                 </h4>
@@ -506,7 +531,7 @@
                     </div>
                     <div class="panel panel-success">
                         <div class="panel-heading">
-                            <a data-toggle="collapse" data-parent="#accordionTwo" href="#mpls">
+                            <a data-toggle="collapse" data-parent="#accordionThree" href="#mpls">
                                 <h4 class="panel-title">
                                     <span class="glyphicon glyphicon-chevron-up"></span> mpls
                                 </h4>
@@ -537,7 +562,7 @@
                     </div>
                     <div class="panel panel-success">
                         <div class="panel-heading">
-                            <a data-toggle="collapse" data-parent="#accordionTwo" href="#pbb">
+                            <a data-toggle="collapse" data-parent="#accordionThree" href="#pbb">
                                 <h4 class="panel-title">
                                     <span class="glyphicon glyphicon-chevron-up"></span> pbb
                                 </h4>
@@ -562,7 +587,7 @@
                     </div>
                     <div class="panel panel-success">
                         <div class="panel-heading">
-                            <a data-toggle="collapse" data-parent="#accordionTwo" href="#tunnel">
+                            <a data-toggle="collapse" data-parent="#accordionThree" href="#tunnel">
                                 <h4 class="panel-title">
                                     <span class="glyphicon glyphicon-chevron-up"></span> tunnel
                                 </h4>
@@ -591,7 +616,20 @@
         </div><!-- End of row -->
     </div><!-- End of TOOLBOX -->
     <!-- SHOWCASE -->
-    <div id="showcase" class="container-fluid showcase">
+    <div id="showcase-header" class="container-fluid">
+        <div class="row">
+            <div class="col-md-2">
+                <span class="lead">dpid</span>
+            </div>
+            <div class="col-md-2">
+                <span class="lead">duration/pkt_count/byte_count</span>
+            </div>
+            <div class="col-md-2">
+                <span class="lead">oxm_match</span>
+            </div>
+        </div>
+    </div>
+    <div id="showcase" class="container-fluid">
     </div><!-- End of SHOWCASE -->
 </body>
 </html>
