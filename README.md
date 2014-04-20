@@ -20,3 +20,9 @@ OmniUI is a debugging and performance evaluation tool for Software-Defined Netwo
     2. Simply copy `/webui` into root directory of website
 - Install MongoDB 
     * Please refer to [Install MongoDB](http://docs.mongodb.org/manual/installation/)
+- Modify the config file
+    * `core/config.json`: Update `dbip`, `user` and `password` in both UIPusher and DbCollection section
+    
+    if you are access webui from outside localhost (optional)
+    * `core/core.py`: Update `Access-Control-Allow-Origin`
+    * `webui/js/omniui.js`: Update IP in `function loadJSONP()` and `function sendFlow()`
