@@ -36,17 +36,17 @@ class DbCollection:
 		tableName =	"uds_hourly"+self.prevDay.strftime("%Y_%m_%d")
 		for entry in self.db[tableName].find():
 			key = entry.copy()
-			key.pop('counterByte',None)
-			key.pop('counterPacket',None)
+			key.pop('byte_count',None)
+			key.pop('packet_count',None)
 			key.pop('duration',None)
 			key.pop('_id',None)
 			key['date'] = int(time.mktime(datetime.datetime.strptime(self.prevDay.strftime("%Y_%m_%d"),"%Y_%m_%d").timetuple()))
 			exist =  self.db['uds_daily'].find_one(key)
 			if exist is not None:
 				key['_id'] = exist['_id']
-				key['counterByte'] = entry['counterByte'] + exist['counterByte']
+				key['byte_count'] = entry['byte_count'] + exist['byte_count']
 			else:
-				key['counterByte'] = entry['counterByte']
+				key['byte_count'] = entry['byte_count']
 			self.db['uds_daily'].save(key)
 			
 		self.prevDay = today
@@ -61,17 +61,17 @@ class DbCollection:
 			key['date'] = {'$gte':fromTime,'$lt':toTime}
 			for entry in self.db['uds_daily'].find(key):
 				key = entry.copy()
-				key.pop('counterByte',None)
-				key.pop('counterPacket',None)
+				key.pop('byte_count',None)
+				key.pop('packet_count',None)
 				key.pop('duration',None)
 				key.pop('_id',None)
 				key['date'] = toTime - 86400*7 #last sunday
 				exist = self.db['uds_weekly'].find_one(key)
 				if exist is not None:
 					key['_id'] = exist['_id']
-					key['counterByte'] = entry['counterByte'] + exist['counterByte']
+					key['byte_count'] = entry['byte_count'] + exist['byte_count']
 				else:
-					key['counterByte'] = entry['counterByte']
+					key['byte_count'] = entry['byte_count']
 				self.db['uds_weekly'].save(key)
 			self.prevWeekDay = today		
 
@@ -86,17 +86,17 @@ class DbCollection:
 			key['date'] = {'$gte':fromTime,'$lt':toTime}
 			for entry in self.db['uds_daily'].find(key):
 				key = entry.copy()
-				key.pop('counterByte',None)
-				key.pop('counterPacket',None)
+				key.pop('byte_count',None)
+				key.pop('packet_count',None)
 				key.pop('duration',None)
 				key.pop('_id',None)
 				key['date'] = fromTime
 				exist = self.db['uds_monthly'].find_one(key)
 				if exist is not None:
 					key['_id'] = exist['_id']
-					key['counterByte'] = entry['counterByte'] + exist['counterByte']
+					key['byte_count'] = entry['byte_count'] + exist['byte_count']
 				else:
-					key['counterByte'] = entry['counterByte']
+					key['byte_count'] = entry['byte_count']
 				self.db['uds_monthly'].save(key)
 			self.prevMonth = today
 	def monthlyToAnnually(self):
@@ -109,17 +109,17 @@ class DbCollection:
 			key['date'] = {'$gte':fromTime,'$lt':toTime}
 			for entry in self.db['uds_monthly'].find(key):
 				key = entry.copy()
-				key.pop('counterByte',None)
-				key.pop('counterPacket',None)
+				key.pop('byte_count',None)
+				key.pop('packet_count',None)
 				key.pop('duration',None)
 				key.pop('_id',None)
 				key['date'] = fromTime
 				exist = self.db['uds_annually'].find_one(key)
 				if exist is not None:
 					key['_id'] = exist['_id']
-					key['counterByte'] = entry['counterByte'] + exist['counterByte']
+					key['byte_count'] = entry['byte_count'] + exist['byte_count']
 				else:
-					key['counterByte'] = entry['counterByte']
+					key['byte_count'] = entry['byte_count']
 				self.db['uds_annually'].save(key)
 			self.prevMonth = today
 
