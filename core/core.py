@@ -72,6 +72,7 @@ class Core:
 			@hook('after_request')
 			def enable_cors():
 				response.headers['Access-Control-Allow-Origin'] = 'http://localhost'
+				response.headers['Access-Control-Allow-Methods'] = 'GET,POST,PUT,OPTIONS'
 
 			@route('/info/:request', method='GET')
 			def restRouter(request):
@@ -88,6 +89,26 @@ class Core:
                                 return restHandlers['flowmod'](data2)
                             else:
                                 abort(404, "Not found: '/flowmod'")
+			@route('/uds/:request',method='GET')
+			def restRouter(request):
+				if "uds"+request in restHandlers:
+					return restHandlers["uds"+request]()
+				else:
+					abort(404, "Not found: '/uds/%s'" % request)
+
+			@route('/uds/add', method=['OPTIONS','PUT'])
+			def StatHandler():
+				print "haha"
+				if "udsadd" in restHandlers:
+					return restHandlers["udsadd"](request)
+				else:
+					abort(404, "Not found: '/uds/%s'" % request)
+			@route('/uds/del', method=['OPTIONS','PUT'])
+			def StatHandler():
+				if "udsdel" in restHandlers:
+					return restHandlers["udsdel"](request)
+				else:
+					abort(404, "Not found: '/uds/%s'" % request)
 
 			@route('/stat', method='POST')
 			def StatHandler():

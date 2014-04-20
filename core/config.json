@@ -1,5 +1,5 @@
 {
-	"ControllerType":"pox",
+	"ControllerType":"trema",
 	"LogFile": "core.log",
 	"REST": {
 		"ip": "localhost",	
@@ -19,7 +19,9 @@
 		"port": "8080",
 		"interval": "5"
     },
-	"Flow_mod":	{
+	"Flow_mod":{
+		"ip":"localhost",
+		"port":"8080"
 	},
 	"DbCollection": {
 		"enable":"True",
