@@ -53,6 +53,9 @@ class ControllerAdapter:
 	def periodicInquiry(self):
 		try:
 			response = urllib2.urlopen(self.udsUrl).read()
+			if response == "null":
+				result = {}
+				return json.dumps(result,separators=(',',':'))
 			data = json.loads(response)
 			self.uds=[]
 			for switch in data:

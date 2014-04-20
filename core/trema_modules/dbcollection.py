@@ -7,8 +7,8 @@ class DbCollection:
 	def __init__(self,core,parm):
 		#	membeRs
 		self.timeInterval = int(parm['interval'])
-		self.prevDay  = datetime.datetime.today() 
-		self.prevWeekDay  = datetime.datetime.today() 
+		self.prevDay  = datetime.datetime.today()
+		self.prevWeekDay  = datetime.datetime.today()
 		self.prevMonth = datetime.datetime.today()
 		self.prevYear = datetime.datetime.today()
 		self.enable = True if parm['enable'] == "true" or parm['enable'] == "True"  else False
@@ -48,8 +48,8 @@ class DbCollection:
 			else:
 				key['byte_count'] = entry['byte_count']
 			self.db['uds_daily'].save(key)
-			
 		self.prevDay = today
+		
 	def dailyToWeekly(self):
 		today = datetime.datetime.today() 
 		#update the daily to weekly every sunday

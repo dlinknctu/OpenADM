@@ -13,7 +13,7 @@ class UIPusher:
 		# register event handler
 		core.registerEventHandler("controlleradapter", self.controllerHandler)
 		# register rest api
-		core.registerRestApi("uds", self.udsHandler)
+		core.registerRestApi("udsget", self.udsHandler)
 		core.registerRestApi("stat", self.statisticHandler)
 		# save core for ipc use
 		self.core = core
@@ -42,8 +42,8 @@ class UIPusher:
 		return "omniui(%s);" % result
 
 	def controllerHandler(self,event):
-		if event is None:
-			print "None"
+		if event is None or event == "{}":
+			print "null event"
 			return
 		if self.enable:
 			#compute timestamp 
