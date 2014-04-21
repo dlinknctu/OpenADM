@@ -500,6 +500,9 @@ handle_query_get_uds( const struct mg_request_info *request_info, void *request_
 	char dpid[30];
 	memset(dpid,0,sizeof(dpid));
 	memcpy(dpid,&request_info->uri[9],strlen(request_info->uri)-8);
+	while(uds_count!=0){
+		sleep(1);
+	}
 	uds_count = 1;
 	if( NULL != response){
 		json_object_put(response);
@@ -524,6 +527,9 @@ handle_query_get_uds_all( const struct mg_request_info *request_info, void *requ
 	UNUSED(request_info);
 	int err,i=0;
 	const list_element *element;
+	while(uds_count!=0){
+		sleep(1);
+	}
 	uds_count = uds_current_count ;
 	if( NULL != response){
 		json_object_put(response);
@@ -792,18 +798,34 @@ int get_uds_flow(uint64_t datapath_id, char* request_data){
 
 
 int set_oxm_matches_from_json(oxm_matches* oxm_match,char* request_data){
+	char match_str[ MATCH_STRING_LENGTH ];
 	int err = 0;
 	json_object *new_obj,*match;
 	json_object *data1,*data2;
     new_obj = json_tokener_parse(request_data);
+	//printf("nuw_obj = %s \n",json_object_to_json_string(new_obj));
 	if(!json_object_object_get_ex(new_obj,"match",&match)){
 		printf("parse match filed  error %s\n",json_object_get_string(new_obj));
   		err = -1;
 		goto error;
 	}
+	//in_port 
+	if(json_object_object_get_ex(match,"in_port",&data1)){
+		uint32_t in_port;
+		in_port = (uint32_t)json_object_get_int(data1);
+		json_object_put(data1);
+		append_oxm_match_in_port(oxm_match,in_port);
+	}
+	//in_phy_port 
+	if(json_object_object_get_ex(match,"in_phy_port",&data1)){
+		uint32_t in_phy_port;
+		in_phy_port = (uint32_t)json_object_get_int(data1);
+		json_object_put(data1);
+		append_oxm_match_in_port(oxm_match,in_phy_port);
+	}
 	// eth_type (hexdecimal) ex. 0x0806
 	if(json_object_object_get_ex(match,"eth_type",&data1)){
-		int eth_type;
+		uint32_t eth_type;
 		sscanf(json_object_get_string(data1),"0x%x",&eth_type);
 		json_object_put(data1);
 		append_oxm_match_eth_type(oxm_match,(uint16_t)eth_type);
@@ -838,16 +860,49 @@ int set_oxm_matches_from_json(oxm_matches* oxm_match,char* request_data){
 		}
 		append_oxm_match_eth_dst(oxm_match,(uint8_t*)eth_mac,(uint8_t*)eth_mac_mask);
 	}
-	//in_port 
-	if(json_object_object_get_ex(match,"in_port",&data1)){
-		int in_port;
-		in_port = json_object_get_int(data1);
+	//vlan_vid: uint16_t,  vlan_vid_mask:uint16_t
+	if(json_object_object_get_ex(match,"vlan_vid",&data1)){
+		uint16_t vid = 0,mask = 0xffff;
+		vid = (uint16_t)json_object_get_int(data1);
+		if(json_object_object_get_ex(match,"vlan_vid_mask",&data2)){
+			mask = (uint16_t)json_object_get_int(data2);
+			json_object_put(data2);
+		}
 		json_object_put(data1);
-		append_oxm_match_in_port(oxm_match,(uint32_t)in_port);
+		append_oxm_match_vlan_vid(oxm_match,vid,mask);
 	}
+	//vlan_pcp: uint8_t,
+	if(json_object_object_get_ex(match,"vlan_pcp",&data1)){
+		uint8_t vlan_pcp;
+		vlan_pcp = (uint8_t)json_object_get_int(data1);
+		json_object_put(data1);
+		append_oxm_match_vlan_pcp(oxm_match,vlan_pcp);
+	}
+	// ip_dscp: uint8_t,
+	if(json_object_object_get_ex(match,"ip_dscp",&data1)){
+		uint8_t ip_dscp;
+		ip_dscp = (uint8_t)json_object_get_int(data1);
+		json_object_put(data1);
+		append_oxm_match_ip_dscp(oxm_match,ip_dscp);
+	}
+	// ip_ecn: uint8_t,
+	if(json_object_object_get_ex(match,"ip_ecn",&data1)){
+		uint8_t ip_ecn;
+		ip_ecn = (uint8_t)json_object_get_int(data1);
+		json_object_put(data1);
+		append_oxm_match_ip_ecn(oxm_match,ip_ecn);
+	}
+	// ip_proto: uint8_t,
+	if(json_object_object_get_ex(match,"ip_proto",&data1)){
+		uint8_t ip_proto;
+		ip_proto = (uint8_t)json_object_get_int(data1);
+		json_object_put(data1);
+		append_oxm_match_ip_proto(oxm_match,ip_proto);
+	}
+
 	//ipv4_src && ipv4_src_mask
 	if(json_object_object_get_ex(match,"ipv4_src",&data1)){
-		unsigned ip[5],mask[5];
+		unsigned int ip[5],mask[5];
 		sscanf(json_object_get_string(data1),"%d.%d.%d.%d",&ip[0],&ip[1],&ip[2],&ip[3]);
 		ip[4] = ip[0]<<24 | ip[1]<<16 | ip[2]<<8 | ip[3];
 		json_object_put(data1);
@@ -858,7 +913,6 @@ int set_oxm_matches_from_json(oxm_matches* oxm_match,char* request_data){
 		}else{
 			mask[4] = 0xffffffff;
 		}
-		append_oxm_match_eth_type(oxm_match, 0x0800 );
 		append_oxm_match_ipv4_src(oxm_match,ip[4],mask[4]);
 	}
 	//ipv4_dst && ipv4_dst_mask
@@ -875,9 +929,257 @@ int set_oxm_matches_from_json(oxm_matches* oxm_match,char* request_data){
 		else{
 			mask[4] = 0xffffffff;
 		}
-		append_oxm_match_eth_type(oxm_match, 0x0800 );
 		append_oxm_match_ipv4_dst(oxm_match,ip[4],mask[4]);
 	}
+	//tcp_src: uint16_t,
+	if(json_object_object_get_ex(match,"tcp_src",&data1)){
+		uint16_t tcp_src;
+		tcp_src = (uint16_t)json_object_get_int(data1);
+		json_object_put(data1);
+		append_oxm_match_tcp_src(oxm_match,tcp_src);
+	}
+	//tcp_dst: uint16_t,
+	if(json_object_object_get_ex(match,"tcp_dst",&data1)){
+		uint16_t tcp_dst;
+		tcp_dst = (uint16_t)json_object_get_int(data1);
+		json_object_put(data1);
+		append_oxm_match_tcp_dst(oxm_match,tcp_dst);
+	}
+	//udp_src: uint16_t,
+	if(json_object_object_get_ex(match,"udp_src",&data1)){
+		uint16_t udp_src;
+		udp_src = (uint16_t)json_object_get_int(data1);
+		json_object_put(data1);
+		append_oxm_match_udp_src(oxm_match,udp_src);
+	}
+	//udp_dst: uint16_t,
+	if(json_object_object_get_ex(match,"udp_src",&data1)){
+		uint16_t udp_src;
+		udp_src = (uint16_t)json_object_get_int(data1);
+		json_object_put(data1);
+		append_oxm_match_udp_src(oxm_match,udp_src);
+	}
+	//sctp_src: uint16_t,
+	if(json_object_object_get_ex(match,"sctp_src",&data1)){
+		uint16_t sctp_src;
+		sctp_src = (uint16_t)json_object_get_int(data1);
+		json_object_put(data1);
+		append_oxm_match_sctp_src(oxm_match,sctp_src);
+	}
+	//sctp_dst: uint16_t,
+	if(json_object_object_get_ex(match,"sctp_dst",&data1)){
+		uint16_t sctp_dst;
+		sctp_dst = (uint16_t)json_object_get_int(data1);
+		json_object_put(data1);
+		append_oxm_match_sctp_dst(oxm_match,sctp_dst);
+	}
+	//icmpv4_type: uint8_t,
+	if(json_object_object_get_ex(match,"icmpv4_type",&data1)){
+		uint8_t icmpv4_type;
+		icmpv4_type = (uint8_t)json_object_get_int(data1);
+		json_object_put(data1);
+		append_oxm_match_icmpv4_type(oxm_match,icmpv4_type);
+	}
+	//icmpv4_code: uint8_t,
+	if(json_object_object_get_ex(match,"icmpv4_code",&data1)){
+		uint8_t icmpv4_code;
+		icmpv4_code = (uint8_t)json_object_get_int(data1);
+		json_object_put(data1);
+		append_oxm_match_icmpv4_code(oxm_match,icmpv4_code);
+	}
+	//arp_op: uint16_t,
+	if(json_object_object_get_ex(match,"arp_op",&data1)){
+		uint16_t arp_op;
+		arp_op = (uint16_t)json_object_get_int(data1);
+		json_object_put(data1);
+		append_oxm_match_arp_op(oxm_match,arp_op);
+	}
+	//arp_spa: uint32_t,  arp_spa_mask
+	if(json_object_object_get_ex(match,"arp_spa",&data1)){
+		unsigned int arp[5],mask[5];
+		sscanf(json_object_get_string(data1),"%d.%d.%d.%d",&arp[0],&arp[1],&arp[2],&arp[3]);
+		arp[4] = arp[0]<<24 | arp[1]<<16 | arp[2]<<8 | arp[3];
+		json_object_put(data1);
+		if(json_object_object_get_ex(match,"arp_spa_mask",&data2)){
+			sscanf(json_object_get_string(data2),"%d.%d.%d.%d",&mask[0],&mask[1],&mask[2],&mask[3]);
+			mask[4] = mask[0]<<24 | mask[1]<<16 | mask[2]<<8 | mask[3];
+			json_object_put(data2);
+		}else{
+			mask[4] = 0xffffffff;
+		}
+		append_oxm_match_arp_spa(oxm_match,arp[4],mask[4]);
+	}
+	//arp_tpa: uint32_t, arp_tpa_mask
+	if(json_object_object_get_ex(match,"arp_tpa",&data1)){
+		unsigned int arp[5],mask[5];
+		sscanf(json_object_get_string(data1),"%d.%d.%d.%d",&arp[0],&arp[1],&arp[2],&arp[3]);
+		arp[4] = arp[0]<<24 | arp[1]<<16 | arp[2]<<8 | arp[3];
+		json_object_put(data1);
+		if(json_object_object_get_ex(match,"arp_tpa_mask",&data2)){
+			sscanf(json_object_get_string(data2),"%d.%d.%d.%d",&mask[0],&mask[1],&mask[2],&mask[3]);
+			mask[4] = mask[0]<<24 | mask[1]<<16 | mask[2]<<8 | mask[3];
+			json_object_put(data2);
+		}else{
+			mask[4] = 0xffffffff;
+		}
+		append_oxm_match_arp_tpa(oxm_match,arp[4],mask[4]);
+	}
+	//arp_sha: uint8_t[6], arp_sha_mask
+    if(json_object_object_get_ex(match,"arp_sha",&data1)){
+		char eth_mac[OFP_ETH_ALEN],eth_mac_mask[OFP_ETH_ALEN];
+		sscanf(json_object_get_string(data1), "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", &eth_mac[0], &eth_mac[1], &eth_mac[2], &eth_mac[3], &eth_mac[4], &eth_mac[5]);
+		json_object_put(data1);
+		//Get eth_mac_mask
+		if(json_object_object_get_ex(match,"arp_sha_mask",&data2)){
+			sscanf(json_object_get_string(data2), "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", &eth_mac_mask[0], &eth_mac_mask[1], &eth_mac_mask[2], &eth_mac_mask[3], &eth_mac_mask[4], &eth_mac_mask[5]);
+			json_object_put(data2);
+		}	
+		else{
+			memset(eth_mac_mask,255,sizeof(eth_mac_mask));
+		}
+		append_oxm_match_arp_sha(oxm_match,(uint8_t*)eth_mac,(uint8_t*)eth_mac_mask);
+	}
+	//arp_tha: uint8_t[6],  arp_tha_mask
+    if(json_object_object_get_ex(match,"arp_tha",&data1)){
+		char eth_mac[OFP_ETH_ALEN],eth_mac_mask[OFP_ETH_ALEN];
+		sscanf(json_object_get_string(data1), "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", &eth_mac[0], &eth_mac[1], &eth_mac[2], &eth_mac[3], &eth_mac[4], &eth_mac[5]);
+		json_object_put(data1);
+		//Get eth_mac_mask
+		if(json_object_object_get_ex(match,"arp_tha_mask",&data2)){
+			sscanf(json_object_get_string(data2), "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", &eth_mac_mask[0], &eth_mac_mask[1], &eth_mac_mask[2], &eth_mac_mask[3], &eth_mac_mask[4], &eth_mac_mask[5]);
+			json_object_put(data2);
+		}	
+		else{
+			memset(eth_mac_mask,255,sizeof(eth_mac_mask));
+		}
+		append_oxm_match_arp_tha(oxm_match,(uint8_t*)eth_mac,(uint8_t*)eth_mac_mask);
+	}
+	//ipv6_src: 128bit 2001:0db8:85a3:08d3:1319:8a2e:0370:7344   ipv6_src_mask
+	if(json_object_object_get_ex(match,"ipv6_src",&data1)){
+		struct in6_addr ipv6_src,ipv6_src_mask;
+		inet_pton(AF_INET6, json_object_get_string(data1), &(ipv6_src.__in6_u.__u6_addr16));
+		json_object_put(data1);
+		if(json_object_object_get_ex(match,"ipv6_src_mask",&data2)){
+			inet_pton(AF_INET6, json_object_get_string(data2), &(ipv6_src_mask.__in6_u.__u6_addr16));
+			json_object_put(data2);
+		}	
+		append_oxm_match_ipv6_src(oxm_match,ipv6_src,ipv6_src_mask);
+	}
+	//ipv6_dst: in6_addr,
+	if(json_object_object_get_ex(match,"ipv6_dst",&data1)){
+		struct in6_addr ipv6_dst,ipv6_dst_mask;
+		inet_pton(AF_INET6, json_object_get_string(data1), &(ipv6_dst.__in6_u.__u6_addr16));
+		json_object_put(data1);
+		if(json_object_object_get_ex(match,"ipv6_dst_mask",&data2)){
+			inet_pton(AF_INET6, json_object_get_string(data2), &(ipv6_dst_mask.__in6_u.__u6_addr16));
+			json_object_put(data2);
+		}	
+		append_oxm_match_ipv6_dst(oxm_match,ipv6_dst,ipv6_dst_mask);
+	}
+	//ipv6_flabel: uint32_t, ipv6_flabel_mask
+	if(json_object_object_get_ex(match,"ipv6_flabel",&data1)){
+		uint32_t ipv6_flabel = 0,mask = 0xffffffff;
+		ipv6_flabel = (uint32_t)json_object_get_int(data1);
+		if(json_object_object_get_ex(match,"ipv6_flabel_mask",&data2)){
+			mask = (uint32_t)json_object_get_int(data2);
+			json_object_put(data2);
+		}
+		json_object_put(data1);
+		append_oxm_match_ipv6_flabel(oxm_match,ipv6_flabel,mask);
+	}
+	//icmpv6_type: uint8_t,
+	if(json_object_object_get_ex(match,"icmpv6_type",&data1)){
+		uint8_t icmpv6_type;
+		icmpv6_type = (uint8_t)json_object_get_int(data1);
+		json_object_put(data1);
+		append_oxm_match_icmpv6_type(oxm_match,icmpv6_type);
+	}
+	//icmpv6_code: uint8_t,
+	if(json_object_object_get_ex(match,"icmpv6_code",&data1)){
+		uint8_t icmpv6_code;
+		icmpv6_code = (uint8_t)json_object_get_int(data1);
+		json_object_put(data1);
+		append_oxm_match_icmpv6_code(oxm_match,icmpv6_code);
+	}
+	//ipv6_nd_target: in6_addr,
+	if(json_object_object_get_ex(match,"ipv6_nd_target",&data1)){
+		struct in6_addr ipv6_nd_target;
+		inet_pton(AF_INET6, json_object_get_string(data1), &(ipv6_nd_target.__in6_u.__u6_addr16));
+		json_object_put(data1);
+		append_oxm_match_ipv6_nd_target(oxm_match,ipv6_nd_target);
+	}
+	//ipv6_dst: in6_addr,
+	//ipv6_nd_sll: uint8_t[6],
+    if(json_object_object_get_ex(match,"ipv6_nd_sll",&data1)){
+		char eth_mac[OFP_ETH_ALEN];
+		sscanf(json_object_get_string(data1), "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", &eth_mac[0], &eth_mac[1], &eth_mac[2], &eth_mac[3], &eth_mac[4], &eth_mac[5]);
+		json_object_put(data1);
+		append_oxm_match_ipv6_nd_sll(oxm_match,(uint8_t*)eth_mac);
+	}
+	//ipv6_nd_tll: uint8_t[6],
+    if(json_object_object_get_ex(match,"ipv6_nd_tll",&data1)){
+		char eth_mac[OFP_ETH_ALEN];
+		sscanf(json_object_get_string(data1), "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", &eth_mac[0], &eth_mac[1], &eth_mac[2], &eth_mac[3], &eth_mac[4], &eth_mac[5]);
+		json_object_put(data1);
+		append_oxm_match_ipv6_nd_tll(oxm_match,(uint8_t*)eth_mac);
+	}
+	//mpls_label: uint32_t,
+	if(json_object_object_get_ex(match,"mpls_label",&data1)){
+		uint32_t mpls_label;
+		mpls_label = (uint32_t)json_object_get_int(data1);
+		json_object_put(data1);
+		append_oxm_match_mpls_label(oxm_match,mpls_label);
+	}
+	//mpls_label: uint8_t,
+	if(json_object_object_get_ex(match,"mpls_tc",&data1)){
+		uint8_t mpls_tc;
+		mpls_tc = (uint8_t)json_object_get_int(data1);
+		json_object_put(data1);
+		append_oxm_match_mpls_tc(oxm_match,mpls_tc);
+	}
+	//mpls_bos: uint8_t,
+	if(json_object_object_get_ex(match,"mpls_bos",&data1)){
+		uint8_t mpls_bos;
+		mpls_bos = (uint8_t)json_object_get_int(data1);
+		json_object_put(data1);
+		append_oxm_match_mpls_bos(oxm_match,mpls_bos);
+	}
+	//pbb_isid: uint32_t,   pbb_idid_mask
+	if(json_object_object_get_ex(match,"pbb_isid",&data1)){
+		uint32_t pbb_isid = 0,mask = 0xffffffff;
+		pbb_isid = (uint32_t)json_object_get_int(data1);
+		if(json_object_object_get_ex(match,"pbb_isid_mask",&data2)){
+			mask = (uint32_t)json_object_get_int(data2);
+			json_object_put(data2);
+		}
+		json_object_put(data1);
+		append_oxm_match_pbb_isid(oxm_match,pbb_isid,mask);
+	}
+	//tunnel_id: uint64_t,  tunnel_id_mask
+	if(json_object_object_get_ex(match,"tunnel_id",&data1)){
+		uint64_t tunnel_id = 0,mask = 0xffffffffffffffff;
+		sscanf(json_object_get_string(data1),"%" SCNu64 "",&tunnel_id);
+		if(json_object_object_get_ex(match,"tunnel_id_mask",&data2)){
+			sscanf(json_object_get_string(data2),"%" SCNu64 "",&mask);
+			json_object_put(data2);
+		}
+		json_object_put(data1);
+		append_oxm_match_tunnel_id(oxm_match,tunnel_id,mask);
+	}
+	//ipv6_exthdr: uint16_t,  && ipv6_exthdr_mask : uint16_t
+	if(json_object_object_get_ex(match,"ipv6_exthdr",&data1)){
+		uint16_t ipv6_exthdr = 0,mask = 0xffff;
+		ipv6_exthdr = (uint16_t)json_object_get_int(data1);
+		if(json_object_object_get_ex(match,"ipv6_exthdr_mask",&data2)){
+			mask = (uint16_t)json_object_get_int(data2);
+			json_object_put(data2);
+		}
+		json_object_put(data1);
+		append_oxm_match_ipv6_exthdr(oxm_match,ipv6_exthdr,mask);
+	}
+
+	match_to_string(oxm_match,match_str,sizeof(match_str));
+	//printf("oxm_match = %s\n",match_str);
 error:
 	json_object_put(new_obj);
 	return err;
