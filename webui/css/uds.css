@@ -1,0 +1,33 @@
+#banner {
+    color: #FFFFFF;
+    background: #33BB33;
+}
+#toolbox {
+    padding: 50px;
+}
+#toolbox #console button {
+    margin-bottom: 5px;
+}
+#showcase-header {
+    background: #9494B8;
+}
+#showcase-header .row {
+    margin: 5px;
+}
+#showcase {
+    background: #DDDDDD;
+}
+#showcase .row {
+    margin: 10px;
+    background: #CCCCCC;
+}
+#showcase .row .col-md-2 {
+    outline: 1px solid #ddd;
+    padding: 5px;
+}
+a {
+    text-decoration: none !important;
+}
+.input-group {
+    padding: 5px;
+}

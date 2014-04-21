@@ -1,0 +1,74 @@
+@import url("reset.css");
+
+body {
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: 0.9em;
+    color:#333;
+}
+
+p {
+    padding: 10px;
+}
+
+table {
+    margin: 0px auto;
+}
+
+#wrapper {
+    background: #DDDDDD;
+    width: 100%;
+    min-width: 1400px;
+    max-width: 2000px;
+    margin: 0 auto;
+}
+
+#header {
+    text-align: center;
+    font-size: 30px;
+    color: #FFFFFF;
+    float: left;
+    height: 50px;
+    width: 100%;
+    background: #33BB33;
+}
+
+#content {
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+#statformlist {
+  padding-top: 50px;
+}
+
+#ui-datepicker-div select {
+  color: black;
+  font-weight: normal;
+}
+
+.statform {
+  background: #CCCCCC;
+  margin: 10px;
+  padding: 10px;
+  border-width: 2px;
+  border-color: #AAAAAA;
+  border-style: dashed;
+}
+
+/* css for d3 */
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
