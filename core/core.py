@@ -98,7 +98,6 @@ class Core:
 
 			@route('/uds/add', method=['OPTIONS','PUT'])
 			def StatHandler():
-				print "haha"
 				if "udsadd" in restHandlers:
 					return restHandlers["udsadd"](request)
 				else:
