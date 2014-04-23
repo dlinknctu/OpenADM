@@ -68,5 +68,8 @@ class ControllerAdapter:
 			result = {}
 			result['nodes'] = self.uds
 			return json.dumps(result,separators=(',',':'))
-		except:
-			logger.debug("connection error for uds")
+		except Exception,e:
+			print e
+			logger.debug("connection error for uds"+str(e))
+			result = {}
+			return json.dumps(result,separators=(',',':'))
