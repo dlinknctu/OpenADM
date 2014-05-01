@@ -126,14 +126,31 @@ public class SwitchInfo extends JsonSerializer<SwitchInfo> {
 				for(OFAction action: actionList){
 					OFActionType type = action.getType();
 					jgen.writeStartObject();
-					String str = action.toString();
-					//Foramt = type[value]
-					int index1,index2;
-					index1 = str.indexOf('[');
-					index2 = str.lastIndexOf(']');
-					jgen.writeStringField("type",str.substring(0,index1));
-					jgen.writeStringField("value",str.substring(index1+1,index2));
-					jgen.writeEndObject();
+					if(type == OFActionType.SET_VLAN_ID){
+						OFActionVirtualLanIdentifier vaction = (OFActionVirtualLanIdentifier) action;
+						int vid = vaction.getVirtualLanIdentifier();
+						jgen.writeStringField("type","VLAN");
+						jgen.writeStringField("value",Integer.toString(vid));
+						jgen.writeEndObject();
+					}else if(type == OFActionType.SET_VLAN_PCP){
+						OFActionVirtualLanPriorityCodePoint paction = (OFActionVirtualLanPriorityCodePoint) action;
+						int pcp = paction.getVirtualLanPriorityCodePoint();
+						jgen.writeStringField("type","PRIO");
+						jgen.writeStringField("value",Integer.toString(pcp));
+						jgen.writeEndObject();
+					}else if(type == OFActionType.STRIP_VLAN){
+						jgen.writeStringField("type","STRIP_VLAN");
+						jgen.writeEndObject();
+					}else{
+						String str = action.toString();
+						//Foramt = type[value]
+						int index1,index2;
+						index1 = str.indexOf('[');
+						index2 = str.lastIndexOf(']');
+						jgen.writeStringField("type",str.substring(0,index1));
+						jgen.writeStringField("value",str.substring(index1+1,index2));
+						jgen.writeEndObject();
+					}
 				}
 
 				jgen.writeEndArray();
