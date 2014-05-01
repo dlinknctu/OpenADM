@@ -129,13 +129,13 @@ public class SwitchInfo extends JsonSerializer<SwitchInfo> {
 					if(type == OFActionType.SET_VLAN_ID){
 						OFActionVirtualLanIdentifier vaction = (OFActionVirtualLanIdentifier) action;
 						int vid = vaction.getVirtualLanIdentifier();
-						jgen.writeStringField("type","VLAN");
+						jgen.writeStringField("type","SET_VLAN_ID");
 						jgen.writeStringField("value",Integer.toString(vid));
 						jgen.writeEndObject();
 					}else if(type == OFActionType.SET_VLAN_PCP){
 						OFActionVirtualLanPriorityCodePoint paction = (OFActionVirtualLanPriorityCodePoint) action;
 						int pcp = paction.getVirtualLanPriorityCodePoint();
-						jgen.writeStringField("type","PRIO");
+						jgen.writeStringField("type","SET_VLAN_P");
 						jgen.writeStringField("value",Integer.toString(pcp));
 						jgen.writeEndObject();
 					}else if(type == OFActionType.STRIP_VLAN){

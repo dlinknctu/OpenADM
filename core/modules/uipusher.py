@@ -57,9 +57,15 @@ class UIPusher:
 					key.pop("counterByte",None)
 					key.pop("counterPacket",None)
 					key.pop("duration",None)
-					key['actions'] = "".join(["{0}:{1}".format(dic['type'],dic['value']) for dic in key['actions']])
+					for dic in key['actions']:
+						if dic['type'] == "STRIP_VLAN":
+							key['actions'] = "".join(["{0}".format(dic['type'])])
+						else:
+							key['actions'] = "".join(["{0}:{1}".format(dic['type'],dic['value'])])
 					key['dpid'] = str(node['dpid'])
 					key['date'] = int(now - reduntTime)
+					if isinstance(key['actions'],list):
+						del key['actions']
 					hashkey = frozenset(key.items())
 					if hashkey in self.cache:
 						if self.diff[hashkey][2] > flow['duration']:
