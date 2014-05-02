@@ -42,6 +42,8 @@ $(function() {
                     if("actions" in flow) {
                         flow["actions"] = flow["actions"].replace(/(.*)=/, function(a) {
                             return a.toUpperCase();
+                        }).replace(/(strip_vlan)/, function(a) {
+                            return a.toUpperCase();
                         });
                     }
                     var srcCIDR = flow["srcIP"].split(/\//);
@@ -65,6 +67,8 @@ $(function() {
                     flow["command"] = "MOD";
                     if("actions" in flow) {
                         flow["actions"] = flow["actions"].replace(/(.*)=/, function(a) {
+                            return a.toUpperCase();
+                        }).replace(/(strip_vlan)/, function(a) {
                             return a.toUpperCase();
                         });
                     }
@@ -107,6 +111,8 @@ $(function() {
                 if("actions" in flow) {
                     flow["actions"] = flow["actions"].replace(/(.*)=/, function(a) {
                         return a.toUpperCase();
+                    }).replace(/(strip_vlan)/, function(a) {
+                        return a.toUpperCase();
                     });
                 }
                 sendFlow(flow);
@@ -134,7 +140,11 @@ function modFlow(i) {
     var actions = flow.actions;
     var actionsStrArr = [];
     for(var j in actions) {
-        actionsStrArr.push(actions[j].type + "=" + actions[j].value);
+        if("value" in actions[j]) {
+            actionsStrArr.push(actions[j].type + "=" + actions[j].value);
+        } else {
+            actionsStrArr.push(actions[j].type);
+        }
     }
     flow["actions"] = actionsStrArr.toString();
     flow["command"] = "MOD_ST";

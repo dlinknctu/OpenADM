@@ -111,7 +111,11 @@ function mouseclick() {
         var actions = flows[i].actions;
         var actionsStrArr = [];
         for(var j in actions) {
-            actionsStrArr.push(actions[j].type + " " + actions[j].value);
+            if("value" in actions[j]) {
+                actionsStrArr.push(actions[j].type + " " + actions[j].value);
+            } else {
+                actionsStrArr.push(actions[j].type);
+            }
         }
 		$("#flows").append("<tr>\
         <td>" + flows[i].ingressPort + "</td>\
