@@ -27,7 +27,7 @@ class Flow_mod:
 		url = self.addUrl
 		entity={}
 		if not data:
-			print "data is none"
+			print "No get data from WEBUI"
 			return
 		else:
 			entity =  json.loads(data)
@@ -54,6 +54,7 @@ class Flow_mod:
 		url = self.delUrl
 		entity={}
 		if not data:
+			print "No get data from WEBUI"
 			return
 		else:
 			entity =  json.loads(data)

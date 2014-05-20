@@ -53,7 +53,7 @@ class ControllerAdapter:
 	def periodicInquiry(self):
 		try:
 			response = urllib2.urlopen(self.udsUrl).read()
-			if response == "null":
+			if response == "null" or response == "[ ]":
 				result = {}
 				return json.dumps(result,separators=(',',':'))
 			data = json.loads(response)
@@ -69,7 +69,7 @@ class ControllerAdapter:
 			result['nodes'] = self.uds
 			return json.dumps(result,separators=(',',':'))
 		except Exception,e:
-			print e
+			print "{} for {}".format(str(e),self.udsUrl)
 			logger.debug("connection error for uds"+str(e))
 			result = {}
 			return json.dumps(result,separators=(',',':'))

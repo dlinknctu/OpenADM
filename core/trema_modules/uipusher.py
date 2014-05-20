@@ -43,7 +43,7 @@ class UIPusher:
 
 	def controllerHandler(self,event):
 		if event is None or event == "{}":
-			print "null event"
+			print "no data get from controller"
 			return
 		if self.enable:
 			#compute timestamp 
@@ -99,7 +99,7 @@ class UIPusher:
 		##update db name
 		prevTime = datetime.datetime.fromtimestamp(self.prevTime).strftime("%Y_%m_%d")
 		self.intervalList[0] = 'uds_hourly'+str(prevTime)
-		print self.intervalList[0]
+		print "write data to "+str(self.intervalList[0])
 		for hashkey in self.tmpcache:
 			key = self.tmpcache[hashkey][2]
 			exist = self.db[self.intervalList[0]].find_one(key)
