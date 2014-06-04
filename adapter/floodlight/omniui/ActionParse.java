@@ -60,16 +60,16 @@ public class ActionParse{
                 if (action.equals("OUTPUT")) {
                     subaction_struct = decode_output(subaction, log);
                 }
-                else if (action.equals("enqueue")) {
+                else if (action.equals("ENQUEUE")) {
                     subaction_struct = decode_enqueue(subaction, log);
                 }
-                else if (action.equals("strip-vlan")) {
+                else if (action.equals("STRIP_VLAN")) {
                     subaction_struct = decode_strip_vlan(subaction, log);
                 }
-                else if (action.equals("set-vlan-id")) {
+                else if (action.equals("SET_VLAN_ID")) {
                     subaction_struct = decode_set_vlan_id(subaction, log);
                 }
-                else if (action.equals("set-vlan-priority")) {
+                else if (action.equals("SET_VLAN_P")) {
                     subaction_struct = decode_set_vlan_priority(subaction, log);
                 }
                 else if (action.equals("SET_DL_SRC")) {
@@ -162,7 +162,7 @@ public class ActionParse{
         SubActionStruct sa = null;
         Matcher n;
         
-        n = Pattern.compile("enqueue=(?:((?:0x)?\\d+)\\:((?:0x)?\\d+))").matcher(subaction);
+        n = Pattern.compile("ENQUEUE=(?:((?:0x)?\\d+)\\:((?:0x)?\\d+))").matcher(subaction);
         if (n.matches()) {
             short portnum = 0;
             if (n.group(1) != null) {
@@ -205,7 +205,7 @@ public class ActionParse{
     
     private static SubActionStruct decode_strip_vlan(String subaction, Logger log) {
         SubActionStruct sa = null;
-        Matcher n = Pattern.compile("strip-vlan").matcher(subaction);
+        Matcher n = Pattern.compile("STRIP_VLAN").matcher(subaction);
         
         if (n.matches()) {
             OFActionStripVirtualLan action = new OFActionStripVirtualLan();
@@ -225,7 +225,7 @@ public class ActionParse{
     
     private static SubActionStruct decode_set_vlan_id(String subaction, Logger log) {
         SubActionStruct sa = null;
-        Matcher n = Pattern.compile("set-vlan-id=((?:0x)?\\d+)").matcher(subaction);
+        Matcher n = Pattern.compile("SET_VLAN_ID=((?:0x)?\\d+)").matcher(subaction);
         
         if (n.matches()) {            
             if (n.group(1) != null) {
@@ -255,7 +255,7 @@ public class ActionParse{
     
     private static SubActionStruct decode_set_vlan_priority(String subaction, Logger log) {
         SubActionStruct sa = null;
-        Matcher n = Pattern.compile("set-vlan-priority=((?:0x)?\\d+)").matcher(subaction); 
+        Matcher n = Pattern.compile("SET_VLAN_P=((?:0x)?\\d+)").matcher(subaction); 
         
         if (n.matches()) {            
             if (n.group(1) != null) {
