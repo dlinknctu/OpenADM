@@ -215,10 +215,10 @@ function nexthop(ff3,flow3){
 							f3["dstIP"]=flow3.actions[act].value;
 							break;
 						case "SET_DL_SRC":		//mac
-							f3["srcMac"]=flow3.actions[act].value;
+							f3["srcMac"]=flow3.actions[act].value.toLowerCase();
 							break;
 						case "SET_DL_DST":
-							f3["dstMac"]=flow3.actions[act].value;
+							f3["dstMac"]=flow3.actions[act].value.toLowerCase();
 							break;
 						case "SET_NW_TOS":
 							f3["tos-bits"]=flow3.actions[act].value;
