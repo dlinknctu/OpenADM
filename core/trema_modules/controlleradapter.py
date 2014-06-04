@@ -1,4 +1,4 @@
-import urllib2
+import httplib
 import logging
 import json
 from threading import Thread
@@ -52,7 +52,9 @@ class ControllerAdapter:
 
 	def periodicInquiry(self):
 		try:
-			response = urllib2.urlopen(self.udsUrl).read()
+			conn = httplib.HTTPConnection(self.controllerIP, int(self.controllerPort))
+			conn.request('GET', "/uds/getall")
+			response = conn.getresponse().read()
 			if response == "null" or response == "[ ]":
 				result = {}
 				return json.dumps(result,separators=(',',':'))
