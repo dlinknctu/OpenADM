@@ -20,26 +20,52 @@
 
 #include <assert.h>
 #include <inttypes.h>
-#include <signal.h>
 #include <errno.h>
+#include <time.h>
+#include <unistd.h>
 #include "trema.h"
 #include "simple_restapi_manager.h"
 #include "json.h"
+#define QUEUE_SIZE 10
+#define TIME_LIMIT 10
+enum query_state{
+	NOUSED,UNDONE,ALLDONE
 
-int isdone=false;
-list_element *switches;
-json_object* response = NULL;
-int uds_count,uds_current_count=0;
+};
+
+struct queue{
+	uint32_t	transaction_id;
+	json_object*  response;
+	enum query_state state;
+	int query_switch_count;
+	time_t  start_time;
+	//timer
+};
+
+struct query_queue{
+	struct queue buff[QUEUE_SIZE];
+	int current_position;
+};
+
+
+struct query_queue  uds_query_queue;
+list_element *switches = NULL;
+int switch_count=0;
 int set_oxm_matches_from_json(oxm_matches* match,char* request_data);
 int send_uds_flow(uint64_t datapath_id, char* request_data);
 int delete_uds_flow(uint64_t datapath_id, char* request_data);
-int get_uds_flow(uint64_t datapath_id, char* request_data);
+int get_uds_flow(uint32_t xid, uint64_t datapath_id, char* request_data);
 uint64_t dpid_from_string(char* input);
 void dpid_from_uint64(char* ans,uint64_t input);
-void handle_multipart_reply_flow(uint64_t datapath_id,  struct ofp_flow_stats *data,   uint16_t body_length);
+void handle_multipart_reply_flow(struct queue* recv_queue,uint64_t datapath_id,  struct ofp_flow_stats *data,   uint16_t body_length);
 void add_int_to_json(const char*name,int input,json_object* obj);
 void add_uint64_to_json(const char* name,uint64_t  input, json_object* obj);
 
+void init_queue(struct queue *input_queue);
+void init_query_queue();
+void set_queue(struct queue *input_queue,uint32_t xid,enum query_state state,int sw_count);
+struct queue* get_free_queue();
+struct queue* get_queue_by_xid(uint32_t xid);
 
 /********************************
  * convert dpif string to int
@@ -376,7 +402,7 @@ static void
 handle_switch_ready( uint64_t datapath_id, void *user_data ) {
   UNUSED( user_data );
   info( "%#" PRIx64 " is connected.", datapath_id );
-  uds_current_count+=1;
+  switch_count+=1;
   //add datapath
   list_element **switches = user_data;
   insert_datapath_id( switches, datapath_id );
@@ -497,27 +523,43 @@ handle_query_del_uds_all( const struct mg_request_info *request_info, void *requ
 static char *
 handle_query_get_uds( const struct mg_request_info *request_info, void *request_data, void *retcode ) {
 	int i;
+	uint32_t xid = get_transaction_id();
 	char dpid[30];
+	struct queue* send_queue;
+
+	//get free buffer
+	send_queue = get_free_queue();
+	if (NULL == send_queue){
+		printf("queue is full\n");
+		*((int*)retcode)=404;
+		return "null";
+	}
+	//get dpid
 	memset(dpid,0,sizeof(dpid));
 	memcpy(dpid,&request_info->uri[9],strlen(request_info->uri)-8);
-	while(uds_count!=0){
-		sleep(1);
+
+	
+	if(0 == switch_count){ // no switch, return null
+		*((int*)retcode)=404;
+		send_queue->state = NOUSED;
+		return "null";
 	}
-	uds_count = 1;
-	if( NULL != response){
-		json_object_put(response);
-		response = NULL;
-	}
-	isdone = false;
-	get_uds_flow(dpid_from_string(dpid),request_data);
-	for(i=0;i<10;i++){
-		if(isdone){
+
+	get_uds_flow(xid,dpid_from_string(dpid),request_data);
+	while(true){
+		if( ALLDONE == send_queue->state){
 			*((int*)retcode)=200;
-			return json_object_to_json_string(response);
+			char *ptr = json_object_to_json_string(send_queue->response);
+			send_queue->state = NOUSED;
+			return ptr;
 		}
-		sleep(1);
+		else if ( (time(NULL) - send_queue->start_time) >=TIME_LIMIT){//Timeout = TIME_LIMIT SECOND
+			*((int*)retcode)=404;
+			send_queue->state = NOUSED;
+			return "timeout";
+		}
+		usleep(100000); // 100000 us = 100ms
 	}
-	*((int*)retcode)=404;
 	return "timeout";
 }
 
@@ -526,18 +568,28 @@ static char *
 handle_query_get_uds_all( const struct mg_request_info *request_info, void *request_data, void *retcode ) {
 	UNUSED(request_info);
 	int err,i=0;
+	uint32_t xid = get_transaction_id();
 	const list_element *element;
-	while(uds_count!=0){
-		sleep(1);
+
+	struct queue* send_queue;
+	send_queue = get_free_queue();
+	if (NULL == send_queue){
+		printf("queue is full\n");
+		*((int*)retcode)=404;
+		return "null";
 	}
-	uds_count = uds_current_count ;
-	if( NULL != response){
-		json_object_put(response);
-		response = NULL;
+	//fill the queue
+	init_queue(send_queue);
+	set_queue(send_queue,xid,UNDONE,switch_count);
+
+	if(0 == switch_count){ // no switch, return null
+		*((int*)retcode)=404;
+		send_queue->state = NOUSED;
+		return "null";
 	}
-	isdone = false;
+
 	for ( element = switches; element != NULL; element = element->next ) {
-		err = get_uds_flow( *(uint64_t*)element->data,request_data);
+		err = get_uds_flow(xid, *(uint64_t*)element->data,request_data);
 		switch(err){
 			case -1:
 				return "json format error\n";
@@ -545,15 +597,20 @@ handle_query_get_uds_all( const struct mg_request_info *request_info, void *requ
 				break;
 		}
 	}
-	for(i=0;i<10;i++){
-		if(isdone){
+	while(true){
+		if( ALLDONE == send_queue->state){
 			*((int*)retcode)=200;
-			return json_object_to_json_string(response);
+			char *ptr = json_object_to_json_string(send_queue->response);
+			send_queue->state = NOUSED;
+			return ptr;
 		}
-		sleep(1);
+		else if ( (time(NULL) - send_queue->start_time) >=TIME_LIMIT){//Timeout = TIME_LIMIT SECOND
+			*((int*)retcode)=404;
+			send_queue->state = NOUSED;
+			return "timeout";
+		}
+		usleep(100000); // 100000 us = 100ms
 	}
-	*((int*)retcode)=404;
-	return "timeout";
 
 }
 
@@ -572,6 +629,13 @@ handle_multipart_reply(  uint64_t datapath_id,   uint32_t transaction_id,   uint
 	UNUSED( user_data );
 	UNUSED( flags );
 	UNUSED( transaction_id );
+	struct queue * recv_queue;
+	recv_queue = get_queue_by_xid(transaction_id);
+	if (NULL == recv_queue){
+		printf("no corresponding xid in queue\n");
+		fflush(stdout);
+		return ;
+	}
 /*
 	printf( "[multipart_reply]" );
 	printf( " datapath_id: %#" PRIx64, datapath_id );
@@ -587,9 +651,8 @@ handle_multipart_reply(  uint64_t datapath_id,   uint32_t transaction_id,   uint
 		body_length = ( uint16_t ) body->length;
 	}else{
 		if( OFPMP_FLOW == type){
-			if( 0 == --uds_count){
-
-				isdone = true;
+			if( 0 == --recv_queue->query_switch_count){
+				recv_queue->state = ALLDONE;
 			}
 		}
 	}
@@ -597,7 +660,7 @@ handle_multipart_reply(  uint64_t datapath_id,   uint32_t transaction_id,   uint
 	if ( NULL != body){
 		switch(type){
 			case OFPMP_FLOW:
-				handle_multipart_reply_flow( datapath_id,(struct ofp_flow_stats *) multipart_data, body_length );
+				handle_multipart_reply_flow(recv_queue, datapath_id,(struct ofp_flow_stats *) multipart_data, body_length );
 				break;
 		}
 	}
@@ -605,7 +668,7 @@ handle_multipart_reply(  uint64_t datapath_id,   uint32_t transaction_id,   uint
 
 
 void
-handle_multipart_reply_flow(uint64_t datapath_id,  struct ofp_flow_stats *data,   uint16_t body_length){
+handle_multipart_reply_flow(struct queue* recv_queue,uint64_t datapath_id,  struct ofp_flow_stats *data,   uint16_t body_length){
 	struct ofp_flow_stats *stats = data;
 	uint16_t rest_length = body_length;
 	uint16_t match_len = 0;
@@ -618,10 +681,7 @@ handle_multipart_reply_flow(uint64_t datapath_id,  struct ofp_flow_stats *data, 
 	oxm_matches *tmp_matches;
 	char match_str[ MATCH_STRING_LENGTH ];
 	char *tmp,*tmp2;
-	//json
-	if(NULL == response){
-		response = json_object_new_array();
-	}
+
 	dpid_from_uint64(dpid,datapath_id);
 	json_object* datapath = json_object_new_string(dpid);
 	json_object* data_flow = json_object_new_object();
@@ -684,18 +744,16 @@ handle_multipart_reply_flow(uint64_t datapath_id,  struct ofp_flow_stats *data, 
 		json_object_array_add(flows,flow);
 	}
 	json_object_object_add(data_flow,"flows",flows);
-	json_object_array_add(response,data_flow);
+	if( NULL == recv_queue->response){
+		printf("recv_queue->response is NULL");
+		recv_queue->state = ALLDONE;
+	}
+	json_object_array_add(recv_queue->response,data_flow);
 	//printf ("The json object created: %s\n count = %d\n",json_object_to_json_string(response),uds_count);
-	fflush(stdout);
-	if( 0 == --uds_count){
-		fflush(stdout);
-		isdone = true;
+	if( 0 == --recv_queue->query_switch_count){
+		recv_queue->state = ALLDONE;
 	}
 }
-/*
- *  Mooooo
- *
- */
 
 void add_int_to_json(const char*name,int input,json_object* obj){
     json_object* tmp = json_object_new_int(input);
@@ -778,11 +836,11 @@ error:
 }
 
 
-int get_uds_flow(uint64_t datapath_id, char* request_data){
+int get_uds_flow(uint32_t xid, uint64_t datapath_id, char* request_data){
 	UNUSED(request_data);
 	oxm_matches *match = create_oxm_matches();
 	buffer* flow_multipart = create_flow_multipart_request(
-			get_transaction_id(),
+			xid,
 			0, // flags
 			0, // table id
 			OFPP_ANY,// out_port
@@ -1186,6 +1244,66 @@ error:
 }
 
 /***************************************************/
+/*
+ *
+ * QUEUE
+ *
+ *
+ *
+*/
+
+
+
+
+void init_queue(struct queue *input_queue){
+	input_queue->transaction_id = 0;
+	if( NULL != input_queue->response)
+		json_object_put(input_queue->response);
+	input_queue->response = NULL;
+	input_queue->state = NOUSED;
+	input_queue->query_switch_count = 0;
+	input_queue->start_time = 0;
+}
+
+
+void init_query_queue(){
+	int i;
+	for(i=0;i<QUEUE_SIZE;i++){
+		init_queue(&uds_query_queue.buff[i]);
+	}
+}
+
+void set_queue(struct queue *input_queue,uint32_t xid,enum query_state state,int sw_count){
+	init_queue(input_queue);
+	input_queue->transaction_id = xid;
+	input_queue->state = state;
+	input_queue->query_switch_count = sw_count;
+	input_queue->response = json_object_new_array();
+	input_queue->start_time = time(NULL);
+}
+
+struct queue* get_free_queue(){
+	int i ,index = uds_query_queue.current_position;
+	for(i=0;i<QUEUE_SIZE;i++){
+		if( NOUSED == uds_query_queue.buff[index].state )
+		{	
+			uds_query_queue.current_position = index;
+			return &uds_query_queue.buff[index];
+		}
+		index = (index+1)%QUEUE_SIZE;
+	}
+	return NULL;
+}
+
+struct queue* get_queue_by_xid(uint32_t xid){
+	int i=0;
+	for(i=0;i<QUEUE_SIZE;i++){
+		if( xid == uds_query_queue.buff[i].transaction_id)
+			return &uds_query_queue.buff[i];
+	}
+	return NULL;
+
+}
 
 
 int
@@ -1217,7 +1335,7 @@ main( int argc, char *argv[] ) {
 	set_packet_in_handler( handle_packet_in, forwarding_db );
 	set_switch_ready_handler( handle_switch_ready, &switches );
 	
-	
+	init_query_queue();	
 
 	/* Main loop */
 	start_trema();
