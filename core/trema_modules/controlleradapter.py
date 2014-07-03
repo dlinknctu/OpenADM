@@ -13,7 +13,6 @@ class ControllerAdapter:
 		self.controllerIP = "localhost"
 		self.controllerPort = "8080"
 		self.timerInterval = 5
-		self.udsUrl="http://"+self.controllerIP+":"+self.controllerPort+"/uds/getall"
 
 		#load config
 		if(parm):
@@ -23,6 +22,8 @@ class ControllerAdapter:
 				self.controllerPort = parm["port"]
 			if(parm.has_key("interval")):
 				self.timerInterval = int(parm["interval"])
+
+		self.udsUrl="http://"+self.controllerIP+":"+self.controllerPort+"/uds/getall"
 		logger.debug('IP =%s  port = %s  interval = %s' % (self.controllerIP,self.controllerPort,self.timerInterval))
 		core.registerEvent("controlleradapter",self.periodicInquiry,self.timerInterval)
 		core.registerIPC("periodicInquiry", self.periodicInquiry)
