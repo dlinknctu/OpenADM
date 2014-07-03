@@ -23,14 +23,11 @@ class Flow_mod:
 		core.registerRestApi("udsdel", self.udsDelHandler)
 
 	def udsAddHandler(self,request):
-		data = request.body.readline()
 		url = self.addUrl
-		entity={}
-		if not data:
+		entity = request.get_json(force=True)
+		if not entity:
 			print "No get data from WEBUI"
 			return
-		else:
-			entity =  json.loads(data)
 		if 'match' not in entity or len(entity['match'])==0:
 			return
 
@@ -40,7 +37,7 @@ class Flow_mod:
 		else:
 			url = url +"all"
 		conn = httplib.HTTPConnection(self.IP,self.Port)
-		conn.request('PUT',url,data,self.headers)
+		conn.request('PUT', url, json.dumps(entity), self.headers)
 		response = conn.getresponse()
 		ret = (response.status, response.reason, response.read())
 		conn.close()
@@ -50,14 +47,11 @@ class Flow_mod:
 		return msg
 
 	def udsDelHandler(self,request):
-		data = request.body.readline()
 		url = self.delUrl
-		entity={}
-		if not data:
+		entity = request.get_json(force=True)
+		if not entity:
 			print "No get data from WEBUI"
 			return
-		else:
-			entity =  json.loads(data)
 		if 'match' not in entity or len(entity['match'])==0:
 			return
 
@@ -67,7 +61,7 @@ class Flow_mod:
 		else:
 			url = url +"all"
 		conn = httplib.HTTPConnection(self.IP,self.Port)
-		conn.request('PUT',url,data,self.headers)
+		conn.request('PUT', url, json.dumps(entity), self.headers)
 		response = conn.getresponse()
 		ret = (response.status, response.reason, response.read())
 		conn.close()

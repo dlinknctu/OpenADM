@@ -7,9 +7,12 @@ from importlib import import_module
 import logging
 import threading
 from threading import Thread
-from bottle import route, run, abort, hook, request, response
-logger = logging.getLogger(__name__)
+from flask import Flask, request
+from flask_cors import *
 
+app = Flask(__name__)
+app.config['CORS_ORIGINS'] = ['http://localhost']
+logger = logging.getLogger(__name__)
 
 class EventHandler:
 	def __init__(self,eventName,handler):
@@ -69,54 +72,57 @@ class Core:
 			restIP = config['REST']['ip']
 			restPort = config['REST']['port']
 
-			@hook('after_request')
-			def enable_cors():
-				response.headers['Access-Control-Allow-Origin'] = 'http://localhost'
-				response.headers['Access-Control-Allow-Methods'] = 'GET,POST,PUT,OPTIONS'
-
-			@route('/info/:request', method='GET')
-			def restRouter(request):
+			@app.route('/info/<request>', methods=['GET'])
+			@cross_origin()
+			def restInfoRouter(request):
 				if request in restHandlers:
 					return restHandlers[request]()
 				else:
 					abort(404, "Not found: '/info/%s'" % request)
 
-                        @route('/flowmod', method='POST')
-                        def flowmodHandler():
-                            if 'flowmod' in restHandlers:
-                                data = json.load(request.body)
-                                data2 = json.dumps(data)
-                                return restHandlers['flowmod'](data2)
-                            else:
-                                abort(404, "Not found: '/flowmod'")
-			@route('/uds/:request',method='GET')
-			def restRouter(request):
+			@app.route('/flowmod', methods=['POST'])
+			@cross_origin()
+			def flowmodHandler():
+				if 'flowmod' in restHandlers:
+					data = json.load(request.body)
+					data2 = json.dumps(data)
+					return restHandlers['flowmod'](data2)
+				else:
+					abort(404, "Not found: '/flowmod'")
+
+			@app.route('/uds/<request>', methods=['GET'])
+			@cross_origin()
+			def restUDSRouter(request):
 				if "uds"+request in restHandlers:
 					return restHandlers["uds"+request]()
 				else:
 					abort(404, "Not found: '/uds/%s'" % request)
 
-			@route('/uds/add', method=['OPTIONS','PUT'])
-			def StatHandler():
+			@app.route('/uds/add', methods=['OPTIONS','PUT'])
+			@cross_origin()
+			def UDSAddHandler():
 				if "udsadd" in restHandlers:
 					return restHandlers["udsadd"](request)
 				else:
 					abort(404, "Not found: '/uds/%s'" % request)
-			@route('/uds/del', method=['OPTIONS','PUT'])
-			def StatHandler():
+
+			@app.route('/uds/del', methods=['OPTIONS','PUT'])
+			@cross_origin()
+			def UDSDelHandler():
 				if "udsdel" in restHandlers:
 					return restHandlers["udsdel"](request)
 				else:
 					abort(404, "Not found: '/uds/%s'" % request)
 
-			@route('/stat', method='POST')
+			@app.route('/stat', methods='POST')
+			@cross_origin()
 			def StatHandler():
 				if 'stat' in restHandlers:
 					return restHandlers['stat'](request)
 				else:
 					abort(404, "Not found: '/stat/%s'" % request)
-			run(host="0.0.0.0", port=restPort, quiet=True)
 
+			app.run(host=restIP, port=int(restPort), debug=True)
 
 	#Register REST API
 	def registerRestApi(self, requestName, handler):
