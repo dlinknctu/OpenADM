@@ -114,13 +114,11 @@ class UIPusher:
 			self.db[self.intervalList[0]].save(key)
 
 	def statisticHandler(self,request):
-
 		if self.enable == False:
 			return "Time\t1\n"
 		
 		#parse json data
-		data = json.load(request.body)
-		print data
+		data = request.get_json(force=True)
 		#declare variable
 		multiGroup = {}
 		output = "Time"

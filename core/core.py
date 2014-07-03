@@ -114,7 +114,7 @@ class Core:
 				else:
 					abort(404, "Not found: '/uds/%s'" % request)
 
-			@app.route('/stat', methods='POST')
+			@app.route('/stat', methods=['POST'])
 			@cross_origin()
 			def StatHandler():
 				if 'stat' in restHandlers:
