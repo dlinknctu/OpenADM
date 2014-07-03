@@ -43,7 +43,7 @@ class UIPusher:
 
 	def controllerHandler(self,event):
 		if event is None or event == "{}":
-			print "no data get from controller"
+			# print "no data get from controller"
 			return
 		if self.enable:
 			#compute timestamp 
