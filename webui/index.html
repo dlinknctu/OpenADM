@@ -147,17 +147,36 @@
     <script type="text/javascript" src="js/spin.min.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function() {
-            getFeature();
+            $.ajax({
+                type: "GET",
+                url: "http://localhost:5567/feature",
+                dataType: "jsonp",
+                jsonpCallback: "omniui",
+                timeout: 500,
+                success: function(json){
+                    // check feature of core
+                    if(json.ControllerType == 'trema') {
+                        alert('Topology view with Trema controller is still under construction.');
+                    }
+                    else {
+                        spinner = new Spinner(opts);
+                        $("#porttable").stupidtable();
+                        $("#flowtable").stupidtable();
+                        $("#reload").click(function() {
+                            spinner.spin(target);
+                            loadJSONP();
+                            $("#info").empty();
+                            clearcolor();
+                        });
+                        loadJSONP();
+                    }
+                },
+                error: function(){
+                    alert('Unable to fetch feature from OmniUI core. Please check network connectivity.');
+                    return false;
+                }
+            });
 
-            spinner = new Spinner(opts);
-			$("#porttable").stupidtable();
-			$("#flowtable").stupidtable();
-			$("#reload").click(function() {
-                spinner.spin(target);
-				loadJSONP();
-				$("#info").empty();
-				clearcolor();
-			});
 		});
 	</script>
 </html>
