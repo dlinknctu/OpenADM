@@ -72,6 +72,12 @@ class Core:
 			restIP = config['REST']['ip']
 			restPort = config['REST']['port']
 
+			@app.route('/feature', methods=['GET'])
+			@cross_origin()
+			def featureRequest():
+				feature = {'ControllerType': str(config['ControllerType'])}
+				return "omniui(%s);" % json.dumps(feature)
+
 			@app.route('/info/<request>', methods=['GET'])
 			@cross_origin()
 			def restInfoRouter(request):

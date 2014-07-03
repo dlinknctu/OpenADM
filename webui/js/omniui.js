@@ -297,6 +297,22 @@ function updateTopo(json) {
 
 }
 
+function getFeature(){
+	$.ajax({
+		type: "GET",
+		url: "http://localhost:5567/feature",
+		dataType: "jsonp",
+		jsonpCallback: "omniui",
+		success: function(json){
+			if(json.ControllerType == 'trema')
+				alert('Topology view with Trema controller is still under construction')
+			},
+		error: function(){
+			alert('Fail fetching feature');
+		}
+	});
+}
+
 function loadJSONP(){
 	$.ajax({
 	   type: "GET",
