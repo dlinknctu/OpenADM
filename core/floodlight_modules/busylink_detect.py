@@ -12,7 +12,6 @@ class BusyLink_Detect:
 		self.timerInterval = 5
 		self.statistics = {}
 		self.BLD_result = []
-		self.linkcapacity = 10737418240.0 	#10G
 
 		#load config
 		if(parm):
@@ -44,6 +43,46 @@ class BusyLink_Detect:
 		self.periodicQueryLink()
 		self.periodicQueryPort()
 	
+	def parsePortFeatures(self,features):
+		if features == 0:
+			return 0
+		turn_binary = bin(features)[2:]
+		binary_len = len(turn_binary)
+		if binary_len < 12:
+			turn_binary = '0'*(12-binary_len) + turn_binary
+		
+		if turn_binary[5] == '1':
+			return 10*(1024**3)/8.0			#10Gb
+		if turn_binary[6] == '1' or turn_binary[7] == '1':
+			return 1024**3/8.0				#1Gb
+		if turn_binary[8] == '1' or turn_binary[9] == '1':
+			return 100*(1024**2)/8.0		#100Mb
+		if turn_binary[10] == '1' or turn_binary[11] == '1':
+			return 10*(1024**2)/8.0			#10Mb
+		return 0
+		
+	def queryLinkCapacity(self):
+		try:
+			conn = httplib.HTTPConnection(self.controllerIP, int(self.controllerPort))
+			conn.request("GET", "/wm/core/switch/all/features/json")
+			response = conn.getresponse().read()
+		except Exception, e:
+			logger.error("connection error for inquiring features: "+str(e))
+			return
+		finally:
+			conn.close()
+		try:
+			data = json.loads(response)
+			self.capacity = {}
+			for switch_id in data:
+				switch = data[switch_id]
+				ports = switch['ports']
+				for port in ports:
+					result = self.parsePortFeatures(port['currentFeatures'])
+					self.capacity["%s_%d" % (switch_id,port['portNumber'])] = result
+		except Exception, e:
+			logger.error("json parse error for features: "+str(e))
+		
 	def periodicQueryLink(self):
 		try:
 			conn = httplib.HTTPConnection(self.controllerIP, int(self.controllerPort))
@@ -67,6 +106,7 @@ class BusyLink_Detect:
 				self.links[id] = tmp
 		except Exception, e:
 			logger.error("json parse error for links: "+str(e))
+		self.queryLinkCapacity()
 	
 	def periodicQueryPort(self):
 		try:
@@ -91,7 +131,7 @@ class BusyLink_Detect:
 	
 	def busyLinkDetect(self,event):
 		self.BLD_result = []
-		#calculate link's countBytes
+		#calculate link's countBytes and capacity
 		for link_id in self.links:
 			link = self.links[link_id]
 			src = link['source']
@@ -100,6 +140,7 @@ class BusyLink_Detect:
 			destp = link['targetPort']
 			total_bytes = self.switches[src][srcp] + self.switches[dest][destp]
 			link['countBytes'] = total_bytes
+			link['capacity'] = min(self.capacity["%s_%d" % (src,srcp)],self.capacity["%s_%d" % (dest,destp)])
 		
 		#initialize self.statistics value
 		if len(self.statistics) == 0:
@@ -111,7 +152,7 @@ class BusyLink_Detect:
 		#check threshold
 		for link_id in self.links:
 			if link_id in self.statistics:
-				if (self.links[link_id]['countBytes'] - self.statistics[link_id]['countBytes']) / self.linkcapacity >= 0.8:
+				if (self.links[link_id]['countBytes'] - self.statistics[link_id]['countBytes']) / self.statistics[link_id]['capacity'] >= 0.8:
 					self.overthreshold(self.statistics[link_id],link_id)
 				else:
 					self.underthreshold(self.statistics[link_id])
@@ -119,6 +160,10 @@ class BusyLink_Detect:
 			else:
 				self.statistics[link_id] = dict(self.links[link_id])
 				self.statistics[link_id]['state'] = 1
+		#remove unexisted link info
+		for link_id in self.statistics:
+			if link_id not in self.links:
+				del self.statistics[link_id]
 		
 		#return result
 		if len(self.BLD_result)>0:
