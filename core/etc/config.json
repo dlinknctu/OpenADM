@@ -2,7 +2,7 @@
 	"ControllerType":"floodlight",
 	"LogFile": "/tmp/omniui.log",
 	"REST": {
-		"ip": "localhost",	
+		"ip": "localhost",
 		"port": "5567"
 	},
 	"UIPusher": {
@@ -14,14 +14,19 @@
 		"password":"xxxxxx",
 		"queryinterval":"5"
 	},
-	"ControllerAdapter": {	
-		"ip": "localhost",	
+	"ControllerAdapter": {
+		"ip": "localhost",
 		"port": "8080",
 		"interval": "5"
     },
 	"Flow_mod":{
 		"ip":"localhost",
 		"port":"8080"
+	},
+	"BusyLink_Detect": {
+		"ip": "localhost",
+		"port": "8080",
+		"interval": "5"
 	},
 	"DbCollection": {
 		"enable":"False",
