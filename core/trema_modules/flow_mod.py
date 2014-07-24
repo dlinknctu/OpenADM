@@ -19,8 +19,8 @@ class Flow_mod:
 		# register rest api
 		self.addUrl="/uds/add"
 		self.delUrl="/uds/del"
-		core.registerRestApi("udsadd", self.udsAddHandler)
-		core.registerRestApi("udsdel", self.udsDelHandler)
+		core.registerRestApi("uds/add", self.udsAddHandler)
+		core.registerRestApi("uds/del", self.udsDelHandler)
 
 	def udsAddHandler(self,request):
 		url = self.addUrl
