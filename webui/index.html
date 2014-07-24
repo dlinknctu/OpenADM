@@ -149,10 +149,10 @@
 		$(document).ready(function() {
             $.ajax({
                 type: "GET",
-                url: "http://localhost:5567/feature",
+                url: "http://lab.rascov.tw:5567/feature",
                 dataType: "jsonp",
                 jsonpCallback: "omniui",
-                timeout: 500,
+                timeout: 1000,
                 success: function(json){
                     // check feature of core
                     if(json.ControllerType == 'trema') {
