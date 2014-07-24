@@ -303,7 +303,6 @@ function loadJSONP(){
 	   url: "http://localhost:5567/info/topology",
 	   dataType: "jsonp",
 	   jsonpCallback: "omniui",
-	   timeout: 1500,
 	   success: function(json){
 	       updateTopo(json);
            spinner.stop();
