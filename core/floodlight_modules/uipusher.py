@@ -13,7 +13,7 @@ class UIPusher:
 		# register event handler
 		core.registerEventHandler("controlleradapter", self.controllerHandler)
 		# register rest api
-		core.registerRestApi("topology", self.topologyHandler)
+		core.registerRestApi("info/topology", self.topologyHandler)
 		core.registerRestApi("stat", self.statisticHandler)
 		# save core for ipc use
 		self.core = core

@@ -72,61 +72,31 @@ class Core:
 			restIP = config['REST']['ip']
 			restPort = config['REST']['port']
 
-			@app.route('/feature', methods=['GET'])
+			# handler for feature request
+			@app.route('/feature')
 			@cross_origin()
 			def featureRequest():
 				feature = {'ControllerType': str(config['ControllerType'])}
 				return "omniui(%s);" % json.dumps(feature)
 
-			@app.route('/info/<request>', methods=['GET'])
+			# general top level rest handler
+			@app.route('/<request>')
 			@cross_origin()
-			def restInfoRouter(request):
+			def topLevelRoute(request):
 				if request in restHandlers:
 					return restHandlers[request]()
 				else:
-					abort(404, "Not found: '/info/%s'" % request)
+					abort(404, "Not found: '/%s'" % request)
 
-			@app.route('/flowmod', methods=['POST'])
+			# general second level rest handler
+			@app.route('/<prefix>/<suffix>')
 			@cross_origin()
-			def flowmodHandler():
-				if 'flowmod' in restHandlers:
-					data = json.load(request.body)
-					data2 = json.dumps(data)
-					return restHandlers['flowmod'](data2)
+			def secondLevelRoute(prefix, suffix):
+				request = prefix + '/' + suffix
+				if request in restHandlers:
+					return restHandlers[request]()
 				else:
-					abort(404, "Not found: '/flowmod'")
-
-			@app.route('/uds/<request>', methods=['GET'])
-			@cross_origin()
-			def restUDSRouter(request):
-				if "uds"+request in restHandlers:
-					return restHandlers["uds"+request]()
-				else:
-					abort(404, "Not found: '/uds/%s'" % request)
-
-			@app.route('/uds/add', methods=['OPTIONS','PUT'])
-			@cross_origin()
-			def UDSAddHandler():
-				if "udsadd" in restHandlers:
-					return restHandlers["udsadd"](request)
-				else:
-					abort(404, "Not found: '/uds/%s'" % request)
-
-			@app.route('/uds/del', methods=['OPTIONS','PUT'])
-			@cross_origin()
-			def UDSDelHandler():
-				if "udsdel" in restHandlers:
-					return restHandlers["udsdel"](request)
-				else:
-					abort(404, "Not found: '/uds/%s'" % request)
-
-			@app.route('/stat', methods=['POST'])
-			@cross_origin()
-			def StatHandler():
-				if 'stat' in restHandlers:
-					return restHandlers['stat'](request)
-				else:
-					abort(404, "Not found: '/stat/%s'" % request)
+					abort(404, "Not found: '/%s/%s'" % (prefix, request))
 
 			app.run(host=restIP, port=int(restPort), debug=True)
 
