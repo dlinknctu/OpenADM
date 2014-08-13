@@ -243,7 +243,7 @@ function nexthop(ff3,flow3){
 								else if(key=="ingressPort") ff["ingressPort"]=dstp;
 								else ff[key]=f3[key];
 							}
-							linkchangecolor(src,srcp,dst,dstp);
+							linkchangecolor(src,srcp,dst,dstp,true);
 							getflowmsg(ff);
 							break;
 							
@@ -255,7 +255,7 @@ function nexthop(ff3,flow3){
 								else if(key=="ingressPort") ff["ingressPort"]=srcp;
 								else ff[key]=f3[key];
 							}
-							linkchangecolor(src,srcp,dst,dstp);
+							linkchangecolor(src,srcp,dst,dstp,false);
 							getflowmsg(ff);
 							break;
 						}else if(src==f3["switch"] && flow3.actions[act].value=="-5"){	//flood
@@ -267,7 +267,7 @@ function nexthop(ff3,flow3){
 								else if(key=="ingressPort") ff["ingressPort"]=dstp;
 								else ff[key]=f3[key];
 							}
-							linkchangecolor(src,srcp,dst,dstp);
+							linkchangecolor(src,srcp,dst,dstp,true);
 							getflowmsg(ff);
 							
 						}else if(dst==f3["switch"] && flow3.actions[act].value=="-5"){	//flood
@@ -279,7 +279,7 @@ function nexthop(ff3,flow3){
 								else if(key=="ingressPort") ff["ingressPort"]=srcp;
 								else ff[key]=f3[key];
 							}
-							linkchangecolor(src,srcp,dst,dstp);
+							linkchangecolor(src,srcp,dst,dstp,false);
 							getflowmsg(ff);
 						}else{
 							console.log("no next hop");
@@ -292,16 +292,39 @@ function nexthop(ff3,flow3){
 	}	
 }
 
-function linkchangecolor(src,srcp,dst,dstp){
+function linkchangecolor(src,srcp,dst,dstp,reverse){
 	var link = $("path.link");
-	//console.log(link);
 	var msg = "dpid " + src + ", port " + srcp + " -- " + "dpid " + dst + ", port " + dstp;
 	var length = link.length;
 	for(var k=0;k<length;k++)
 	{
 		if(link[k].textContent == msg)
 		{
-			link[k].style.stroke="#cccc00";
+			var path = link[k];
+			var totLen = path.getTotalLength();
+			// Clear any previous transition
+			path.style.transition = path.style.WebkitTransition = 'none';
+			// Set up the starting positions
+			path.style.strokeDasharray = 4;
+			if(reverse) {
+				path.style.strokeDashoffset = totLen;
+			}
+			else {
+				path.style.strokeDashoffset = 0;
+			}
+			path.style.stroke = "#1199cc";
+			// Trigger a layout so styles are calculated & the browser
+			// picks up the starting position before animating
+			path.getBoundingClientRect();
+			// Define our transition
+			path.style.transition = path.style.WebkitTransition = 'stroke-dashoffset 2s linear';
+			// Go!
+			if(reverse) {
+				path.style.strokeDashoffset = 0;
+			}
+			else {
+				path.style.strokeDashoffset = totLen;
+			}
 		}
 	}
 }
@@ -309,8 +332,10 @@ function linkchangecolor(src,srcp,dst,dstp){
 function clearcolor(){
 	var link = $("path.link");
 	var length = link.length;
-	for(var k=0;k<length;k++) link[k].style.stroke="#000";
-	
+	for(var k=0;k<length;k++) {
+		link[k].style.stroke="#000";
+		link[k].style.strokeDasharray = 0;
+	}
 	var node3 = $("circle.node");
 	var length = node3.length;
 	for(var k=0;k<length;k++) node3[k].style.fill="#FF9900";
