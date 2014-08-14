@@ -303,27 +303,34 @@ function linkchangecolor(src,srcp,dst,dstp,reverse){
 			var path = link[k];
 			var totLen = path.getTotalLength();
 			// Clear any previous transition
-			path.style.transition = path.style.WebkitTransition = 'none';
-			// Set up the starting positions
-			path.style.strokeDasharray = 4;
-			if(reverse) {
-				path.style.strokeDashoffset = totLen;
-			}
-			else {
-				path.style.strokeDashoffset = 0;
-			}
+			path.style.animation = path.style.WebkitAnimation = 'none';
+
+			// Setup dash style
 			path.style.stroke = "#1199cc";
+			path.style.strokeDasharray = 8;
+
+			// Setup animation and insert into css
+			$.keyframe.define([{
+				name: 'forward_flow',
+				'0%': {'stroke-dashoffset': 0},
+				'100%': {'stroke-dashoffset': totLen*30}
+			}]);
+			$.keyframe.define([{
+				name: 'reverse_flow',
+				'0%': {'stroke-dashoffset': totLen*30},
+				'100%': {'stroke-dashoffset': 0}
+			}]);
+
 			// Trigger a layout so styles are calculated & the browser
 			// picks up the starting position before animating
 			path.getBoundingClientRect();
-			// Define our transition
-			path.style.transition = path.style.WebkitTransition = 'stroke-dashoffset 2s linear';
-			// Go!
+
+			// Start animation
 			if(reverse) {
-				path.style.strokeDashoffset = 0;
+				path.style.animation = path.style.WebkitAnimation = 'reverse_flow 30s linear infinite';
 			}
 			else {
-				path.style.strokeDashoffset = totLen;
+				path.style.animation = path.style.WebkitAnimation = 'forward_flow 30s linear infinite';
 			}
 		}
 	}
@@ -335,6 +342,7 @@ function clearcolor(){
 	for(var k=0;k<length;k++) {
 		link[k].style.stroke="#000";
 		link[k].style.strokeDasharray = 0;
+		link[k].style.animation = link[k].style.WebkitAnimation = 'none';
 	}
 	var node3 = $("circle.node");
 	var length = node3.length;
