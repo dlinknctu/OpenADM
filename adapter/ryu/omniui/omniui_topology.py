@@ -1,12 +1,3 @@
-
-# REST API for switch configuration
-#
-# get all the switches
-# GET /v1.0/topology/switches
-#
-# get all the links
-# GET /v1.0/topology/links
-
 import json
 from webob import Response
 from ryu.app.wsgi import ControllerBase, WSGIApplication, route
@@ -22,6 +13,7 @@ from ryu.ofproto import ofproto_v1_3
 from ryu.lib import ofctl_v1_0
 from ryu.lib import ofctl_v1_2
 from ryu.lib import ofctl_v1_3
+from ryu.lib.dpid import dpid_to_str
 from ryu.topology.api import get_switch, get_link
 
 
@@ -41,23 +33,12 @@ class OmniUI(app_manager.RyuApp):
         self.data['omniui'] = self
         mapper = wsgi.mapper
         wsgi.registory['RestController'] = self.data
-        path = '/wm/omniui'
 
-        uri = path + '/switch/json'
-        mapper.connect('omniui', uri,
-                       controller=RestController, action='list_switches',
+        mapper.connect('omniui', '/wm/omniui/switch/json',
+                       controller=RestController, action='switches',
                        conditions=dict(method=['GET']))
-        uri = path + '/link/json'
-        mapper.connect('omniui', uri,
-                       controller=RestController, action='list_links',
-                       conditions=dict(method=['GET']))
-        uri = path + '/flows/json/{dpid}'
-        mapper.connect('omniui', uri,
-                       controller=RestController, action='list_flows',
-                       conditions=dict(method=['GET']))
-        uri = path + '/ports/json/{dpid}'
-        mapper.connect('omniui', uri,
-                       controller=RestController, action='list_ports',
+        mapper.connect('omniui', '/wm/omniui/link/json',
+                       controller=RestController, action='links',
                        conditions=dict(method=['GET']))
 
     @set_ev_cls([ofp_event.EventOFPStatsReply,
@@ -104,34 +85,16 @@ class RestController(ControllerBase):
         self.dpset = data['dpset']
         self.waiters = data['waiters']
 
-    def list_switches(self, req, **kwargs):
-        dps = self.dpset.dps.keys()
-        body = json.dumps(dps)
-        return (Response(content_type='application/json', body=body))
+    # return dpid of all nodes
+    def getNodes(self):
+        return self.dpset.dps.keys()
 
-    def list_links(self, req, **kwargs):
-        dpid = None
-        if 'dpid' in kwargs:
-            dpid = dpid_lib.str_to_dpid(kwargs['dpid'])
-        links = get_link(self.omniui, dpid)
-        print(links);
-        body = json.dumps([link.to_dict() for link in links])
-        return Response(content_type='application/json', body=body)
-
-    def list_flows(self, req, dpid, **kwargs):
-        if req.body == '':
-            flow = {}
-        else:
-            try:
-                flow = eval(req.body)
-            except SyntaxError:
-                LOG.debug('invalid syntax %s', req.body)
-                return Response(status=400)
-
+    # return flow table of specific dpid
+    def getFlows(self, dpid):
+        flow = {}
         dp = self.dpset.get(int(dpid))
         if dp is None:
-            return Response(status=404)
-
+            return None
         if dp.ofproto.OFP_VERSION == ofproto_v1_0.OFP_VERSION:
             flows = ofctl_v1_0.get_flow_stats(dp, self.waiters, flow)
         elif dp.ofproto.OFP_VERSION == ofproto_v1_2.OFP_VERSION:
@@ -140,16 +103,14 @@ class RestController(ControllerBase):
             flows = ofctl_v1_3.get_flow_stats(dp, self.waiters, flow)
         else:
             LOG.debug('Unsupported OF protocol')
-            return Response(status=501)
+            return None
+        return flows
 
-        body = json.dumps(flows)
-        return (Response(content_type='application/json', body=body))
-
-    def list_ports(self, req, dpid, **kwargs):
+    # return port information of specific dpid
+    def getPorts(self, dpid):
         dp = self.dpset.get(int(dpid))
         if dp is None:
-            return Response(status=404)
-
+            return None
         if dp.ofproto.OFP_VERSION == ofproto_v1_0.OFP_VERSION:
             ports = ofctl_v1_0.get_port_stats(dp, self.waiters)
         elif dp.ofproto.OFP_VERSION == ofproto_v1_2.OFP_VERSION:
@@ -158,7 +119,96 @@ class RestController(ControllerBase):
             ports = ofctl_v1_3.get_port_stats(dp, self.waiters)
         else:
             LOG.debug('Unsupported OF protocol')
-            return Response(status=501)
+            return None
+        return ports
 
-        body = json.dumps(ports)
-        return (Response(content_type='application/json', body=body))
+    # return links in network topology
+    # notice: --observe-link is needed when running ryu-manager
+    def getLinks(self):
+        dpid = None
+        links = get_link(self.omniui, dpid)
+        return links
+
+    # repack switch information
+    def switches(self, req, **kwargs):
+        result = []
+        nodes = self.getNodes()
+        for node in nodes:
+            omniNode = {
+                'dpid': self.colonDPID(dpid_to_str(node)),
+                'flows':[],
+                'ports':[]
+            }
+            # repack flow information
+            flows = self.getFlows(node)
+            for key in flows:
+                for flow in flows[key]:
+                    print flow
+                    omniFlow = {
+                        # TODO fix flow entry fields
+                        'ingressPort': flow['match']['in_port'],
+                        'srcMac': flow['match']['dl_src'],
+                        'dstMac': flow['match']['dl_dst'],
+                        'dstIP': flow['match']['nw_dst'],
+                        #"dstIPMask": flow['match'][''],
+                        'netProtocol': flow['match']['nw_proto'],
+                        'srcIP': flow['match']['nw_src'],
+                        #"srcIPMask": flow['match'][''],
+                        'dstPort': flow['match']['tp_dst'],
+                        'srcPort': flow['match']['tp_src'],
+                        'vlan': flow['match']['dl_vlan'],
+                        #"vlanP": flow['match'][''],
+                        #"wildcards": flow[''],
+                        #"tosBits": flow[''],
+                        'counterByte': flow['byte_count'],
+                        'counterPacket': flow['packet_count'],
+                        'idleTimeout': flow['idle_timeout'],
+                        'hardTimeout': flow['hard_timeout'],
+                        'priority': flow['priority'],
+                        'duration': flow['duration_sec'],
+                        'dlType': flow['match']['dl_type'],
+                        'actions': []
+                    }
+                    # repack action field
+                    for action in flow['actions']:
+                        omniAction = {
+                            'type': action.split(':')[0],
+                            'value': action.split(':')[1]
+                        }
+                        omniFlow['actions'].append(omniAction)
+                    omniNode['flows'].append(omniFlow)
+            # repack port information
+            ports = self.getPorts(node)
+            for key in ports:
+                for port in ports[key]:
+                    omniPort = {
+                        'PortNumber': port['port_no'],
+                        'recvPackets': port['rx_packets'],
+                        'transmitPackets': port['tx_packets'],
+                        'recvBytes': port['rx_bytes'],
+                        'transmitBytes': port['tx_bytes']
+                    }
+                    omniNode['ports'].append(omniPort)
+            result.append(omniNode)
+        body = json.dumps(result)
+        return Response(content_type='application/json', body=body)
+
+    # repack link information
+    def links(self, req, **kwargs):
+        result = []
+        links = self.getLinks()
+        for link in links:
+            # TODO remove bi-direction link
+            omniLink = {
+                'src-switch': self.colonDPID(link.to_dict()['src']['dpid']),
+                'dst-switch': self.colonDPID(link.to_dict()['dst']['dpid']),
+                'src-port': (int)(link.to_dict()['src']['port_no']),
+                'dst-port': (int)(link.to_dict()['dst']['port_no'])
+            }
+            result.append(omniLink)
+        body = json.dumps(result)
+        return Response(content_type='application/json', body=body)
+
+    # repack dpid
+    def colonDPID(self, dpid):
+        return ':'.join(a+b for a,b in zip(dpid[::2], dpid[1::2]))
