@@ -41,18 +41,9 @@ class OmniUI(app_manager.RyuApp):
                        controller=RestController, action='links',
                        conditions=dict(method=['GET']))
 
-    @set_ev_cls([ofp_event.EventOFPStatsReply,
-                 ofp_event.EventOFPDescStatsReply,
-                 ofp_event.EventOFPFlowStatsReply,
+    @set_ev_cls([ofp_event.EventOFPFlowStatsReply,
                  ofp_event.EventOFPPortStatsReply,
-                 ofp_event.EventOFPMeterStatsReply,
-                 ofp_event.EventOFPMeterFeaturesStatsReply,
-                 ofp_event.EventOFPMeterConfigStatsReply,
-                 ofp_event.EventOFPGroupStatsReply,
-                 ofp_event.EventOFPGroupFeaturesStatsReply,
-                 ofp_event.EventOFPGroupDescStatsReply,
-                 ofp_event.EventOFPPortDescStatsReply
-                 ], MAIN_DISPATCHER)
+                ], MAIN_DISPATCHER)
     def stats_reply_handler(self, ev):
         msg = ev.msg
         dp = msg.datapath
@@ -143,30 +134,29 @@ class RestController(ControllerBase):
             flows = self.getFlows(node)
             for key in flows:
                 for flow in flows[key]:
-                    print flow
+                    print flow['match']
                     omniFlow = {
-                        # TODO fix flow entry fields
-                        'ingressPort': flow['match']['in_port'],
-                        'srcMac': flow['match']['dl_src'],
-                        'dstMac': flow['match']['dl_dst'],
-                        'dstIP': flow['match']['nw_dst'],
-                        #"dstIPMask": flow['match'][''],
-                        'netProtocol': flow['match']['nw_proto'],
-                        'srcIP': flow['match']['nw_src'],
-                        #"srcIPMask": flow['match'][''],
-                        'dstPort': flow['match']['tp_dst'],
-                        'srcPort': flow['match']['tp_src'],
-                        'vlan': flow['match']['dl_vlan'],
-                        #"vlanP": flow['match'][''],
-                        #"wildcards": flow[''],
-                        #"tosBits": flow[''],
+                        'ingressPort': flow['match']['in_port'] if 'in_port' in flow['match'] else 0,
+                        'srcMac': flow['match']['dl_src'] if 'dl_src' in flow['match'] else 0,
+                        'dstMac': flow['match']['dl_dst'] if 'dl_dst' in flow['match'] else 0,
+                        'dstIP': flow['match']['nw_dst'] if 'nw_dst' in flow['match'] else 0,
+                        'dstIPMask': '-', # not support in ryu
+                        'netProtocol': flow['match']['nw_proto'] if 'nw_proto' in flow['match'] else 0,
+                        'srcIP': flow['match']['nw_src'] if 'nw_src' in flow['match'] else 0,
+												'srcIPMask': '-', # not support in ryu
+                        'dstPort': flow['match']['tp_dst'] if 'tp_dst' in flow['match'] else 0,
+                        'srcPort': flow['match']['tp_src'] if 'tp_src' in flow['match'] else 0,
+                        'vlan': flow['match']['dl_vlan'] if 'dl_vlan' in flow['match'] else 0,
+                        'vlanP': flow['match']['dl_vlan_pcp'] if 'dl_vlan_pcp' in flow['match'] else 0,
+                        'wildcards': '-', # not support in ryu
+                        "tosBits": flow['match']['nw_tos'] if 'nw_tos' in flow['match'] else 0,
                         'counterByte': flow['byte_count'],
                         'counterPacket': flow['packet_count'],
                         'idleTimeout': flow['idle_timeout'],
                         'hardTimeout': flow['hard_timeout'],
                         'priority': flow['priority'],
                         'duration': flow['duration_sec'],
-                        'dlType': flow['match']['dl_type'],
+                        'dlType': flow['match']['dl_type'] if 'dl_type' in flow['match'] else 0,
                         'actions': []
                     }
                     # repack action field
