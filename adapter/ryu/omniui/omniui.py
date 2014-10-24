@@ -188,14 +188,21 @@ class RestController(ControllerBase):
         result = []
         links = self.getLinks()
         for link in links:
-            # TODO remove bi-direction link
             omniLink = {
                 'src-switch': self.colonDPID(link.to_dict()['src']['dpid']),
                 'dst-switch': self.colonDPID(link.to_dict()['dst']['dpid']),
                 'src-port': (int)(link.to_dict()['src']['port_no']),
                 'dst-port': (int)(link.to_dict()['dst']['port_no'])
             }
-            result.append(omniLink)
+            # remove bi-direction link
+            reverse = False
+            for link in result:
+                if(link['src-switch'] == omniLink['dst-switch'] and
+										link['dst-switch'] == omniLink['src-switch'] and
+										link['src-port'] == omniLink['dst-port'] and
+										link['dst-port'] == omniLink['src-port']):
+                    reverse = True
+            result.append(omniLink) if reverse is False else None
         body = json.dumps(result)
         return Response(content_type='application/json', body=body)
 
