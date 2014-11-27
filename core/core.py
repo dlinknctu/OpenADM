@@ -72,7 +72,7 @@ class Core:
 			restIP = config['REST']['ip']
 			restPort = config['REST']['port']
 
-			def event_stream(req)
+			def event_stream(req):
 				return 'data: %s\n\n' % restHandlers['uds/stream'](req)
 
 			# handler for server-sent event
