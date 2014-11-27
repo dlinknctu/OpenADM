@@ -7,7 +7,7 @@ from importlib import import_module
 import logging
 import threading
 from threading import Thread
-from flask import Flask, request, abort
+from flask import Flask, Response, request, abort
 from flask_cors import *
 
 app = Flask(__name__)
@@ -72,6 +72,16 @@ class Core:
 			restIP = config['REST']['ip']
 			restPort = config['REST']['port']
 
+			def event_stream(req)
+				return 'data: %s\n\n' % restHandlers['uds/stream'](req)
+
+			# handler for server-sent event
+			@app.route('/stream')
+			@cross_origin()
+			def stream():
+				return Response(event_stream(request),
+								mimetype='text/event-stream')
+
 			# handler for feature request
 			@app.route('/feature')
 			@cross_origin()
@@ -98,7 +108,7 @@ class Core:
 				else:
 					abort(404, "Not found: '/%s'" % url)
 
-			app.run(host=restIP, port=int(restPort), debug=True)
+			app.run(host=restIP, port=int(restPort), debug=True, threaded=True)
 
 	#Register REST API
 	def registerRestApi(self, requestName, handler):

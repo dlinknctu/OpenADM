@@ -14,6 +14,7 @@ class UIPusher:
 		core.registerEventHandler("controlleradapter", self.controllerHandler)
 		# register rest api
 		core.registerRestApi("uds/get", self.udsHandler)
+		core.registerRestApi("uds/stream", self.udsHandlerStream)
 		core.registerRestApi("stat", self.statisticHandler)
 		# save core for ipc use
 		self.core = core
@@ -40,6 +41,11 @@ class UIPusher:
 		# return JSONP format
 		result = self.core.invokeIPC("periodicInquiry")
 		return "omniui(%s);" % result
+
+	def udsHandlerStream(self, request):
+		# return JSON format
+		result = self.core.invokeIPC("periodicInquiry")
+		return result
 
 	def controllerHandler(self,event):
 		if event is None or event == "{}":

@@ -97,6 +97,13 @@ function parseInput() {
     return data;
 }
 
+function sse() {
+    var source = new EventSource('http://localhost:5567/stream');
+    source.onmessage = function(e) {
+        updateShowcase(JSON.parse(e.data));
+    };
+}
+
 $(document).ready(function() {
     $('#reload').click(function() {
         queryUdsEntries();
@@ -128,4 +135,5 @@ $(document).ready(function() {
 
     // Initial Query
     queryUdsEntries();
+    sse();
 });
