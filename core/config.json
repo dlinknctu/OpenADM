@@ -1,17 +1,17 @@
 {
-	"ControllerType":"trema",
+	"ControllerType":"floodlight",
 	"LogFile": "core.log",
 	"REST": {
-		"ip": "localhost",	
+		"ip": "192.168.1.159",	
 		"port": "5567"
 	},
 	"UIPusher": {
 		"enable":"True",
-		"dbip":"140.113.215.200",
+		"dbip":"127.0.0.1",
 		"dbport":"27017",
 		"db":"omniui",
-		"user":"xxxxxx",
-		"password":"xxxxxx",
+		"user":"sdn",
+		"password":"sdn",
 		"queryinterval":"5"
 	},
 	"ControllerAdapter": {	
@@ -25,11 +25,11 @@
 	},
 	"DbCollection": {
 		"enable":"True",
-		"dbip":"140.113.215.200",
+		"dbip":"127.0.0.1",
 		"dbport":"27017",
 		"db":"omniui",
-		"user":"xxxxxx",
-		"password":"xxxxxx",
+		"user":"sdn",
+		"password":"sdn",
 		"interval": "86400"
 	}
 }

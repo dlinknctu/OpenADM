@@ -29,6 +29,7 @@ OmniUI is a diagnosis, analytic and management framework for Software-Defined Ne
     if you are access webui from outside localhost (optional)
     * `core/core.py`: Update `Access-Control-Allow-Origin`
     * `webui/js/omniui.js`: Update IP in `function loadJSONP()` and `function sendFlow()`
+    * `webui/index.html`: Update IP in `url: "http://192.168.1.159:5567/feature"`
 
 ##Current Progress (on dev branch)##
 ```
