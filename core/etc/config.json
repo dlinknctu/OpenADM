@@ -1,13 +1,13 @@
 {
 	"ControllerType":"floodlight",
-	"LogFile": "/tmp/omniui.log",
+	"LogFile": "core.log",
 	"REST": {
-		"ip": "localhost",
+		"ip": "192.168.1.159",	
 		"port": "5567"
 	},
 	"UIPusher": {
-		"enable":"False",
-		"dbip":"140.113.215.200",
+		"enable":"True",
+		"dbip":"127.0.0.1",
 		"dbport":"27017",
 		"db":"omniui",
 		"user":"xxxxxx",
@@ -29,12 +29,12 @@
 		"interval": "5"
 	},
 	"DbCollection": {
-		"enable":"False",
-		"dbip":"140.113.215.200",
+		"enable":"True",
+		"dbip":"127.0.0.1",
 		"dbport":"27017",
 		"db":"omniui",
-		"user":"xxxxxx",
-		"password":"xxxxxx",
+		"user":"sdn",
+		"password":"sdn",
 		"interval": "86400"
 	}
 }

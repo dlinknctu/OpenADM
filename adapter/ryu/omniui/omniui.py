@@ -254,6 +254,16 @@ class RestController(ControllerBase):
         else:
             return Response(status=404)
 
+        if dp.ofproto.OFP_VERSION == ofproto_v1_0.OFP_VERSION:
+            ryuFlow = self.ryuFlow_v1_0(dp, omniFlow)
+            ofctl_v1_0.mod_flow_entry(dp, ryuFlow, cmd)
+        elif dp.ofproto.OFP_VERSION == ofproto_v1_2.OFP_VERSION:
+            ofctl_v1_2.mod_flow_entry(dp, omniFlow, cmd)
+        elif dp.ofproto.OFP_VERSION == ofproto_v1_3.OFP_VERSION:
+            ofctl_v1_3.mod_flow_entry(dp, omniFlow, cmd)
+        else:
+            return Response(status=404)
+
         return Response(status=200)
 
     # restore to Ryu Openflow v1.0 flow format
