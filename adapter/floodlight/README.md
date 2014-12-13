@@ -21,15 +21,15 @@ $ `git clone https://github.com/dlinknctu/OmniUI.git -b dev`
 5. Download the Floodlight Controller  
 $ `git clone https://github.com/floodlight/floodlight.git`
 
-6. Adding OmniUI to Floodlight  
+6. Add OmniUI into Floodlight  
 $ `cd floodlight/src/main/java/net/floodlightcontroller/`  
 $ `cp -r ~/OmniUI/adapter/floodlight/omniui/ .`
 
 7. Import OmniUI into Floodlight  
-$ `gedit ~/floodlight/src/main/resources/META-INF/services/net.floodlightcontroller.core.module.IFloodlightModule`  
+	a) $ `gedit ~/floodlight/src/main/resources/META-INF/services/net.floodlightcontroller.core.module.IFloodlightModule`  
 	**Add the following to the end of the file**  
 	`net.floodlightcontroller.omniui.OmniUI`  
-$ `gedit ~/floodlight/src/main/resources/floodlightdefault.properties`  
+	b) $ `gedit ~/floodlight/src/main/resources/floodlightdefault.properties`  
 	**Add the following to the 2nd line of the file**  
 	`net.floodlightcontroller.omniui.OmniUI,\`
 
@@ -38,7 +38,7 @@ $ `cd ~/floodlight`
 $ `ant`  
 **No error means successful compilation**  
 
-9. Compile OmniUI core  
+9. Edit Database data in OmniUI core  
 $ `cd ~/OmniUI/core`  
 $ `gedit config.json`  
 	**Change to the following details:**  
@@ -49,16 +49,17 @@ $ `gedit config.json`
 	`"user":"<Enter your DB's login username>"`  
 	`"password":"<Enter your DB's login password>"`  
 
+10. Compile OmniUI core  
 $ `python core.py`  
 **No error means it's running**  
 
-10. Running the Floodlight Controller (Using a 2nd Terminal)  
+10. Run the Floodlight Controller (Using a 2nd Terminal)  
 $ `java -jar floodlight/target/floodlight.jar`
 
-11. Running a simple Mininet topology (Using a 3rd Terminal)  
+11. Run a simple Mininet topology (Using a 3rd Terminal)  
 $ `sudo mn --controller=remote --topo tree,depth=2`
 
-12. Startup OmniUI Web UI  
+12. Start-up OmniUI Web UI  
 $ `firefox ~/OmniUI/webui/index.html &`
 
 ###MISCELLANEOUS###
