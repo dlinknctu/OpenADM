@@ -3,66 +3,66 @@ OmniUI Floodlight Adapter
 A floodlight adapter module for OmniUI
 
 ###INSTALLATION###
-1. Install some required packages
+1. Install some required packages  
 $ `sudo apt-get install build-essential default-jdk ant python-dev eclipse git python-virtualenv python-dev`
 
-2. Update all existing packages
-$ `sudo apt-get update`
-$ `sudo pip install --upgrade pip virtualenv`
+2. Update all existing packages  
+$ `sudo apt-get update`  
+$ `sudo pip install --upgrade pip virtualenv`  
 $ `sudo pip install flask flask_cors pymongo`
 
-3. Download & Install Mininet
-$ `git clone git://github.com/mininet/mininet`
+3. Download & Install Mininet  
+$ `git clone git://github.com/mininet/mininet`  
 $ `mininet/util/install.sh -a`
 
-4. Clone OmniUI from Github
+4. Clone OmniUI from Github  
 $ `git clone https://github.com/dlinknctu/OmniUI.git -b dev`
 
 5. Download the Floodlight Controller
 $ `git clone https://github.com/floodlight/floodlight.git`
 
 6. Adding OmniUI to Floodlight 
-$ `cd floodlight/src/main/java/net/floodlightcontroller/`
+$ `cd floodlight/src/main/java/net/floodlightcontroller/`  
 $ `cp -r ~/OmniUI/adapter/floodlight/omniui/ .`
 
-7. Importing OmniUI into Floodlight
-$ `gedit ~/floodlight/src/main/resources/META-INF/services/net.floodlightcontroller.core.module.IFloodlightModule`
-	**Add this to the end of the file**
-	`net.floodlightcontroller.omniui.OmniUI`
+7. Importing OmniUI into Floodlight  
+$ `gedit ~/floodlight/src/main/resources/META-INF/services/net.floodlightcontroller.core.module.IFloodlightModule`  
+	**Add this to the end of the file**  
+	`net.floodlightcontroller.omniui.OmniUI`  
 
-$ `gedit ~/floodlight/src/main/resources/floodlightdefault.properties`
-	**Add this to the 2nd line of the file**
+$ `gedit ~/floodlight/src/main/resources/floodlightdefault.properties`  
+	**Add this to the 2nd line of the file**  
 	`net.floodlightcontroller.omniui.OmniUI,\`
 
-8. Compile Floodlight
-$ `cd ~/floodlight`
-$ `ant`
+8. Compile Floodlight  
+$ `cd ~/floodlight`  
+$ `ant`  
 **No error means successful compilation**
 
-9. Compile OmniUI core
-$ `cd ~/OmniUI/core`
-$ `gedit config.json`
-	**Change to the following details:**
-	`"ControllerType":"floodlight"
-	"dbip":"<Enter your DB IP address>",
-	"dbport":"<Enter your DB port>",
-	"db":"<Enter your DB name>",
-	"user":"<Enter your DB's login username>"
-	"password":"<Enter your DB's login password>"`
+9. Compile OmniUI core  
+$ `cd ~/OmniUI/core`  
+$ `gedit config.json`  
+	**Change to the following details:**  
+	`"ControllerType":"floodlight"`  
+	`"dbip":"<Enter your DB IP address>",`  
+	`"dbport":"<Enter your DB port>",`  
+	`"db":"<Enter your DB name>",`  
+	`"user":"<Enter your DB's login username>"`  
+	`"password":"<Enter your DB's login password>"`  
 
-$ `python core.py`
+$ `python core.py`  
 **No error means it's running**
 
-10. Running the Floodlight Controller (Using a 2nd Terminal)
+10. Running the Floodlight Controller (Using a 2nd Terminal)  
 $ `java -jar floodlight/target/floodlight.jar`
 
-11. Running a simple Mininet topology (Using a 3rd Terminal)
+11. Running a simple Mininet topology (Using a 3rd Terminal)  
 $ `sudo mn --controller=remote --topo tree,depth=2`
 
-12. Startup OmniUI Web UI
+12. Startup OmniUI Web UI  
 $ `firefox ~/OmniUI/webui/index.html &`
 
 ###MISCELLANEOUS###
-1. Properly exit Mininet
-mininet> exit
+1. Properly exit Mininet  
+mininet> exit  
 $ `sudo mn -c`
