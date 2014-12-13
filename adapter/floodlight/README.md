@@ -25,14 +25,13 @@ $ `git clone https://github.com/floodlight/floodlight.git`
 $ `cd floodlight/src/main/java/net/floodlightcontroller/`  
 $ `cp -r ~/OmniUI/adapter/floodlight/omniui/ .`
 
-7. Importing OmniUI into Floodlight  
+7. Import OmniUI into Floodlight  
 $ `gedit ~/floodlight/src/main/resources/META-INF/services/net.floodlightcontroller.core.module.IFloodlightModule`  
 	**Add the following to the end of the file**  
 	`net.floodlightcontroller.omniui.OmniUI`  
-
 $ `gedit ~/floodlight/src/main/resources/floodlightdefault.properties`  
 	**Add the following to the 2nd line of the file**  
-	`net.floodlightcontroller.omniui.OmniUI,\`  
+	`net.floodlightcontroller.omniui.OmniUI,\`
 
 8. Compile Floodlight  
 $ `cd ~/floodlight`  
