@@ -38,7 +38,7 @@ $ `cd ~/floodlight`
 $ `ant`  
 **No error means successful compilation**  
 
-9. Edit Database data in OmniUI core  
+9. Edit database credentials into OmniUI core  
 $ `cd ~/OmniUI/core`  
 $ `gedit config.json`  
 	**Change to the following details:**  
