@@ -18,26 +18,26 @@ $ `mininet/util/install.sh -a`
 4. Clone OmniUI from Github  
 $ `git clone https://github.com/dlinknctu/OmniUI.git -b dev`
 
-5. Download the Floodlight Controller
+5. Download the Floodlight Controller  
 $ `git clone https://github.com/floodlight/floodlight.git`
 
-6. Adding OmniUI to Floodlight 
+6. Adding OmniUI to Floodlight  
 $ `cd floodlight/src/main/java/net/floodlightcontroller/`  
 $ `cp -r ~/OmniUI/adapter/floodlight/omniui/ .`
 
 7. Importing OmniUI into Floodlight  
 $ `gedit ~/floodlight/src/main/resources/META-INF/services/net.floodlightcontroller.core.module.IFloodlightModule`  
-	**Add this to the end of the file**  
+	**Add the following to the end of the file**  
 	`net.floodlightcontroller.omniui.OmniUI`  
 
 $ `gedit ~/floodlight/src/main/resources/floodlightdefault.properties`  
-	**Add this to the 2nd line of the file**  
-	`net.floodlightcontroller.omniui.OmniUI,\`
+	**Add the following to the 2nd line of the file**  
+	`net.floodlightcontroller.omniui.OmniUI,\`  
 
 8. Compile Floodlight  
 $ `cd ~/floodlight`  
 $ `ant`  
-**No error means successful compilation**
+**No error means successful compilation**  
 
 9. Compile OmniUI core  
 $ `cd ~/OmniUI/core`  
@@ -51,7 +51,7 @@ $ `gedit config.json`
 	`"password":"<Enter your DB's login password>"`  
 
 $ `python core.py`  
-**No error means it's running**
+**No error means it's running**  
 
 10. Running the Floodlight Controller (Using a 2nd Terminal)  
 $ `java -jar floodlight/target/floodlight.jar`
