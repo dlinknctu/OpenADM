@@ -4,7 +4,7 @@ A floodlight adapter module for OmniUI
 
 ###INSTALLATION###
 1. Install some required packages  
-$ `sudo apt-get install build-essential default-jdk ant python-dev eclipse git python-virtualenv python-dev`
+$ `sudo apt-get install build-essential default-jdk ant python-dev eclipse git python-virtualenv`
 
 2. Update all existing packages  
 $ `sudo apt-get update`  
@@ -39,8 +39,7 @@ $ `ant`
 **No error means successful compilation**  
 
 9. Edit database credentials in OmniUI core  
-$ `cd ~/OmniUI/core`  
-$ `gedit config.json`  
+$ `gedit ~/OmniUI/core/config.json`  
 	**Change to the following details:**  
 	`"ControllerType":"floodlight"`  
 	`"dbip":"<Enter your DB IP address>",`  
@@ -50,19 +49,15 @@ $ `gedit config.json`
 	`"password":"<Enter your DB's login password>"`  
 
 10. Compile OmniUI core  
-$ `python core.py`  
+$ `python ~/OmniUI/core/core.py`  
 **No error means it's running**  
 
+###EXECUTION###
 10. Run the Floodlight Controller (Using a 2nd Terminal)  
 $ `java -jar floodlight/target/floodlight.jar`
 
 11. Run a simple Mininet topology (Using a 3rd Terminal)  
 $ `sudo mn --controller=remote --topo tree,depth=2`
 
-12. Start-up OmniUI Web UI  
-$ `firefox ~/OmniUI/webui/index.html &`
-
-###MISCELLANEOUS###
-1. Properly exit Mininet  
-mininet> exit  
-$ `sudo mn -c`
+12. Start-up OmniUI Web UI (Using a 4th Terminal)  
+$ `firefox ~/OmniUI/webui/index.html .`
