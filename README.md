@@ -38,7 +38,7 @@ $ `git clone https://github.com/dlinknctu/OmniUI.git -b dev`
 5. Modify OmniUI database credentials  
 $ `gedit ~/OmniUI/core/config.json`  
 	**Modify the following (UIPusher and DbCollection section):**  
-	`"ControllerType":"<CONTROLLER_NAME>"` **NOTE: If using Ryu, fill ControllerType as "floodlight"**  
+	`"ControllerType":"<CONTROLLER_NAME>"` **If using Ryu, fill ControllerType as "floodlight"**  
 	`"dbip":"<YOUR_DATABASE_IP_ADDR>",`  
 	`"dbport":"<YOUR_DATABASE_IP_PORT>",`  
 	`"db":"<YOUR_DATABASE_NAME>",`  
