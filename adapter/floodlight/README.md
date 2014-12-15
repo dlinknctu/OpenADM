@@ -1,31 +1,16 @@
 OmniUI Floodlight Adapter 
 -------------------------
-A floodlight adapter module for OmniUI
+Floodlight adapter module for OmniUI
 
-###INSTALLATION###
-1. Install some required packages  
-$ `sudo apt-get install build-essential default-jdk ant python-dev eclipse git python-virtualenv`
-
-2. Update all existing packages  
-$ `sudo apt-get update`  
-$ `sudo pip install --upgrade pip virtualenv`  
-$ `sudo pip install flask flask_cors pymongo`
-
-3. Download & Install Mininet  
-$ `git clone git://github.com/mininet/mininet`  
-$ `mininet/util/install.sh -a`
-
-4. Clone OmniUI from Github  
-$ `git clone https://github.com/dlinknctu/OmniUI.git -b dev`
-
-5. Download the Floodlight Controller  
+###Installation###
+1. Download the Floodlight Controller  
 $ `git clone https://github.com/floodlight/floodlight.git`
 
-6. Add OmniUI into Floodlight  
+2. Add OmniUI into Floodlight  
 $ `cd floodlight/src/main/java/net/floodlightcontroller/`  
 $ `cp -r ~/OmniUI/adapter/floodlight/omniui/ .`
 
-7. Import OmniUI into Floodlight  
+3. Import OmniUI into Floodlight  
 	a) $ `gedit ~/floodlight/src/main/resources/META-INF/services/net.floodlightcontroller.core.module.IFloodlightModule`  
 	**Add the following to the end of the file**  
 	`net.floodlightcontroller.omniui.OmniUI`  
@@ -33,31 +18,20 @@ $ `cp -r ~/OmniUI/adapter/floodlight/omniui/ .`
 	**Add the following to the 2nd line of the file**  
 	`net.floodlightcontroller.omniui.OmniUI,\`
 
-8. Compile Floodlight  
-$ `cd ~/floodlight`  
-$ `ant`  
-**No error means successful compilation**  
+4. Compile Floodlight  
+$ `cd ~/floodlight; ant`  
 
-9. Edit database credentials in OmniUI core  
-$ `gedit ~/OmniUI/core/config.json`  
-	**Change to the following details:**  
-	`"ControllerType":"floodlight"`  
-	`"dbip":"<Enter your DB IP address>",`  
-	`"dbport":"<Enter your DB port>",`  
-	`"db":"<Enter your DB name>",`  
-	`"user":"<Enter your DB's login username>"`  
-	`"password":"<Enter your DB's login password>"`  
+###Execution###
+1. Compile OmniUI core  
+$ `cd ~; python ~/OmniUI/core/core.py`  
+**Successful compilation starts the OmniUI core**  
 
-10. Compile OmniUI core  
-$ `python ~/OmniUI/core/core.py`  
-**No error means it's running**  
-
-###EXECUTION###
-10. Run the Floodlight Controller (Using a 2nd Terminal)  
+2. Run the Floodlight Controller (Using a 2nd Terminal)  
 $ `java -jar floodlight/target/floodlight.jar`
 
-11. Run a simple Mininet topology (Using a 3rd Terminal)  
+3. Run a simple Mininet topology (Using a 3rd Terminal)  
 $ `sudo mn --controller=remote --topo tree,depth=2`
 
-12. Start-up OmniUI Web UI (Using a 4th Terminal)  
-$ `firefox ~/OmniUI/webui/index.html .`
+4. Start-up OmniUI Web UI (Using a 4th Terminal)  
+$ `firefox ~/OmniUI/webui/index.html`
+
