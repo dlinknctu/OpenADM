@@ -36,7 +36,7 @@ $ `mininet/util/install.sh -a`
 $ `git clone https://github.com/dlinknctu/OmniUI.git -b dev`
 
 5. Install MongoDB  
-    * Please refer to [Install MongoDB](http://docs.mongodb.org/manual/installation/)
+    * Please refer to [Install MongoDB](http://docs.mongodb.org/manual/installation/)  
 
 6. Modify OmniUI database credentials  
 $ `gedit ~/OmniUI/core/config.json`  
