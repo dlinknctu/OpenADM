@@ -67,10 +67,10 @@
         	</div>
         	
         	<div id="leftcolumn">
-        		<button id="reload" type="botton">Reload</button>
-        		<button id="send" type="botton">Edit Flows</button>
+        		<button id="reload" type="button">Reload</button>
+        		<button id="send" type="button">Edit Flows</button>
         		<p id="info"></p>
-				<button id="match" type="botton">Edit Match</button>
+				<button id="match" type="button">Edit Match</button>
         	</div>
 
             <div id="rightcolumn">
@@ -137,7 +137,7 @@
 </body>
 	<script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
 	<script type="text/javascript" src="js/jquery.keyframes.min.js"></script>
-  <script type="text/javascript" src="js/jquery-ui-1.10.4.custom.min.js"></script>
+	<script type="text/javascript" src="js/jquery-ui-1.10.4.custom.min.js"></script>
 	<script type="text/javascript" src="js/d3.v3.min.js"></script>
 	<script type="text/javascript" src="js/topograph.js"></script>
 	<script type="text/javascript" src="js/omniui.js"></script>
@@ -145,10 +145,10 @@
 	<script type="text/javascript" src="js/filter.js"></script>
 	<script type="text/javascript" src="js/flowmod.js"></script>
 	<script type="text/javascript" src="js/match.js"></script>
-    <script type="text/javascript" src="js/spin.min.js"></script>
+	<script type="text/javascript" src="js/spin.min.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function() {
-            $.ajax({
+		$.ajax({
                 type: "GET",
                 url: "http://localhost:5567/feature",
                 dataType: "jsonp",
@@ -170,14 +170,13 @@
                             clearcolor();
                         });
                         loadJSONP();
-                    }
+                    	}
                 },
                 error: function(){
                     alert('Unable to fetch feature from OmniUI core. Please check network connectivity.');
                     return false;
                 }
-            });
-
 		});
+	});
 	</script>
 </html>
