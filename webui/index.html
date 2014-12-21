@@ -137,9 +137,10 @@
 </body>
 	<script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
 	<script type="text/javascript" src="js/jquery.keyframes.min.js"></script>
-	<script type="text/javascript" src="js/jquery-ui-1.10.4.custom.min.js"></script>
+  <script type="text/javascript" src="js/jquery-ui-1.10.4.custom.min.js"></script>
 	<script type="text/javascript" src="js/d3.v3.min.js"></script>
 	<script type="text/javascript" src="js/topograph.js"></script>
+	<script type="text/javascript" src="js/config.js"></script>
 	<script type="text/javascript" src="js/omniui.js"></script>
 	<script type="text/javascript" src="js/stupidtable.min.js"></script>
 	<script type="text/javascript" src="js/filter.js"></script>
@@ -148,9 +149,9 @@
 	<script type="text/javascript" src="js/spin.min.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function() {
-		$.ajax({
+            $.ajax({
                 type: "GET",
-                url: "http://localhost:5567/feature",
+                url: getFeatureUrl(),
                 dataType: "jsonp",
                 jsonpCallback: "omniui",
                 timeout: 1000,
