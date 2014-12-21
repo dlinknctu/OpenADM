@@ -137,7 +137,7 @@
 </body>
 	<script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
 	<script type="text/javascript" src="js/jquery.keyframes.min.js"></script>
-  <script type="text/javascript" src="js/jquery-ui-1.10.4.custom.min.js"></script>
+    <script type="text/javascript" src="js/jquery-ui-1.10.4.custom.min.js"></script>
 	<script type="text/javascript" src="js/d3.v3.min.js"></script>
 	<script type="text/javascript" src="js/topograph.js"></script>
 	<script type="text/javascript" src="js/config.js"></script>
@@ -149,10 +149,9 @@
     <script type="text/javascript" src="js/spin.min.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function() {
-            var url_t = getfeature();
             $.ajax({
                 type: "GET",
-                url: url_t,
+                url: getfeature(),
                 dataType: "jsonp",
                 jsonpCallback: "omniui",
                 timeout: 1000,

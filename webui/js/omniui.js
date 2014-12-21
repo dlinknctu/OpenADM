@@ -323,7 +323,6 @@ function sendFlow(f){
     var data = JSON.stringify(f);
     var callback = function(resp) {
         var stat = JSON.parse(resp[2]);
-        console.log("WTF!!!!!");
         console.log(resp);
         loadJSONP();
         clearcolor();
