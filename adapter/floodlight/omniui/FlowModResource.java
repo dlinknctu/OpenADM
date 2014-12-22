@@ -96,7 +96,7 @@ public class FlowModResource extends ServerResource {
      * checking for the correct ether-type (2048).
      * @param rows The Map that is a string representation of
      * the static flow.
-     * @reutrn True if they checked the ether-type, false otherwise
+     * @return True if they checked the ether-type, false otherwise
      */ 
 	 
     private boolean checkMatchIp(Map<String, Object> rows) {
