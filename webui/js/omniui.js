@@ -300,7 +300,7 @@ function updateTopo(json) {
 function loadJSONP(){
 	$.ajax({
 	   type: "GET",
-	   url: gettopology(),
+	   url: getTopologyUrl(),
 	   dataType: "jsonp",
 	   jsonpCallback: "omniui",
 	   success: function(json){
@@ -319,7 +319,7 @@ function sendFlow(f){
     for(var i in f) {
         f[i] = f[i].replace(/\s+/g, "");
     }
-    var url = sendflowmod();
+    var url = getFlowModUrl();
     var data = JSON.stringify(f);
     var callback = function(resp) {
         var stat = JSON.parse(resp[2]);

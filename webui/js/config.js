@@ -1,14 +1,15 @@
-var coreIP = "http://localhost:5567/";
+var coreIP = "http://localhost";
+var corePort = "5567";
 
-function getfeature(){
-    return coreIP+"feature";
+function getFeatureUrl(){
+    return coreIP+":"+corePort+"/feature";
 }
-function getstat(){
-    return coreIP+"stat";
+function getStatUrl(){
+    return coreIP+":"+corePort+"/stat";
 }
-function gettopology(){
-    return coreIP+"info/topology";
+function getTopologyUrl(){
+    return coreIP+":"+corePort+"/info/topology";
 }
-function sendflowmod(){
-    return coreIP+"flowmod";
+function getFlowModUrl(){
+    return coreIP+":"+corePort+"/flowmod";
 }
