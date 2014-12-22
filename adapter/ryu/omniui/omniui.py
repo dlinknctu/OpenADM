@@ -143,7 +143,7 @@ class RestController(ControllerBase):
                         'dstIPMask': '-', # not support in ryu
                         'netProtocol': flow['match']['nw_proto'] if 'nw_proto' in flow['match'] else 0,
                         'srcIP': flow['match']['nw_src'] if 'nw_src' in flow['match'] else 0,
-												'srcIPMask': '-', # not support in ryu
+			'srcIPMask': '-', # not support in ryu
                         'dstPort': flow['match']['tp_dst'] if 'tp_dst' in flow['match'] else 0,
                         'srcPort': flow['match']['tp_src'] if 'tp_src' in flow['match'] else 0,
                         'vlan': flow['match']['dl_vlan'] if 'dl_vlan' in flow['match'] else 0,
