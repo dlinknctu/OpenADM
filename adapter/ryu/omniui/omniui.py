@@ -140,27 +140,27 @@ class RestController(ControllerBase):
             for key in flows:
                 for flow in flows[key]:
                     omniFlow = {
-                        'ingressPort': flow['match']['in_port'] if 'in_port' in flow['match'] else 0,#12
-                        'srcMac': flow['match']['dl_src'] if 'dl_src' in flow['match'] else 0,#4
-                        'dstMac': flow['match']['dl_dst'] if 'dl_dst' in flow['match'] else 0,#11
-                        'dstIP': flow['match']['nw_dst'] if 'nw_dst' in flow['match'] else 0,#2
+                        'ingressPort': flow['match']['in_port'] if 'in_port' in flow['match'] else 0,
+                        'srcMac': flow['match']['dl_src'] if 'dl_src' in flow['match'] else 0,
+                        'dstMac': flow['match']['dl_dst'] if 'dl_dst' in flow['match'] else 0,
+                        'dstIP': flow['match']['nw_dst'] if 'nw_dst' in flow['match'] else 0,
                         'dstIPMask': '-', # not support in ryu
-                        'netProtocol': flow['match']['nw_proto'] if 'nw_proto' in flow['match'] else 0,#9
-                        'srcIP': flow['match']['nw_src'] if 'nw_src' in flow['match'] else 0,#8
+                        'netProtocol': flow['match']['nw_proto'] if 'nw_proto' in flow['match'] else 0,
+                        'srcIP': flow['match']['nw_src'] if 'nw_src' in flow['match'] else 0,
 			'srcIPMask': '-', # not support in ryu
-                        'dstPort': flow['match']['tp_dst'] if 'tp_dst' in flow['match'] else 0,#10
-                        'srcPort': flow['match']['tp_src'] if 'tp_src' in flow['match'] else 0,#6
-                        'vlan': flow['match']['dl_vlan'] if 'dl_vlan' in flow['match'] else 0,#7
-                        'vlanP': flow['match']['dl_vlan_pcp'] if 'dl_vlan_pcp' in flow['match'] else 0,#3
+                        'dstPort': flow['match']['tp_dst'] if 'tp_dst' in flow['match'] else 0,
+                        'srcPort': flow['match']['tp_src'] if 'tp_src' in flow['match'] else 0,
+                        'vlan': flow['match']['dl_vlan'] if 'dl_vlan' in flow['match'] else 0,
+                        'vlanP': flow['match']['dl_vlan_pcp'] if 'dl_vlan_pcp' in flow['match'] else 0,
                         'wildcards': '-', # not support in ryu
-                        "tosBits": flow['match']['nw_tos'] if 'nw_tos' in flow['match'] else 0,#5
+                        "tosBits": flow['match']['nw_tos'] if 'nw_tos' in flow['match'] else 0,
                         'counterByte': flow['byte_count'],
                         'counterPacket': flow['packet_count'],
                         'idleTimeout': flow['idle_timeout'],
                         'hardTimeout': flow['hard_timeout'],
                         'priority': flow['priority'],
                         'duration': flow['duration_sec'],
-                        'dlType': flow['match']['dl_type'] if 'dl_type' in flow['match'] else 0,#1
+                        'dlType': flow['match']['dl_type'] if 'dl_type' in flow['match'] else 0,
                         'actions': []
                     }
                     # repack action field
@@ -256,7 +256,7 @@ class RestController(ControllerBase):
 	actions_type = flows.get('actions').split('=')[0]
 	actions_value = 0	
 	
-	if actions_type == '':
+	if actions_type == '':		#action_type = None when not action is provided
 		actions_type = None
 	else:
 		actions_value = flows.get('actions').split('=')[1]
