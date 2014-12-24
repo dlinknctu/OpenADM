@@ -255,63 +255,45 @@ class RestController(ControllerBase):
     def ryuFlow(self, flows):
 	actions_type = flows.get('actions').split('=')[0]
 	actions_value = 0	
-	
 	if actions_type == '':		#action_type = None when not action is provided
 		actions_type = None
 	else:
 		actions_value = flows.get('actions').split('=')[1]
 
-	idleTimeout = flows.get('idleTimeout')
-	packet_count = flows.get('counterPacket')
-	hard_timeout = flows.get('hardTimeout')
-	byte_count = flows.get('counterByte')
-	priority = flows.get('priority')
-	duration_sec = flows.get('duration')
-	
-	dl_type = flows.get('dlType')
 	nw_dst = flows.get('dstIP')
-	dl_vlan_pcp = flows.get('vlanP')
-	dl_src = flows.get('srcMac')
-	nw_tos = flows.get('tosBits')
-	tp_src = flows.get('srcPort')
-	dl_vlan = flows.get('vlan')
 	nw_src = flows.get('srcIP')
-	nw_proto = flows.get('netProtocol')
-	tp_dst = flows.get('dstPort')
-	dl_dst = flows.get('dstMac')
-	in_port = flows.get('ingressPort')
-	
-	if (nw_dst[len(nw_dst)-2:] == "/-") or (nw_src[len(nw_dst)-2:] == "/-"):
+	if (nw_dst[len(nw_dst)-2:] == "/-") or (nw_src[len(nw_dst)-2:] == "/-") or (nw_dst[len(nw_dst)-2:] == "/0") or (nw_src[len(nw_dst)-2:] == "/0"):
 		nw_dst = nw_dst[:-2]	#Remove rouge IP Mask from destination IP
 		nw_src = nw_src[:-2]	#Remove rouge IP Mask from source IP
 
 	ryuFlow = {
 		'actions': [{
 			'type': actions_type,
-			'value': actions_value
+			'port': actions_value
 		}],
-		'idleTimeout': idleTimeout,
 		'cookie': 0,
-		'packet_count': packet_count,
-		'hard_timeout': hard_timeout,
-		'byte_count': byte_count,
-		'duration_nsec': 0,
-		'priority': priority,
-		'duration_sec': duration_sec,
 		'table_id' : 0,
+		'idleTimeout': flows.get('idleTimeout'),
+		'active': flows.get('active'),
+		'priority': flows.get('priority'),
+		'hard_timeout': flows.get('hardTimeout'),
+		#'packet_count': flows.get('counterPacket'),
+		#'byte_count': flows.get('counterByte'),
+		#'duration_nsec': (flows.get('duration'))/1000000000,
+		#'duration_sec': flows.get('duration'),
 		'match': {
-			'dl_type': dl_type,
+			'dl_type': flows.get('dlType'),
 			'nw_dst': nw_dst,
-			'dl_vlan_pcp': dl_vlan_pcp,
-			'dl_src': dl_src,
-			'nw_tos': nw_tos,
-			'tp_src': tp_src,
-			'dl_vlan': dl_vlan,
+			'dl_vlan_pcp': flows.get('vlanP'),
+			'dl_src': flows.get('srcMac'),
+			'nw_tos': flows.get('tosBits'),
+			'tp_src': flows.get('srcPort'),
+			'dl_vlan': flows.get('vlan'),
 			'nw_src': nw_src,
-			'nw_proto': nw_proto,
-			'tp_dst': tp_dst,
-			'dl_dst': dl_dst,
-			'in_port': in_port
+			'nw_proto': flows.get('netProtocol'),
+			'tp_dst': flows.get('dstPort'),
+			'dl_dst': flows.get('dstMac'),
+			'in_port': flows.get('ingressPort')
 		}
 	}
 	return ryuFlow
