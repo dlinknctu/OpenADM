@@ -16,7 +16,6 @@ from ryu.lib import ofctl_v1_0
 from ryu.lib import ofctl_v1_2
 from ryu.lib import ofctl_v1_3
 from ryu.lib.dpid import dpid_to_str
-from ryu.lib.dpid import str_to_dpid
 from ryu.topology.api import get_switch, get_link
 
 
@@ -35,8 +34,6 @@ class OmniUI(app_manager.RyuApp):
         self.data['waiters'] = self.waiters
         self.data['omniui'] = self
         mapper = wsgi.mapper
-        path = '/wm/omniui/'
-        format = 'json'
         wsgi.registory['RestController'] = self.data
 
         mapper.connect('omniui', '/wm/omniui/switch/json',
@@ -45,7 +42,6 @@ class OmniUI(app_manager.RyuApp):
         mapper.connect('omniui', '/wm/omniui/link/json',
                        controller=RestController, action='links',
                        conditions=dict(method=['GET']))
-        
         mapper.connect('omniui', '/wm/omniui/add/json',
                        controller=RestController, action='mod_flow_entry',
                        conditions=dict(method=['POST']))
@@ -152,7 +148,7 @@ class RestController(ControllerBase):
                         'dstIPMask': '-', # not support in ryu
                         'netProtocol': flow['match']['nw_proto'] if 'nw_proto' in flow['match'] else 0,
                         'srcIP': flow['match']['nw_src'] if 'nw_src' in flow['match'] else 0,
-												'srcIPMask': '-', # not support in ryu
+			'srcIPMask': '-', # not support in ryu
                         'dstPort': flow['match']['tp_dst'] if 'tp_dst' in flow['match'] else 0,
                         'srcPort': flow['match']['tp_src'] if 'tp_src' in flow['match'] else 0,
                         'vlan': flow['match']['dl_vlan'] if 'dl_vlan' in flow['match'] else 0,
