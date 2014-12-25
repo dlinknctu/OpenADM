@@ -1,6 +1,6 @@
 import json
-import ast
 import sys
+import ast
 from webob import Response
 from ryu.app.wsgi import ControllerBase, WSGIApplication, route
 from ryu.base import app_manager
@@ -17,7 +17,6 @@ from ryu.lib import ofctl_v1_2
 from ryu.lib import ofctl_v1_3
 from ryu.lib.dpid import dpid_to_str
 from ryu.topology.api import get_switch, get_link
-
 
 class OmniUI(app_manager.RyuApp):
     _CONTEXTS = {
@@ -201,10 +200,7 @@ class RestController(ControllerBase):
             # remove bi-direction link
             reverse = False
             for link in result:
-                if(link['src-switch'] == omniLink['dst-switch'] and
-										link['dst-switch'] == omniLink['src-switch'] and
-										link['src-port'] == omniLink['dst-port'] and
-										link['dst-port'] == omniLink['src-port']):
+                if(link['src-switch'] == omniLink['dst-switch'] and link['dst-switch'] == omniLink['src-switch'] and link['src-port'] == omniLink['dst-port'] and link['dst-port'] == omniLink['src-port']):
                     reverse = True
             result.append(omniLink) if reverse is False else None
         body = json.dumps(result)
