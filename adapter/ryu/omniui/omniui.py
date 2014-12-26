@@ -137,34 +137,34 @@ class RestController(ControllerBase):
             for key in flows:
                 for flow in flows[key]:
                     omniFlow = {
-                        'ingressPort': flow['match']['in_port'] if 'in_port' in flow['match'] else 0,
-                        'srcMac': flow['match']['dl_src'] if 'dl_src' in flow['match'] else 0,
-                        'dstMac': flow['match']['dl_dst'] if 'dl_dst' in flow['match'] else 0,
-                        'dstIP': flow['match']['nw_dst'] if 'nw_dst' in flow['match'] else 0,
-                        'dstIPMask': '-', # not support in ryu
-                        'netProtocol': flow['match']['nw_proto'] if 'nw_proto' in flow['match'] else 0,
-                        'srcIP': flow['match']['nw_src'] if 'nw_src' in flow['match'] else 0,
+			'ingressPort': flow['match']['in_port'] if 'in_port' in flow['match'] else 0,
+			'srcMac': flow['match']['dl_src'] if 'dl_src' in flow['match'] else 0,
+			'dstMac': flow['match']['dl_dst'] if 'dl_dst' in flow['match'] else 0,
+			'dstIP': flow['match']['nw_dst'] if 'nw_dst' in flow['match'] else 0,
+			'dstIPMask': '-', # not support in ryu
+			'netProtocol': flow['match']['nw_proto'] if 'nw_proto' in flow['match'] else 0,
+			'srcIP': flow['match']['nw_src'] if 'nw_src' in flow['match'] else 0,
 			'srcIPMask': '-', # not support in ryu
-                        'dstPort': flow['match']['tp_dst'] if 'tp_dst' in flow['match'] else 0,
-                        'srcPort': flow['match']['tp_src'] if 'tp_src' in flow['match'] else 0,
-                        'vlan': flow['match']['dl_vlan'] if 'dl_vlan' in flow['match'] else 0,
-                        'vlanP': flow['match']['dl_vlan_pcp'] if 'dl_vlan_pcp' in flow['match'] else 0,
-                        'wildcards': '-', # not support in ryu
-                        "tosBits": flow['match']['nw_tos'] if 'nw_tos' in flow['match'] else 0,
-                        'counterByte': flow['byte_count'],
-                        'counterPacket': flow['packet_count'],
-                        'idleTimeout': flow['idle_timeout'],
-                        'hardTimeout': flow['hard_timeout'],
-                        'priority': flow['priority'],
-                        'duration': flow['duration_sec'],
-                        'dlType': flow['match']['dl_type'] if 'dl_type' in flow['match'] else 0,
-                        'actions': []
+			'dstPort': flow['match']['tp_dst'] if 'tp_dst' in flow['match'] else 0,
+			'srcPort': flow['match']['tp_src'] if 'tp_src' in flow['match'] else 0,
+			'vlan': flow['match']['dl_vlan'] if 'dl_vlan' in flow['match'] else 0,
+			'vlanP': flow['match']['dl_vlan_pcp'] if 'dl_vlan_pcp' in flow['match'] else 0,
+			'wildcards': '-', # not support in ryu
+			'tosBits': flow['match']['nw_tos'] if 'nw_tos' in flow['match'] else 0,
+			'counterByte': flow['byte_count'],
+			'counterPacket': flow['packet_count'],
+			'idleTimeout': flow['idle_timeout'],
+			'hardTimeout': flow['hard_timeout'],
+			'priority': flow['priority'],
+			'duration': flow['duration_sec'],
+			'dlType': flow['match']['dl_type'] if 'dl_type' in flow['match'] else 0,
+			'actions': []
                     }
                     # repack action field
                     for action in flow['actions']:
                         omniAction = {
-                            'type': action.split(':')[0],
-                            'value': action.split(':')[1]
+                        	'type': action.split(':')[0],
+				'value': action.split(':')[1]
                         }
                         omniFlow['actions'].append(omniAction)
                     omniNode['flows'].append(omniFlow)
@@ -173,11 +173,11 @@ class RestController(ControllerBase):
             for key in ports:
                 for port in ports[key]:
                     omniPort = {
-                        'PortNumber': port['port_no'],
-                        'recvPackets': port['rx_packets'],
-                        'transmitPackets': port['tx_packets'],
-                        'recvBytes': port['rx_bytes'],
-                        'transmitBytes': port['tx_bytes']
+			'PortNumber': port['port_no'],
+			'recvPackets': port['rx_packets'],
+			'transmitPackets': port['tx_packets'],
+			'recvBytes': port['rx_bytes'],
+			'transmitBytes': port['tx_bytes']
                     }
                     omniNode['ports'].append(omniPort)
             result.append(omniNode)
@@ -190,10 +190,10 @@ class RestController(ControllerBase):
         links = self.getLinks()
         for link in links:
             omniLink = {
-                'src-switch': self.colonDPID(link.to_dict()['src']['dpid']),
-                'dst-switch': self.colonDPID(link.to_dict()['dst']['dpid']),
-                'src-port': (int)(link.to_dict()['src']['port_no']),
-                'dst-port': (int)(link.to_dict()['dst']['port_no'])
+		'src-switch': self.colonDPID(link.to_dict()['src']['dpid']),
+		'dst-switch': self.colonDPID(link.to_dict()['dst']['dpid']),
+		'src-port': (int)(link.to_dict()['src']['port_no']),
+		'dst-port': (int)(link.to_dict()['dst']['port_no'])
             }
             # remove bi-direction link
             reverse = False
@@ -206,10 +206,10 @@ class RestController(ControllerBase):
 
     def mod_flow_entry(self, req, **kwargs):
 	try:
-            omniflow = ast.literal_eval(req.body) 	#Getting flow from req
-        except SyntaxError:
-            LOG.debug('invalid syntax %s', req.body)
-            return Response(status=400)
+		omniflow = ast.literal_eval(req.body) 	#Getting flow from req
+	except SyntaxError:
+		LOG.debug('invalid syntax %s', req.body)
+		return Response(status=400)
 	
 	omnidpid = omniflow.get('switch')		#Getting OmniUI dpid from flow	
 	if omnidpid is None:
@@ -220,33 +220,32 @@ class RestController(ControllerBase):
 	cmd = omniflow.get('command')			#Getting OmniUI command from flow
 	dp = self.dpset.get(int(dpid))			#Getting datapath from Ryu dpid
 	if dp is None:					#NB: convert dpid to int first
-            return Response(status=404)
+		return Response(status=404)
 
 	if cmd == 'ADD':
-            cmd = dp.ofproto.OFPFC_ADD
-        elif cmd == 'MOD':
-            cmd = dp.ofproto.OFPFC_MODIFY
-        elif cmd == 'MOD_ST':
-            cmd = dp.ofproto.OFPFC_MODIFY_STRICT
-        elif cmd == 'DEL':
-            cmd = dp.ofproto.OFPFC_DELETE
-        elif cmd == 'DEL_ST':
-            cmd = dp.ofproto.OFPFC_DELETE_STRICT
-        else:
-            return Response(status=404)
+		cmd = dp.ofproto.OFPFC_ADD
+	elif cmd == 'MOD':
+		cmd = dp.ofproto.OFPFC_MODIFY
+	elif cmd == 'MOD_ST':
+		cmd = dp.ofproto.OFPFC_MODIFY_STRICT
+	elif cmd == 'DEL':
+		cmd = dp.ofproto.OFPFC_DELETE
+	elif cmd == 'DEL_ST':
+		cmd = dp.ofproto.OFPFC_DELETE_STRICT
+	else:
+		return Response(status=404)
 
-        if dp.ofproto.OFP_VERSION == ofproto_v1_0.OFP_VERSION:
-	    flow = self.ryuFlow_v1_0(dp, omniflow)
-            ofctl_v1_0.mod_flow_entry(dp, flow, cmd)
-        elif dp.ofproto.OFP_VERSION == ofproto_v1_2.OFP_VERSION:
-            ofctl_v1_2.mod_flow_entry(dp, flow, cmd)
-        elif dp.ofproto.OFP_VERSION == ofproto_v1_3.OFP_VERSION:
-            ofctl_v1_3.mod_flow_entry(dp, flow, cmd)
-        else:
-            LOG.debug('Unsupported OF protocol')
-            return Response(status=501)
+	if dp.ofproto.OFP_VERSION == ofproto_v1_0.OFP_VERSION:
+		flow = self.ryuFlow_v1_0(dp, omniflow)
+		ofctl_v1_0.mod_flow_entry(dp, flow, cmd)
+	elif dp.ofproto.OFP_VERSION == ofproto_v1_2.OFP_VERSION:
+		ofctl_v1_2.mod_flow_entry(dp, flow, cmd)
+	elif dp.ofproto.OFP_VERSION == ofproto_v1_3.OFP_VERSION:
+		ofctl_v1_3.mod_flow_entry(dp, flow, cmd)
+	else:
+		return Response(status=404)
 
-        return Response(status=200)
+	return Response(status=200)
 
     # restore to Ryu Openflow v1.0 flow format
     def ryuFlow_v1_0(self, dp, flows):
@@ -261,7 +260,7 @@ class RestController(ControllerBase):
 		'active': flows.get('active'),
 		'actions': [],		
 		'match': {
-			'wildcards': flows.get('wildcards',dp.ofproto.OFPFW_ALL), 
+			'wildcards': flows.get('wildcards',0), 
 			'dl_type': int(flows.get('dlType', 0)),
 			'nw_dst': flows.get('dstIP').split('/')[0],
 			'dl_vlan_pcp': int(flows.get('vlanP', 0)),
