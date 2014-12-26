@@ -149,7 +149,7 @@ class RestController(ControllerBase):
 			'srcPort': flow['match']['tp_src'] if 'tp_src' in flow['match'] else 0,
 			'vlan': flow['match']['dl_vlan'] if 'dl_vlan' in flow['match'] else 0,
 			'vlanP': flow['match']['dl_vlan_pcp'] if 'dl_vlan_pcp' in flow['match'] else 0,
-			'wildcards': '-', # not support in ryu
+			'wildcards': flow['match']['wildcards'] if 'wildcards' in flow['match'] else '-',
 			'tosBits': flow['match']['nw_tos'] if 'nw_tos' in flow['match'] else 0,
 			'counterByte': flow['byte_count'],
 			'counterPacket': flow['packet_count'],
@@ -206,20 +206,20 @@ class RestController(ControllerBase):
 
     def mod_flow_entry(self, req, **kwargs):
 	try:
-		omniflow = ast.literal_eval(req.body) 	#Getting flow from req
+		omniflow = ast.literal_eval(req.body) 		#Getting flow from req
 	except SyntaxError:
 		LOG.debug('invalid syntax %s', req.body)
 		return Response(status=400)
 	
-	omnidpid = omniflow.get('switch')		#Getting OmniUI dpid from flow	
+	omnidpid = omniflow.get('switch')			#Getting OmniUI dpid from flow	
 	if omnidpid is None:
 		return Response(status=404)
 	else:
-		dpid = self.nospaceDPID(omnidpid.split(':'))		#Split OmniUI dpid into a list
+		dpid = self.nospaceDPID(omnidpid.split(':'))	#Split OmniUI dpid into a list
 
-	cmd = omniflow.get('command')			#Getting OmniUI command from flow
-	dp = self.dpset.get(int(dpid))			#Getting datapath from Ryu dpid
-	if dp is None:					#NB: convert dpid to int first
+	cmd = omniflow.get('command')				#Getting OmniUI command from flow
+	dp = self.dpset.get(int(dpid))				#Getting datapath from Ryu dpid
+	if dp is None:						#NB: convert dpid to int first
 		return Response(status=404)
 
 	if cmd == 'ADD':
@@ -249,6 +249,11 @@ class RestController(ControllerBase):
 
     # restore to Ryu Openflow v1.0 flow format
     def ryuFlow_v1_0(self, dp, flows):
+	if flows.get('wildcards') == '-':
+		wildcards = 0
+	else:
+		wildcards = flows.get('wildcards')
+
 	ryuFlow = {
 		'cookie': int(flows.get('cookie', 0)),
 		'priority': int(flows.get('priority', dp.ofproto.OFP_DEFAULT_PRIORITY)),		
@@ -257,34 +262,31 @@ class RestController(ControllerBase):
 		'flags': int(flows.get('flags', 0)),
 		'idle_timeout': int(flows.get('idleTimeout', 0)),
 		'hard_timeout': int(flows.get('hardTimeout', 0)),
-		'active': flows.get('active'),
 		'actions': [],		
 		'match': {
-			'wildcards': flows.get('wildcards', 0), 
-			'dl_type': int(flows.get('dlType', 0)),
-			'nw_dst': flows.get('dstIP').split('/')[0],
-			'dl_vlan_pcp': int(flows.get('vlanP', 0)),
-			'dl_src': flows.get('srcMac', '00:00:00:00:00:00'),
-			'nw_tos': int(flows.get('tosBits', 0)),
-			'tp_src': int(flows.get('srcPort', 0)),
+			'wildcards': wildcards,
+			'in_port': int(flows.get('ingressPort', 0))			
+			'dl_src': flows.get('srcMac'),
+			'dl_dst': flows.get('dstMac'),
 			'dl_vlan': int(flows.get('vlan', 0)),
-			'nw_src': flows.get('srcIP').split('/')[0],
+			'dl_vlan_pcp': int(flows.get('vlanP', 0)),
+			'dl_type': int(flows.get('dlType', 0)),
+			'nw_tos': int(flows.get('tosBits', 0)),
 			'nw_proto': int(flows.get('netProtocol', 0)),
+			'nw_src': flows.get('srcIP').split('/')[0],
+			'nw_dst': flows.get('dstIP').split('/')[0],
+			'tp_src': int(flows.get('srcPort', 0)),
 			'tp_dst': int(flows.get('dstPort', 0)),
-			'dl_dst': flows.get('dstMac', '00:00:00:00:00:00'),
-			'in_port': int(flows.get('ingressPort', 0))
 		}
 	}
 	actions_type = flows.get('actions')
 	if actions_type is not None:
 		actions_type = actions_type.split('=')[0]
 
-	if actions_type == '':		#action_type = None when not action is provided
-		actions_type = None
-	elif actions_type == 'OUTPUT':
+	if actions_type == 'OUTPUT':
 		ryuAction = {
 			'type': actions_type,
-			'port': flows.get('actions').split('=')[1],
+			'port': flows.get('actions').split('=')[1], 
 			'max_len': 0xffe5
 		}
 		ryuFlow['actions'].append(ryuAction)
@@ -310,35 +312,30 @@ class RestController(ControllerBase):
 		ryuFlow['actions'].append(ryuAction)
 		print (ryuFlow)
 	elif actions_type == 'SET_DL_SRC':
-		print (flows.get('actions').split('=')[1])
-		actions_mac = flows.get('actions').split('=')[1]
 		ryuAction = {
 			'type': actions_type,
-			'dl_src': actions_mac
+			'dl_src': flows.get('actions').split('=')[1]
 		}
 		ryuFlow['actions'].append(ryuAction)
 		print (ryuFlow)
 	elif actions_type == 'SET_DL_DST':
-		actions_mac = flows.get('actions').split('=')[1]
 		ryuAction = {
 			'type': actions_type,
-			'dl_dst': actions_mac
+			'dl_dst': flows.get('actions').split('=')[1]
 		}
 		ryuFlow['actions'].append(ryuAction)
 		print (ryuFlow)
 	elif actions_type == 'SET_NW_SRC':
-		actions_ip = flows.get('actions').split('=')[1]
 		ryuAction = {
 			'type': actions_type,
-			'nw_src': actions_ip
+			'nw_src': flows.get('actions').split('=')[1]
 		}
 		ryuFlow['actions'].append(ryuAction)
 		print (ryuFlow)
 	elif actions_type == 'SET_NW_DST':
-		actions_ip = flows.get('actions').split('=')[1]
 		ryuAction = {
 			'type': actions_type,
-			'nw_dst': actions_ip
+			'nw_dst': flows.get('actions').split('=')[1]
 		}
 		ryuFlow['actions'].append(ryuAction)
 		print (ryuFlow)
