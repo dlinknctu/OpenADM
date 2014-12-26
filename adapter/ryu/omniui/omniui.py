@@ -260,7 +260,7 @@ class RestController(ControllerBase):
 		'active': flows.get('active'),
 		'actions': [],		
 		'match': {
-			'wildcards': flows.get('wildcards',0), 
+			'wildcards': flows.get('wildcards', 0), 
 			'dl_type': int(flows.get('dlType', 0)),
 			'nw_dst': flows.get('dstIP').split('/')[0],
 			'dl_vlan_pcp': int(flows.get('vlanP', 0)),
