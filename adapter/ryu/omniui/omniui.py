@@ -1,7 +1,7 @@
 import json
 import sys
 import ast
-import logging
+import logging as LOG
 from webob import Response
 from ryu.app.wsgi import ControllerBase, WSGIApplication, route
 from ryu.base import app_manager
