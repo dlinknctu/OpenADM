@@ -265,7 +265,7 @@ class RestController(ControllerBase):
 		'actions': [],		
 		'match': {
 			'wildcards': wildcards,
-			'in_port': int(flows.get('ingressPort', 0))
+			'in_port': int(flows.get('ingressPort', 0)),
 			'dl_src': flows.get('srcMac'),
 			'dl_dst': flows.get('dstMac'),
 			'dl_vlan': int(flows.get('vlan', 0)),
