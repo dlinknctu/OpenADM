@@ -265,7 +265,7 @@ class RestController(ControllerBase):
 		'actions': [],		
 		'match': {
 			'wildcards': wildcards,
-			'in_port': int(flows.get('ingressPort', 0))			
+			'in_port': int(flows.get('ingressPort', 0))
 			'dl_src': flows.get('srcMac'),
 			'dl_dst': flows.get('dstMac'),
 			'dl_vlan': int(flows.get('vlan', 0)),
@@ -276,7 +276,7 @@ class RestController(ControllerBase):
 			'nw_src': flows.get('srcIP').split('/')[0],
 			'nw_dst': flows.get('dstIP').split('/')[0],
 			'tp_src': int(flows.get('srcPort', 0)),
-			'tp_dst': int(flows.get('dstPort', 0)),
+			'tp_dst': int(flows.get('dstPort', 0))
 		}
 	}
 	actions_type = flows.get('actions')
@@ -286,7 +286,7 @@ class RestController(ControllerBase):
 	if actions_type == 'OUTPUT':
 		ryuAction = {
 			'type': actions_type,
-			'port': flows.get('actions').split('=')[1], 
+			'port': flows.get('actions').split('=')[1],
 			'max_len': 0xffe5
 		}
 		ryuFlow['actions'].append(ryuAction)
