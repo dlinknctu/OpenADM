@@ -133,7 +133,7 @@ class RestController(ControllerBase):
                 'ports':[]
             }
             # repack flow information
-        flows = self.getFlows(node)
+            flows = self.getFlows(node)
             for key in flows:
                 for flow in flows[key]:
                     omniFlow = {
@@ -293,7 +293,7 @@ class RestController(ControllerBase):
                 'max_len': 0xffe5
             }
             ryuFlow['actions'].append(ryuAction)
-           print (ryuFlow)
+            print (ryuFlow)
         elif actions_type == 'SET_VLAN_VID':
             ryuAction = {
                 'type': actions_type,
