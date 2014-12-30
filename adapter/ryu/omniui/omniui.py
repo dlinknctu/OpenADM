@@ -198,10 +198,10 @@ class RestController(ControllerBase):
             # remove bi-direction link
             reverse = False
             for link in result:
-                if(link['src-switch'] == omniLink['dst-switch'] and
-										link['dst-switch'] == omniLink['src-switch'] and
-										link['src-port'] == omniLink['dst-port'] and
-										link['dst-port'] == omniLink['src-port']):
+                if (link['src-switch'] == omniLink['dst-switch'] and
+                        link['dst-switch'] == omniLink['src-switch'] and
+                        link['src-port'] == omniLink['dst-port'] and
+                        link['dst-port'] == omniLink['src-port']):
                     reverse = True
             result.append(omniLink) if reverse is False else None
         body = json.dumps(result)
@@ -259,13 +259,13 @@ class RestController(ControllerBase):
 
         ryuFlow = {
             'cookie': int(flows.get('cookie', 0)),
-            'priority': int(flows.get('priority', dp.ofproto.OFP_DEFAULT_PRIORITY)),        
+            'priority': int(flows.get('priority', dp.ofproto.OFP_DEFAULT_PRIORITY)),
             'buffer_id': int(flows.get('buffer_id', dp.ofproto.OFP_NO_BUFFER)),
             'out_port': int(flows.get('out_port', dp.ofproto.OFPP_NONE)),
             'flags': int(flows.get('flags', 0)),
             'idle_timeout': int(flows.get('idleTimeout', 0)),
             'hard_timeout': int(flows.get('hardTimeout', 0)),
-            'actions': [],        
+            'actions': [],
             'match': {
                 'wildcards': wildcards,
                 'in_port': int(flows.get('ingressPort', 0)),
@@ -340,8 +340,8 @@ class RestController(ControllerBase):
                 'type': actions_type,
                 'nw_dst': flows.get('actions').split('=')[1]
             }
-        ryuFlow['actions'].append(ryuAction)
-        print (ryuFlow)
+            ryuFlow['actions'].append(ryuAction)
+            print (ryuFlow)
         elif actions_type == 'SET_NW_TOS':
             ryuAction = {
                 'type': actions_type,
