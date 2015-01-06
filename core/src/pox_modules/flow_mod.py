@@ -9,16 +9,16 @@ class Flow_mod:
 		self.Port = "8080"
 		self.path = '/wm/omniui/add/json'
 		self.headers = {
-            'Content-type': 'application/json',
-            'Accept': 'application/json',
-            }
+            		'Content-type': 'application/json',
+            		'Accept': 'application/json',
+            	}
 		# register rest api
 		self.Url="http://"+self.IP+":"+self.Port+"/wm/omniui/add/json"
 		core.registerRestApi("flowmod", self.flowHandler)
 
 	def flowHandler(self,data):
 		# return JSONP format
-		body = data
+		body = json.dumps(data.get_json(force=True))
 		conn = httplib.HTTPConnection(self.IP,self.Port)
 		conn.request('POST',self.path,body,self.headers)
 		response = conn.getresponse()

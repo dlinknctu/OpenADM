@@ -34,7 +34,7 @@ $(function() {
                     if($input.eq(i).val() != "") {
                         flow[$(this).text()] = $input.eq(i).val();
                     } else {
-                        flow[$(this).text()] = defaultFlow[$(this).text()];
+                        //flow[$(this).text()] = defaultFlow[$(this).text()];
                     }
                 });
                 if(!jQuery.isEmptyObject(flow)) {
@@ -46,10 +46,15 @@ $(function() {
                             return a.toUpperCase();
                         });
                     }
-                    var srcCIDR = flow["srcIP"].split(/\//);
-                    var dstCIDR = flow["dstIP"].split(/\//);
-                    flow["srcIPMask"] = (srcCIDR.length == 2)? srcCIDR[1]: "32";
-                    flow["dstIPMask"] = (dstCIDR.length == 2)? dstCIDR[1]: "32";
+                    if("srcIP" in flow){
+                        var srcCIDR = flow["srcIP"].split(/\//);
+                        flow["srcIPMask"] = (srcCIDR.length == 2)? srcCIDR[1]: "32";
+                    }
+                    if("dstIP" in flow){
+                        var dstCIDR = flow["dstIP"].split(/\//);
+                        flow["dstIPMask"] = (dstCIDR.length == 2)? dstCIDR[1]: "32";
+                    }
+                    if(!("actions" in flow)) flow["actions"] = "";
                     sendFlow(flow);
                 }
                 $(this).dialog("close");
@@ -71,7 +76,7 @@ $(function() {
                         }).replace(/(strip_vlan)/, function(a) {
                             return a.toUpperCase();
                         });
-                    }
+                    }else flow["actions"] = "";
                     sendFlow(flow);
                 }
                 $(this).dialog("close");
@@ -87,6 +92,7 @@ $(function() {
                 });
                 if(!jQuery.isEmptyObject(flow)) {
                     flow["command"] = "DEL";
+                    if(!("actions" in flow)) flow["actions"] = "";
                     sendFlow(flow);
                 }
                 $(this).dialog("close");
@@ -153,7 +159,12 @@ function modFlow(i) {
     flow["dstIP"] += ("/" + flow["dstIPMask"]);
 
     for(var k in flow) {
-        flow[k] = flow[k].toString();
+        if(flow[k]!=null){ 
+            flow[k] = flow[k].toString();
+            var checkNone = flow[k].split(/\//);
+            if(checkNone[0]=="None") delete flow[k];
+            if(flow[k]=="0") delete flow[k];
+        }else delete flow[k];
     }
 
     $("#actions-dialog").data("flow", flow).dialog("open");
@@ -171,7 +182,12 @@ function delFlow(i) {
     flow["dstIP"] += ("/" + flow["dstIPMask"]);
 
     for(var k in flow) {
-        flow[k] = flow[k].toString();
+        if(flow[k]!=null){ 
+            flow[k] = flow[k].toString();
+            var checkNone = flow[k].split(/\//);
+            if(checkNone[0]=="None") delete flow[k];
+            if(flow[k]=="0") delete flow[k];
+        }else delete flow[k];
     }
 
     sendFlow(flow);

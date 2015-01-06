@@ -79,13 +79,6 @@ json_links = []
 json_switches = []
 payload = "null"
 
-
-
-
-
-
-
-
 def _setAttribs (parent, child):
   attrs = ['command', 'request_version', 'close_connection',
            'raw_requestline', 'requestline', 'path', 'headers', 'wfile',
@@ -189,7 +182,6 @@ class CoreHandler (SplitRequestHandler):
       core.flow_stats._send_ofp_stats_request()   #invoke request function in flow_stats component
       self.wfile.write(json_switches)
     elif self.path == "/wm/omniui/add/json":
-      
       global payload
       l = self.headers.get("Content-Length", "")
       if l == "":
@@ -197,14 +189,14 @@ class CoreHandler (SplitRequestHandler):
       else:
         data = json.loads(self.rfile.read(int(l)))
       payload = data
-      # print "payload====\n",payload
       core.FlowModEvent_Generator._raise_FlowModEvent()
-
-
-
-
+      time.sleep(5)
+      get_barrierin = core.flow_modify.check_barrierin()
+      if get_barrierin:
+          self.send_response(200, "OK")
+      else:
+        self.send_response(200, "NO GET Barrier Response")
     else:
-      # print "path",self.path
       self.send_error(404, "File not found on CoreHandler")
 
   def send_favicon (self, is_get = False):
@@ -417,7 +409,6 @@ class SplitterRequestHandler (BaseHTTPRequestHandler):
     while True:
       for m in self.server.matches:
         if self.path.startswith(m[0]):
-          #print m,self.path
           handler = m[1](self, m[0], m[3])
           #pb = self.rec.getPlayback()
           #handler = m[1](pb, *self.args[1:])
@@ -511,19 +502,41 @@ class StatsEvent_Listener (EventMixin):
     link = event.link
     link_dict ={}
 
-    sw1 = str(link).split()[0]     
-    sw2 = str(link).split()[2]
-    
+    sw0 = str(link).split('(')[1]
+    sw0 = sw0.split(')')[0]
+    sw0 = sw0.split(', ')
+    sw1_id = hex(int(sw0[0].split('=')[1])).split('x')[1]
+    sw1_pr = sw0[1].split('=')[1]
+    sw2_id = hex(int(sw0[2].split('=')[1])).split('x')[1]
+    sw2_pr = sw0[3].split('=')[1]
+
     """
-    add "00:00:" and replace '-' to ':'
+    change dpid=xx to dpid=00:00:00:00:00:00:00:xx
     """
-    link_dict['src-switch'] = "00:00:" + sw1.split('.')[0].replace('-',':')  #dpid1   
-    link_dict['src-port'] = sw1.split('.')[1] #port1
-    link_dict['dst-switch'] = "00:00:" + sw2.split('.')[0].replace('-',':')  #dpid2
-    link_dict['dst-port'] = sw2.split('.')[1] #port2
     
+    link_dict['src-switch'] = self.change_switch_id_format(sw1_id)  #dpid1   
+    link_dict['src-port'] = sw1_pr #port1
+    link_dict['dst-switch'] = self.change_switch_id_format(sw2_id) #dpid2
+    link_dict['dst-port'] = sw2_pr #port2
     self.links.append(link_dict)
 
+  def change_switch_id_format (self, dpid):
+    pre_id = ""
+    id_len = len(dpid)
+    double = id_len/2
+    leave = id_len%2
+    for i in range(8-double-leave):
+        pre_id = pre_id + "00:"
+    if leave == 1:
+        dpid = '0' + dpid
+        id_len = len(dpid)
+    for i in range(id_len):
+        pre_id = pre_id + dpid[i]
+        if i%2 != 0:
+            pre_id = pre_id + ":"
+    id_len = len(pre_id)
+    dpid = pre_id[:id_len-1]
+    return dpid
 
   def _handle_GoingUpEvent (self, event):
     self.listenTo(core.flow_stats)
@@ -540,7 +553,7 @@ class StatsEvent_Listener (EventMixin):
     
     global json_switches
     global json_links
-    if self.links and self.ports and self.flows:
+    if self.ports and self.flows:
 
       file_ports = []
       file_flows = []
@@ -548,42 +561,33 @@ class StatsEvent_Listener (EventMixin):
       file_links = []
       file_nodes_dict = {}
 
-      
-
       for l1 in self.links:
         if file_links :
           for l2 in file_links :
             if l1['src-port'] != l2['src-port'] and l1['src-switch'] != l2['src-switch'] and l1['dst-port'] != l2['dst-port'] and l1['dst-switch'] != l2['dst-switch'] :
-              if l1['src-port'] != l2['dsr-port'] and l1['src-switch'] != l2['dst-switch'] and l1['dst-port'] != l2['src-port'] and l1['src-switch'] != l2['dst-switch'] :     
+              if not(l1['src-port'] == l2['dst-port'] and l1['src-switch'] == l2['dst-switch'] and l1['dst-port'] == l2['src-port'] and l1['src-switch'] == l2['dst-switch']) :     
                 file_links.append(l1)
                 if l1['src-switch'] not in dpid_used :
                   dpid_used.append(l1['src-switch'])
                 if l1['dst-switch'] not in dpid_used :
                   dpid_used.append(l1['dst-switch'])
-
         else :
           file_links.append(l1)
           dpid_used.append(l1['src-switch'])
           dpid_used.append(l1['dst-switch'])
-
 
       for f_index in self.flows:
         for p_index in self.ports:
           if p_index['dpid'] == f_index['dpid'] :
             if f_index['dpid'] not in dpid_cannot_use :
               dpid_cannot_use.append(p_index['dpid'])
-            
-
               for p_index_i in p_index['ports']:
                 file_ports.append(p_index_i)
               for f_index_i in f_index['flows']:
                 file_flows.append(f_index_i)
-
-            
             
               p_temp = file_ports[:]
               f_temp = file_flows[:]
-
 
               file_nodes_dict['ports'] = p_temp
               file_nodes_dict['flows'] = f_temp
@@ -609,8 +613,6 @@ class StatsEvent_Listener (EventMixin):
         
         json_switches = json.dumps(file_nodes[:])
         json_links = json.dumps(file_links[:])
-
-        print json_links
 
         dpid_cannot_use[:] = [] 
         dpid_used[:] = []

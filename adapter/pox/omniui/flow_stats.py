@@ -118,8 +118,8 @@ def _handle_flowstats_received (event):
     translate wildcards' 8~13 bit to IP SrcMask 
                         14~19 bit to IP DstMask 
     """
-    flows['srcIPMask'] =  32 - (f.match.wildcards & 0X3f00)
-    flows['dstIPMask'] =  32 - (f.match.wildcards & 0xfc000)
+    flows['srcIPMask'] =  32 - ((f.match.wildcards & 0x3f00) >> 8)
+    flows['dstIPMask'] =  32 - ((f.match.wildcards & 0xfc000) >> 14)
 
     flows['dstIP'] = str(f.match.nw_dst)
 
@@ -136,63 +136,66 @@ def _handle_flowstats_received (event):
     
     flows['ingressPort'] = f.match.in_port
     flows['dstMac'] = str(f.match.dl_dst)
-    # print "\n",f.actions[0].type
-    actions_dict['type'] = ofp_action_type(f.actions[0].type)
     
+    for action in f.actions:
+        
+        actions_dict = {}
+        
+        actions_dict['type'] = ofp_action_type(action.type)
 
-    # print "actions_dict\n",actions_dict
-
-    if actions_dict['type'] == "OUTPUT":
-      actions_dict['value'] = f.actions[0].port
+        if actions_dict['type'] == "OUTPUT":
+            actions_dict['value'] = action.port
     
-    elif actions_dict['type'] == "SET_VLAN_VID":
-      actions_dict['value'] = f.actions[0].vlan_vid
+        elif actions_dict['type'] == "SET_VLAN_VID":
+            actions_dict['value'] = action.vlan_vid
 
-    elif actions_dict['type'] == "SET_VLAN_PCP":
-      actions_dict['value'] = f.actions[0].vlan_pcp
+        elif actions_dict['type'] == "SET_VLAN_PCP":
+            actions_dict['value'] = action.vlan_pcp
 
-    elif actions_dict['type'] == "STRIP_VLAN":
-      actions_dict['value'] = "no_return_value"
+        #elif actions_dict['type'] == "STRIP_VLAN":
+            #actions_dict['value'] = "no_return_value"
 
-    elif actions_dict['type'] == "SET_DL_SRC":
-      actions_dict['value'] = str(f.actions[0].dl_addr)
+        elif actions_dict['type'] == "SET_DL_SRC":
+            actions_dict['value'] = str(action.dl_addr)
 
-    elif actions_dict['type'] == "SET_DL_DST":
-      actions_dict['value'] = str(f.actions[0].dl_addr)
+        elif actions_dict['type'] == "SET_DL_DST":
+            actions_dict['value'] = str(action.dl_addr)
     
-    elif actions_dict['type'] == "SET_NW_SRC":
-      actions_dict['value'] = str(f.actions[0].nw_addr)
+        elif actions_dict['type'] == "SET_NW_SRC":
+            actions_dict['value'] = str(action.nw_addr)
     
-    elif actions_dict['type'] == "SET_NW_DST":
-      actions_dict['value'] = str(f.actions[0].nw_addr) 
+        elif actions_dict['type'] == "SET_NW_DST":
+            actions_dict['value'] = str(action.nw_addr) 
     
-    elif actions_dict['type'] == "SET_NW_TOS":
-      actions_dict['value'] = str(f.actions[0].nw_tos)    
+        elif actions_dict['type'] == "SET_NW_TOS":
+            actions_dict['value'] = str(action.nw_tos)    
 
-    
-    elif actions_dict['type'] == "SET_TP_SRC":
-      actions_dict['value'] = f.actions[0].tp_port      
+        elif actions_dict['type'] == "SET_TP_SRC":
+            actions_dict['value'] = action.tp_port      
 
-    elif actions_dict['type'] == "SET_TP_DST":
-      actions_dict['value'] = f.actions[0].tp_port 
+        elif actions_dict['type'] == "SET_TP_DST":
+            actions_dict['value'] = action.tp_port 
 
-    elif actions_dict['type'] == "ENQUEUE":
+        elif actions_dict['type'] == "ENQUEUE":
+            tmp=[]
+            tmp.append(action.port)
+            tmp.append(action.queue_id)
+            actions_dict['value'] = tmp
 
-      tmp=[]
-      tmp.append(f.actions[0].port)
-      tmp.append(f.actions[0].queue_id)
-      actions_dict['value'] = tmp
-
-
-
-    actions.append(actions_dict)
+        actions.append(actions_dict)
     
     flows['actions'] = actions
     
     flows['priority'] = f.priority
     flows['srcIP'] = str(f.match.nw_src)
     flows['vlan'] = f.match.dl_vlan    
+    flows['vlanP'] = f.match.dl_vlan_pcp
+    if flows['vlanP']==None: 
+        flows['vlanP']=0
     flows['counterPacket'] = f.packet_count
+    flows['tosBits'] = f.match.nw_tos;    
+    if flows['tosBits']==None: 
+        flows['tosBits']=0
     
     if f.match.tp_dst == None :
       flows['dstPort'] = 0
