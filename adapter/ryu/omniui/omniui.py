@@ -148,7 +148,7 @@ class RestController(ControllerBase):
                         'dstIPMask': '-', # not support in ryu
                         'netProtocol': flow['match']['nw_proto'] if 'nw_proto' in flow['match'] else 0,
                         'srcIP': flow['match']['nw_src'] if 'nw_src' in flow['match'] else 0,
-			'srcIPMask': '-', # not support in ryu
+                        'srcIPMask': '-', # not support in ryu
                         'dstPort': flow['match']['tp_dst'] if 'tp_dst' in flow['match'] else 0,
                         'srcPort': flow['match']['tp_src'] if 'tp_src' in flow['match'] else 0,
                         'vlan': flow['match']['dl_vlan'] if 'dl_vlan' in flow['match'] else 0,
@@ -203,15 +203,14 @@ class RestController(ControllerBase):
             reverse = False
             for link in result:
                 if(link['src-switch'] == omniLink['dst-switch'] and
-										link['dst-switch'] == omniLink['src-switch'] and
-										link['src-port'] == omniLink['dst-port'] and
-										link['dst-port'] == omniLink['src-port']):
+                                        link['dst-switch'] == omniLink['src-switch'] and
+                                        link['src-port'] == omniLink['dst-port'] and
+                                        link['dst-port'] == omniLink['src-port']):
                     reverse = True
             result.append(omniLink) if reverse is False else None
         body = json.dumps(result)
         return Response(content_type='application/json', body=body)
     
-
     # repack flow mod information
     def mod_flow_entry(self, req, **_kwargs):
         try:
@@ -255,24 +254,11 @@ class RestController(ControllerBase):
         else:
             LOG.debug('Unsupported OF protocol')
             return Response(status=501)
-        '''
-        file = open('./log.txt', 'w')
-        test = "ryuFlow:%s\n" % ryuFlow
-        test += "dp: %s\n" % dp
-        test += "cmd:%s\n" % omniFlow.get('command')
-        file.write(test)
-        file.close()
-        '''
+
         return Response(status=200)
 
     def repack_flow_13(self, omniFlow, dp):
-        actions_type = omniFlow.get('actions').split('=')[0].upper()
-        actions_value = 0   
-        if actions_type == '':      #action_type = None, when not action is provided
-            actions_type = None
-        else:
-            actions_value = omniFlow.get('actions').split('=')[1]
-
+    
         ryuFlow = {
             'cookie': int(omniFlow.get('cookie', 0)),
             'cookie_mask': int(omniFlow.get('cookie_mask', 0)),
@@ -335,12 +321,105 @@ class RestController(ControllerBase):
                 #'tunnel_id': int(omniFlow.get('tunnel_id', 0)),
                 #'ipv6_exthdr': int(omniFlow.get('ipv6_exthdr', 0))
             },
-            'actions': [{
-                "type":actions_type,
-                "port":actions_value
-            }]
+            'actions': []
         }
+
+        file = open('./log.txt', 'w')
+        test = "log for flow mod\n"
+
+        # handle mutiple actions
+        acts = omniFlow.get('actions').split(',')
+        for a in acts:
+            action = self.to_action(dp, a)
+            if action is not None:
+                ryuFlow['actions'].append(action)
+
+        test += "ryuFlow:%s\n" % ryuFlow        
+        file.write(test)
+        file.close()
         return ryuFlow
+
+    # repack actions
+    def to_action(self, dp, dic):
+        action_type = dic.split('=')[0]
+        if action_type == 'OUTPUT':
+            omniAction = {
+                'type': action_type,
+                'port': dic.split('=')[1],
+                'max_len': 0xffe5
+            }
+        elif action_type == 'COPY_TTL_OUT':
+            omniAction = {
+                'type': action_type
+            }
+        elif action_type == 'COPY_TTL_IN':
+            omniAction = {
+                'type': action_type
+            }
+        elif action_type == 'SET_MPLS_TTL':
+            omniAction = {
+                'type': action_type,
+                'mpls_ttl': dic.split('=')[1]
+            }
+        elif action_type == 'DEC_MPLS_TTL':
+            omniAction = {
+                'type': action_type
+            }
+        elif action_type == 'PUSH_VLAN':
+            omniAction = {
+                'type': action_type,
+                'ethertype': dic.split('=')[1]
+            }
+        elif action_type == 'POP_VLAN':
+            omniAction = {
+                'type': action_type
+            }
+        elif action_type == 'PUSH_MPLS':
+            omniAction = {
+                'type': action_type,
+                'ethertype': dic.split('=')[1]
+            }
+        elif action_type == 'POP_MPLS':
+            omniAction = {
+                'type': action_type,
+                'ethertype': dic.split('=')[1]
+            }
+        elif action_type == 'SET_QUEUE':
+            omniAction = {
+                'type': action_type,
+                'queue_id': dic.split('=')[1]
+            }
+        elif action_type == 'GROUP':
+            omniAction = {
+                'type': action_type,
+                'group_id': dic.split('=')[1]
+            }
+        elif action_type == 'SET_NW_TTL':
+            omniAction = {
+                'type': action_type,
+                'nw_ttl': dic.split('=')[1]
+            }
+        elif action_type == 'DEC_NW_TTL':
+            omniAction = {
+                'type': action_type
+            }
+        elif action_type == 'SET_FIELD':  
+            omniAction = {
+                'type': action_type
+                'field': dic.split('=')[1].split(':')[0]
+                'value': dic.split('=')[1].split(':')[1]
+            }  
+        elif action_type == 'PUSH_PBB':
+            omniAction = {
+                'type': action_type,
+                'ethertype': dic.split('=')[1]
+            }  
+        elif action_type == 'POP_PBB':
+            omniAction = {
+                'type': action_type
+            }  
+
+        return omniAction
 
     # repack dpid
     def colonDPID(self, dpid):
