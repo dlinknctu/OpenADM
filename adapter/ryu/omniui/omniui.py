@@ -282,87 +282,81 @@ class RestController(ControllerBase):
                 'tp_dst': int(flows.get('dstPort', 0))
             }
         }
-        actions_type = flows.get('actions')
-        if actions_type is not None:
-            actions_type = actions_type.split('=')[0]
+        actions = flows.get('actions')
+        if actions is not None:
+            actions = flows.get('actions').split(',')
+            for act in actions:
+                action = self.to_action(dp, act)
+                ryuFlow['actions'].append(action)
 
+    def to_action(self, dp, actions)
+        action_type = actions.split('=')[0]
         if actions_type == 'OUTPUT':
             ryuAction = {
                 'type': actions_type,
                 'port': flows.get('actions').split('=')[1],
                 'max_len': 0xffe5
             }
-            ryuFlow['actions'].append(ryuAction)
-            print (ryuFlow)
+            print ("{}={}:{}".format(action_type, flows.get('actions').split('=')[1], 0xffe5))
         elif actions_type == 'SET_VLAN_VID':
             ryuAction = {
                 'type': actions_type,
                 'vlan_vid': flows.get('actions').split('=')[1]
             }
-            ryuFlow['actions'].append(ryuAction)
-            print (ryuFlow)
+            print ("{}={}".format(action_type, flows.get('actions').split('=')[1]))
         elif actions_type == 'SET_VLAN_PCP':
             ryuAction = {
                 'type': actions_type,
                 'vlan_pcp': flows.get('actions').split('=')[1]
             }
-            ryuFlow['actions'].append(ryuAction)
-            print (ryuFlow)
+            print ("{}={}".format(action_type, flows.get('actions').split('=')[1]))
         elif actions_type == 'STRIP_VLAN':
             ryuAction = {
                 'type': actions_type
             }
-            ryuFlow['actions'].append(ryuAction)
-            print (ryuFlow)
+            print ("{}".format(action_type)
         elif actions_type == 'SET_DL_SRC':
             ryuAction = {
                 'type': actions_type,
                 'dl_src': flows.get('actions').split('=')[1]
             }
-            ryuFlow['actions'].append(ryuAction)
-            print (ryuFlow)
+            print ("{}={}".format(action_type, flows.get('actions').split('=')[1]))
         elif actions_type == 'SET_DL_DST':
             ryuAction = {
                 'type': actions_type,
                 'dl_dst': flows.get('actions').split('=')[1]
             }
-            ryuFlow['actions'].append(ryuAction)
-            print (ryuFlow)
+            print ("{}={}".format(action_type, flows.get('actions').split('=')[1]))
         elif actions_type == 'SET_NW_SRC':
             ryuAction = {
                 'type': actions_type,
                 'nw_src': flows.get('actions').split('=')[1]
             }
-            ryuFlow['actions'].append(ryuAction)
-            print (ryuFlow)
+            print ("{}={}".format(action_type, flows.get('actions').split('=')[1]))
         elif actions_type == 'SET_NW_DST':
             ryuAction = {
                 'type': actions_type,
                 'nw_dst': flows.get('actions').split('=')[1]
             }
-            ryuFlow['actions'].append(ryuAction)
-            print (ryuFlow)
+            print ("{}={}".format(action_type, flows.get('actions').split('=')[1]))
         elif actions_type == 'SET_NW_TOS':
             ryuAction = {
                 'type': actions_type,
                 'nw_tos': flows.get('actions').split('=')[1]
             }
-            ryuFlow['actions'].append(ryuAction)
-            print (ryuFlow)
+            print ("{}={}".format(action_type, flows.get('actions').split('=')[1]))
         elif actions_type == 'SET_TP_SRC':
             ryuAction = {
                 'type': actions_type,
                 'tp_src': flows.get('actions').split('=')[1]
             }
-            ryuFlow['actions'].append(ryuAction)
             print (ryuFlow)
         elif actions_type == 'SET_TP_DST':
             ryuAction = {
                 'type': actions_type,
                 'tp_dst': flows.get('actions').split('=')[1]
             }
-            ryuFlow['actions'].append(ryuAction)
-            print (ryuFlow)
+            print ("{}={}".format(action_type, flows.get('actions').split('=')[1]))
         elif actions_type == 'ENQUEUE':
             actions_port = flows.get('actions').split('=')[1].split(':')[0]
             actions_qid = flows.get('actions').split('=')[1].split(':')[1]
@@ -371,8 +365,7 @@ class RestController(ControllerBase):
                 'port': actions_port,
                 'queue_id': actions_qid
             }
-            ryuFlow['actions'].append(ryuAction)
-            print (ryuFlow)
+            print ("{}={}:{}".format(action_type, actions_port, actions_qid)
         else:
             LOG.debug('Unknown action type')
 
