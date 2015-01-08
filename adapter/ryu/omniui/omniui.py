@@ -289,87 +289,89 @@ class RestController(ControllerBase):
                 action = self.to_action(dp, act)
                 ryuFlow['actions'].append(action)
 
-    def to_action(self, dp, actions)
-        action_type = actions.split('=')[0]
+        return ryuFlow
+
+    def to_action(self, dp, actions):
+        actions_type = actions.split('=')[0]
         if actions_type == 'OUTPUT':
             ryuAction = {
                 'type': actions_type,
-                'port': flows.get('actions').split('=')[1],
+                'port': actions.split('=')[1],
                 'max_len': 0xffe5
             }
-            print ("{}={}:{}".format(action_type, flows.get('actions').split('=')[1], 0xffe5))
+            print ("{}={}:{}".format(actions_type, actions.split('=')[1], 0xffe5))
         elif actions_type == 'SET_VLAN_VID':
             ryuAction = {
                 'type': actions_type,
-                'vlan_vid': flows.get('actions').split('=')[1]
+                'vlan_vid': actions.split('=')[1]
             }
-            print ("{}={}".format(action_type, flows.get('actions').split('=')[1]))
+            print ("{}={}".format(actions_type, actions.split('=')[1]))
         elif actions_type == 'SET_VLAN_PCP':
             ryuAction = {
                 'type': actions_type,
-                'vlan_pcp': flows.get('actions').split('=')[1]
+                'vlan_pcp': actions.split('=')[1]
             }
-            print ("{}={}".format(action_type, flows.get('actions').split('=')[1]))
+            print ("{}={}".format(actions_type, actions.split('=')[1]))
         elif actions_type == 'STRIP_VLAN':
             ryuAction = {
                 'type': actions_type
             }
-            print ("{}".format(action_type)
+            print ("{}".format(actions_type))
         elif actions_type == 'SET_DL_SRC':
             ryuAction = {
                 'type': actions_type,
-                'dl_src': flows.get('actions').split('=')[1]
+                'dl_src': actions.split('=')[1]
             }
-            print ("{}={}".format(action_type, flows.get('actions').split('=')[1]))
+            print ("{}={}".format(actions_type, actions.split('=')[1]))
         elif actions_type == 'SET_DL_DST':
             ryuAction = {
                 'type': actions_type,
-                'dl_dst': flows.get('actions').split('=')[1]
+                'dl_dst': actions.split('=')[1]
             }
-            print ("{}={}".format(action_type, flows.get('actions').split('=')[1]))
+            print ("{}={}".format(actions_type, actions.split('=')[1]))
         elif actions_type == 'SET_NW_SRC':
             ryuAction = {
                 'type': actions_type,
-                'nw_src': flows.get('actions').split('=')[1]
+                'nw_src': actions.split('=')[1]
             }
-            print ("{}={}".format(action_type, flows.get('actions').split('=')[1]))
+            print ("{}={}".format(actions_type, actions.split('=')[1]))
         elif actions_type == 'SET_NW_DST':
             ryuAction = {
                 'type': actions_type,
-                'nw_dst': flows.get('actions').split('=')[1]
+                'nw_dst': actions.split('=')[1]
             }
-            print ("{}={}".format(action_type, flows.get('actions').split('=')[1]))
+            print ("{}={}".format(actions_type, actions.split('=')[1]))
         elif actions_type == 'SET_NW_TOS':
             ryuAction = {
                 'type': actions_type,
-                'nw_tos': flows.get('actions').split('=')[1]
+                'nw_tos': actions.split('=')[1]
             }
-            print ("{}={}".format(action_type, flows.get('actions').split('=')[1]))
+            print ("{}={}".format(actions_type, actions.split('=')[1]))
         elif actions_type == 'SET_TP_SRC':
             ryuAction = {
                 'type': actions_type,
-                'tp_src': flows.get('actions').split('=')[1]
+                'tp_src': actions.split('=')[1]
             }
-            print (ryuFlow)
+            print ("{}={}".format(actions_type, actions.split('=')[1]))
         elif actions_type == 'SET_TP_DST':
             ryuAction = {
                 'type': actions_type,
-                'tp_dst': flows.get('actions').split('=')[1]
+                'tp_dst': actions.split('=')[1]
             }
-            print ("{}={}".format(action_type, flows.get('actions').split('=')[1]))
+            print ("{}={}".format(actions_type, actions.split('=')[1]))
         elif actions_type == 'ENQUEUE':
-            actions_port = flows.get('actions').split('=')[1].split(':')[0]
-            actions_qid = flows.get('actions').split('=')[1].split(':')[1]
+            actions_port = actions.split('=')[1].split(':')[0]
+            actions_qid = actions.split('=')[1].split(':')[1]
             ryuAction = {
                 'type': actions_type,
                 'port': actions_port,
                 'queue_id': actions_qid
             }
-            print ("{}={}:{}".format(action_type, actions_port, actions_qid)
+            print ("{}={}:{}".format(actions_type, actions_port, actions_qid))
         else:
             LOG.debug('Unknown action type')
 
-        return ryuFlow
+        return ryuAction
 
     # restore Ryu-format dpid
     def nospaceDPID(self, dpid):
