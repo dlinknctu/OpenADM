@@ -167,11 +167,11 @@ class RestController(ControllerBase):
                     }
                     # repack action field
                     for action in flow['actions']:
-                        ryuAction = {
+                        omniAction = {
                             'type': action.split(':')[0],
                             'value': action.split(':')[1]
                         }
-                        omniFlow['actions'].append(ryuAction)
+                        omniFlow['actions'].append(omniAction)
                     omniNode['flows'].append(omniFlow)
             # repack port information
             ports = self.getPorts(node)
@@ -242,9 +242,6 @@ class RestController(ControllerBase):
             return Response(status=404)
         
         # repack Omniui Flow to Ryu Flow
-        
-        
-
         if dp.ofproto.OFP_VERSION == ofproto_v1_0.OFP_VERSION:
             ofctl_v1_0.mod_flow_entry(dp, ryuFlow, cmd)
         elif dp.ofproto.OFP_VERSION == ofproto_v1_2.OFP_VERSION:
@@ -259,7 +256,6 @@ class RestController(ControllerBase):
         return Response(status=200)
 
     def repack_flow_13(self, omniFlow, dp):
-    
         ryuFlow = {
             'cookie': int(omniFlow.get('cookie', 0)),
             'cookie_mask': int(omniFlow.get('cookie_mask', 0)),
@@ -275,7 +271,7 @@ class RestController(ControllerBase):
             'actions': []
         }
 
-        # handle match field
+        # handle match dictionary
         for key in omniFlow:
             match = self.to_match(dp, key, omniFlow)
             if match is not None:
@@ -287,12 +283,12 @@ class RestController(ControllerBase):
             action = self.to_action(dp, a)
             if action is not None:
                 ryuFlow['actions'].append(action)
-                
+
         return ryuFlow
 
     # repack match
     def to_match(self, dp, omni_key, omniFlow):
-        # key convert from omniui to ryu
+        # convert key from omniui to ryu, and change its type
         convert = {
             'ingressPort': {'in_port': int},
             'in_phy_port': {'in_phy_port': int},
