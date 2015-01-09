@@ -1,6 +1,7 @@
 import json
 import sys
 import ast
+import logging as LOG
 from webob import Response
 from ryu.app.wsgi import ControllerBase, WSGIApplication, route
 from ryu.base import app_manager
@@ -166,11 +167,11 @@ class RestController(ControllerBase):
                     }
                     # repack action field
                     for action in flow['actions']:
-                        omniAction = {
+                        ryuAction = {
                             'type': action.split(':')[0],
                             'value': action.split(':')[1]
                         }
-                        omniFlow['actions'].append(omniAction)
+                        omniFlow['actions'].append(ryuAction)
                     omniNode['flows'].append(omniFlow)
             # repack port information
             ports = self.getPorts(node)
@@ -266,66 +267,22 @@ class RestController(ControllerBase):
             'idle_timeout': int(omniFlow.get('idleTimeout', 0)),
             'hard_timeout': int(omniFlow.get('hardTimeout', 0)),
             'priority': int(omniFlow.get('priority', 0)),
-            #'buffer_id': int(omniFlow.get('buffer_id', dp.ofproto.OFP_NO_BUFFER)),
-            #'out_port': int(omniFlow.get('out_port', dp.ofproto.OFPP_ANY)),
-            #'out_group': int(omniFlow.get('out_group', dp.ofproto.OFPG_ANY)),
+            'buffer_id': int(omniFlow.get('buffer_id', 0)),
+            'out_port': int(omniFlow.get('out_port', 0)),
+            'out_group': int(omniFlow.get('out_group', 0)),
             'flags': int(omniFlow.get('flags', 0)),
-            'match': {
-                'in_port': int(omniFlow.get('ingressPort', 0)),
-                #'in_phy_port': int(omniFlow.get('in_phy_port', 0)),
-                #'metadata': to_match_metadata,
-                'dl_dst': omniFlow.get('dstMac'),
-                'dl_src': omniFlow.get('srcMac'),
-                #'eth_dst': omniFlow.get('eth_dst'),
-                #'eth_src': omniFlow.get('eth_src'),
-                'dl_type': int(omniFlow.get('dlType', 0)),
-                #'eth_type': int(omniFlow.get('eth_type', 0)),
-                'dl_vlan': int(omniFlow.get('vlan', 0)),
-                #'vlan_vid': to_match_vid,
-                'vlan_pcp': int(omniFlow.get('vlanP', 0)),
-                #'ip_dscp': int(omniFlow.get('ip_dscp', 0)),
-                #'ip_ecn': int(omniFlow.get('ip_ecn', 0)),
-                'nw_proto': int(omniFlow.get('netProtocol', 0)),
-                #'ip_proto': int(omniFlow.get('ip_proto', 0)),
-                'nw_src': omniFlow.get('srcIP'),
-                'nw_dst': omniFlow.get('dstIP'),
-                #'ipv4_src': omniFlow.get('ipv4_src'),
-                #'ipv4_dst': omniFlow.get('ipv4_dst'),
-                ##'tp_src': int(omniFlow.get('srcPort', 0)),
-                ##'tp_dst': int(omniFlow.get('dstPort', 0)),
-                #'tcp_src': int(omniFlow.get('tcp_src', 0)),
-                #'tcp_dst': int(omniFlow.get('tcp_dst', 0)),
-                #'udp_src': int(omniFlow.get('udp_src', 0)),
-                #'udp_dst': int(omniFlow.get('udp_dst', 0)),
-                #'sctp_src': int(omniFlow.get('sctp_src', 0)),
-                #'sctp_dst': int(omniFlow.get('sctp_dst', 0)),
-                #'icmpv4_type': int(omniFlow.get('icmpv4_type', 0)),
-                #'icmpv4_code': int(omniFlow.get('icmpv4_code', 0)),
-                #'arp_op': int(omniFlow.get('arp_op', 0)),
-                #'arp_spa': to_match_ip,
-                #'arp_tpa': to_match_ip,
-                #'arp_sha': to_match_eth,
-                #'arp_tha': to_match_eth,
-                #'ipv6_src': to_match_ip,
-                #'ipv6_dst': to_match_ip,
-                #'ipv6_flabel': int(omniFlow.get('ipv6_flabel', 0)),
-                #'icmpv6_type': int(omniFlow.get('icmpv6_type', 0)),
-                #'icmpv6_code': int(omniFlow.get('icmpv6_code', 0)),
-                #'ipv6_nd_target': to_match_ip,
-                #'ipv6_nd_sll': to_match_eth,
-                #'ipv6_nd_tll': to_match_eth,
-                #'mpls_label': int(omniFlow.get('mpls_label', 0)),
-                #'mpls_tc': int(omniFlow.get('mpls_tc', 0)),
-                #'mpls_bos': int(omniFlow.get('mpls_bos', 0)),
-                #'pbb_isid': int(omniFlow.get('pbb_isid', 0)),
-                #'tunnel_id': int(omniFlow.get('tunnel_id', 0)),
-                #'ipv6_exthdr': int(omniFlow.get('ipv6_exthdr', 0))
-            },
+            'match': {},
             'actions': []
         }
 
         file = open('./log.txt', 'w')
         test = "log for flow mod\n"
+
+        # handle match field
+        for key in omniFlow:
+            match = self.to_match(dp, key, omniFlow)
+            if match is not None:
+                ryuFlow['match'].update(match) 
 
         # handle mutiple actions
         acts = omniFlow.get('actions').split(',')
@@ -339,87 +296,154 @@ class RestController(ControllerBase):
         file.close()
         return ryuFlow
 
+    # repack match
+    def to_match(self, dp, omni_key, omniFlow):
+        # key convert from omniui to ryu
+        convert = {
+            'ingressPort': {'in_port': int},
+            'in_phy_port': {'in_phy_port': int},
+            'metadata': {'metadata': str},
+            'dstMac': {'dl_dst': str},
+            'srcMac': {'dl_src': str},
+            'eth_dst': {'eth_dst': str},
+            'eth_src': {'eth_src': str},
+            'dlType': {'dl_type': int},
+            'eth_type': {'eth_type': int},
+            'vlan': {'dl_vlan': str},
+            'vlan_vid': {'vlan_vid': str},
+            'vlanP': {'vlan_pcp': int},
+            'ip_dscp': {'ip_dscp': int},
+            'ip_ecn': {'ip_ecn': int},
+            'netProtocol': {'nw_proto': int},
+            'ip_proto': {'ip_proto': int},
+            'srcIP': {'nw_src': str},
+            'dstIP': {'nw_dst': str},
+            'ipv4_src': {'ipv4_src': str},
+            'ipv4_dst': {'ipv4_dst': str},
+            'srcPort': {'tp_src': int},
+            'dstPort': {'tp_dst': int},
+            'tcp_src': {'tcp_src': int},
+            'tcp_dst': {'tcp_dst': int},
+            'udp_src': {'udp_src': int},
+            'udp_dst': {'udp_dst': int},
+            'sctp_src': {'sctp_src': int},
+            'sctp_dst': {'sctp_dst': int},
+            'icmpv4_type': {'icmpv4_type': int},
+            'icmpv4_code': {'icmpv4_code': int},
+            'arp_op': {'arp_op': int},
+            'arp_spa': {'arp_spa': str},
+            'arp_tpa': {'arp_tpa': str},
+            'arp_sha': {'arp_sha': str},
+            'arp_tha': {'arp_tha': str},
+            'ipv6_src': {'ipv6_src': str},
+            'ipv6_dst': {'ipv6_dst': str},
+            'ipv6_flabel': {'ipv6_flabel': int},
+            'icmpv6_type': {'icmpv6_type': int},
+            'icmpv6_code': {'icmpv6_code': int},
+            'ipv6_nd_target': {'ipv6_nd_target': str},
+            'ipv6_nd_sll': {'ipv6_nd_sll': str},
+            'ipv6_nd_tll': {'ipv6_nd_tll': str},
+            'mpls_label': {'mpls_label': int},
+            'mpls_tc': {'mpls_tc': int},
+            'mpls_bos': {'mpls_bos': int},
+            'pbb_isid': {'pbb_isid': int},
+            'tunnel_id': {'tunnel_id': int},
+            'ipv6_exthdr': {'ipv6_exthdr': int}
+        }
+
+        for key1 in convert.keys():
+            convert2 = convert.get(key1)
+            for key2, value in convert2.items():
+                if omni_key == key1:
+                    ryuMatch = {
+                        key2: value(omniFlow.get(omni_key))
+                    }
+                    return ryuMatch
+
+        return None
+        
     # repack actions
     def to_action(self, dp, dic):
         action_type = dic.split('=')[0]
         if action_type == 'OUTPUT':
-            omniAction = {
+            ryuAction = {
                 'type': action_type,
-                'port': dic.split('=')[1],
-                'max_len': 0xffe5
+                'port': dic.split('=')[1]
             }
         elif action_type == 'COPY_TTL_OUT':
-            omniAction = {
+            ryuAction = {
                 'type': action_type
             }
         elif action_type == 'COPY_TTL_IN':
-            omniAction = {
+            ryuAction = {
                 'type': action_type
             }
         elif action_type == 'SET_MPLS_TTL':
-            omniAction = {
+            ryuAction = {
                 'type': action_type,
                 'mpls_ttl': dic.split('=')[1]
             }
         elif action_type == 'DEC_MPLS_TTL':
-            omniAction = {
+            ryuAction = {
                 'type': action_type
             }
         elif action_type == 'PUSH_VLAN':
-            omniAction = {
+            ryuAction = {
                 'type': action_type,
                 'ethertype': dic.split('=')[1]
             }
         elif action_type == 'POP_VLAN':
-            omniAction = {
+            ryuAction = {
                 'type': action_type
             }
         elif action_type == 'PUSH_MPLS':
-            omniAction = {
+            ryuAction = {
                 'type': action_type,
                 'ethertype': dic.split('=')[1]
             }
         elif action_type == 'POP_MPLS':
-            omniAction = {
+            ryuAction = {
                 'type': action_type,
                 'ethertype': dic.split('=')[1]
             }
         elif action_type == 'SET_QUEUE':
-            omniAction = {
+            ryuAction = {
                 'type': action_type,
                 'queue_id': dic.split('=')[1]
             }
         elif action_type == 'GROUP':
-            omniAction = {
+            ryuAction = {
                 'type': action_type,
                 'group_id': dic.split('=')[1]
             }
         elif action_type == 'SET_NW_TTL':
-            omniAction = {
+            ryuAction = {
                 'type': action_type,
                 'nw_ttl': dic.split('=')[1]
             }
         elif action_type == 'DEC_NW_TTL':
-            omniAction = {
+            ryuAction = {
                 'type': action_type
             }
         elif action_type == 'SET_FIELD':  
-            omniAction = {
-                'type': action_type
-                'field': dic.split('=')[1].split(':')[0]
+            ryuAction = {
+                'type': action_type,
+                'field': dic.split('=')[1].split(':')[0],
                 'value': dic.split('=')[1].split(':')[1]
             }  
         elif action_type == 'PUSH_PBB':
-            omniAction = {
+            ryuAction = {
                 'type': action_type,
                 'ethertype': dic.split('=')[1]
             }  
         elif action_type == 'POP_PBB':
-            omniAction = {
+            ryuAction = {
                 'type': action_type
-            }  
+            } 
+        else:
+            ryuAction = None 
 
-        return omniAction
+        return ryuAction
 
     # repack dpid
     def colonDPID(self, dpid):
