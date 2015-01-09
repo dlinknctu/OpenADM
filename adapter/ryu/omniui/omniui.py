@@ -275,9 +275,6 @@ class RestController(ControllerBase):
             'actions': []
         }
 
-        file = open('./log.txt', 'w')
-        test = "log for flow mod\n"
-
         # handle match field
         for key in omniFlow:
             match = self.to_match(dp, key, omniFlow)
@@ -290,10 +287,7 @@ class RestController(ControllerBase):
             action = self.to_action(dp, a)
             if action is not None:
                 ryuFlow['actions'].append(action)
-
-        test += "ryuFlow:%s\n" % ryuFlow        
-        file.write(test)
-        file.close()
+                
         return ryuFlow
 
     # repack match
