@@ -140,7 +140,7 @@ class RestController(ControllerBase):
             flows = self.getFlows(node)
             for key in flows:
                 for flow in flows[key]:
-                    print flow['match']
+                    print flow['actions']
                     omniFlow = {
                         'ingressPort': flow['match']['in_port'] if 'in_port' in flow['match'] else 0,
                         'srcMac': flow['match']['dl_src'] if 'dl_src' in flow['match'] else 0,
@@ -227,6 +227,7 @@ class RestController(ControllerBase):
         if dp is None:
             return Response(status=404)
        
+       
         cmd = omniFlow.get('command')
         if cmd == 'ADD':
             cmd = dp.ofproto.OFPFC_ADD
@@ -240,7 +241,7 @@ class RestController(ControllerBase):
             cmd = dp.ofproto.OFPFC_DELETE_STRICT
         else:
             return Response(status=404)
-        
+            
         # repack Omniui Flow to Ryu Flow
         if dp.ofproto.OFP_VERSION == ofproto_v1_0.OFP_VERSION:
             ofctl_v1_0.mod_flow_entry(dp, ryuFlow, cmd)
@@ -263,15 +264,15 @@ class RestController(ControllerBase):
             'idle_timeout': int(omniFlow.get('idleTimeout', 0)),
             'hard_timeout': int(omniFlow.get('hardTimeout', 0)),
             'priority': int(omniFlow.get('priority', 0)),
-            'buffer_id': int(omniFlow.get('buffer_id', 0)),
-            'out_port': int(omniFlow.get('out_port', 0)),
-            'out_group': int(omniFlow.get('out_group', 0)),
+            'buffer_id': int(omniFlow.get('buffer_id', dp.ofproto.OFP_NO_BUFFER)),
+            'out_port': int(omniFlow.get('out_port', dp.ofproto.OFPP_ANY)),
+            'out_group': int(omniFlow.get('out_group', dp.ofproto.OFPG_ANY)),
             'flags': int(omniFlow.get('flags', 0)),
             'match': {},
             'actions': []
         }
 
-        # handle match dictionary
+        # convert match field from omniui to ryu
         for key in omniFlow:
             match = self.to_match(dp, key, omniFlow)
             if match is not None:
@@ -290,65 +291,63 @@ class RestController(ControllerBase):
     def to_match(self, dp, omni_key, omniFlow):
         # convert key from omniui to ryu, and change its type
         convert = {
-            'ingressPort': {'in_port': int},
-            'in_phy_port': {'in_phy_port': int},
-            'metadata': {'metadata': str},
-            'dstMac': {'dl_dst': str},
-            'srcMac': {'dl_src': str},
-            'eth_dst': {'eth_dst': str},
-            'eth_src': {'eth_src': str},
-            'dlType': {'dl_type': int},
-            'eth_type': {'eth_type': int},
-            'vlan': {'dl_vlan': str},
-            'vlan_vid': {'vlan_vid': str},
-            'vlanP': {'vlan_pcp': int},
-            'ip_dscp': {'ip_dscp': int},
-            'ip_ecn': {'ip_ecn': int},
-            'netProtocol': {'nw_proto': int},
-            'ip_proto': {'ip_proto': int},
-            'srcIP': {'nw_src': str},
-            'dstIP': {'nw_dst': str},
-            'ipv4_src': {'ipv4_src': str},
-            'ipv4_dst': {'ipv4_dst': str},
-            'srcPort': {'tp_src': int},
-            'dstPort': {'tp_dst': int},
-            'tcp_src': {'tcp_src': int},
-            'tcp_dst': {'tcp_dst': int},
-            'udp_src': {'udp_src': int},
-            'udp_dst': {'udp_dst': int},
-            'sctp_src': {'sctp_src': int},
-            'sctp_dst': {'sctp_dst': int},
-            'icmpv4_type': {'icmpv4_type': int},
-            'icmpv4_code': {'icmpv4_code': int},
-            'arp_op': {'arp_op': int},
-            'arp_spa': {'arp_spa': str},
-            'arp_tpa': {'arp_tpa': str},
-            'arp_sha': {'arp_sha': str},
-            'arp_tha': {'arp_tha': str},
-            'ipv6_src': {'ipv6_src': str},
-            'ipv6_dst': {'ipv6_dst': str},
-            'ipv6_flabel': {'ipv6_flabel': int},
-            'icmpv6_type': {'icmpv6_type': int},
-            'icmpv6_code': {'icmpv6_code': int},
-            'ipv6_nd_target': {'ipv6_nd_target': str},
-            'ipv6_nd_sll': {'ipv6_nd_sll': str},
-            'ipv6_nd_tll': {'ipv6_nd_tll': str},
-            'mpls_label': {'mpls_label': int},
-            'mpls_tc': {'mpls_tc': int},
-            'mpls_bos': {'mpls_bos': int},
-            'pbb_isid': {'pbb_isid': int},
-            'tunnel_id': {'tunnel_id': int},
-            'ipv6_exthdr': {'ipv6_exthdr': int}
+            'ingressPort': ['in_port', int],
+            'in_phy_port': ['in_phy_port', int],
+            'metadata': ['metadata', str],
+            'dstMac': ['dl_dst', str],
+            'srcMac': ['dl_src', str],
+            'eth_dst': ['eth_dst', str],
+            'eth_src': ['eth_src', str],
+            'dlType': ['dl_type', int],
+            'eth_type': ['eth_type', int],
+            'vlan': ['dl_vlan', str],
+            'vlan_vid': ['vlan_vid', str],
+            'vlanP': ['vlan_pcp', int],
+            'ip_dscp': ['ip_dscp', int],
+            'ip_ecn': ['ip_ecn', int],
+            'netProtocol': ['nw_proto', int],
+            'ip_proto': ['ip_proto', int],
+            'srcIP': ['nw_src', str],
+            'dstIP': ['nw_dst', str],
+            'ipv4_src': ['ipv4_src', str],
+            'ipv4_dst': ['ipv4_dst', str],
+            'srcPort': ['tp_src', int],
+            'dstPort': ['tp_dst', int],
+            'tcp_src': ['tcp_src', int],
+            'tcp_dst': ['tcp_dst', int],
+            'udp_src': ['udp_src', int],
+            'udp_dst': ['udp_dst', int],
+            'sctp_src': ['sctp_src', int],
+            'sctp_dst': ['sctp_dst', int],
+            'icmpv4_type': ['icmpv4_type', int],
+            'icmpv4_code': ['icmpv4_code', int],
+            'arp_op': ['arp_op', int],
+            'arp_spa': ['arp_spa', str],
+            'arp_tpa': ['arp_tpa', str],
+            'arp_sha': ['arp_sha', str],
+            'arp_tha': ['arp_tha', str],
+            'ipv6_src': ['ipv6_src', str],
+            'ipv6_dst': ['ipv6_dst', str],
+            'ipv6_flabel': ['ipv6_flabel', int],
+            'icmpv6_type': ['icmpv6_type', int],
+            'icmpv6_code': ['icmpv6_code', int],
+            'ipv6_nd_target': ['ipv6_nd_target', str],
+            'ipv6_nd_sll': ['ipv6_nd_sll', str],
+            'ipv6_nd_tll': ['ipv6_nd_tll', str],
+            'mpls_label': ['mpls_label', int],
+            'mpls_tc': ['mpls_tc', int],
+            'mpls_bos': ['mpls_bos', int],
+            'pbb_isid': ['pbb_isid', int],
+            'tunnel_id': ['tunnel_id', int],
+            'ipv6_exthdr': ['ipv6_exthdr', int]
         }
 
-        for key1 in convert.keys():
-            convert2 = convert.get(key1)
-            for key2, value in convert2.items():
-                if omni_key == key1:
-                    ryuMatch = {
-                        key2: value(omniFlow.get(omni_key))
-                    }
-                    return ryuMatch
+        for key, value in convert.items():
+            if omni_key == key:
+                ryuMatch = {
+                    value[0]: value[1](omniFlow.get(omni_key))
+                }
+                return ryuMatch
 
         return None
         
