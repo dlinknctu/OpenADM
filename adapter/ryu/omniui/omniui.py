@@ -162,11 +162,17 @@ class RestController(ControllerBase):
                     }
                     # repack action field
                     for action in flow['actions']:
-                        omniAction = {
-                            'type': action.split(':')[0],
-                            'value': action.split(':')[1]
-                        }
-                        omniFlow['actions'].append(omniAction)
+                        if action == 'STRIP_VLAN':
+                            omniAction = {
+                                'type': action,
+                            }
+                            omniFlow['actions'].append(omniAction)
+                        else:
+                            omniAction = {
+                                'type': action.split(':')[0],
+                                'value': action.split(':')[1]
+                            }
+                            omniFlow['actions'].append(omniAction)
                     omniNode['flows'].append(omniFlow)
             # repack port information
             ports = self.getPorts(node)
@@ -209,18 +215,18 @@ class RestController(ControllerBase):
 
     def mod_flow_entry(self, req, **kwargs):
         try:
-            omniflow = ast.literal_eval(req.body)     #Getting flow from req
+            omniFlow = ast.literal_eval(req.body)     #Getting flow from req
         except SyntaxError:
-            LOG.debug('invalid syntax %s', req.body)
+            LOG.debug('Invalid syntax %s', req.body)
             return Response(status=400)
 
-        omnidpid = omniflow.get('switch')             #Getting OmniUI dpid from flow    
-        if omnidpid is None:
+        omniDpid = omniFlow.get('switch')             #Getting OmniUI dpid from flow    
+        if omniDpid is None:
             return Response(status=404)
         else:
-            dpid = self.nospaceDPID(omnidpid.split(':'))    #Split OmniUI dpid into a list
+            dpid = self.nospaceDPID(omniDpid.split(':'))    #Split OmniUI dpid into a list
 
-        cmd = omniflow.get('command')                 #Getting OmniUI command from flow
+        cmd = omniFlow.get('command')                 #Getting OmniUI command from flow
         dp = self.dpset.get(int(dpid))                #Getting datapath from Ryu dpid
         if dp is None:                                #NB: convert dpid to int first
             return Response(status=404)
@@ -239,12 +245,12 @@ class RestController(ControllerBase):
             return Response(status=404)
 
         if dp.ofproto.OFP_VERSION == ofproto_v1_0.OFP_VERSION:
-            flow = self.ryuFlow_v1_0(dp, omniflow)
-            ofctl_v1_0.mod_flow_entry(dp, flow, cmd)
+            ryuFlow = self.ryuFlow_v1_0(dp, omniFlow)
+            ofctl_v1_0.mod_flow_entry(dp, ryuFlow, cmd)
         elif dp.ofproto.OFP_VERSION == ofproto_v1_2.OFP_VERSION:
-            ofctl_v1_2.mod_flow_entry(dp, flow, cmd)
+            ofctl_v1_2.mod_flow_entry(dp, omniFlow, cmd)
         elif dp.ofproto.OFP_VERSION == ofproto_v1_3.OFP_VERSION:
-            ofctl_v1_3.mod_flow_entry(dp, flow, cmd)
+            ofctl_v1_3.mod_flow_entry(dp, omniFlow, cmd)
         else:
             return Response(status=404)
 
@@ -299,66 +305,55 @@ class RestController(ControllerBase):
                 'port': actions.split('=')[1],
                 'max_len': 0xffe5
             }
-            print ("{}={}:{}".format(actions_type, actions.split('=')[1], 0xffe5))
         elif actions_type == 'SET_VLAN_VID':
             ryuAction = {
                 'type': actions_type,
                 'vlan_vid': actions.split('=')[1]
             }
-            print ("{}={}".format(actions_type, actions.split('=')[1]))
         elif actions_type == 'SET_VLAN_PCP':
             ryuAction = {
                 'type': actions_type,
                 'vlan_pcp': actions.split('=')[1]
             }
-            print ("{}={}".format(actions_type, actions.split('=')[1]))
         elif actions_type == 'STRIP_VLAN':
             ryuAction = {
                 'type': actions_type
             }
-            print ("{}".format(actions_type))
         elif actions_type == 'SET_DL_SRC':
             ryuAction = {
                 'type': actions_type,
                 'dl_src': actions.split('=')[1]
             }
-            print ("{}={}".format(actions_type, actions.split('=')[1]))
         elif actions_type == 'SET_DL_DST':
             ryuAction = {
                 'type': actions_type,
                 'dl_dst': actions.split('=')[1]
             }
-            print ("{}={}".format(actions_type, actions.split('=')[1]))
         elif actions_type == 'SET_NW_SRC':
             ryuAction = {
                 'type': actions_type,
                 'nw_src': actions.split('=')[1]
             }
-            print ("{}={}".format(actions_type, actions.split('=')[1]))
         elif actions_type == 'SET_NW_DST':
             ryuAction = {
                 'type': actions_type,
                 'nw_dst': actions.split('=')[1]
             }
-            print ("{}={}".format(actions_type, actions.split('=')[1]))
         elif actions_type == 'SET_NW_TOS':
             ryuAction = {
                 'type': actions_type,
                 'nw_tos': actions.split('=')[1]
             }
-            print ("{}={}".format(actions_type, actions.split('=')[1]))
         elif actions_type == 'SET_TP_SRC':
             ryuAction = {
                 'type': actions_type,
                 'tp_src': actions.split('=')[1]
             }
-            print ("{}={}".format(actions_type, actions.split('=')[1]))
         elif actions_type == 'SET_TP_DST':
             ryuAction = {
                 'type': actions_type,
                 'tp_dst': actions.split('=')[1]
             }
-            print ("{}={}".format(actions_type, actions.split('=')[1]))
         elif actions_type == 'ENQUEUE':
             actions_port = actions.split('=')[1].split(':')[0]
             actions_qid = actions.split('=')[1].split(':')[1]
@@ -367,7 +362,6 @@ class RestController(ControllerBase):
                 'port': actions_port,
                 'queue_id': actions_qid
             }
-            print ("{}={}:{}".format(actions_type, actions_port, actions_qid))
         else:
             LOG.debug('Unknown action type')
 
