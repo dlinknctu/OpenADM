@@ -167,10 +167,15 @@ class RestController(ControllerBase):
                     }
                     # repack action field
                     for action in flow['actions']:
-                        omniAction = {
-                            'type': action.split(':')[0],
-                            'value': action.split(':')[1]
-                        }
+                        try:
+                            omniAction = {
+                                'type': action.split(':')[0],
+                                'value': action.split(':')[1]
+                            }
+                        except:
+                            omniAction = {
+                                'type': action.split(':')[0]
+                            }
                         omniFlow['actions'].append(omniAction)
                     omniNode['flows'].append(omniFlow)
             # repack port information
@@ -204,9 +209,9 @@ class RestController(ControllerBase):
             reverse = False
             for link in result:
                 if(link['src-switch'] == omniLink['dst-switch'] and
-                                        link['dst-switch'] == omniLink['src-switch'] and
-                                        link['src-port'] == omniLink['dst-port'] and
-                                        link['dst-port'] == omniLink['src-port']):
+                   link['dst-switch'] == omniLink['src-switch'] and 
+                   link['src-port'] == omniLink['dst-port'] and 
+                   link['dst-port'] == omniLink['src-port']):
                     reverse = True
             result.append(omniLink) if reverse is False else None
         body = json.dumps(result)
@@ -241,7 +246,8 @@ class RestController(ControllerBase):
             cmd = dp.ofproto.OFPFC_DELETE_STRICT
         else:
             return Response(status=404)
-            
+        
+        ryuflow={}
         # repack Omniui Flow to Ryu Flow
         if dp.ofproto.OFP_VERSION == ofproto_v1_0.OFP_VERSION:
             ofctl_v1_0.mod_flow_entry(dp, ryuFlow, cmd)
@@ -297,7 +303,7 @@ class RestController(ControllerBase):
             'dstMac': ['dl_dst', str],
             'srcMac': ['dl_src', str],
             'eth_dst': ['eth_dst', str],
-            'eth_src': ['eth_src', str],
+            'eth_src': ['iteth_src', str],
             'dlType': ['dl_type', int],
             'eth_type': ['eth_type', int],
             'vlan': ['dl_vlan', str],
