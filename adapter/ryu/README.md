@@ -9,6 +9,7 @@ $ `cd ryu; sudo python ./setup.py install`
 
 ###Execution###
 **Ryu 1.0**  
+
 1. Compile OmniUI core  
 $ `cd ~; python ~/OmniUI/core/core.py`  
 **Successful compilation starts the OmniUI core**  
@@ -24,6 +25,7 @@ $ `firefox ~/OmniUI/webui/index.html`
   
 
 **Ryu 1.3**  
+  
 1. Emulate 1 switch with 3 hosts  
 $ `sudo mn --topo single,3 --mac --controller remote --switch ovsk,protocols=OpenFlow13`
 
