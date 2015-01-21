@@ -162,7 +162,7 @@ class RestController(ControllerBase):
                     }
                     # repack action field
                     for action in flow['actions']:
-                        if action == 'STRIP_VLAN':
+                        if (len(action.split(':')) == 1):
                             omniAction = {
                                 'type': action,
                             }
