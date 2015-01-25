@@ -15,6 +15,8 @@ class UIPusher:
 		# register rest api
 		core.registerRestApi("info/topology", self.topologyHandler)
 		core.registerRestApi("stat", self.statisticHandler)
+		# register sse handler
+		core.registerSSEHandler('updatetopo', self.topoHandler)
 		# save core for ipc use
 		self.core = core
 
@@ -35,6 +37,11 @@ class UIPusher:
 				self.db.authenticate(parm['user'],parm['password'])
 			except:
 				print "database connection failed"
+
+	def topoHandler(self):
+		# return JSON format
+		result = self.core.invokeIPC("periodicInquiry")
+		return result
 
 	def topologyHandler(self,request):
 		# return JSONP format
