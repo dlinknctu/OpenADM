@@ -14,7 +14,7 @@ from flask import Flask, Response, request, abort, render_template
 from flask_cors import *
 
 app = Flask(__name__)
-app.config['CORS_ORIGINS'] = ['*']
+app.config['CORS_ORIGINS'] = ['http://localhost']
 subscriptions = []
 logger = logging.getLogger(__name__)
 
