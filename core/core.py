@@ -31,6 +31,16 @@ class ServerSentEvent(object):
 		}
 
 	def encode(self):
+		"""Encodes received data to valid SSE format
+
+		SSE payload format:
+			id: xxx\n
+			event: xxx\n
+			data: xxx\n\n
+
+		Return string:
+			'id: xxx\nevent: xxx\ndata: xxx\n\n'
+		"""
 		if not self.data:
 			return ''
 		lines = ['%s: %s' % (v, k)
