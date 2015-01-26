@@ -180,7 +180,6 @@ class Core:
 
 	# Register SSE
 	def registerSSEHandler(self, sseName, handler):
-		#self.sseHandlers.append(SSEHandler(sseName, handler))
 		sseHandlers[sseName] = handler
 
 	#Register Event
