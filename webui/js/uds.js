@@ -83,7 +83,7 @@ function parseInput() {
     return data;
 }
 
-function sse() {
+function serverSentEvent() {
     var evtSrc = new EventSource('http://localhost:5567/subscribe');
     evtSrc.addEventListener('updateuds', function(e) {
         updateShowcase(JSON.parse(e.data));
@@ -116,5 +116,5 @@ $(document).ready(function() {
         }
     });
 
-    sse();
+    serverSentEvent();
 });

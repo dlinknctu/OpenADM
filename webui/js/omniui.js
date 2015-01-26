@@ -332,7 +332,7 @@ function sendFlow(f){
     $.post(url, data, callback, "json");
 }
 
-function sse() {
+function serverSentEvent() {
     var evtSrc = new EventSource('http://localhost:5567/subscribe');
     evtSrc.addEventListener('updatetopo', function(e) {
         updateTopo(JSON.parse(e.data));
