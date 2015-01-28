@@ -43,19 +43,6 @@ function updateShowcase(json) {
     }
 }
 
-function queryUdsEntries() {
-    $.ajax({
-        type: 'GET',
-        url: 'http://localhost:5567/uds/get',
-        dataType: 'jsonp',
-        jsonpCallback: 'omniui',
-        success: function(json) {
-            updateShowcase(json);
-            notifyUser('success', 'Updated successfully.', 'RELOAD');
-        }
-    });
-}
-
 function udsEntryMgmt(action, oxm_match) {
     $.ajax({
         type: 'PUT',
@@ -64,7 +51,6 @@ function udsEntryMgmt(action, oxm_match) {
         success: function(resp) {
             notifyUser('success', 'Flow added successfully.', action.toUpperCase() + ' FLOW');
             $('input').val('');
-            queryUdsEntries();
             console.log(resp);
         },
         error: function(resp) {
@@ -97,10 +83,14 @@ function parseInput() {
     return data;
 }
 
+function serverSentEvent() {
+    var evtSrc = new EventSource('http://localhost:5567/subscribe');
+    evtSrc.addEventListener('updateuds', function(e) {
+        updateShowcase(JSON.parse(e.data));
+    }, false);
+}
+
 $(document).ready(function() {
-    $('#reload').click(function() {
-        queryUdsEntries();
-    });
     $('#add-flow').click(function() {
         try {
             udsEntryMgmt('add', parseInput());
@@ -126,6 +116,5 @@ $(document).ready(function() {
         }
     });
 
-    // Initial Query
-    queryUdsEntries();
+    serverSentEvent();
 });
