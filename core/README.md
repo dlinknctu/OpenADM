@@ -37,6 +37,9 @@ config.json
     * requestName: http://<ip>:<port>/info/<requestName>
     * handler: the function which handles the REST request
     * REST service listens on localhost:5567 by default. You can change it by modifying `core/config.json` and `webui/js/omniui.js`
+- You can use **core.registerSSEHandler(sseName, handler)** to register SSE (Server-Sent Event)
+    * sseName: the SSE you interesting.
+    * handler: the function which handles the specific SSE.
 
 ####Exapmle####
 Assume you write a module **hello.py** and **echo.py**
