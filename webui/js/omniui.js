@@ -300,7 +300,7 @@ function updateTopo(json) {
 function loadJSONP(){
 	$.ajax({
 	   type: "GET",
-	   url: "http://localhost:5567/info/topology",
+	   url: getTopologyUrl(),
 	   dataType: "jsonp",
 	   jsonpCallback: "omniui",
 	   success: function(json){
@@ -319,8 +319,7 @@ function sendFlow(f){
     for(var i in f) {
         f[i] = f[i].replace(/\s+/g, "");
     }
-
-    var url = "http://localhost:5567/flowmod";
+    var url = getFlowModUrl();
     var data = JSON.stringify(f);
     var callback = function(resp) {
         var stat = JSON.parse(resp[2]);
@@ -332,3 +331,11 @@ function sendFlow(f){
     spinner.spin(target);
     $.post(url, data, callback, "json");
 }
+
+function serverSentEvent() {
+    var evtSrc = new EventSource('http://localhost:5567/subscribe');
+    evtSrc.addEventListener('updatetopo', function(e) {
+        updateTopo(JSON.parse(e.data));
+    }, false);
+}
+
