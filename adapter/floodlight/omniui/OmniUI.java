@@ -4,9 +4,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.HashMap;
 
-import org.openflow.protocol.OFMessage;
-import org.openflow.protocol.OFType;
-
 import net.floodlightcontroller.core.FloodlightContext;
 import net.floodlightcontroller.core.module.FloodlightModuleContext;
 import net.floodlightcontroller.core.module.FloodlightModuleException;
@@ -15,20 +12,27 @@ import net.floodlightcontroller.core.module.IFloodlightService;
 import net.floodlightcontroller.restserver.IRestApiService;
 import net.floodlightcontroller.core.IOFMessageListener;
 import net.floodlightcontroller.core.IOFSwitch;
-
+import net.floodlightcontroller.core.PortChangeType;
 import net.floodlightcontroller.core.IFloodlightProviderService;
 import net.floodlightcontroller.core.IOFSwitchListener;
-import net.floodlightcontroller.core.ImmutablePort;
-import org.openflow.protocol.OFFlowRemoved;
+import org.projectfloodlight.openflow.protocol.OFFlowRemoved;
+import org.projectfloodlight.openflow.protocol.OFFlowRemovedReason;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.Set;
-import org.openflow.util.HexString;
+
+import org.projectfloodlight.openflow.types.DatapathId;
+import org.projectfloodlight.openflow.util.HexString;
+import org.projectfloodlight.openflow.protocol.OFMessage;
+import org.projectfloodlight.openflow.protocol.OFType;
+import org.projectfloodlight.openflow.protocol.OFPortDesc;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OmniUI implements IFloodlightModule,IOFMessageListener,IOFSwitchListener  {
-	
+//public class OmniUI implements IFloodlightModule,IOFMessageListener,IOFSwitchListener  {
+public class OmniUI implements IFloodlightModule,IOFMessageListener {
+
 	protected IFloodlightProviderService floodlightProvider;
 	protected IRestApiService restApi;
 	protected static Logger logger;
@@ -92,60 +96,61 @@ public class OmniUI implements IFloodlightModule,IOFMessageListener,IOFSwitchLis
 		floodlightProvider.addOFMessageListener(OFType.FLOW_MOD, this);
 		floodlightProvider.addOFMessageListener(OFType.FLOW_REMOVED, this);
 		floodlightProvider.addOFMessageListener(OFType.BARRIER_REPLY, this);
-		floodlightProvider.addOFSwitchListener(this);
+	//	floodlightProvider.addOFSwitchListener(this);
 		restApi.addRestletRoutable(new OmniUIWebRoutable());
 	}
-	
+
 	@Override
 	public net.floodlightcontroller.core.IListener.Command receive(IOFSwitch sw, OFMessage msg, FloodlightContext cntx) {
-	
+
 		switch (msg.getType()) {
         case FLOW_MOD:
 			logger.info("FLOW MOD MSG : {}",msg);
 			return Command.CONTINUE;
 		case FLOW_REMOVED:
 			OFFlowRemoved msg2 = (OFFlowRemoved) msg;
-			if (msg2.getReason() == OFFlowRemoved.OFFlowRemovedReason.OFPRR_DELETE){
+			if (OFFlowRemovedReason.DELETE.equals(msg2.getReason())) {
 				logger.info("FLOW REMOVED MSG : {} ; from switch : {}",msg2,sw);
-				FlowModResource.setMsg();
+			//	FlowModResource.setMsg();
 			}
 			return Command.CONTINUE;
 		case BARRIER_REPLY:
 			logger.info("BARRIER REPLY : {}",msg);
-			FlowModResource.setMsg2();
+			//FlowModResource.setMsg2();
 			return Command.CONTINUE;
         default:
             return Command.CONTINUE;
 		}
 	}
-	
+
+	/*
     @Override
-    public void switchAdded(long switchId) {
-        logger.info("SWITCH ADD : {}",HexString.toHexString(switchId));
-        FlowModResource.sendEntriesToSwitch(switchId);
+    public void switchAdded(DatapathId switchId) {
+          logger.info("SWITCH ADD : {}",HexString.toHexString(switchId));
+ //       FlowModResource.sendEntriesToSwitch(switchId);
     }
 
     @Override
-    public void switchRemoved(long switchId) {
+    public void switchRemoved(DatapathId switchId) {
         // do NOT delete from our internal state; we're tracking the rules,
         // not the switches
     }
 
     @Override
-    public void switchActivated(long switchId) {
+    public void switchActivated(DatapathId switchId) {
         // no-op
     }
 
     @Override
-    public void switchChanged(long switchId) {
+    public void switchChanged(DatapathId switchId) {
         // no-op
     }
 
     @Override
-    public void switchPortChanged(long switchId,
-                                  ImmutablePort port,
-                                  IOFSwitch.PortChangeType type) {
+    public void switchPortChanged(DatapathId switchId,
+                                  OFPortDesc port,
+                                  PortChangeType type) {
         // no-op
     }
-
+*/
 }
