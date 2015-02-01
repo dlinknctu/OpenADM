@@ -46,7 +46,7 @@ function updateShowcase(json) {
 function udsEntryMgmt(action, oxm_match) {
     $.ajax({
         type: 'PUT',
-        url: getUdsUrl() + action,
+        url: getUdsUrl() + '/' + action,
         data: JSON.stringify(oxm_match),
         success: function(resp) {
             notifyUser('success', 'Flow added successfully.', action.toUpperCase() + ' FLOW');
