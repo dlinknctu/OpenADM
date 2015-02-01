@@ -333,7 +333,7 @@ function sendFlow(f){
 }
 
 function serverSentEvent() {
-    var evtSrc = new EventSource('http://localhost:5567/subscribe');
+    var evtSrc = new EventSource(getSubscribeUrl());
     evtSrc.addEventListener('updatetopo', function(e) {
         updateTopo(JSON.parse(e.data));
     }, false);

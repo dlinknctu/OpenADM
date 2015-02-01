@@ -46,7 +46,7 @@ function updateShowcase(json) {
 function udsEntryMgmt(action, oxm_match) {
     $.ajax({
         type: 'PUT',
-        url: 'http://localhost:5567/uds/' + action,
+        url: getUdsUrl() + '/' + action,
         data: JSON.stringify(oxm_match),
         success: function(resp) {
             notifyUser('success', 'Flow added successfully.', action.toUpperCase() + ' FLOW');
@@ -84,7 +84,7 @@ function parseInput() {
 }
 
 function serverSentEvent() {
-    var evtSrc = new EventSource('http://localhost:5567/subscribe');
+    var evtSrc = new EventSource(getSubscribeUrl());
     evtSrc.addEventListener('updateuds', function(e) {
         updateShowcase(JSON.parse(e.data));
     }, false);
