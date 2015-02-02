@@ -1,1 +1,6 @@
 script: ./run-tests.sh
+sudo: false
+cache:
+    directories:
+        - $HOME/.local/lib/python2.7/site-packages/
+        - $HOME/build/dlinknctu/OmniUI/ui/node_modules/

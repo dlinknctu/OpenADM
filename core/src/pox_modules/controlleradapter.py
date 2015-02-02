@@ -2,8 +2,8 @@ import httplib
 import logging
 import json
 from threading import Thread
-import core
 logger = logging.getLogger(__name__)
+
 
 class ControllerAdapter:
 	def __init__(self,core,parm):

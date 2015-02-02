@@ -1,5 +1,4 @@
 import logging
-from core import Core
 from pymongo import MongoClient
 import json
 from bson import json_util

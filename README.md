@@ -26,7 +26,6 @@ $ `sudo apt-get install build-essential python-dev git python-virtualenv python-
 2. Update existing packages  
 $ `sudo apt-get update`  
 $ `sudo pip install --upgrade pip virtualenv`  
-$ `sudo pip install flask flask_cors gevent pymongo`
 
 3. Download & Install Mininet  
 $ `git clone git://github.com/mininet/mininet`  
@@ -38,17 +37,24 @@ $ `git clone https://github.com/dlinknctu/OmniUI.git -b dev`
 5. Install MongoDB  
     * Please refer to [Install MongoDB](http://docs.mongodb.org/manual/installation/)  
 
-6. Modify OmniUI database credentials  
-$ `gedit ~/OmniUI/core/config.json`  
-	**Modify the following (UIPusher and DbCollection section):**  
-	`"ControllerType":"<CONTROLLER_NAME>"` **If using Ryu, fill ControllerType as "floodlight"**  
-	`"dbip":"<YOUR_DATABASE_IP_ADDR>",`  
-	`"dbport":"<YOUR_DATABASE_IP_PORT>",`  
-	`"db":"<YOUR_DATABASE_NAME>",`  
-	`"user":"<YOUR_DATABASE_LOGIN_USERNAME>"`  
-	`"password":"<YOUR_DATABASE_LOGIN_PASSWORD>"`
+###Installation & Execution of OmniUI Core###
+1. Modify OmniUI database credentials  
+$ `gedit ~/OmniUI/core/etc/config.json`  
+    **Modify the following (UIPusher and DbCollection section):**  
+    `"ControllerType":"<CONTROLLER_NAME>"` **If using Ryu, fill ControllerType as "floodlight"**  
+    `"dbip":"<YOUR_DATABASE_IP_ADDR>",`  
+    `"dbport":"<YOUR_DATABASE_IP_PORT>",`  
+    `"db":"<YOUR_DATABASE_NAME>",`  
+    `"user":"<YOUR_DATABASE_LOGIN_USERNAME>"`  
+    `"password":"<YOUR_DATABASE_LOGIN_PASSWORD>"`
 
-###Installation & Execution###
+2. Install OmniUI core and dependencies
+$ `sudo python ~/OmniUI/core/setup.py install`
+
+3. Run OmniUI core
+$ `/usr/local/bin/omniui`
+
+###Installation & Execution of Controllers###
 - Installation & Execution of controller adapter  
     * Please refer to `/adapter/<controller>/README.md`
 

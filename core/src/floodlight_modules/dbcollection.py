@@ -1,5 +1,3 @@
-
-from core import Core
 from pymongo import MongoClient
 import datetime,time,calendar
 
