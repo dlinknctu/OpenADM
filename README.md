@@ -1,4 +1,4 @@
-OmniUI
+OmniUI [![Build Status](https://travis-ci.org/dlinknctu/OmniUI.svg?branch=dev)](https://travis-ci.org/dlinknctu/OmniUI)
 ------
 A diagnosis, analytic and management framework for SDN  
 http://www.slideshare.net/rascov/20140824-omni-ui
