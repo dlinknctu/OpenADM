@@ -221,13 +221,15 @@ class RestController(ControllerBase):
             LOG.debug('invalid syntax %s', req.body)
             return Response(status=400)
 
-        switchID = omniFlow.get('switch')
-        dpid = switchID.replace(":",'')
-        dp = self.dpset.get(int(dpid))
+        omniDpid = omniFlow.get('switch')
+        if omniDpid is None:
+            return Response(status=404)
+        else:
+            dpid = omniDpid.replace(":",'')
 
+        dp = self.dpset.get(int(dpid))
         if dp is None:
             return Response(status=404)
-       
        
         cmd = omniFlow.get('command')
         if cmd == 'ADD':
