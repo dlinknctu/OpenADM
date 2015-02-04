@@ -299,7 +299,7 @@ class RestController(ControllerBase):
             'dstMac': ['dl_dst', str],
             'srcMac': ['dl_src', str],
             'eth_dst': ['eth_dst', str],
-            'eth_src': ['iteth_src', str],
+            'eth_src': ['eth_src', str],
             'dlType': ['dl_type', int],
             'eth_type': ['eth_type', int],
             'vlan': ['dl_vlan', str],
