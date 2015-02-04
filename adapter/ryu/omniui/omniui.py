@@ -244,13 +244,13 @@ class RestController(ControllerBase):
         else:
             return Response(status=404)
 
+        ryuFlow={}
         if dp.ofproto.OFP_VERSION == ofproto_v1_0.OFP_VERSION:
             ryuFlow = self.ryuFlow_v1_0(dp, omniFlow)
             ofctl_v1_0.mod_flow_entry(dp, ryuFlow, cmd)
-        elif dp.ofproto.OFP_VERSION == ofproto_v1_2.OFP_VERSION:
-            ofctl_v1_2.mod_flow_entry(dp, omniFlow, cmd)
         elif dp.ofproto.OFP_VERSION == ofproto_v1_3.OFP_VERSION:
-            ofctl_v1_3.mod_flow_entry(dp, omniFlow, cmd)
+            ryuFlow = self.ryuFlow_v1_3(dp, omniFlow)
+            ofctl_v1_3.mod_flow_entry(dp, ryuFlow, cmd)
         else:
             return Response(status=404)
 
@@ -292,12 +292,13 @@ class RestController(ControllerBase):
         if actions is not None:
             actions = flows.get('actions').split(',')
             for act in actions:
-                action = self.to_action(dp, act)
+                action = self.to_action_v1_0(dp, act)
                 ryuFlow['actions'].append(action)
 
         return ryuFlow
 
-    def to_action(self, dp, actions):
+    # repack 1.0 actions
+    def to_action_v1_0(self, dp, actions):
         actions_type = actions.split('=')[0]
         if actions_type == 'OUTPUT':
             ryuAction = {
@@ -364,6 +365,185 @@ class RestController(ControllerBase):
             }
         else:
             LOG.debug('Unknown action type')
+
+        return ryuAction
+
+    # restore to Ryu Openflow v1.3 flow format
+    def ryuFlow_v1_3(self, dp, omniFlow):
+        ryuFlow = {
+            'cookie': int(omniFlow.get('cookie', 0)),
+            'cookie_mask': int(omniFlow.get('cookie_mask', 0)),
+            'table_id ': int(omniFlow.get('table_id', 0)),
+            'idle_timeout': int(omniFlow.get('idleTimeout', 0)),
+            'hard_timeout': int(omniFlow.get('hardTimeout', 0)),
+            'priority': int(omniFlow.get('priority', 0)),
+            'buffer_id': int(omniFlow.get('buffer_id', dp.ofproto.OFP_NO_BUFFER)),
+            'out_port': int(omniFlow.get('out_port', dp.ofproto.OFPP_ANY)),
+            'out_group': int(omniFlow.get('out_group', dp.ofproto.OFPG_ANY)),
+            'flags': int(omniFlow.get('flags', 0)),
+            'match': {},
+            'actions': []
+        }
+
+        # convert match field from omniui to ryu
+        for key in omniFlow:
+            match = self.to_match_v1_3(dp, key, omniFlow)
+            if match is not None:
+                ryuFlow['match'].update(match) 
+
+        # handle mutiple actions
+        acts = omniFlow.get('actions').split(',')
+        for a in acts:
+            action = self.to_action_v1_3(dp, a)
+            if action is not None:
+                ryuFlow['actions'].append(action)
+
+        return ryuFlow
+
+    # repack 1.3 match
+    def to_match_v1_3(self, dp, omni_key, omniFlow):
+        # convert key from omniui to ryu, and change its type
+        convert = {
+            'ingressPort': ['in_port', int],
+            'in_phy_port': ['in_phy_port', int],
+            'metadata': ['metadata', str],
+            'dstMac': ['dl_dst', str],
+            'srcMac': ['dl_src', str],
+            'eth_dst': ['eth_dst', str],
+            'eth_src': ['eth_src', str],
+            'dlType': ['dl_type', int],
+            'eth_type': ['eth_type', int],
+            'vlan': ['dl_vlan', str],
+            'vlan_vid': ['vlan_vid', str],
+            'vlanP': ['vlan_pcp', int],
+            'ip_dscp': ['ip_dscp', int],
+            'ip_ecn': ['ip_ecn', int],
+            'netProtocol': ['nw_proto', int],
+            'ip_proto': ['ip_proto', int],
+            'srcIP': ['nw_src', str],
+            'dstIP': ['nw_dst', str],
+            'ipv4_src': ['ipv4_src', str],
+            'ipv4_dst': ['ipv4_dst', str],
+            'srcPort': ['tp_src', int],
+            'dstPort': ['tp_dst', int],
+            'tcp_src': ['tcp_src', int],
+            'tcp_dst': ['tcp_dst', int],
+            'udp_src': ['udp_src', int],
+            'udp_dst': ['udp_dst', int],
+            'sctp_src': ['sctp_src', int],
+            'sctp_dst': ['sctp_dst', int],
+            'icmpv4_type': ['icmpv4_type', int],
+            'icmpv4_code': ['icmpv4_code', int],
+            'arp_op': ['arp_op', int],
+            'arp_spa': ['arp_spa', str],
+            'arp_tpa': ['arp_tpa', str],
+            'arp_sha': ['arp_sha', str],
+            'arp_tha': ['arp_tha', str],
+            'ipv6_src': ['ipv6_src', str],
+            'ipv6_dst': ['ipv6_dst', str],
+            'ipv6_flabel': ['ipv6_flabel', int],
+            'icmpv6_type': ['icmpv6_type', int],
+            'icmpv6_code': ['icmpv6_code', int],
+            'ipv6_nd_target': ['ipv6_nd_target', str],
+            'ipv6_nd_sll': ['ipv6_nd_sll', str],
+            'ipv6_nd_tll': ['ipv6_nd_tll', str],
+            'mpls_label': ['mpls_label', int],
+            'mpls_tc': ['mpls_tc', int],
+            'mpls_bos': ['mpls_bos', int],
+            'pbb_isid': ['pbb_isid', int],
+            'tunnel_id': ['tunnel_id', int],
+            'ipv6_exthdr': ['ipv6_exthdr', int]
+        }
+
+        for key, value in convert.items():
+            if omni_key == key:
+                ryuMatch = {
+                    value[0]: value[1](omniFlow.get(omni_key))
+                }
+                return ryuMatch
+
+        return None
+        
+    # repack 1.3 actions
+    def to_action_v1_3(self, dp, dic):
+        action_type = dic.split('=')[0]
+        if action_type == 'OUTPUT':
+            ryuAction = {
+                'type': action_type,
+                'port': dic.split('=')[1]
+            }
+        elif action_type == 'COPY_TTL_OUT':
+            ryuAction = {
+                'type': action_type
+            }
+        elif action_type == 'COPY_TTL_IN':
+            ryuAction = {
+                'type': action_type
+            }
+        elif action_type == 'SET_MPLS_TTL':
+            ryuAction = {
+                'type': action_type,
+                'mpls_ttl': dic.split('=')[1]
+            }
+        elif action_type == 'DEC_MPLS_TTL':
+            ryuAction = {
+                'type': action_type
+            }
+        elif action_type == 'PUSH_VLAN':
+            ryuAction = {
+                'type': action_type,
+                'ethertype': dic.split('=')[1]
+            }
+        elif action_type == 'POP_VLAN':
+            ryuAction = {
+                'type': action_type
+            }
+        elif action_type == 'PUSH_MPLS':
+            ryuAction = {
+                'type': action_type,
+                'ethertype': dic.split('=')[1]
+            }
+        elif action_type == 'POP_MPLS':
+            ryuAction = {
+                'type': action_type,
+                'ethertype': dic.split('=')[1]
+            }
+        elif action_type == 'SET_QUEUE':
+            ryuAction = {
+                'type': action_type,
+                'queue_id': dic.split('=')[1]
+            }
+        elif action_type == 'GROUP':
+            ryuAction = {
+                'type': action_type,
+                'group_id': dic.split('=')[1]
+            }
+        elif action_type == 'SET_NW_TTL':
+            ryuAction = {
+                'type': action_type,
+                'nw_ttl': dic.split('=')[1]
+            }
+        elif action_type == 'DEC_NW_TTL':
+            ryuAction = {
+                'type': action_type
+            }
+        elif action_type == 'SET_FIELD':  
+            ryuAction = {
+                'type': action_type,
+                'field': dic.split('=')[1].split(':')[0],
+                'value': dic.split('=')[1].split(':')[1]
+            }  
+        elif action_type == 'PUSH_PBB':
+            ryuAction = {
+                'type': action_type,
+                'ethertype': dic.split('=')[1]
+            }  
+        elif action_type == 'POP_PBB':
+            ryuAction = {
+                'type': action_type
+            } 
+        else:
+            ryuAction = None 
 
         return ryuAction
 
