@@ -331,3 +331,11 @@ function sendFlow(f){
     spinner.spin(target);
     $.post(url, data, callback, "json");
 }
+
+function serverSentEvent() {
+    var evtSrc = new EventSource(getSubscribeUrl());
+    evtSrc.addEventListener('updatetopo', function(e) {
+        updateTopo(JSON.parse(e.data));
+    }, false);
+}
+

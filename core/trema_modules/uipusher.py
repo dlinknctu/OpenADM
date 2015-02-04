@@ -12,8 +12,8 @@ class UIPusher:
 	def __init__(self,core,parm):		
 		# register event handler
 		core.registerEventHandler("controlleradapter", self.controllerHandler)
-		# register rest api
-		core.registerRestApi("uds/get", self.udsHandler)
+		# register sse handler
+		core.registerSSEHandler('updateuds', self.udsHandler)
 		core.registerRestApi("stat", self.statisticHandler)
 		# save core for ipc use
 		self.core = core
@@ -36,10 +36,10 @@ class UIPusher:
 			except:
 				print "database connection failed"
 
-	def udsHandler(self, request):
-		# return JSONP format
+	def udsHandler(self):
+		# return JSON format
 		result = self.core.invokeIPC("periodicInquiry")
-		return "omniui(%s);" % result
+		return result
 
 	def controllerHandler(self,event):
 		if event is None or event == "{}":

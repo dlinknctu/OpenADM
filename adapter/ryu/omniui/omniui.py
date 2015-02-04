@@ -19,7 +19,6 @@ from ryu.lib import ofctl_v1_3
 from ryu.lib.dpid import dpid_to_str
 from ryu.topology.api import get_switch, get_link
 
-
 class OmniUI(app_manager.RyuApp):
     _CONTEXTS = {
         'wsgi': WSGIApplication,
@@ -47,9 +46,7 @@ class OmniUI(app_manager.RyuApp):
                        controller=RestController, action='mod_flow_entry',
                        conditions=dict(method=['POST']))
 
-    @set_ev_cls([ofp_event.EventOFPFlowStatsReply,
-                 ofp_event.EventOFPPortStatsReply,
-                ], MAIN_DISPATCHER)
+    @set_ev_cls([ofp_event.EventOFPFlowStatsReply, ofp_event.EventOFPPortStatsReply], MAIN_DISPATCHER)
     def stats_reply_handler(self, ev):
         msg = ev.msg
         dp = msg.datapath
@@ -73,7 +70,6 @@ class OmniUI(app_manager.RyuApp):
             return
         del self.waiters[dp.id][msg.xid]
         lock.set()
-
 
 class RestController(ControllerBase):
     def __init__(self, req, link, data, **config):
@@ -140,7 +136,6 @@ class RestController(ControllerBase):
             flows = self.getFlows(node)
             for key in flows:
                 for flow in flows[key]:
-                    print flow['actions']
                     omniFlow = {
                         'ingressPort': flow['match']['in_port'] if 'in_port' in flow['match'] else 0,
                         'srcMac': flow['match']['dl_src'] if 'dl_src' in flow['match'] else 0,
@@ -154,8 +149,8 @@ class RestController(ControllerBase):
                         'srcPort': flow['match']['tp_src'] if 'tp_src' in flow['match'] else 0,
                         'vlan': flow['match']['dl_vlan'] if 'dl_vlan' in flow['match'] else 0,
                         'vlanP': flow['match']['dl_vlan_pcp'] if 'dl_vlan_pcp' in flow['match'] else 0,
-                        'wildcards': '-', # not support in ryu
-                        "tosBits": flow['match']['nw_tos'] if 'nw_tos' in flow['match'] else 0,
+                        'wildcards': flow['match']['wildcards'] if 'wildcards' in flow['match'] else '-',
+                        'tosBits': flow['match']['nw_tos'] if 'nw_tos' in flow['match'] else 0,
                         'counterByte': flow['byte_count'],
                         'counterPacket': flow['packet_count'],
                         'idleTimeout': flow['idle_timeout'],
@@ -167,16 +162,17 @@ class RestController(ControllerBase):
                     }
                     # repack action field
                     for action in flow['actions']:
-                        try:
+                        if (len(action.split(':')) == 1):
+                            omniAction = {
+                                'type': action,
+                            }
+                            omniFlow['actions'].append(omniAction)
+                        else:
                             omniAction = {
                                 'type': action.split(':')[0],
                                 'value': action.split(':')[1]
                             }
-                        except:
-                            omniAction = {
-                                'type': action.split(':')[0]
-                            }
-                        omniFlow['actions'].append(omniAction)
+                            omniFlow['actions'].append(omniAction)
                     omniNode['flows'].append(omniFlow)
             # repack port information
             ports = self.getPorts(node)
@@ -208,10 +204,10 @@ class RestController(ControllerBase):
             # remove bi-direction link
             reverse = False
             for link in result:
-                if(link['src-switch'] == omniLink['dst-switch'] and
-                   link['dst-switch'] == omniLink['src-switch'] and 
-                   link['src-port'] == omniLink['dst-port'] and 
-                   link['dst-port'] == omniLink['src-port']):
+                if (link['src-switch'] == omniLink['dst-switch'] and
+                        link['dst-switch'] == omniLink['src-switch'] and
+                        link['src-port'] == omniLink['dst-port'] and
+                        link['dst-port'] == omniLink['src-port']):
                     reverse = True
             result.append(omniLink) if reverse is False else None
         body = json.dumps(result)
@@ -439,6 +435,164 @@ class RestController(ControllerBase):
             ryuAction = None 
 
         return ryuAction
+
+    def mod_flow_entry(self, req, **kwargs):
+        try:
+            omniFlow = ast.literal_eval(req.body)     #Getting flow from req
+        except SyntaxError:
+            LOG.debug('Invalid syntax %s', req.body)
+            return Response(status=400)
+
+        omniDpid = omniFlow.get('switch')             #Getting OmniUI dpid from flow    
+        if omniDpid is None:
+            return Response(status=404)
+        else:
+            dpid = self.nospaceDPID(omniDpid.split(':'))    #Split OmniUI dpid into a list
+
+        cmd = omniFlow.get('command')                 #Getting OmniUI command from flow
+        dp = self.dpset.get(int(dpid))                #Getting datapath from Ryu dpid
+        if dp is None:                                #NB: convert dpid to int first
+            return Response(status=404)
+
+        if cmd == 'ADD':
+            cmd = dp.ofproto.OFPFC_ADD
+        elif cmd == 'MOD':
+            cmd = dp.ofproto.OFPFC_MODIFY
+        elif cmd == 'MOD_ST':
+            cmd = dp.ofproto.OFPFC_MODIFY_STRICT
+        elif cmd == 'DEL':
+            cmd = dp.ofproto.OFPFC_DELETE
+        elif cmd == 'DEL_ST':
+            cmd = dp.ofproto.OFPFC_DELETE_STRICT
+        else:
+            return Response(status=404)
+
+        if dp.ofproto.OFP_VERSION == ofproto_v1_0.OFP_VERSION:
+            ryuFlow = self.ryuFlow_v1_0(dp, omniFlow)
+            ofctl_v1_0.mod_flow_entry(dp, ryuFlow, cmd)
+        elif dp.ofproto.OFP_VERSION == ofproto_v1_2.OFP_VERSION:
+            ofctl_v1_2.mod_flow_entry(dp, omniFlow, cmd)
+        elif dp.ofproto.OFP_VERSION == ofproto_v1_3.OFP_VERSION:
+            ofctl_v1_3.mod_flow_entry(dp, omniFlow, cmd)
+        else:
+            return Response(status=404)
+
+        return Response(status=200)
+
+    # restore to Ryu Openflow v1.0 flow format
+    def ryuFlow_v1_0(self, dp, flows):
+        if flows.get('wildcards') == '-':
+            wildcards = 0
+        else:
+            wildcards = flows.get('wildcards')
+
+        ryuFlow = {
+            'cookie': int(flows.get('cookie', 0)),
+            'priority': int(flows.get('priority', dp.ofproto.OFP_DEFAULT_PRIORITY)),
+            'buffer_id': int(flows.get('buffer_id', dp.ofproto.OFP_NO_BUFFER)),
+            'out_port': int(flows.get('out_port', dp.ofproto.OFPP_NONE)),
+            'flags': int(flows.get('flags', 0)),
+            'idle_timeout': int(flows.get('idleTimeout', 0)),
+            'hard_timeout': int(flows.get('hardTimeout', 0)),
+            'actions': [],
+            'match': {
+                'wildcards': wildcards,
+                'in_port': int(flows.get('ingressPort', 0)),
+                'dl_src': flows.get('srcMac'),
+                'dl_dst': flows.get('dstMac'),
+                'dl_vlan': int(flows.get('vlan', 0)),
+                'dl_vlan_pcp': int(flows.get('vlanP', 0)),
+                'dl_type': int(flows.get('dlType', 0)),
+                'nw_tos': int(flows.get('tosBits', 0)),
+                'nw_proto': int(flows.get('netProtocol', 0)),
+                'nw_src': flows.get('srcIP').split('/')[0],
+                'nw_dst': flows.get('dstIP').split('/')[0],
+                'tp_src': int(flows.get('srcPort', 0)),
+                'tp_dst': int(flows.get('dstPort', 0))
+            }
+        }
+        actions = flows.get('actions')
+        if actions is not None:
+            actions = flows.get('actions').split(',')
+            for act in actions:
+                action = self.to_action(dp, act)
+                ryuFlow['actions'].append(action)
+
+        return ryuFlow
+
+    def to_action(self, dp, actions):
+        actions_type = actions.split('=')[0]
+        if actions_type == 'OUTPUT':
+            ryuAction = {
+                'type': actions_type,
+                'port': actions.split('=')[1],
+                'max_len': 0xffe5
+            }
+        elif actions_type == 'SET_VLAN_VID':
+            ryuAction = {
+                'type': actions_type,
+                'vlan_vid': actions.split('=')[1]
+            }
+        elif actions_type == 'SET_VLAN_PCP':
+            ryuAction = {
+                'type': actions_type,
+                'vlan_pcp': actions.split('=')[1]
+            }
+        elif actions_type == 'STRIP_VLAN':
+            ryuAction = {
+                'type': actions_type
+            }
+        elif actions_type == 'SET_DL_SRC':
+            ryuAction = {
+                'type': actions_type,
+                'dl_src': actions.split('=')[1]
+            }
+        elif actions_type == 'SET_DL_DST':
+            ryuAction = {
+                'type': actions_type,
+                'dl_dst': actions.split('=')[1]
+            }
+        elif actions_type == 'SET_NW_SRC':
+            ryuAction = {
+                'type': actions_type,
+                'nw_src': actions.split('=')[1]
+            }
+        elif actions_type == 'SET_NW_DST':
+            ryuAction = {
+                'type': actions_type,
+                'nw_dst': actions.split('=')[1]
+            }
+        elif actions_type == 'SET_NW_TOS':
+            ryuAction = {
+                'type': actions_type,
+                'nw_tos': actions.split('=')[1]
+            }
+        elif actions_type == 'SET_TP_SRC':
+            ryuAction = {
+                'type': actions_type,
+                'tp_src': actions.split('=')[1]
+            }
+        elif actions_type == 'SET_TP_DST':
+            ryuAction = {
+                'type': actions_type,
+                'tp_dst': actions.split('=')[1]
+            }
+        elif actions_type == 'ENQUEUE':
+            actions_port = actions.split('=')[1].split(':')[0]
+            actions_qid = actions.split('=')[1].split(':')[1]
+            ryuAction = {
+                'type': actions_type,
+                'port': actions_port,
+                'queue_id': actions_qid
+            }
+        else:
+            LOG.debug('Unknown action type')
+
+        return ryuAction
+
+    # restore Ryu-format dpid
+    def nospaceDPID(self, dpid):
+        return "".join(dpid)
 
     # repack dpid
     def colonDPID(self, dpid):

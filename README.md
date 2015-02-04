@@ -1,4 +1,4 @@
-OmniUI
+OmniUI [![Build Status](https://travis-ci.org/dlinknctu/OmniUI.svg?branch=dev)](https://travis-ci.org/dlinknctu/OmniUI)
 ------
 A diagnosis, analytic and management framework for SDN  
 http://www.slideshare.net/rascov/20140824-omni-ui
@@ -26,7 +26,7 @@ $ `sudo apt-get install build-essential python-dev git python-virtualenv python-
 2. Update existing packages  
 $ `sudo apt-get update`  
 $ `sudo pip install --upgrade pip virtualenv`  
-$ `sudo pip install flask flask_cors pymongo`
+$ `sudo pip install flask flask_cors gevent pymongo`
 
 3. Download & Install Mininet  
 $ `git clone git://github.com/mininet/mininet`  
