@@ -1,5 +1,11 @@
 script: ./run-tests.sh
+
+branches:
+    only:
+        - master
+
 sudo: false
+
 cache:
     directories:
         - $HOME/.local/lib/python2.7/site-packages/
