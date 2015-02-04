@@ -246,11 +246,10 @@ class RestController(ControllerBase):
         ryuflow={}
         # repack Omniui Flow to Ryu Flow
         if dp.ofproto.OFP_VERSION == ofproto_v1_0.OFP_VERSION:
+            ryuFlow = self.ryuFlow_v1_0(dp, omniFlow)
             ofctl_v1_0.mod_flow_entry(dp, ryuFlow, cmd)
-        elif dp.ofproto.OFP_VERSION == ofproto_v1_2.OFP_VERSION:
-            ofctl_v1_2.mod_flow_entry(dp, ryuFlow, cmd)
         elif dp.ofproto.OFP_VERSION == ofproto_v1_3.OFP_VERSION:
-            ryuFlow = self.repack_flow_13(omniFlow, dp)
+            ryuFlow = self.ryuFlow_v1_3(dp, omniFlow)
             ofctl_v1_3.mod_flow_entry(dp, ryuFlow, cmd)
         else:
             LOG.debug('Unsupported OF protocol')
@@ -258,7 +257,8 @@ class RestController(ControllerBase):
 
         return Response(status=200)
 
-    def repack_flow_13(self, omniFlow, dp):
+    # restore to Ryu Openflow v1.3 flow format
+    def ryuFlow_v1_3(self, dp, omniFlow):
         ryuFlow = {
             'cookie': int(omniFlow.get('cookie', 0)),
             'cookie_mask': int(omniFlow.get('cookie_mask', 0)),
@@ -276,21 +276,21 @@ class RestController(ControllerBase):
 
         # convert match field from omniui to ryu
         for key in omniFlow:
-            match = self.to_match(dp, key, omniFlow)
+            match = self.to_match_v1_3(dp, key, omniFlow)
             if match is not None:
                 ryuFlow['match'].update(match) 
 
         # handle mutiple actions
         acts = omniFlow.get('actions').split(',')
         for a in acts:
-            action = self.to_action(dp, a)
+            action = self.to_action_v1_3(dp, a)
             if action is not None:
                 ryuFlow['actions'].append(action)
 
         return ryuFlow
 
-    # repack match
-    def to_match(self, dp, omni_key, omniFlow):
+    # repack 1.3 match
+    def to_match_v1_3(self, dp, omni_key, omniFlow):
         # convert key from omniui to ryu, and change its type
         convert = {
             'ingressPort': ['in_port', int],
@@ -353,8 +353,8 @@ class RestController(ControllerBase):
 
         return None
         
-    # repack actions
-    def to_action(self, dp, dic):
+    # repack 1.3 actions
+    def to_action_v1_3(self, dp, dic):
         action_type = dic.split('=')[0]
         if action_type == 'OUTPUT':
             ryuAction = {
@@ -436,49 +436,6 @@ class RestController(ControllerBase):
 
         return ryuAction
 
-    def mod_flow_entry(self, req, **kwargs):
-        try:
-            omniFlow = ast.literal_eval(req.body)     #Getting flow from req
-        except SyntaxError:
-            LOG.debug('Invalid syntax %s', req.body)
-            return Response(status=400)
-
-        omniDpid = omniFlow.get('switch')             #Getting OmniUI dpid from flow    
-        if omniDpid is None:
-            return Response(status=404)
-        else:
-            dpid = self.nospaceDPID(omniDpid.split(':'))    #Split OmniUI dpid into a list
-
-        cmd = omniFlow.get('command')                 #Getting OmniUI command from flow
-        dp = self.dpset.get(int(dpid))                #Getting datapath from Ryu dpid
-        if dp is None:                                #NB: convert dpid to int first
-            return Response(status=404)
-
-        if cmd == 'ADD':
-            cmd = dp.ofproto.OFPFC_ADD
-        elif cmd == 'MOD':
-            cmd = dp.ofproto.OFPFC_MODIFY
-        elif cmd == 'MOD_ST':
-            cmd = dp.ofproto.OFPFC_MODIFY_STRICT
-        elif cmd == 'DEL':
-            cmd = dp.ofproto.OFPFC_DELETE
-        elif cmd == 'DEL_ST':
-            cmd = dp.ofproto.OFPFC_DELETE_STRICT
-        else:
-            return Response(status=404)
-
-        if dp.ofproto.OFP_VERSION == ofproto_v1_0.OFP_VERSION:
-            ryuFlow = self.ryuFlow_v1_0(dp, omniFlow)
-            ofctl_v1_0.mod_flow_entry(dp, ryuFlow, cmd)
-        elif dp.ofproto.OFP_VERSION == ofproto_v1_2.OFP_VERSION:
-            ofctl_v1_2.mod_flow_entry(dp, omniFlow, cmd)
-        elif dp.ofproto.OFP_VERSION == ofproto_v1_3.OFP_VERSION:
-            ofctl_v1_3.mod_flow_entry(dp, omniFlow, cmd)
-        else:
-            return Response(status=404)
-
-        return Response(status=200)
-
     # restore to Ryu Openflow v1.0 flow format
     def ryuFlow_v1_0(self, dp, flows):
         if flows.get('wildcards') == '-':
@@ -515,12 +472,13 @@ class RestController(ControllerBase):
         if actions is not None:
             actions = flows.get('actions').split(',')
             for act in actions:
-                action = self.to_action(dp, act)
+                action = self.to_action_v1_0(dp, act)
                 ryuFlow['actions'].append(action)
 
         return ryuFlow
 
-    def to_action(self, dp, actions):
+    # repack 1.0 actions
+    def to_action_v1_0(self, dp, actions):
         actions_type = actions.split('=')[0]
         if actions_type == 'OUTPUT':
             ryuAction = {
