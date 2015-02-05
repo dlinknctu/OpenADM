@@ -1,10 +1,14 @@
 #!/bin/bash
 
-echo -e "\033[32mClone Floodlight 0.91 from GitHub repository\034[0m"
-git clone https://github.com/floodlight/floodlight.git -b v0.91 floodlight
+echo -e "\033[32mClone Floodlight 1.0 from GitHub repository\033[0m"
+git clone https://github.com/floodlight/floodlight.git -b v1.0 floodlight
 
 echo -e '\033[32mCopy OmniUI module into Floodlight directory\033[0m'
 cp -r adapter/floodlight/omniui floodlight/src/main/java/net/floodlightcontroller/
+# TODO The following three classes have not been ported to Floodlight 1.0 yet
+rm floodlight/src/main/java/net/floodlightcontroller/omniui/ActionParse.java
+rm floodlight/src/main/java/net/floodlightcontroller/omniui/FlowModResource.java
+rm floodlight/src/main/java/net/floodlightcontroller/omniui/FlowModMethod.java
 
 echo -e '\033[32mModify META-INF\033[0m'
 echo "net.floodlightcontroller.omniui.OmniUI" >> \
