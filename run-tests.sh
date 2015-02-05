@@ -1,17 +1,27 @@
 #!/bin/bash
 function test_ui {
-    cd ui
+    cd $rootpath/ui
     npm install
     npm test
-    cd ..
+}
+
+function install_core {
+    cd $rootpath/core
+    python setup.py install --user
 }
 
 function test_core {
-    cd core
-    python setup.py install --user
+    cd $rootpath/core
     python setup.py test
-    cd ..
 }
 
+function install_floodlight {
+    cd $rootpath
+    $rootpath/adapter/floodlight/install.sh
+}
+
+rootpath=`pwd`
 test_ui
+install_core
 test_core
+install_floodlight
