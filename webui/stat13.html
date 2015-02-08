@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>OmniUI</title>
+		<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+		<link rel="stylesheet" href="css/omniui-stat13.css">
+		<link rel="stylesheet" href="css/ui-lightness/jquery-ui-1.10.4.custom.css">
+		<script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
+		<script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="js/omniui-stat13.js"></script>
+		<script type="text/javascript" src="js/jquery-ui-1.10.4.custom.min.js"></script>
+		<script type="text/javascript" src="js/d3.v3.min.js"></script>
+		<script type="text/javascript">
+			$(document).ready(function() {
+				var url = getStatUrl();
+				var table_count=1;
+				
+				$("#radio").buttonset();
+				
+				$("#addform").click(function(event) {
+					$('.popover').remove();
+					
+					var newform = $(".statform").eq(0).clone();
+					table_count++;
+					var newtid='table'+table_count;
+					newform.children().each(function(){
+						$(this).attr('class',newtid);
+					});
+					newform.find('button').each(function(){
+						var id_n = newtid+$(this)[0].innerHTML;
+						$(this).attr('id',id_n);
+					});
+					
+					var $remove = $('<button type="button" class="removebtn">Remove</button>');
+					newform.append( $('<div align="center" class="'+newtid+'"></div>').append($remove) );
+					newform.appendTo("#statformlist");
+					$remove.click(function(event){
+						for(key in localStorage){
+							var table_n = key.split('@')[0];
+							if(table_n==$(this).parent().attr('class'))
+								localStorage.removeItem(key);
+						}
+						//console.log(localStorage);
+						$(this).parent().parent().empty().remove();
+						$('.popover').remove();
+					});
+					newform.find('button').each(function (index, element) {
+						$this = $(element);
+						$this.popover({
+							hide: true,
+							html: true,
+							trigger: 'manual',
+							content: function() {
+								if(array[index]) return array[index];
+							}
+						});
+					});
+					
+					var popolen;
+					var current_button,old_button,init_button=$('#oldbtn');
+					var click_count=0;
+					$('.statform button').click(function(){			// show and hide popover
+						if(click_count==0){
+							current_button = $(this);
+							old_button = init_button;
+							current_button.popover('show');
+							popolen = setTimeout(lll, 200);
+							click_count=1;
+						}else{
+							if((old_button.attr('id')!=current_button.attr('id'))&&(current_button.attr('id')==$(this).attr('id'))){
+								current_button.popover('hide');
+								old_button = current_button;
+							}else if((old_button.attr('id')==current_button.attr('id'))&&(current_button.attr('id')==$(this).attr('id'))){
+								current_button.popover('show');
+								old_button = init_button;
+								popolen = setTimeout(lll, 200);
+							}else{
+								old_button = current_button;
+								current_button = $(this);
+								old_button.popover('hide');
+								current_button.popover('show');
+								popolen = setTimeout(lll, 200);
+							}
+						}
+						// store value
+						$(".popover-content input").keyup(function(){
+							var value = $(this).val();
+							var key = current_button.parent().parent().parent().parent().attr('class')+'@'+$(this).parent().find('p').text();
+							localStorage[key] = value;
+							//console.log(localStorage);
+						});
+					});
+					// show the value
+					function lll(){
+						//console.log($(".popover-content").length);
+						if($(".popover-content").length>0){
+							for(key in localStorage){
+								var table_n = key.split('@');
+								var btn_n = current_button.text();
+								if(table_n[0] == current_button.parent().parent().parent().parent().attr('class')){
+									$(".popover-content").children().each(function(){
+										if(btn_n==$(this).find('input').attr('class') && table_n[1]==$(this).find('p').text())
+											$(this).find('input').val(localStorage[key]);
+									});
+								}
+							}
+						}
+						clearTimeout(popolen);
+					}
+				});
+
+				$("#update").click(function(event) {
+					// check if 'from' is missing
+					var isMissing = 0;
+					if(!$("#from").val()) {
+						$("#from").css({'background-color' : '#FFAAAA'});
+						isMissing = 1;
+					}
+					else {
+						$("#from").css({'background-color' : '#FFFFFF'});
+					}
+					// check if 'to' is missing
+					if(!$("#to").val()) {
+						$("#to").css({'background-color' : '#FFAAAA'});
+						isMissing = 1;
+					}
+					else {
+						$("#to").css({'background-color' : '#FFFFFF'});
+					}
+					// check if each 'dpid' is missing
+					$(".dpid").each(function(){
+						if(!$(this).val()) {
+							$(this).css({'background-color' : '#FFAAAA'});
+							isMissing = 1;
+						}
+						else {
+							$(this).css({'background-color' : '#FFFFFF'});
+							var value = $(this).val();
+							var key = $(this).parent().attr('class')+'@'+$(this).attr('class');
+							localStorage[key] = value;
+						}
+					});
+					// stop querying if any necessary filed is missing
+					if(isMissing ==1) { return; }
+
+					// clear and redraw
+					svgclear();
+					var data = {};
+					data['pattern'] = [];
+
+					$("#statformlist").children().each(function(){
+						var pattern = {};
+						var tbn = $(this).find('table').attr('class');
+						for(key in localStorage){
+							var table_n = key.split('@');
+							if(table_n[0]==tbn){
+								if(table_n[1]=="eth_type"){
+									if(localStorage[key].length==6 && localStorage[key][0]=='0' && localStorage[key][1]=='x')
+										pattern[table_n[1]] = localStorage[key];
+									else{
+										var turn16 = parseInt(localStorage[key]).toString(16);
+										if(turn16.length<4) turn16='0x0'+turn16;
+										else turn16='0x'+turn16;
+										pattern[table_n[1]] = turn16;
+									}
+								}else
+									pattern[table_n[1]] = localStorage[key];
+							}
+						}
+						data['pattern'].push(pattern);
+					});
+					// push from, to, DPID and interval into json
+					data['from'] = $("#from").val();
+					data['to'] = $("#to").val();
+					data['interval'] = $('input[name=interval]:checked').val();
+					
+					console.log(data);
+					// JSON translation
+					json = JSON.stringify(data);
+					$.post(url, json).done(function(resp) {
+						svgplot(resp);
+					});
+				});
+
+				$("#from").datepicker({
+					dateFormat: "yy-mm-dd",
+					changeMonth: true,
+					numberOfMonths: 3,
+					onClose: function( selectedDate ) {
+						$("#to").datepicker("option", "minDate", selectedDate);
+						$("#to").datepicker("show");
+					}
+				});
+
+				$("#to").datepicker({
+					dateFormat: "yy-mm-dd",
+					changeMonth: true,
+					numberOfMonths: 3,
+					onClose: function( selectedDate ) {
+						$("#from").datepicker("option", "maxDate", selectedDate);
+					}
+				});
+			});
+		</script>
+	</head>
+	<body>
+		<div id="wrapper">
+			<div id="header">
+				<p>OmniUI</p>
+			</div>
+			<div id="content">
+				<div id="statformlist">
+					<form class="statform">
+						<div align="center" class="table1">
+							<span>DPID</span>
+							<input type="text" class="dpid" size="25">
+						</div>
+						<table class="table1">
+							<tr>
+								<td><button type="button" class="btn btn-default" style="width:170px;" id="table1in" data-container="body" data-toggle="popover" data-placement="bottom">in</button></td>
+								<td><button type="button" class="btn btn-default" style="width:170px;" id="table1metadata" data-container="body" data-toggle="popover" data-placement="bottom">metadata</button></td>
+								<td><button type="button" class="btn btn-default" style="width:170px;" id="table1eth" data-container="body" data-toggle="popover" data-placement="bottom">eth</button></td>
+								<td><button type="button" class="btn btn-default" style="width:170px;" id="table1vlan" data-container="body" data-toggle="popover" data-placement="bottom">vlan</button></td>
+								<td><button type="button" class="btn btn-default" style="width:170px;" id="table1arp" data-container="body" data-toggle="popover" data-placement="bottom">arp</button></td>
+								<td><button type="button" class="btn btn-default" style="width:170px;" id="table1ip" data-container="body" data-toggle="popover" data-placement="bottom">ip</button></td>
+								<td><button type="button" class="btn btn-default" style="width:170px;" id="table1ipv4" data-container="body" data-toggle="popover" data-placement="bottom">ipv4</button></td>
+							</tr>
+							<tr>
+								<td><button type="button" class="btn btn-default" style="width:170px;" id="table1ipv61" data-container="body" data-toggle="popover" data-placement="bottom">ipv6_1</button></td>
+								<td><button type="button" class="btn btn-default" style="width:170px;" id="table1ipv62" data-container="body" data-toggle="popover" data-placement="bottom">ipv6_2</button></td>
+								<td><button type="button" class="btn btn-default" style="width:170px;" id="table1tcp" data-container="body" data-toggle="popover" data-placement="bottom">tcp/udp/sctp</button></td>
+								<td><button type="button" class="btn btn-default" style="width:170px;" id="table1icmpv4" data-container="body" data-toggle="popover" data-placement="bottom">icmpv4/v6</button></td>
+								<td><button type="button" class="btn btn-default" style="width:170px;" id="table1mpls" data-container="body" data-toggle="popover" data-placement="bottom">mpls</button></td>
+								<td><button type="button" class="btn btn-default" style="width:170px;" id="table1pbb" data-container="body" data-toggle="popover" data-placement="bottom">pbb</button></td>
+								<td><button type="button" class="btn btn-default" style="width:170px;" id="table1tunnel" data-container="body" data-toggle="popover" data-placement="bottom">tunnel</button></td>
+							</tr>
+						</table>
+						
+					</form>
+				</div>
+				<div align="center">
+					<label for="from">From</label>
+					<input type="text" id="from" name="from">
+					<label for="to">To</label>
+					<input type="text" id="to" name="to">
+					<div id="radio">
+						<input type="radio" id="radio1" name="interval" value="0" checked="checked"><label for="radio1">Hourly</label>
+						<input type="radio" id="radio2" name="interval" value="1"><label for="radio2">Daily</label>
+						<!-- TODO: weekly is not support yet !-->
+						<input type="radio" id="radio3" name="interval" value="2"><label for="radio3">Weekly</label>
+						<input type="radio" id="radio4" name="interval" value="3"><label for="radio4">Monthly</label>
+						<input type="radio" id="radio5" name="interval" value="4"><label for="radio5">Annually</label>
+					</div>
+					<button id="addform" type="button">Append</button>
+					<button id="update" type="button">Update</button>
+				</div>
+			</div>
+		
+		</div>
+		<div style="display:none;"><button type="button" id="oldbtn" >old_btn</button></div>
+	</body>
+	<script type="text/javascript" src="js/omniui-stat.js"></script>
+</html>

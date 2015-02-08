@@ -1,6 +1,5 @@
 import httplib
 import json
-import core
 
 
 class Flow_mod:
@@ -19,7 +18,7 @@ class Flow_mod:
 
 	def flowHandler(self,data):
 		# return JSONP format
-		body = json.dumps(data)
+		body = data
 		conn = httplib.HTTPConnection(self.IP,self.Port)
 		conn.request('POST',self.path,body,self.headers)
 		response = conn.getresponse()

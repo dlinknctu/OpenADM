@@ -1,3 +1,24 @@
+var defaultFlow = {
+    "switch": "00:00:00:00:00:00:00:01",
+    "ingressPort": "0",
+    "vlan": "0",
+    "vlanP": "0",
+    "srcMac": "00:00:00:00:00:00",
+    "dstMac": "00:00:00:00:00:00",
+    "dlType": "0",
+    "dstIP": "0.0.0.0/0",
+    "srcIP": "0.0.0.0/0",
+    "tosBits": "0",
+    "netProtocol": "0",
+    "srcPort": "0",
+    "dstPort": "0",
+    "actions": "",
+    "priority": "32767",
+    "active": "true",
+    "hardTimeout": "0",
+    "idleTimeout": "0"
+};
+
 $(function() {
     $("#send-dialog").dialog({
         autoOpen: false,
@@ -5,7 +26,35 @@ $(function() {
         width: 350,
         modal: true,
         buttons: {
-            "Add/Mod Flow": function() {
+            "Add": function() {
+                var flow = {};
+                var $label = $("#send-dialog fieldset label");
+                var $input = $("#send-dialog fieldset input");
+                $label.each(function(i, l) {
+                    if($input.eq(i).val() != "") {
+                        flow[$(this).text()] = $input.eq(i).val();
+                    } else {
+                        flow[$(this).text()] = defaultFlow[$(this).text()];
+                    }
+                });
+                if(!jQuery.isEmptyObject(flow)) {
+                    flow["command"] = "ADD";
+                    if("actions" in flow) {
+                        flow["actions"] = flow["actions"].replace(/(.*)=/, function(a) {
+                            return a.toUpperCase();
+                        }).replace(/(strip_vlan)/, function(a) {
+                            return a.toUpperCase();
+                        });
+                    }
+                    var srcCIDR = flow["srcIP"].split(/\//);
+                    var dstCIDR = flow["dstIP"].split(/\//);
+                    flow["srcIPMask"] = (srcCIDR.length == 2)? srcCIDR[1]: "32";
+                    flow["dstIPMask"] = (dstCIDR.length == 2)? dstCIDR[1]: "32";
+                    sendFlow(flow);
+                }
+                $(this).dialog("close");
+            },
+            "Modify": function() {
                 var flow = {};
                 var $label = $("#send-dialog fieldset label");
                 var $input = $("#send-dialog fieldset input");
@@ -19,19 +68,15 @@ $(function() {
                     if("actions" in flow) {
                         flow["actions"] = flow["actions"].replace(/(.*)=/, function(a) {
                             return a.toUpperCase();
+                        }).replace(/(strip_vlan)/, function(a) {
+                            return a.toUpperCase();
                         });
                     }
-                    flow = pruneFields(flow);
-                    if(!(flow["dlType"] && flow["netProtocol"])) {
-                        delete flow["srcPort"];
-                        delete flow["dstPort"];
-                    }
-                    console.log(JSON.stringify(flow));
                     sendFlow(flow);
                 }
                 $(this).dialog("close");
             },
-            "Del Flow": function() {
+            "Delete": function() {
                 var flow = {};
                 var $label = $("#send-dialog fieldset label");
                 var $input = $("#send-dialog fieldset input");
@@ -42,12 +87,6 @@ $(function() {
                 });
                 if(!jQuery.isEmptyObject(flow)) {
                     flow["command"] = "DEL";
-                    flow = pruneFields(flow);
-                    if(!(flow["dlType"] && flow["netProtocol"])) {
-                        delete flow["srcPort"];
-                        delete flow["dstPort"];
-                    }
-                    console.log(JSON.stringify(flow));
                     sendFlow(flow);
                 }
                 $(this).dialog("close");
@@ -72,9 +111,10 @@ $(function() {
                 if("actions" in flow) {
                     flow["actions"] = flow["actions"].replace(/(.*)=/, function(a) {
                         return a.toUpperCase();
+                    }).replace(/(strip_vlan)/, function(a) {
+                        return a.toUpperCase();
                     });
                 }
-                console.log(JSON.stringify(flow));
                 sendFlow(flow);
                 $(this).dialog("close");
             },
@@ -95,20 +135,22 @@ $(function() {
 });
 
 function modFlow(i) {
-    var flow = pruneFields(flows[i]);
+    var flow = JSON.parse(JSON.stringify(flows[i]));
     flow["switch"] = node.id;
     var actions = flow.actions;
     var actionsStrArr = [];
     for(var j in actions) {
-        actionsStrArr.push(actions[j].type + "=" + actions[j].value);
+        if("value" in actions[j]) {
+            actionsStrArr.push(actions[j].type + "=" + actions[j].value);
+        } else {
+            actionsStrArr.push(actions[j].type);
+        }
     }
     flow["actions"] = actionsStrArr.toString();
     flow["command"] = "MOD_ST";
     $("#_actions").val(flow["actions"]);
-    if(!(flow["dlType"] && flow["netProtocol"])) {
-        delete flow["srcPort"];
-        delete flow["dstPort"];
-    }
+    flow["srcIP"] += ("/" + flow["srcIPMask"]);
+    flow["dstIP"] += ("/" + flow["dstIPMask"]);
 
     for(var k in flow) {
         flow[k] = flow[k].toString();
@@ -119,60 +161,18 @@ function modFlow(i) {
 }
 
 function delFlow(i) {
-    var flow = pruneFields(flows[i]);
+    var flow = flows[i];
     if(flow["actions"][0]) {
         flow["actions"] = flow["actions"][0].type + "=" + flow["actions"][0].value;
     }
     flow["command"] = "DEL_ST";
     flow["switch"] = node.id;
+    flow["srcIP"] += ("/" + flow["srcIPMask"]);
+    flow["dstIP"] += ("/" + flow["dstIPMask"]);
+
     for(var k in flow) {
         flow[k] = flow[k].toString();
     }
 
-    console.log(JSON.stringify(flow));
     sendFlow(flow);
-}
-
-function pruneFields(f) {
-    delete f["counterByte"];
-    delete f["counterPacket"];
-    delete f["srcIPMask"];
-    delete f["dstIPMask"];
-	delete f["wildcards"];
-    if(f["srcMac"] == "00:00:00:00:00:00") {
-        delete f["srcMac"];
-    }
-    if(f["srcIP"] == "0.0.0.0") {
-        delete f["srcIP"];
-    }
-    if(f["srcPort"] == "0") {
-        delete f["srcPort"];
-    }
-    if(f["dstMac"] == "00:00:00:00:00:00") {
-        delete f["dstMac"];
-    }
-    if(f["dstIP"] == "0.0.0.0") {
-        delete f["dstIP"];
-    }
-    if(f["dstPort"] == "0") {
-        delete f["dstPort"];
-    }
-    if(f["ingressPort"] == "0") {
-        delete f["ingressPort"];
-    }
-    if(f["tosBits"] == "0") {
-        delete f["tosBits"];
-    }
-    if(f["vlan"] == "0") {
-        delete f["vlan"];
-    }
-    if(f["netProtocol"] == "0") {
-        delete f["netProtocol"];
-    }
-
-    if((f["srcIP"]) || (f["dstIP"]) || f["tosBits"] || f["netProtocol"]) {
-        f["dlType"] = "2048";
-    }
-
-    return JSON.parse(JSON.stringify(f));
 }

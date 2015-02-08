@@ -215,10 +215,10 @@ function nexthop(ff3,flow3){
 							f3["dstIP"]=flow3.actions[act].value;
 							break;
 						case "SET_DL_SRC":		//mac
-							f3["srcMac"]=flow3.actions[act].value;
+							f3["srcMac"]=flow3.actions[act].value.toLowerCase();
 							break;
 						case "SET_DL_DST":
-							f3["dstMac"]=flow3.actions[act].value;
+							f3["dstMac"]=flow3.actions[act].value.toLowerCase();
 							break;
 						case "SET_NW_TOS":
 							f3["tos-bits"]=flow3.actions[act].value;
@@ -243,7 +243,7 @@ function nexthop(ff3,flow3){
 								else if(key=="ingressPort") ff["ingressPort"]=dstp;
 								else ff[key]=f3[key];
 							}
-							linkchangecolor(src,srcp,dst,dstp);
+							linkchangecolor(src,srcp,dst,dstp,true);
 							getflowmsg(ff);
 							break;
 							
@@ -255,7 +255,7 @@ function nexthop(ff3,flow3){
 								else if(key=="ingressPort") ff["ingressPort"]=srcp;
 								else ff[key]=f3[key];
 							}
-							linkchangecolor(src,srcp,dst,dstp);
+							linkchangecolor(src,srcp,dst,dstp,false);
 							getflowmsg(ff);
 							break;
 						}else if(src==f3["switch"] && flow3.actions[act].value=="-5"){	//flood
@@ -267,7 +267,7 @@ function nexthop(ff3,flow3){
 								else if(key=="ingressPort") ff["ingressPort"]=dstp;
 								else ff[key]=f3[key];
 							}
-							linkchangecolor(src,srcp,dst,dstp);
+							linkchangecolor(src,srcp,dst,dstp,true);
 							getflowmsg(ff);
 							
 						}else if(dst==f3["switch"] && flow3.actions[act].value=="-5"){	//flood
@@ -279,7 +279,7 @@ function nexthop(ff3,flow3){
 								else if(key=="ingressPort") ff["ingressPort"]=srcp;
 								else ff[key]=f3[key];
 							}
-							linkchangecolor(src,srcp,dst,dstp);
+							linkchangecolor(src,srcp,dst,dstp,false);
 							getflowmsg(ff);
 						}else{
 							console.log("no next hop");
@@ -292,16 +292,46 @@ function nexthop(ff3,flow3){
 	}	
 }
 
-function linkchangecolor(src,srcp,dst,dstp){
+function linkchangecolor(src,srcp,dst,dstp,reverse){
 	var link = $("path.link");
-	//console.log(link);
 	var msg = "dpid " + src + ", port " + srcp + " -- " + "dpid " + dst + ", port " + dstp;
 	var length = link.length;
 	for(var k=0;k<length;k++)
 	{
 		if(link[k].textContent == msg)
 		{
-			link[k].style.stroke="#cccc00";
+			var path = link[k];
+			var totLen = path.getTotalLength();
+			// Clear any previous transition
+			path.style.animation = path.style.WebkitAnimation = 'none';
+
+			// Setup dash style
+			path.style.stroke = "#1199cc";
+			path.style.strokeDasharray = 8;
+
+			// Setup animation and insert into css
+			$.keyframe.define([{
+				name: 'forward_flow',
+				'0%': {'stroke-dashoffset': 0},
+				'100%': {'stroke-dashoffset': totLen*30}
+			}]);
+			$.keyframe.define([{
+				name: 'reverse_flow',
+				'0%': {'stroke-dashoffset': totLen*30},
+				'100%': {'stroke-dashoffset': 0}
+			}]);
+
+			// Trigger a layout so styles are calculated & the browser
+			// picks up the starting position before animating
+			path.getBoundingClientRect();
+
+			// Start animation
+			if(reverse) {
+				path.style.animation = path.style.WebkitAnimation = 'reverse_flow 30s linear infinite';
+			}
+			else {
+				path.style.animation = path.style.WebkitAnimation = 'forward_flow 30s linear infinite';
+			}
 		}
 	}
 }
@@ -309,8 +339,11 @@ function linkchangecolor(src,srcp,dst,dstp){
 function clearcolor(){
 	var link = $("path.link");
 	var length = link.length;
-	for(var k=0;k<length;k++) link[k].style.stroke="#000";
-	
+	for(var k=0;k<length;k++) {
+		link[k].style.stroke="#000";
+		link[k].style.strokeDasharray = 0;
+		link[k].style.animation = link[k].style.WebkitAnimation = 'none';
+	}
 	var node3 = $("circle.node");
 	var length = node3.length;
 	for(var k=0;k<length;k++) node3[k].style.fill="#FF9900";

@@ -41,24 +41,10 @@ storage_of_ports = []
 storage_of_flows = []
 
 
-# handler for timer function that sends the requests to all the
-# switches connected to the controller.
+"""
+create an user defined event
+"""
 
-# def _timer_func ():
-#   for connection in core.openflow._connections.values():
-#     print "======= connection ========"
-#     print connection
-    
-#     connection.send(of.ofp_stats_request(body=of.ofp_flow_stats_request()))
-#     connection.send(of.ofp_stats_request(body=of.ofp_port_stats_request()))
-#   log.debug("Sent %i flow/port stats request(s)", len(core.openflow._connections))
-#   # core.flow_stats.foo()
-#   core.flow_stats.foo()  #invoke event 
-
-
-# ====================================
-#  create an user defined event
-# ====================================
 class StatsEvent (Event):
 
   def __init__ (self,flows =[],ports=[]):
@@ -95,13 +81,6 @@ class flow_stats(EventMixin):
 
 
 
-
-
-# ============================================
-#     action_type's transformation
-#     defined in openflow spec 1.1 p.31
-# ============================================
-
 def ofp_action_type(number):
   if(number == 0):return "OUTPUT"
   elif(number == 1):return "SET_VLAN_VID"
@@ -117,9 +96,6 @@ def ofp_action_type(number):
   elif(number == 11):return "ENQUEUE"
 
 
-
-
-# structure of event.stats is defined by ofp_flow_stats()
 def _handle_flowstats_received (event):
   stats = flow_stats_to_list(event.stats)
   log.debug("FlowStatsReceived from %s: %s", 
@@ -128,7 +104,6 @@ def _handle_flowstats_received (event):
   flows_dpid = {}
   flows_list = []
 
-  # print "====== stats ======\n",stats
   for f in event.stats:
     
 
@@ -138,11 +113,22 @@ def _handle_flowstats_received (event):
 
     flows['duration'] = f.duration_sec
     flows['wildcards'] = f.match.wildcards
+     
+    """
+    translate wildcards' 8~13 bit to IP SrcMask 
+                        14~19 bit to IP DstMask 
+    """
+    flows['srcIPMask'] =  32 - (f.match.wildcards & 0X3f00)
+    flows['dstIPMask'] =  32 - (f.match.wildcards & 0xfc000)
+
     flows['dstIP'] = str(f.match.nw_dst)
-    flows['dstIPMask'] =  0          # f.match.nw_dst_mask  not found
+
     flows['srcMac'] = str(f.match.dl_src)
     flows['counterByte'] = f.byte_count
     
+    flows['dlType']=f.match.dl_type
+    
+
     if f.match.tp_src == None:
       flows['srcPort'] = 0
     else:
@@ -153,6 +139,9 @@ def _handle_flowstats_received (event):
     # print "\n",f.actions[0].type
     actions_dict['type'] = ofp_action_type(f.actions[0].type)
     
+
+    # print "actions_dict\n",actions_dict
+
     if actions_dict['type'] == "OUTPUT":
       actions_dict['value'] = f.actions[0].port
     
@@ -188,6 +177,7 @@ def _handle_flowstats_received (event):
       actions_dict['value'] = f.actions[0].tp_port 
 
     elif actions_dict['type'] == "ENQUEUE":
+
       tmp=[]
       tmp.append(f.actions[0].port)
       tmp.append(f.actions[0].queue_id)
@@ -198,7 +188,7 @@ def _handle_flowstats_received (event):
     actions.append(actions_dict)
     
     flows['actions'] = actions
-    flows['srcIPMask'] = 0            #  f.match.nw_src_mask   not found
+    
     flows['priority'] = f.priority
     flows['srcIP'] = str(f.match.nw_src)
     flows['vlan'] = f.match.dl_vlan    
@@ -211,19 +201,18 @@ def _handle_flowstats_received (event):
     
     flows['hardTimeout'] = f.hard_timeout
     flows['idleTimeout'] = f.idle_timeout
-    # flows['idleTimeout'] = 10
     flows['netProtocol'] = f.match.nw_proto
 
 
     flows_list.append(flows)
-    # print flows
+
   
   flows_dpid['flows'] = flows_list
   flows_dpid['dpid'] = "00:00:" + dpidToStr(event.connection.dpid).replace('-',':')
   storage_of_flows.append(flows_dpid)
 
 
-# handler to display port statistics received in JSON format
+
 def _handle_portstats_received (event):
   stats = flow_stats_to_list(event.stats)
   
@@ -246,15 +235,13 @@ def _handle_portstats_received (event):
   ports_dpid['dpid'] = "00:00:" + dpidToStr(event.connection.dpid).replace('-',':')
   storage_of_ports.append(ports_dpid)
 
+
   log.debug("PortStatsReceived from %s: %s", 
     dpidToStr(event.connection.dpid), stats)
 
 
-
-# main function to launch the module
 def launch ():
   core.registerNew(flow_stats)  
-  # attach handsers to listners
   core.openflow.addListenerByName("FlowStatsReceived", 
     _handle_flowstats_received) 
   core.openflow.addListenerByName("PortStatsReceived", 
