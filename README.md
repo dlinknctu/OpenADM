@@ -48,10 +48,10 @@ $ `gedit ~/OmniUI/core/etc/config.json`
     `"user":"<YOUR_DATABASE_LOGIN_USERNAME>"`  
     `"password":"<YOUR_DATABASE_LOGIN_PASSWORD>"`
 
-2. Install OmniUI core and dependencies
-$ `sudo python ~/OmniUI/core/setup.py install`
+2. Install OmniUI core and dependencies  
+$ `cd ~/OmniUI/core; sudo python setup.py install`
 
-3. Run OmniUI core
+3. Run OmniUI core  
 $ `/usr/local/bin/omniui`
 
 ###Installation & Execution of Controllers###
