@@ -49,7 +49,8 @@ $ `gedit ~/OmniUI/core/etc/config.json`
     `"password":"<YOUR_DATABASE_LOGIN_PASSWORD>"`
 
 2. Install OmniUI core and dependencies
-$ `sudo python ~/OmniUI/core/setup.py install`
+$ `cd ~/OmniUI/core/`
+$ `sudo python setup.py install`
 
 3. Run OmniUI core
 $ `/usr/local/bin/omniui`

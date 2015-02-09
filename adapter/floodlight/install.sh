@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo -e "\033[32mClone Floodlight 0.91 from GitHub repository\034[0m"
+echo -e "\033[32mClone Floodlight 0.91 from GitHub repository\033[0m"
 git clone https://github.com/floodlight/floodlight.git -b v0.91 floodlight
 
 echo -e '\033[32mCopy OmniUI module into Floodlight directory\033[0m'
