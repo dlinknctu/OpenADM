@@ -322,7 +322,6 @@ function sendFlow(f){
     var url = getFlowModUrl();
     var data = JSON.stringify(f);
     var callback = function(resp) {
-        //var stat = JSON.parse(resp[2]);
         console.log(resp);
         loadJSONP();
         $("#info").empty();

@@ -7,9 +7,6 @@ from pox.lib.util import *
 
 log = core.getLogger()
 
-Addxid = 0
-Modifyxid = 0
-Deletexid = 0
 Barrier_Addxid = 0
 Barrier_Modifyxid = 0
 Barrier_Deletexid = 0
@@ -17,13 +14,10 @@ add_success = False
 mod_success = False
 del_success = False
 
-
 class ReplyEvent (Event):
   def __init__ (self, reply):
     Event.__init__(self)
     self.reply = reply
-
-
 
 class flow_modify (EventMixin):
   _eventMixin_events = set([ReplyEvent,])
@@ -31,7 +25,6 @@ class flow_modify (EventMixin):
     self.listenTo(core)
     self._record_rules_dict = {}
     self._record_rules_list = []
-
 
   def _handle_GoingUpEvent (self, event):
 
@@ -60,14 +53,11 @@ class flow_modify (EventMixin):
 
   def _add_flow(self,command_type):
 
-    global Addxid 
     global Barrier_Addxid 
-    Addxid = of.generate_xid()
     msg = of.ofp_flow_mod()
     msg.command = of.OFPFC_ADD
 
     self._match_field(msg)
-    # print "====mod payload ====\n",self.payload
 
     for connection in core.openflow._connections.values() :
       if str(dpidToStr(connection.dpid)) == self.dpid:
@@ -82,15 +72,10 @@ class flow_modify (EventMixin):
         # for recover
         self._record_rules(dpid = self.dpid , msg = msg)
 
-
   def _modify_flow(self,command_type):
     
-    global Modifyxid 
     global Barrier_Modifyxid 
-    Modifyxid = of.generate_xid()
     msg = of.ofp_flow_mod()
-    
-    # print "====mod payload ====\n",self.payload
     
     if command_type == "MOD_ST":
       msg.command = of.OFPFC_MODIFY_STRICT
@@ -114,12 +99,9 @@ class flow_modify (EventMixin):
         # for recover
         self._record_rules(dpid = self.dpid , msg = msg)
               
-        
   def _delete_flow(self,command_type):
     
-    global Deletexid
     global Barrier_Deletexid
-    Deletexid = of.generate_xid()
     msg = of.ofp_flow_mod()
 
     if command_type == "DEL_ST":
@@ -127,7 +109,6 @@ class flow_modify (EventMixin):
     elif command_type == "DEL":
       msg.command = of.OFPFC_DELETE
   
-    # print "=== del payload ===\n",self.payload    
     self._match_field(msg)
 
     for connection in core.openflow._connections.values() :
@@ -143,7 +124,6 @@ class flow_modify (EventMixin):
         # for recover
         self._record_rules(dpid = self.dpid , msg = msg)
               
-
   def _parse_actions(self,actions):
     _actions = actions.replace(' ','')
     self.actions = _actions.split(',')
@@ -206,7 +186,6 @@ class flow_modify (EventMixin):
     self.dpid = self.payload['switch'].replace(':','-')[6:]
     self._parse_actions(self.payload['actions'])
 
-
   def _match_action(self,msg):
     
       if len(self.actions) == 1 and self.actions[0] == "" :
@@ -256,14 +235,16 @@ class flow_modify (EventMixin):
         elif(action_name == "SET_TP_DST"):
             msg.actions.append(of.ofp_action_tp_port(type = 10 , tp_port = int(action_argu)))
 
-
   def _record_rules(self,dpid,msg):
+
     self._record_rules_dict['dpid'] = dpid
     self._record_rules_dict['msg'] = msg
     self._record_rules_list.append(self._record_rules_dict)
 
   def check_barrierin(self):
+
     global add_success,mod_success,del_success
+
     if add_success:
         add_success = False
         return True
@@ -277,27 +258,21 @@ class flow_modify (EventMixin):
         return False
 
 def _handle_BarrierIn(event):
-  global Barrier_Addxid,Barrier_Modifyxid,Barrier_Deletexid
+
   global add_success,mod_success,del_success
+
   if Barrier_Addxid == event.xid:
-    #print "=== add event ===\n",event
     add_success = True
   elif Barrier_Modifyxid == event.xid:
-    #print "=== modify event ===\n",event
     mod_success = True
   elif Barrier_Deletexid == event.xid:
-    #print "=== delete event ===\n",event
     del_success = True
-  #else:
-    #print "=== no xid match %s ===" % event.xid
 
 def _raise_ReplyEvent(self):
   self.raiseEvent(ReplyEvent, reply)
   #   pass
 
-
 """reply status for deletion or modification or addition success or failure"""
-
 
 def launch ():
   core.registerNew(flow_modify)

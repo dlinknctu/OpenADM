@@ -181,7 +181,6 @@ class CoreHandler (SplitRequestHandler):
     elif self.path == "/wm/omniui/switch/json":
       core.flow_stats._send_ofp_stats_request()   #invoke request function in flow_stats component
       self.wfile.write(json_switches)
-      #print (json_switches)
     elif self.path == "/wm/omniui/add/json":
       global payload
       l = self.headers.get("Content-Length", "")
@@ -190,7 +189,6 @@ class CoreHandler (SplitRequestHandler):
       else:
         data = json.loads(self.rfile.read(int(l)))
       payload = data
-      # print "payload====\n",payload
       core.FlowModEvent_Generator._raise_FlowModEvent()
       time.sleep(5)
       get_barrierin = core.flow_modify.check_barrierin()
@@ -199,7 +197,6 @@ class CoreHandler (SplitRequestHandler):
       else:
         self.send_response(200, "NO GET Barrier Response")
     else:
-      # print "path",self.path
       self.send_error(404, "File not found on CoreHandler")
 
   def send_favicon (self, is_get = False):
@@ -412,7 +409,6 @@ class SplitterRequestHandler (BaseHTTPRequestHandler):
     while True:
       for m in self.server.matches:
         if self.path.startswith(m[0]):
-          #print m,self.path
           handler = m[1](self, m[0], m[3])
           #pb = self.rec.getPlayback()
           #handler = m[1](pb, *self.args[1:])
@@ -617,8 +613,6 @@ class StatsEvent_Listener (EventMixin):
         
         json_switches = json.dumps(file_nodes[:])
         json_links = json.dumps(file_links[:])
-
-        #print json_switches
 
         dpid_cannot_use[:] = [] 
         dpid_used[:] = []
