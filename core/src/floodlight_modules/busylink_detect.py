@@ -10,6 +10,10 @@ class BusyLink_Detect:
 		self.controllerIP = "localhost"
 		self.controllerPort = "8080"
 		self.timerInterval = 5
+
+		self.baseState = 1
+		self.finalState = 3
+		self.threshold = 0.8
 		self.statistics = {}
 		self.BLD_result = []
 
@@ -27,16 +31,16 @@ class BusyLink_Detect:
 	
 	def overthreshold(self,link,id):
 		link['state'] += 1
-		if link['state'] >= 3:
+		if link['state'] >= self.finalState:
 			print "%s is busy!!!!!!!!" % id
-			link['state'] = 3
+			link['state'] = self.finalState
 			self.BLD_result.append(id)
 		#print "overthreshold!!!!!! state = %d" % link['state']
 	
 	def underthreshold(self,link):
 		link['state'] -= 1
-		if link['state'] <= 0:
-			link['state'] = 1
+		if link['state'] < self.baseState:
+			link['state'] = self.baseState
 		#print "underthreshold!!!!!! state = %d" % link['state']
 	
 	def periodicQuery(self):
@@ -147,19 +151,19 @@ class BusyLink_Detect:
 			self.statistics = dict(self.links)
 			for link_id in self.statistics:
 				link = self.statistics[link_id]
-				link['state'] = 1
+				link['state'] = self.baseState
 		
 		#check threshold
 		for link_id in self.links:
 			if link_id in self.statistics:
-				if (self.links[link_id]['countBytes'] - self.statistics[link_id]['countBytes']) / self.statistics[link_id]['capacity'] >= 0.8:
+				if (self.links[link_id]['countBytes'] - self.statistics[link_id]['countBytes']) / self.statistics[link_id]['capacity'] >= self.threshold:
 					self.overthreshold(self.statistics[link_id],link_id)
 				else:
 					self.underthreshold(self.statistics[link_id])
 				self.statistics[link_id]['countBytes'] = self.links[link_id]['countBytes']
 			else:
 				self.statistics[link_id] = dict(self.links[link_id])
-				self.statistics[link_id]['state'] = 1
+				self.statistics[link_id]['state'] = self.baseState
 		#remove unexisted link info
 		for link_id in self.statistics:
 			if link_id not in self.links:
