@@ -13,3 +13,9 @@ function getTopologyUrl(){
 function getFlowModUrl(){
     return "http://"+coreIP+":"+corePort+"/flowmod";
 }
+function getUdsUrl(){
+    return "http://"+coreIP+":"+corePort+"/uds";
+}
+function getSubscribeUrl(){
+    return "http://"+coreIP+":"+corePort+"/subscribe";
+}
