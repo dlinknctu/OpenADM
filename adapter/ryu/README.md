@@ -13,7 +13,7 @@ $ `cd ~; python ~/OmniUI/core/core.py`
 **Successful compilation starts the OmniUI core**  
 
 2. Run the Ryu Controller (Using a 2nd Terminal)  
-$ `PYTHONPATH=. ~/ryu/bin/ryu-manager --observe-links ~/OmniUI/adapter/ryu/omniui/omniui.py ~/ryu/ryu/app/simple_switch.py`
+$ `PYTHONPATH=. ~/ryu/bin/ryu-manager --observe-links ~/OmniUI/adapter/ryu/omniui/omniui.py ~/OmniUI/adapter/ryu/omniui/simple_switch_13.py`
 
 3. Run a simple Mininet topology (Using a 3rd Terminal)  
 $ `sudo mn --topo single,3 --mac --switch ovsk --controller remote`
