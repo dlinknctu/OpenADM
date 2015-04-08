@@ -42,16 +42,13 @@ class BusyLink_Detect:
 	def overthreshold(self,link,id):
 		link['state'] += 1
 		if link['state'] >= self.finalState:
-			#print "%s is busy!!!!!!!!" % id
 			link['state'] = self.finalState
 			self.BLD_result.append(id)
-		#print "overthreshold!!!!!! state = %d" % link['state']
 	
 	def underthreshold(self,link):
 		link['state'] -= 1
 		if link['state'] < self.baseState:
 			link['state'] = self.baseState
-		#print "underthreshold!!!!!! state = %d" % link['state']
 	
 	def periodicQuery(self):
 		self.periodicQueryLink()
@@ -181,6 +178,5 @@ class BusyLink_Detect:
 		
 		#return result
 		if len(self.BLD_result)>0:
-			#print self.BLD_result
 			conn = httplib.HTTPConnection(self.coreIP,self.corePort)
 			conn.request('POST','/publish/busylink')

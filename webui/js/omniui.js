@@ -349,7 +349,6 @@ function serverSentEvent() {
         updateTopo(JSON.parse(e.data));
     }, false);
     evtSrc.addEventListener('busylink', function(e) {
-        //console.log(e.data);
         var data = JSON.parse(e.data);
         for(var i in data) {
             linkcolorchange(data[i]);
