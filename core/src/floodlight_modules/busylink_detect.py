@@ -11,6 +11,9 @@ class BusyLink_Detect:
 		self.controllerPort = "8080"
 		self.timerInterval = 5
 
+		self.coreIP = "localhost"
+		self.corePort = "5567"
+
 		self.baseState = 1
 		self.finalState = 3
 		self.threshold = 0.8
@@ -28,11 +31,18 @@ class BusyLink_Detect:
 		logger.debug('IP =%s  port = %s  interval = %s' % (self.controllerIP,self.controllerPort,self.timerInterval))
 		core.registerEvent("periodicQuery",self.periodicQuery,self.timerInterval)
 		core.registerEventHandler("periodicQuery", self.busyLinkDetect)
-	
+		core.registerSSEHandler("busylink", self.busylinkHandler)
+
+	def busylinkHandler(self):
+		data = {}
+		for i in range(len(self.BLD_result)):
+			data[i] = self.BLD_result[i]
+		return json.dumps(data)
+
 	def overthreshold(self,link,id):
 		link['state'] += 1
 		if link['state'] >= self.finalState:
-			print "%s is busy!!!!!!!!" % id
+			#print "%s is busy!!!!!!!!" % id
 			link['state'] = self.finalState
 			self.BLD_result.append(id)
 		#print "overthreshold!!!!!! state = %d" % link['state']
@@ -171,4 +181,6 @@ class BusyLink_Detect:
 		
 		#return result
 		if len(self.BLD_result)>0:
-			print self.BLD_result
+			#print self.BLD_result
+			conn = httplib.HTTPConnection(self.coreIP,self.corePort)
+			conn.request('POST','/publish/busylink')

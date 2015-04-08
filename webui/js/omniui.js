@@ -332,10 +332,28 @@ function sendFlow(f){
     $.post(url, data, callback, "json");
 }
 
+function linkcolorchange(msg){
+    var link = $("path.link");
+    var length = link.length;
+    for(var k=0;k<length;k++){
+        if(link[k].textContent == msg){
+            link[k].style.stroke = "#ff0000";
+            break;
+        }
+    }
+}
+
 function serverSentEvent() {
     var evtSrc = new EventSource(getSubscribeUrl());
     evtSrc.addEventListener('updatetopo', function(e) {
         updateTopo(JSON.parse(e.data));
+    }, false);
+    evtSrc.addEventListener('busylink', function(e) {
+        //console.log(e.data);
+        var data = JSON.parse(e.data);
+        for(var i in data) {
+            linkcolorchange(data[i]);
+        }
     }, false);
 }
 
