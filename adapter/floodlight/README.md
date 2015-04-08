@@ -22,16 +22,12 @@ $ `cp -r ~/OmniUI/adapter/floodlight/omniui/ .`
 $ `cd ~/floodlight; ant`  
 
 ###Execution###
-1. Compile OmniUI core  
-$ `cd ~; python ~/OmniUI/core/core.py`  
-**Successful compilation starts the OmniUI core**  
-
-2. Run the Floodlight Controller (Using a 2nd Terminal)  
+1. Run the Floodlight Controller (Using a 2nd Terminal)  
 $ `java -jar floodlight/target/floodlight.jar`
 
-3. Run a simple Mininet topology (Using a 3rd Terminal)  
+2. Run a simple Mininet topology (Using a 3rd Terminal)  
 $ `sudo mn --controller=remote --topo tree,depth=2`
 
-4. Start-up OmniUI Web UI (Using a 4th Terminal)  
+3. Start-up OmniUI Web UI (Using a 4th Terminal)  
 $ `firefox ~/OmniUI/webui/index.html`
 

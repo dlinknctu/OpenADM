@@ -317,14 +317,14 @@ function loadJSONP(){
 function sendFlow(f){
 
     for(var i in f) {
-        f[i] = f[i].replace(/\s+/g, "");
+        if(f[i]!=null) f[i] = f[i].replace(/\s+/g, "");
     }
     var url = getFlowModUrl();
     var data = JSON.stringify(f);
     var callback = function(resp) {
-        var stat = JSON.parse(resp[2]);
         console.log(resp);
         loadJSONP();
+        $("#info").empty();
         clearcolor();
     };
     console.log(data);

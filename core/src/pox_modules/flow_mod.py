@@ -1,6 +1,5 @@
 import httplib
 import json
-import core
 
 
 class Flow_mod:

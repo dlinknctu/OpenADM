@@ -57,7 +57,7 @@ function getflowmsg(f){
 }
 
 function startmatch(f2,flow2,j2,compare2){
-	if(flow2.srcMac!="00:00:00:00:00:00")
+	if(flow2.srcMac!="00:00:00:00:00:00" && flow2.srcMac!="None")
 	{
 		if("srcMac" in f2)
 		{
@@ -69,7 +69,7 @@ function startmatch(f2,flow2,j2,compare2){
 			return
 		}
 	}
-	if(flow2.dstMac!="00:00:00:00:00:00")
+	if(flow2.dstMac!="00:00:00:00:00:00" && flow2.dstMac!="None")
 	{
 		if("dstMac" in f2){
 			console.log("HAVE DSTMAC");
@@ -80,7 +80,7 @@ function startmatch(f2,flow2,j2,compare2){
 			return
 		}
 	}
-    if(flow2.dlType!="0")
+    if(flow2.dlType!="0" && flow2.dlType!=null)
 	{
 		if("dlType" in f2){
 			console.log("HAVE DLTYPE");
@@ -91,7 +91,7 @@ function startmatch(f2,flow2,j2,compare2){
 			return;
 		}
 	}
-	if(flow2.srcIP!="0.0.0.0")
+	if(flow2.srcIP!="0.0.0.0" && flow2.srcIP!="None")
 	{
 		if("srcIP" in f2){
 			console.log("HAVE SRCIP");
@@ -102,7 +102,7 @@ function startmatch(f2,flow2,j2,compare2){
 			return;
 		}
 	}
-	if(flow2.dstIP!="0.0.0.0")
+	if(flow2.dstIP!="0.0.0.0" && flow2.dstIP!="None")
 	{
 		if("dstIP" in f2){
 			console.log("HAVE DSTIP");
@@ -135,7 +135,7 @@ function startmatch(f2,flow2,j2,compare2){
 			return;
 		}
 	}
-	if(flow2.ingressPort!="0")
+	if(flow2.ingressPort!="0" && flow2.ingressPort!=null)
 	{
 		if("ingressPort" in f2){
 			console.log("HAVE INGRESSPORT");
@@ -146,7 +146,7 @@ function startmatch(f2,flow2,j2,compare2){
 			return;
 		}
 	}
-	if(flow2.netProtocol!="0")
+	if(flow2.netProtocol!="0" && flow2.netProtocol!=null)
 	{
 		if("netProtocol" in f2){
 			console.log("HAVE NETPROTOCOL");
@@ -157,7 +157,7 @@ function startmatch(f2,flow2,j2,compare2){
 				return;
 			}
 	}
-	if(flow2.vlan!="0")
+	if(flow2.vlan!="0" && flow2.vlan!=null)
 	{
 		if("vlan" in f2){
 			console.log("HAVE VLAN");
@@ -165,6 +165,17 @@ function startmatch(f2,flow2,j2,compare2){
 			else{ console.log("match vlan failed"); return; }
 		}else{
 			console.log("NOT HAVE VLAN");
+			return;
+		}
+	}
+	if(flow2.vlanP!="0")
+	{
+		if("vlanP" in f2){
+			console.log("HAVE VLANP");
+			if(flow2.vlanP == f2["vlanP"]) console.log("match vlanP");
+			else{ console.log("match vlanP failed"); return; }
+		}else{
+			console.log("NOT HAVE VLANP");
 			return;
 		}
 	}
@@ -222,6 +233,17 @@ function nexthop(ff3,flow3){
 							break;
 						case "SET_NW_TOS":
 							f3["tos-bits"]=flow3.actions[act].value;
+							break;
+						case "SET_VLAN_VID":
+							f3["vlan"]=flow3.actions[act].value;
+							break;
+						case "SET_VLAN_PCP":
+							f3["vlanP"]=flow3.actions[act].value;
+							break;
+						case "STRIP_VLAN":
+							f3["vlan"]=null;
+							break;
+						case "ENQUEUE":
 							break;
 						default: 
 							console.log("no support this actions");
@@ -363,7 +385,7 @@ function highlight(i){
 	delete hflow["wildcards"];
     hflow["switch"] = node.id;
     for(var k in hflow) {
-        hflow[k] = hflow[k].toString();
+        if(hflow[k]!=null) hflow[k] = hflow[k].toString();
     }
 	getflowmsg(hflow);
 }

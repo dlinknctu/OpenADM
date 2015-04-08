@@ -1,3 +1,8 @@
 .DS_Store
 *.pyc
 *.log
+config.json
+build
+dist
+*.egg-info
+*.eggs

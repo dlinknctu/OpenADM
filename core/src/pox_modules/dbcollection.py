@@ -1,14 +1,13 @@
-
-from core import Core
 from pymongo import MongoClient
 import datetime,time,calendar
+
 
 class DbCollection:
 	def __init__(self,core,parm):
 		#	membeRs
 		self.timeInterval = int(parm['interval'])
-		self.prevDay  = datetime.datetime.today()
-		self.prevWeekDay  = datetime.datetime.today()
+		self.prevDay  = datetime.datetime.today() 
+		self.prevWeekDay  = datetime.datetime.today() 
 		self.prevMonth = datetime.datetime.today()
 		self.prevYear = datetime.datetime.today()
 		self.enable = True if parm['enable'] == "true" or parm['enable'] == "True"  else False
@@ -33,23 +32,23 @@ class DbCollection:
 			self.monthlyToAnnually()
 	def hourlyToDaily(self):
 		today = datetime.datetime.today() 
-		tableName =	"uds_hourly"+self.prevDay.strftime("%Y_%m_%d")
+		tableName =	"hourly"+self.prevDay.strftime("%Y_%m_%d")
 		for entry in self.db[tableName].find():
 			key = entry.copy()
-			key.pop('byte_count',None)
-			key.pop('packet_count',None)
+			key.pop('counterByte',None)
+			key.pop('counterPacket',None)
 			key.pop('duration',None)
 			key.pop('_id',None)
 			key['date'] = int(time.mktime(datetime.datetime.strptime(self.prevDay.strftime("%Y_%m_%d"),"%Y_%m_%d").timetuple()))
-			exist =  self.db['uds_daily'].find_one(key)
+			exist =  self.db['daily'].find_one(key)
 			if exist is not None:
 				key['_id'] = exist['_id']
-				key['byte_count'] = entry['byte_count'] + exist['byte_count']
+				key['counterByte'] = entry['counterByte'] + exist['counterByte']
 			else:
-				key['byte_count'] = entry['byte_count']
-			self.db['uds_daily'].save(key)
+				key['counterByte'] = entry['counterByte']
+			self.db['daily'].save(key)
+			
 		self.prevDay = today
-		
 	def dailyToWeekly(self):
 		today = datetime.datetime.today() 
 		#update the daily to weekly every sunday
@@ -59,20 +58,20 @@ class DbCollection:
 			toTime = int(time.mktime(today.strptime(today.strftime("%Y_%m_%d"),"%Y_%m_%d").timetuple()))
 			key={}
 			key['date'] = {'$gte':fromTime,'$lt':toTime}
-			for entry in self.db['uds_daily'].find(key):
+			for entry in self.db['daily'].find(key):
 				key = entry.copy()
-				key.pop('byte_count',None)
-				key.pop('packet_count',None)
+				key.pop('counterByte',None)
+				key.pop('counterPacket',None)
 				key.pop('duration',None)
 				key.pop('_id',None)
 				key['date'] = toTime - 86400*7 #last sunday
-				exist = self.db['uds_weekly'].find_one(key)
+				exist = self.db['weekly'].find_one(key)
 				if exist is not None:
 					key['_id'] = exist['_id']
-					key['byte_count'] = entry['byte_count'] + exist['byte_count']
+					key['counterByte'] = entry['counterByte'] + exist['counterByte']
 				else:
-					key['byte_count'] = entry['byte_count']
-				self.db['uds_weekly'].save(key)
+					key['counterByte'] = entry['counterByte']
+				self.db['weekly'].save(key)
 			self.prevWeekDay = today		
 
 	def weeklyToMonthly(self):
@@ -84,20 +83,20 @@ class DbCollection:
 			toTime = int(time.mktime((self.prevMonth + datetime.timedelta(calendar.mdays[self.prevMonth.month])).timetuple()))
 			key={}
 			key['date'] = {'$gte':fromTime,'$lt':toTime}
-			for entry in self.db['uds_daily'].find(key):
+			for entry in self.db['daily'].find(key):
 				key = entry.copy()
-				key.pop('byte_count',None)
-				key.pop('packet_count',None)
+				key.pop('counterByte',None)
+				key.pop('counterPacket',None)
 				key.pop('duration',None)
 				key.pop('_id',None)
 				key['date'] = fromTime
-				exist = self.db['uds_monthly'].find_one(key)
+				exist = self.db['monthly'].find_one(key)
 				if exist is not None:
 					key['_id'] = exist['_id']
-					key['byte_count'] = entry['byte_count'] + exist['byte_count']
+					key['counterByte'] = entry['counterByte'] + exist['counterByte']
 				else:
-					key['byte_count'] = entry['byte_count']
-				self.db['uds_monthly'].save(key)
+					key['counterByte'] = entry['counterByte']
+				self.db['monthly'].save(key)
 			self.prevMonth = today
 	def monthlyToAnnually(self):
 		today = datetime.datetime.today()
@@ -107,19 +106,19 @@ class DbCollection:
 			toTime = fromTime + 86400*365
 			key={}
 			key['date'] = {'$gte':fromTime,'$lt':toTime}
-			for entry in self.db['uds_monthly'].find(key):
+			for entry in self.db['monthly'].find(key):
 				key = entry.copy()
-				key.pop('byte_count',None)
-				key.pop('packet_count',None)
+				key.pop('counterByte',None)
+				key.pop('counterPacket',None)
 				key.pop('duration',None)
 				key.pop('_id',None)
 				key['date'] = fromTime
-				exist = self.db['uds_annually'].find_one(key)
+				exist = self.db['annually'].find_one(key)
 				if exist is not None:
 					key['_id'] = exist['_id']
-					key['byte_count'] = entry['byte_count'] + exist['byte_count']
+					key['counterByte'] = entry['counterByte'] + exist['counterByte']
 				else:
-					key['byte_count'] = entry['byte_count']
-				self.db['uds_annually'].save(key)
+					key['counterByte'] = entry['counterByte']
+				self.db['annually'].save(key)
 			self.prevMonth = today
 
