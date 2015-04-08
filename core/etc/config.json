@@ -10,8 +10,8 @@
 		"dbip":"127.0.0.1",
 		"dbport":"27017",
 		"db":"omniui",
-		"user":"xxxxxx",
-		"password":"xxxxxx",
+		"user":"sdn",
+		"password":"sdn",
 		"queryinterval":"5"
 	},
 	"ControllerAdapter": {

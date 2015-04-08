@@ -66,8 +66,11 @@ class Core:
 		restHandlers = {}
 		global sseHandlers
 		sseHandlers = {}
+<<<<<<< HEAD:core/src/core.py
 
 	def start(self):
+=======
+>>>>>>> cc14ed5e79713b94a9db5ca79711229fc6fc5f47:core/core.py
 		#Load config file
 		with open(os.path.join(rootPath, 'etc/config.json'),'r') as input:
 			data = input.read()
@@ -98,6 +101,10 @@ class Core:
 		plugins.__path__ = []
 		plugins.__path__.append (os.path.join(rootPath, 'src', ControllerType))
 
+<<<<<<< HEAD:core/src/core.py
+=======
+
+>>>>>>> cc14ed5e79713b94a9db5ca79711229fc6fc5f47:core/core.py
 		for module in config:
 			if module != "LogFile" and module != "REST" and module != "ControllerType" : # load modules other than LogFile and REST
 				instance = import_module('plugins.' + module.lower())
@@ -115,6 +122,7 @@ class Core:
 			@cross_origin()
 			def debug():
 				return 'Currently %d subscriptions' % len(subscriptions)
+<<<<<<< HEAD:core/src/core.py
 
 			# Receive data from SB
 			@app.route('/publish/<event>', methods=['POST'])
@@ -143,6 +151,36 @@ class Core:
 			# For clients to subscribe server-sent events
 			@app.route('/subscribe')
 			@cross_origin()
+=======
+
+			# Receive data from SB
+			@app.route('/publish/<event>', methods=['POST'])
+			@cross_origin()
+			def publish(event):
+				def notify(e, d):
+					msg = {
+						'event': e,
+						'data': d
+					}
+					for sub in subscriptions[:]:
+						sub.put(msg)
+
+				if event in sseHandlers:
+
+					#
+					# Process data, push event
+					#
+
+					gevent.spawn(notify, event, sseHandlers[event]())
+				else:
+					abort(404, 'No such event: \'/publish/%s\'' % event)
+
+				return 'OK'
+
+			# For clients to subscribe server-sent events
+			@app.route('/subscribe')
+			@cross_origin()
+>>>>>>> cc14ed5e79713b94a9db5ca79711229fc6fc5f47:core/core.py
 			def subscribe():
 				def gen():
 					q = Queue()
