@@ -1,5 +1,4 @@
 #!/bin/bash
-<<<<<<< HEAD
 function test_ui {
     cd $rootpath/ui
     npm install
@@ -26,8 +25,3 @@ test_ui
 install_core
 test_core
 install_floodlight
-=======
-cd ui
-npm install
-npm test
->>>>>>> cc14ed5e79713b94a9db5ca79711229fc6fc5f47
