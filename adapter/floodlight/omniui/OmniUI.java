@@ -91,6 +91,7 @@ public class OmniUI implements IFloodlightModule,IOFMessageListener,IOFSwitchLis
 		// TODO Auto-generated method stub
 		floodlightProvider.addOFMessageListener(OFType.FLOW_MOD, this);
 		floodlightProvider.addOFMessageListener(OFType.FLOW_REMOVED, this);
+		floodlightProvider.addOFMessageListener(OFType.BARRIER_REPLY, this);
 		floodlightProvider.addOFSwitchListener(this);
 		restApi.addRestletRoutable(new OmniUIWebRoutable());
 	}
@@ -108,6 +109,10 @@ public class OmniUI implements IFloodlightModule,IOFMessageListener,IOFSwitchLis
 				logger.info("FLOW REMOVED MSG : {} ; from switch : {}",msg2,sw);
 				FlowModResource.setMsg();
 			}
+			return Command.CONTINUE;
+		case BARRIER_REPLY:
+			logger.info("BARRIER REPLY : {}",msg);
+			FlowModResource.setMsg2();
 			return Command.CONTINUE;
         default:
             return Command.CONTINUE;

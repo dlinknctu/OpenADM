@@ -1,11 +1,13 @@
-OmniUI
+OmniUI [![Build Status](https://travis-ci.org/dlinknctu/OmniUI.svg?branch=dev)](https://travis-ci.org/dlinknctu/OmniUI)
 ------
-A diagnosis, analytic and management framework for SDN
+A diagnosis, analytic and management framework for SDN  
 http://www.slideshare.net/rascov/20140824-omni-ui
 
-##Introduction##
-OmniUI is a diagnosis, analytic and management framework for Software-Defined Network. It provides graphical user interface to illustrate information of flows, devices and statistic data. Features of OmniUI includes:
+###Introduction###
+OmniUI is a diagnosis, analytic and management framework for Software-Defined Networks.  
+It provides a graphical user interface to illustrate information on flows, devices and statistic data.  
 
+Features of OmniUI includes:  
 - Compatible with various controller
 - Forwarding path of specific flow
 - Topology view with traffic information
@@ -14,22 +16,50 @@ OmniUI is a diagnosis, analytic and management framework for Software-Defined Ne
 - Dynamic flow migration
 - [Demo Video](http://vimeo.com/mcchan/omniui)
 
-##Installation##
-- Install controller adapter
-    * Please refer to `/adapter/<controller>/README.md`
-- Install web UI
-    1. Install a web server (e.g. Apache)
-    2. Simply copy `/webui` into root directory of website
-- Install MongoDB 
-    * Please refer to [Install MongoDB](http://docs.mongodb.org/manual/installation/)
-- Modify the config file
-    * `core/config.json`: Update `dbip`, `user` and `password` in both UIPusher and DbCollection section
-    
-    if you are access webui from outside localhost (optional)
-    * `core/core.py`: Update `Access-Control-Allow-Origin`
-    * `webui/js/omniui.js`: Update IP in `function loadJSONP()` and `function sendFlow()`
+###Prerequisite###
+1. Install essential packages  
+**Floodlight**  
+$ `sudo apt-get install build-essential default-jdk ant python-dev git python-virtualenv`  
+**Ryu**  
+$ `sudo apt-get install build-essential python-dev git python-virtualenv python-eventlet python-routes python-webob python-paramiko`
 
-##Current Progress (on dev branch)##
+2. Update existing packages  
+$ `sudo apt-get update`  
+$ `sudo pip install --upgrade pip virtualenv`  
+
+3. Download & Install Mininet  
+$ `git clone git://github.com/mininet/mininet`  
+$ `mininet/util/install.sh -a`
+
+4. Clone OmniUI from Github  
+$ `git clone https://github.com/dlinknctu/OmniUI.git -b dev`
+
+5. Install MongoDB  
+    * Please refer to [Install MongoDB](http://docs.mongodb.org/manual/installation/)  
+
+###Installation & Execution of OmniUI Core###
+1. Modify OmniUI database credentials  
+$ `gedit ~/OmniUI/core/etc/config.json`  
+    **Modify the following (UIPusher and DbCollection section):**  
+    `"ControllerType":"<CONTROLLER_NAME>"` **If using Ryu, fill ControllerType as "floodlight"**  
+    `"dbip":"<YOUR_DATABASE_IP_ADDR>",`  
+    `"dbport":"<YOUR_DATABASE_IP_PORT>",`  
+    `"db":"<YOUR_DATABASE_NAME>",`  
+    `"user":"<YOUR_DATABASE_LOGIN_USERNAME>"`  
+    `"password":"<YOUR_DATABASE_LOGIN_PASSWORD>"`
+
+2. Install OmniUI core and dependencies
+$ `cd ~/OmnuUI/core/`
+$ `sudo python setup.py install`
+
+3. Run OmniUI core
+$ `/usr/local/bin/omniui`
+
+###Installation & Execution of Controllers###
+- Installation & Execution of controller adapter  
+    * Please refer to `/adapter/<controller>/README.md`
+
+###Current Progress (dev branch)###
 ```
 feature\controller | Floodlight | POX | Trema | Ryu
 ---------------------------------------------------
@@ -39,6 +69,7 @@ Flow Statistic     | V          | V   |       | V
 Topology View      | V          | V   |       | V
 Path Highlight     | V          | V   |       | V
 Flow Modify        | V          |     |       |
-General Statistic  | V          | V   |       | V   
+General Statistic  | V          | V   |       | V
 UDS                |            |     | V     | 
 ```
+

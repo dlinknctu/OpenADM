@@ -4,28 +4,30 @@
 		<meta charset="utf-8">
 		<title>OmniUI</title>
 		<link rel="stylesheet" href="css/omniui.css">
-        <link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="css/smoothness/jquery-ui.css">
 	</head>
 	<body>
         <div id="send-dialog" title="Flow Information" class="dialog">
             <form>
                 <fieldset>
-                    <label for="i_switch">switch</label><input type="text" id="i_switch" /><br />
-                    <label for="i_priority">priority</label><input type="text" id="i_priority" /><br />
-                    <label for="i_active">active</label><input type="text" id="i_active" /><br />
-                    <label for="i_dstIP">dstIP</label><input type="text" id="i_dstIP" /><br />
-                    <label for="i_srcMac">srcMac</label><input type="text" id="i_srcMac" /><br />
-                    <label for="i_srcPort">srcPort</label><input type="text" id="i_srcPort" /><br />
-                    <label for="i_ingressPort">ingressPort</label><input type="text" id="i_ingressPort" /><br />
-                    <label for="i_dstMac">dstMac</label><input type="text" id="i_dstMac" /><br />
+                    <label for="i_switch">switch</label><input type="text" id="i_switch" placeholder="00:00:00:00:00:00:00:01"/><br />
+                    <label for="i_ingressPort">ingressPort</label><input type="text" id="i_ingressPort" placeholder="0" /><br />
+                    <label for="i_vlan">vlan</label><input type="text" id="i_vlan" placeholder="0" /><br />
+                    <label for="i_vlan">vlanP</label><input type="text" id="i_vlanP" placeholder="0" /><br />
+                    <label for="i_srcMac">srcMac</label><input type="text" id="i_srcMac" placeholder="00:00:00:00:00:00" /><br />
+                    <label for="i_dstMac">dstMac</label><input type="text" id="i_dstMac" placeholder="00:00:00:00:00:00" /><br />
+                    <label for="i_dlType">dlType</label><input type="text" id="i_dlType" placeholder="0" /><br />
+                    <label for="i_srcIP">srcIP</label><input type="text" id="i_srcIP" placeholder="0.0.0.0/0" /><br />
+                    <label for="i_dstIP">dstIP</label><input type="text" id="i_dstIP" placeholder="0.0.0.0/0" /><br />
+                    <label for="i_tos-bits">tosBits</label><input type="text" id="i_tos-bits" placeholder="0" /><br />
+                    <label for="i_netProtocol">netProtocol</label><input type="text" id="i_netProtocol" placeholder="0" /><br />
+                    <label for="i_srcPort">srcPort</label><input type="text" id="i_srcPort" placeholder="0" /><br />
+                    <label for="i_dstPort">dstPort</label><input type="text" id="i_dstPort" placeholder="0" /><br />
                     <label for="i_actions">actions</label><input type="text" id="i_actions" /><br />
-                    <label for="i_vlan-id">vlan</label><input type="text" id="i_vlan-id" /><br />
-                    <label for="i_tos-bits">tosBits</label><input type="text" id="i_tos-bits" /><br />
-                    <label for="i_srcIP">srcIP</label><input type="text" id="i_srcIP" /><br />
-                    <label for="i_dstPort">dstPort</label><input type="text" id="i_dstPort" /><br />
-                    <label for="i_hardTimeout">hardTimeout</label><input type="text" id="i_hardTimeout" /><br />
-                    <label for="i_idleTimeout">idleTimeout</label><input type="text" id="i_idleTimeout" /><br />
-                    <label for="i_netProtocol">netProtocol</label><input type="text" id="i_netProtocol" /><br />
+                    <label for="i_priority">priority</label><input type="text" id="i_priority" placeholder="32767" /><br />
+                    <label for="i_active">active</label><input type="text" id="i_active" placeholder="true" /><br />
+                    <label for="i_hardTimeout">hardTimeout</label><input type="text" id="i_hardTimeout" placeholder="0" /><br />
+                    <label for="i_idleTimeout">idleTimeout</label><input type="text" id="i_idleTimeout" placeholder="0" /><br />
                 </fieldset>
             </form>
         </div>
@@ -42,6 +44,7 @@
                     <label for="m_switch">switch</label><input type="text" id="m_switch" /><br />
                     <label for="m_srcMac">srcMac</label><input type="text" id="m_srcMac" /><br />
                     <label for="m_dstMac">dstMac</label><input type="text" id="m_dstMac" /><br />
+                    <label for="m_dlType">dlType</label><input type="text" id="m_dlType" /><br />
                     <label for="m_srcIP">srcIP</label><input type="text" id="m_srcIP" /><br />
                     <label for="m_dstIP">dstIP</label><input type="text" id="m_dstIP" /><br />
                     <label for="m_srcPort">srcPort</label><input type="text" id="m_srcPort" /><br />
@@ -49,6 +52,7 @@
                     <label for="m_ingressPort">ingressPort</label><input type="text" id="m_ingressPort" /><br />
                     <label for="m_netProtocol">netProtocol</label><input type="text" id="m_netProtocol" /><br />
                     <label for="m_vlan">vlan</label><input type="text" id="m_vlan" /><br />
+                    <label for="m_vlanP">vlanP</label><input type="text" id="m_vlanP" /><br />
                     <label for="m_tos-bits">tosBits</label><input type="text" id="m_tos-bits" /><br />
                 </fieldset>
             </form>
@@ -64,10 +68,10 @@
         	</div>
         	
         	<div id="leftcolumn">
-        		<button id="reload" type="botton">Reload</button>
-        		<button id="send" type="botton">Edit Flows</button>
+        		<button id="reload" type="button">Reload</button>
+        		<button id="send" type="button">Edit Flows</button>
         		<p id="info"></p>
-				<button id="match" type="botton">Edit Match</button>
+				<button id="match" type="button">Edit Match</button>
         	</div>
 
             <div id="rightcolumn">
@@ -89,14 +93,14 @@
             <table id="flowtable">
                 <thead>
                     <tr>
-                        <th data-sort="string" width=6%>wildcards</th>
                         <th data-sort="int" width=3%>ingressPort</th>
-                        <th data-sort="int" width=5%>vlan</th>
+                        <th data-sort="int" width=3%>vlan</th>
+                        <th data-sort="int" width=3%>vlanP</th>
                         <th data-sort="string" width=10%>srcMac</th>
                         <th data-sort="string" width=10%>dstMac</th>
                         <th data-sort="int" width=5%>dlType</th>
-                        <th data-sort="string" width=8%>srcIP</th>
-                        <th data-sort="string" width=8%>dstIP</th>
+                        <th data-sort="string" width=11%>srcIP/Mask</th>
+                        <th data-sort="string" width=11%>dstIP/Mask</th>
                         <th data-sort="int" width=5%>netProtocol</th>
                         <th data-sort="int" width=5%>srcPort</th>
                         <th data-sort="int" width=5%>dstPort</th>
@@ -108,9 +112,9 @@
                         <th width=5%>FlowMod</th>
                     </tr>
                     <tr>
-                        <th><input type="text" id="wildcards" style="width: 90%;" /></th>
                         <th><input type="text" id="ingressPort" style="width: 90%;" /></th>
                         <th><input type="text" id="vlan" style="width: 90%;" /></th>
+                        <th><input type="text" id="vlanP" style="width: 90%;" /></th>
                         <th><input type="text" id="srcMac" style="width: 90%;" /></th>
                         <th><input type="text" id="dstMac" style="width: 90%;" /></th>
                         <th><input type="text" id="dlType" style="width: 90%;" /></th>
@@ -133,24 +137,49 @@
     </div>
 </body>
 	<script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
-    <script type="text/javascript" src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+	<script type="text/javascript" src="js/jquery.keyframes.min.js"></script>
+  <script type="text/javascript" src="js/jquery-ui-1.10.4.custom.min.js"></script>
 	<script type="text/javascript" src="js/d3.v3.min.js"></script>
 	<script type="text/javascript" src="js/topograph.js"></script>
+	<script type="text/javascript" src="js/config.js"></script>
 	<script type="text/javascript" src="js/omniui.js"></script>
 	<script type="text/javascript" src="js/stupidtable.min.js"></script>
 	<script type="text/javascript" src="js/filter.js"></script>
 	<script type="text/javascript" src="js/flowmod.js"></script>
 	<script type="text/javascript" src="js/match.js"></script>
-    <script type="text/javascript" src="js/spin.min.js"></script>
+	<script type="text/javascript" src="js/spin.min.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function() {
-			$("#porttable").stupidtable();
-			$("#flowtable").stupidtable();
-			$("#reload").click(function() {
-				loadJSONP();
-				$("#info").empty();
-				clearcolor();
-			});
+            $.ajax({
+                type: "GET",
+                url: getFeatureUrl(),
+                dataType: "jsonp",
+                jsonpCallback: "omniui",
+                timeout: 1000,
+                success: function(json){
+                    // check feature of core
+                    if(json.ControllerType == 'trema') {
+                        alert('Topology view with Trema controller is still under construction.');
+                    }
+                    else {
+                        spinner = new Spinner(opts);
+                        $("#porttable").stupidtable();
+                        $("#flowtable").stupidtable();
+                        $("#reload").click(function() {
+                            spinner.spin(target);
+                            loadJSONP();
+                            $("#info").empty();
+                            clearcolor();
+                        });
+                        loadJSONP();
+                    	}
+                },
+                error: function(){
+                    alert('Unable to fetch feature from OmniUI core. Please check network connectivity.');
+                    return false;
+                }
 		});
+    serverSentEvent();
+	});
 	</script>
 </html>

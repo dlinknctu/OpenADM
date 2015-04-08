@@ -48,6 +48,9 @@ import net.floodlightcontroller.core.IOFSwitch;
 import net.floodlightcontroller.core.IFloodlightProviderService;
 import org.openflow.util.U16;
 import org.restlet.resource.ServerResource; 
+import org.openflow.protocol.Wildcards;
+import org.openflow.protocol.Wildcards.Flag;
+import java.util.EnumSet;
 //
 
 /**
@@ -108,7 +111,7 @@ public class FlowModMethod {
                 entry.put(FlowModResource.COLUMN_DL_DST, jp.getText());
             else if (n == "vlan")
                 entry.put(FlowModResource.COLUMN_DL_VLAN, jp.getText());
-            else if (n == "vlan-priority")
+            else if (n == "vlanP")
                 entry.put(FlowModResource.COLUMN_DL_VLAN_PCP, jp.getText());
             else if (n == "dlType")
                 entry.put(FlowModResource.COLUMN_DL_TYPE, jp.getText());
@@ -143,6 +146,8 @@ public class FlowModMethod {
         OFFlowMod flowMod = (OFFlowMod) floodlightProvider.getOFMessageFactory()
                 .getMessage(OFType.FLOW_MOD);
 
+        boolean haswild=false;
+
         if (!row.containsKey(FlowModResource.COLUMN_SWITCH)) {
             log.debug(
                     "skipping entry with missing required 'switch' entry: {}", row);
@@ -165,9 +170,11 @@ public class FlowModMethod {
                 if (key.equals(FlowModResource.COLUMN_SWITCH) || key.equals("id"))
                     continue; // already handled
                 // explicitly ignore timeouts and wildcards
-                if (key.equals(FlowModResource.COLUMN_WILDCARD))
-                    continue;
-				else if(key.equals(FlowModResource.COLUMN_HARD_TIMEOUT)){
+                if (key.equals(FlowModResource.COLUMN_WILDCARD)){
+                    haswild=true;
+                    //Wildcards www = Wildcards.of(Integer.parseInt(row.get(FlowModResource.COLUMN_WILDCARD).toString()));
+                    //EnumSet<Wildcards.Flag> enum1 = www.getWildcardedFlags();
+				}else if(key.equals(FlowModResource.COLUMN_HARD_TIMEOUT)){
 					flowMod.setHardTimeout(U16.t(Integer.valueOf((String) row.get(FlowModResource.COLUMN_HARD_TIMEOUT))));
 				}else if(key.equals(FlowModResource.COLUMN_IDLE_TIMEOUT)){
 					flowMod.setIdleTimeout(U16.t(Integer.valueOf((String) row.get(FlowModResource.COLUMN_IDLE_TIMEOUT))));
@@ -202,9 +209,18 @@ public class FlowModMethod {
 						flowMod.setCommand(OFFlowMod.OFPFC_MODIFY);
 						
                 } else { // the rest of the keys are for OFMatch().fromString()
-                    if (matchString.length() > 0)
-                        matchString.append(",");
-                    matchString.append(key + "=" + row.get(key).toString());
+                    if(haswild){ 
+                        Wildcards www = Wildcards.of(Integer.parseInt(row.get(FlowModResource.COLUMN_WILDCARD).toString())); 
+                        if(!www.isWildcarded(Wildcards.Flag.valueOf(key.toString().toUpperCase()))){
+                            if (matchString.length() > 0)
+                                matchString.append(",");
+                            matchString.append(key + "=" + row.get(key).toString());
+                        }
+                    }else{
+                        if (matchString.length() > 0)
+                            matchString.append(",");
+                        matchString.append(key + "=" + row.get(key).toString());
+                    }
                 }
             }
         } catch (ClassCastException e) {
@@ -217,7 +233,7 @@ public class FlowModMethod {
                         e.getMessage(), e.getStackTrace());
             }
         }
-
+        haswild=false;
         OFMatch ofMatch = new OFMatch();
         String match = matchString.toString();
         try {
