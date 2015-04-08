@@ -244,7 +244,6 @@ class RestController(ControllerBase):
         else:
             return Response(status=404)
 
-<<<<<<< HEAD
         ryuFlow={}
         if dp.ofproto.OFP_VERSION == ofproto_v1_0.OFP_VERSION:
             ryuFlow = self.ryuFlow_v1_0(dp, omniFlow)
@@ -255,8 +254,6 @@ class RestController(ControllerBase):
         else:
             return Response(status=404)
 
-=======
->>>>>>> cc14ed5e79713b94a9db5ca79711229fc6fc5f47
         if dp.ofproto.OFP_VERSION == ofproto_v1_0.OFP_VERSION:
             ryuFlow = self.ryuFlow_v1_0(dp, omniFlow)
             ofctl_v1_0.mod_flow_entry(dp, ryuFlow, cmd)
@@ -305,21 +302,13 @@ class RestController(ControllerBase):
         if actions is not None:
             actions = flows.get('actions').split(',')
             for act in actions:
-<<<<<<< HEAD
                 action = self.to_action_v1_0(dp, act)
-=======
-                action = self.to_action(dp, act)
->>>>>>> cc14ed5e79713b94a9db5ca79711229fc6fc5f47
                 ryuFlow['actions'].append(action)
 
         return ryuFlow
 
-<<<<<<< HEAD
     # repack 1.0 actions
     def to_action_v1_0(self, dp, actions):
-=======
-    def to_action(self, dp, actions):
->>>>>>> cc14ed5e79713b94a9db5ca79711229fc6fc5f47
         actions_type = actions.split('=')[0]
         if actions_type == 'OUTPUT':
             ryuAction = {
@@ -389,7 +378,6 @@ class RestController(ControllerBase):
 
         return ryuAction
 
-<<<<<<< HEAD
     # restore to Ryu Openflow v1.3 flow format
     def ryuFlow_v1_3(self, dp, omniFlow):
         ryuFlow = {
@@ -569,8 +557,6 @@ class RestController(ControllerBase):
 
         return ryuAction
 
-=======
->>>>>>> cc14ed5e79713b94a9db5ca79711229fc6fc5f47
     # restore Ryu-format dpid
     def nospaceDPID(self, dpid):
         return "".join(dpid)

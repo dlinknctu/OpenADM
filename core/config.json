@@ -1,0 +1,35 @@
+{
+	"ControllerType":"floodlight",
+	"LogFile": "core.log",
+	"REST": {
+		"ip": "192.168.1.159",	
+		"port": "5567"
+	},
+	"UIPusher": {
+		"enable":"True",
+		"dbip":"127.0.0.1",
+		"dbport":"27017",
+		"db":"omniui",
+		"user":"sdn",
+		"password":"sdn",
+		"queryinterval":"5"
+	},
+	"ControllerAdapter": {	
+		"ip": "localhost",	
+		"port": "8080",
+		"interval": "5"
+    },
+	"Flow_mod":{
+		"ip":"localhost",
+		"port":"8080"
+	},
+	"DbCollection": {
+		"enable":"True",
+		"dbip":"127.0.0.1",
+		"dbport":"27017",
+		"db":"omniui",
+		"user":"sdn",
+		"password":"sdn",
+		"interval": "86400"
+	}
+}
