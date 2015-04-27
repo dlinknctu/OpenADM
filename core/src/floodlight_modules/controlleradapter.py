@@ -31,7 +31,7 @@ class ControllerAdapter:
             logger.debug('timerInterval = %s' % (self.timerInterval))
 
         ###what is the feature of shareing timerInterval
-        core.registerEvent("controlleradapter",self.periodicInquiry,self.timerInterval)
+        core.registerEvent("controlleradapter",self.inquiryAll,self.timerInterval)
         core.registerIPC("periodicInquiry", self.periodicInquiry)
 
     def inquirySwitch(self, controller, port):
@@ -77,6 +77,7 @@ class ControllerAdapter:
                 self.links.append(tmp)
         except Exception, e:
             logger.error("json parse error for links: "+str(e))
+
     def periodicInquiry(self, controller, port):
         self.inquiryLink(controller, port)
         self.inquirySwitch(controller, port)
@@ -84,5 +85,12 @@ class ControllerAdapter:
         result['nodes'] = self.switches
         result['links'] = self.links
         return json.dumps(result, separators=(',',':'))
+
+    def inquiryAll(self):
+        for controller in self.controllerlist:
+            ip = self.controllerlist[controller]["ip"]
+            port = self.controllerlist[controller]["port"]
+            self.periodicInquiry(ip, port)
+
     def controllerList(self):
         return self.controllerlist
