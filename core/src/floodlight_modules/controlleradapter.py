@@ -17,16 +17,18 @@ class ControllerAdapter:
         #load config
         for name in parm:
             tmp = {}
+            if(name is "interval"):
+                self.timerInterval = parm["interval"]
+                continue
             if(parm[name].has_key("ip")):
                 tmp["ip"] = parm[name]["ip"]
             if(parm[name].has_key("port")):
                 tmp["port"] = parm[name]["port"]
-            if(parm[name].has_key("interval")):
-                tmp["interval"] = parm[name]["interval"]
             self.controllerlist[name] = tmp
         print(self.controllerList())
         for name in self.controllerlist:
-            logger.debug('Controller name =%s IP =%s  port = %s  interval = %s' % (name,self.controllerlist[name]["ip"],self.controllerlist[name]["port"],self.controllerlist[name]["interval"]))
+            logger.debug('Controller name =%s IP =%s  port = %s' % (name,self.controllerlist[name]["ip"],self.controllerlist[name]["port"]))
+            logger.debug('timerInterval = %s' % (self.timerInterval))
 
         ###what is the feature of shareing timerInterval
         core.registerEvent("controlleradapter",self.periodicInquiry,self.timerInterval)
