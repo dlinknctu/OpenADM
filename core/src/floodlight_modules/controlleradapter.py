@@ -10,8 +10,8 @@ class ControllerAdapter:
         self.controllerIP = "localhost"
         self.controllerPort = "8080"
         self.timerInterval = 5
-        self.switches=[]
-        self.links=[]
+        self.switches={} #{controllername: []}
+        self.links={} #{controllername: []}
         self.inquiryHandler=[]
         self.controllerlist = {} #{controllername: {ip: "xx",port: "xx",interval: "xx"}}
         #load config
@@ -22,6 +22,8 @@ class ControllerAdapter:
                 continue
             if(parm[name].has_key("ip")):
                 tmp["ip"] = parm[name]["ip"]
+                self.switches[name]={}
+                self.links[name]={}
             if(parm[name].has_key("port")):
                 tmp["port"] = parm[name]["port"]
             self.controllerlist[name] = tmp
@@ -31,8 +33,10 @@ class ControllerAdapter:
             logger.debug('timerInterval = %s' % (self.timerInterval))
 
         ###what is the feature of shareing timerInterval
-        core.registerEvent("controlleradapter",self.inquiryAll,self.timerInterval)
-        core.registerIPC("periodicInquiry", self.periodicInquiry)
+        core.registerEvent("controlleradapter",self.periodicInquiry,self.timerInterval)
+        core.registerIPC("inquiryController", self.inquiryController)
+        core.registerIPC("controllerList", self.controllerList)
+        core.registerIPC("controllerDetail", self.controllerDetail)
 
     def inquirySwitch(self, controller, port):
         try:
@@ -46,13 +50,14 @@ class ControllerAdapter:
             conn.close()
         try:
             data = json.loads(response)
-            self.switches= []
+            controllerName = self.getControllerName(controller)
+            self.switches[controllerName]= []
             for switch in data:
                 tmp = {}
                 tmp['dpid'] = switch['dpid']
                 tmp['flows'] = switch['flows']
                 tmp['ports'] = switch['ports']
-                self.switches.append(tmp)
+                self.switches[controllerName] = tmp
         except Exception, e:
             logger.error("json parse error for switch: "+str(e))
     def inquiryLink(self, controller, port):
@@ -67,30 +72,46 @@ class ControllerAdapter:
             conn.close()
         try:
             data = json.loads(response)
-            self.links = []
+            controllerName = self.getControllerName(controller)
+            self.links[controllerName] = []
             for link in data:
                 tmp = {}
                 tmp['source'] = link['src-switch']
                 tmp['target'] = link['dst-switch']
                 tmp['sourcePort'] = link['src-port']
                 tmp['targetPort'] = link['dst-port']
-                self.links.append(tmp)
+                self.links[controllerName]=tmp
         except Exception, e:
             logger.error("json parse error for links: "+str(e))
 
-    def periodicInquiry(self, controller, port):
+    def inquiryController(self, controller, port):
         self.inquiryLink(controller, port)
         self.inquirySwitch(controller, port)
+        controllerName = self.getControllerName(controller)
         result = {}
-        result['nodes'] = self.switches
-        result['links'] = self.links
+        result['nodes'] = self.switches[controllerName]
+        result['links'] = self.links[controllerName]
         return json.dumps(result, separators=(',',':'))
 
-    def inquiryAll(self):
+    def periodicInquiry(self):
+        result = {}
         for controller in self.controllerlist:
             ip = self.controllerlist[controller]["ip"]
             port = self.controllerlist[controller]["port"]
-            self.periodicInquiry(ip, port)
+            result[controller] = self.inquiryController(ip, port)
+        return json.dumps(result, separators=(',',':'))
 
     def controllerList(self):
-        return self.controllerlist
+        tmp = []
+        for controller in self.controllerlist:
+            tmp.append(controller)
+        return tmp
+
+    def controllerDetail(self,controllerName):
+        return self.controllerlist[controllerName]
+
+    def getControllerName(self, ip):
+        for name in self.controllerlist:
+            if self.controllerlist[name]["ip"] is ip:
+                return name
+        return None
