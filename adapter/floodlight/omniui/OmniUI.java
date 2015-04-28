@@ -20,6 +20,8 @@ import net.floodlightcontroller.core.IFloodlightProviderService;
 import net.floodlightcontroller.core.IOFSwitchListener;
 import net.floodlightcontroller.core.ImmutablePort;
 import org.openflow.protocol.OFFlowRemoved;
+import org.openflow.protocol.OFPacketIn;
+import org.openflow.protocol.OFMatch;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.Set;
@@ -35,11 +37,17 @@ import java.net.URL;
 import net.floodlightcontroller.linkdiscovery.ILinkDiscoveryListener;
 import net.floodlightcontroller.linkdiscovery.ILinkDiscoveryService;
 import java.util.List;
+import net.floodlightcontroller.devicemanager.IDevice;
+import net.floodlightcontroller.devicemanager.IDeviceListener;
+import net.floodlightcontroller.devicemanager.IDeviceService;
+import net.floodlightcontroller.devicemanager.SwitchPort;
 
-public class OmniUI implements IFloodlightModule,IOFMessageListener,IOFSwitchListener,ILinkDiscoveryListener  {
+public class OmniUI implements IFloodlightModule,IOFMessageListener,IOFSwitchListener,ILinkDiscoveryListener {
 	
 	protected IFloodlightProviderService floodlightProvider;
 	protected ILinkDiscoveryService linkDiscoveryService;
+	protected IDeviceService deviceService;
+	protected DeviceListenerImpl deviceManager;
 	protected IRestApiService restApi;
 	protected static Logger logger;
 	public static final String StaticFlowName = "omniui";
@@ -56,10 +64,6 @@ public class OmniUI implements IFloodlightModule,IOFMessageListener,IOFSwitchLis
 		wr.close();
 
 		int responseCode = con.getResponseCode();
-		logger.info("Sending 'POST' request to URL : " + url);
-		logger.info("Post parameters : " + data);
-		logger.info("Response Code : " + responseCode);
-
 		BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
 		String inputLine;
 		StringBuffer response = new StringBuffer();
@@ -111,35 +115,38 @@ public class OmniUI implements IFloodlightModule,IOFMessageListener,IOFSwitchLis
 		// TODO Auto-generated method stub
 		Collection<Class<? extends IFloodlightService>> l = new ArrayList<Class<? extends IFloodlightService>>();
 		l.add(IFloodlightProviderService.class);
+		l.add(IDeviceService.class);
 		l.add(IRestApiService.class);
 		return l;
 	}
 
 	@Override
-	public void init(FloodlightModuleContext context)
-			throws FloodlightModuleException {
-			linkDiscoveryService = context.getServiceImpl(ILinkDiscoveryService.class);
-			floodlightProvider = context.getServiceImpl(IFloodlightProviderService.class);
-			restApi = context.getServiceImpl(IRestApiService.class);
-			logger = LoggerFactory.getLogger(OmniUI.class);
+	public void init(FloodlightModuleContext context) throws FloodlightModuleException {
+		linkDiscoveryService = context.getServiceImpl(ILinkDiscoveryService.class);
+		deviceService = context.getServiceImpl(IDeviceService.class);
+		deviceManager = new DeviceListenerImpl();
+		floodlightProvider = context.getServiceImpl(IFloodlightProviderService.class);
+		restApi = context.getServiceImpl(IRestApiService.class);
+		logger = LoggerFactory.getLogger(OmniUI.class);
 	}
 
 	@Override
 	public void startUp(FloodlightModuleContext context) {
 		// TODO Auto-generated method stub
 		linkDiscoveryService.addListener(this);
+		deviceService.addListener(this.deviceManager);
 		floodlightProvider.addOFMessageListener(OFType.FLOW_MOD, this);
 		floodlightProvider.addOFMessageListener(OFType.FLOW_REMOVED, this);
 		floodlightProvider.addOFMessageListener(OFType.BARRIER_REPLY, this);
+		floodlightProvider.addOFMessageListener(OFType.PACKET_IN, this);
 		floodlightProvider.addOFSwitchListener(this);
 		restApi.addRestletRoutable(new OmniUIWebRoutable());
 	}
 	
 	@Override
 	public net.floodlightcontroller.core.IListener.Command receive(IOFSwitch sw, OFMessage msg, FloodlightContext cntx) {
-	
 		switch (msg.getType()) {
-        case FLOW_MOD:
+		case FLOW_MOD:
 			logger.info("FLOW MOD MSG : {}",msg);
 			return Command.CONTINUE;
 		case FLOW_REMOVED:
@@ -153,101 +160,215 @@ public class OmniUI implements IFloodlightModule,IOFMessageListener,IOFSwitchLis
 			logger.info("BARRIER REPLY : {}",msg);
 			FlowModResource.setMsg2();
 			return Command.CONTINUE;
-        default:
-            return Command.CONTINUE;
+		case PACKET_IN:
+			OFPacketIn pi = (OFPacketIn) msg;
+			OFMatch match = new OFMatch();
+			match.loadFromPacket(pi.getPacketData(), pi.getInPort());
+			String url = "http://localhost:5567/publish/packet";
+			String data = String.format("{'dpid':'%s', 'in_port':'%s', 'mac_src':'%s', 'mac_dst':'%s', 'ether_type':'0x%x', 'ip_src':'%s', 'ip_dst':'%s', 'protocol':'0x%x', 'port_src':'%s', 'port_dst':'%s'}", HexString.toHexString(sw.getId()), match.getInputPort(), HexString.toHexString(match.getDataLayerSource()), HexString.toHexString(match.getDataLayerDestination()), match.getDataLayerType(), intToIp(match.getNetworkSource()), intToIp(match.getNetworkDestination()), match.getNetworkProtocol(), match.getTransportSource(), match.getTransportDestination());
+			try{
+				sendPost(url, data);
+			}catch (Exception e){
+				logger.info("sendPost failed.");
+			}
+			return Command.CONTINUE;
+		default:
+			return Command.CONTINUE;
 		}
 	}
 	
-    @Override
-    public void switchAdded(long switchId) {
-        logger.info("SWITCH ADD : {}",HexString.toHexString(switchId));
-    }
+	@Override
+	public void switchAdded(long switchId) {
+		//logger.info("SWITCH ADD : {}",HexString.toHexString(switchId));
+	}
 
-    @Override
-    public void switchRemoved(long switchId) {
-        logger.info("SWITCH REMOVE : {}",HexString.toHexString(switchId));
-        String url = "http://localhost:5567/publish/deldevice";
-        String data = String.format("{'dpid':'%s'}", HexString.toHexString(switchId));
-        try{
-            sendPost(url, data);
-         }catch (Exception e){
-            logger.info("sendPost failed.");
-         }
-    }
+	@Override
+	public void switchRemoved(long switchId) {
+		//logger.info("SWITCH REMOVE : {}",HexString.toHexString(switchId));
+		String url = "http://localhost:5567/publish/deldevice";
+		String data = String.format("{'dpid':'%s'}", HexString.toHexString(switchId));
+		try{
+			sendPost(url, data);
+		}catch (Exception e){
+			logger.info("sendPost failed.");
+		}
+	}
 
-    @Override
-    public void switchActivated(long switchId) {
-        logger.info("SWITCH ACTIVATED : dpid {}",HexString.toHexString(switchId));
-        FlowModResource.sendEntriesToSwitch(switchId);
-        String url = "http://localhost:5567/publish/adddevice";
-        String data = String.format("{'dpid':'%s'}", HexString.toHexString(switchId));
-        try{
-            sendPost(url, data);
-         }catch (Exception e){
-            logger.info("sendPost failed.");
-         }
-    }
+	@Override
+	public void switchActivated(long switchId) {
+		//logger.info("SWITCH ACTIVATED : dpid {}",HexString.toHexString(switchId));
+		FlowModResource.sendEntriesToSwitch(switchId);
+		String url = "http://localhost:5567/publish/adddevice";
+		String data = String.format("{'dpid':'%s'}", HexString.toHexString(switchId));
+		try{
+			sendPost(url, data);
+		}catch (Exception e){
+			logger.info("sendPost failed.");
+		}
+	}
 
-    @Override
-    public void switchChanged(long switchId) {
-        logger.info("SWITCH CHANGED : dpid {}",HexString.toHexString(switchId));
-    }
+	@Override
+	public void switchChanged(long switchId) {
+		// no-op
+		logger.info("SWITCH CHANGED : dpid {}",HexString.toHexString(switchId));
+	}
 
-    @Override
-    public void switchPortChanged(long switchId,
-                                  ImmutablePort port,
-                                  IOFSwitch.PortChangeType type) {
-        String url = "";
-        if(type == IOFSwitch.PortChangeType.ADD || type == IOFSwitch.PortChangeType.UP){
-            url = "http://localhost:5567/publish/addport";
-        }else if(type == IOFSwitch.PortChangeType.DELETE || type == IOFSwitch.PortChangeType.DOWN){
-            url = "http://localhost:5567/publish/delport";
-        }else{
-            logger.info("No process IOFSwitch.PortChangeType.OTHER_UPDATE");
-            return;
-        }
-        String data = String.format("{'dpid':'%s', 'port':'%s'}", HexString.toHexString(switchId), port.getPortNumber());
-        try{
-            sendPost(url, data);
-         }catch (Exception e){
-            logger.info("sendPost failed.");
-         }
+	@Override
+	public void switchPortChanged(long switchId, ImmutablePort port, IOFSwitch.PortChangeType type) {
+		String url = "";
+		if(type == IOFSwitch.PortChangeType.ADD || type == IOFSwitch.PortChangeType.UP){
+			url = "http://localhost:5567/publish/addport";
+		}else if(type == IOFSwitch.PortChangeType.DELETE || type == IOFSwitch.PortChangeType.DOWN){
+			url = "http://localhost:5567/publish/delport";
+		}else{
+			logger.info("No process IOFSwitch.PortChangeType.OTHER_UPDATE");
+			return;
+		}
+		String data = String.format("{'dpid':'%s', 'port':'%s'}", HexString.toHexString(switchId), port.getPortNumber());
+		try{
+			sendPost(url, data);
+		}catch (Exception e){
+			logger.info("sendPost failed.");
+		}
+	}
 
-    }
+	@Override
+	public void linkDiscoveryUpdate(List<LDUpdate> updateList) {
+		//logger.info("LINK UPDATE 1: {}", updateList);
+		for(int i = 0; i < updateList.size(); i++){
+			String url = "";
+			String data = "";
+			switch(updateList.get(i).getOperation()){
+				case LINK_UPDATED:
+					url = "http://localhost:5567/publish/addlink";
+					data = String.format("{'src_dpid':'%s', 'dst_dpid':'%s', 'src_port':'%s', 'dst_port':'%s'}", HexString.toHexString(updateList.get(i).getSrc()), HexString.toHexString(updateList.get(i).getDst()), updateList.get(i).getSrcPort(), updateList.get(i).getDstPort());
+					break;
+				case LINK_REMOVED:
+					url = "http://localhost:5567/publish/dellink";
+					data = String.format("{'src_dpid':'%s', 'dst_dpid':'%s', 'src_port':'%s', 'dst_port':'%s'}", HexString.toHexString(updateList.get(i).getSrc()), HexString.toHexString(updateList.get(i).getDst()), updateList.get(i).getSrcPort(), updateList.get(i).getDstPort());
+					break;
+				case PORT_UP:
+					url = "http://localhost:5567/publish/addport";
+					data = String.format("{'dpid':'%s', 'port':'%s'}", HexString.toHexString(updateList.get(i).getSrc()), updateList.get(i).getSrcPort());
+					break;
+				default:
+					break;
+			}
+			try{
+				sendPost(url, data);
+			}catch (Exception e){
+				logger.info("sendPost failed.");
+			}
+		}
+	}
 
-    @Override
-    public void linkDiscoveryUpdate(List<LDUpdate> updateList) {
-        logger.info("LINK UPDATE 1: {}", updateList);
-        for(int i = 0; i < updateList.size(); i++){
-            String url = "";
-            String data = "";
-            switch(updateList.get(i).getOperation()){
-                case LINK_UPDATED:
-                    url = "http://localhost:5567/publish/addlink";
-                    data = String.format("{'src_dpid':'%s', 'dst_dpid':'%s', 'src_port':'%s', 'dst_port':'%s'}", HexString.toHexString(updateList.get(i).getSrc()), HexString.toHexString(updateList.get(i).getDst()), updateList.get(i).getSrcPort(), updateList.get(i).getDstPort());
-                    break;
-                case LINK_REMOVED:
-                    url = "http://localhost:5567/publish/dellink";
-                    data = String.format("{'src_dpid':'%s', 'dst_dpid':'%s', 'src_port':'%s', 'dst_port':'%s'}", HexString.toHexString(updateList.get(i).getSrc()), HexString.toHexString(updateList.get(i).getDst()), updateList.get(i).getSrcPort(), updateList.get(i).getDstPort());
-                    break;
-                case PORT_UP:
-                    url = "http://localhost:5567/publish/addport";
-                    data = String.format("{'dpid':'%s', 'port':'%s'}", HexString.toHexString(updateList.get(i).getSrc()), updateList.get(i).getSrcPort());
-                    break;
-                default:
-                    break;
-            }
-            try{
-                sendPost(url, data);
-            }catch (Exception e){
-                logger.info("sendPost failed.");
-            }
-        }
-    }
+	@Override
+	public void linkDiscoveryUpdate(LDUpdate update) {
+		logger.info("LINK UPDATE 2: {}", update);
+	}
 
-    @Override
-    public void linkDiscoveryUpdate(LDUpdate update) {
-        logger.info("LINK UPDATE 2: {}", update);
-    }
+	class DeviceListenerImpl implements IDeviceListener{
 
+		@Override
+		public void deviceAdded(IDevice device) {
+			//logger.info("DEVICE ADD: {}", device);
+			SwitchPort[] sw = device.getAttachmentPoints();
+			String url = "http://localhost:5567/publish/addhost";
+			String data2 = "";
+			for(int i=0; i<sw.length; i++){
+				String info = String.format("{'dpid':'%s', 'port':'%d'}", HexString.toHexString(sw[i].getSwitchDPID()), sw[i].getPort());
+				data2 += info;
+				if(i != sw.length-1) data2 += ",";
+			}
+			String data = String.format("{\"mac\":\"%s\", \"aps\":\"%s\"}", HexString.toHexString(device.getMACAddress()), data2);
+			try{
+				sendPost(url, data);
+			}catch (Exception e){
+				logger.info("sendPost failed.");
+			}
+		}
+
+		@Override
+		public void deviceRemoved(IDevice device) {
+			//logger.info("DEVICE REMOVED: {}", device);
+			String url = "http://localhost:5567/publish/delhost";
+			String data = String.format("{'mac':'%s'}", HexString.toHexString(device.getMACAddress()));
+			try{
+				sendPost(url, data);
+			}catch (Exception e){
+				logger.info("sendPost failed.");
+			}
+		}
+
+		@Override
+		public void deviceMoved(IDevice device) {
+			//logger.info("DEVICE MOVED: {}", device);
+			String url, data;
+			SwitchPort[] sw = device.getAttachmentPoints();
+			if( sw.length == 0){
+				url = "http://localhost:5567/publish/delhost";
+				data = String.format("{'mac':%s}", HexString.toHexString(device.getMACAddress()));
+			}else{
+				url = "http://localhost:5567/publish/addhost";
+				String data2 = "";
+				for(int i=0; i<sw.length; i++){
+					String info = String.format("{'dpid':'%s', 'port':'%d'}", HexString.toHexString(sw[i].getSwitchDPID()), sw[i].getPort());
+					data2 += info;
+					if(i != sw.length-1) data2 += ",";
+				}
+				data = String.format("{\"mac\":\"%s\", \"aps\":\"%s\"}", HexString.toHexString(device.getMACAddress()), data2);
+			}
+			try{
+				sendPost(url, data);
+			}catch (Exception e){
+				logger.info("sendPost failed.");
+			}
+		}
+
+		@Override
+		public void deviceIPV4AddrChanged(IDevice device) {
+			//logger.info("DEVICE ADDR CHANGED: {}", device);
+			String url = "http://localhost:5567/publish/addhost";
+			String data2 = "";
+			SwitchPort[] sw = device.getAttachmentPoints();
+			for(int i=0; i<sw.length; i++){
+				String info = String.format("{'dpid':'%s', 'port':'%d'}", HexString.toHexString(sw[i].getSwitchDPID()), sw[i].getPort());
+				data2 += info;
+				if(i != sw.length-1) data2 += ",";
+			}
+			Integer[] ips = device.getIPv4Addresses();
+			String ips2 = "";
+			for(int i=0; i<ips.length; i++){
+				ips2 += ("'"+intToIp(ips[i])+"'");
+				if(i != ips.length-1) ips2 += ",";
+			}
+			String data = String.format("{\"mac\":\"%s\", \"ips\":\"[%s]\", \"aps\":\"%s\"}", HexString.toHexString(device.getMACAddress()), ips2, data2);
+			try{
+				sendPost(url, data);
+			}catch (Exception e){
+				logger.info("sendPost failed.");
+			}
+		}
+
+		@Override
+		public void deviceVlanChanged(IDevice device) {
+			logger.info("DEVICE VLAN CHANGED: {}", device);
+		}
+		@Override
+		public String getName() {
+			return "omniui_device_listener";
+		}
+		@Override
+		public boolean isCallbackOrderingPrereq(String type, String name) {
+			return false;
+		}
+		@Override
+		public boolean isCallbackOrderingPostreq(String type, String name) {
+			return false;
+		}
+	}
+
+	private String intToIp(int i) {
+		return ((i >> 24 ) & 0xFF) + "." + ((i >> 16 ) & 0xFF) + "." + ((i >>  8 ) & 0xFF) + "." + ( i & 0xFF);
+	}
 }
