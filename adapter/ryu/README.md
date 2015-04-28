@@ -15,7 +15,7 @@ $ `cd ~; python ~/OmniUI/core/core.py`
 **Successful compilation starts the OmniUI core**  
 
 2. Run the Ryu Controller (Using a 2nd Terminal)  
-$ `PYTHONPATH=. ~/ryu/bin/ryu-manager --observe-links ~/OmniUI/adapter/ryu/omniui/omniui.py ~/ryu/ryu/app/simple_switch.py`
+$ `PYTHONPATH=. ~/ryu/bin/ryu-manager --observe-links ~/OmniUI/adapter/ryu/omniui/omniui.py ~/OmniUI/adapter/ryu/omniui/simple_switch.py`
 
 3. Run a simple Mininet topology (Using a 3rd Terminal)  
 $ `sudo mn --topo single,3 --mac --switch ovsk --controller remote`
@@ -27,7 +27,7 @@ $ `firefox ~/OmniUI/webui/index.html`
 **Ryu 1.3 (without web UI)**  
   
 1. Initiating the Ryu controller, Ryu app, OmniUI adapter and Simple Switch 1.3 application<br/> 
-$ `ryu-manager --observe-links ~/OmniUI/adapter/ryu/omniui/omniui.py ~/ryu/ryu/app/simple_switch_13.py`
+$ `ryu-manager --observe-links ~/OmniUI/adapter/ryu/omniui/omniui.py ~/OmniUI/adapter/ryu/omniui/simple_switch_13.py`
 
 2. Emulate 1 switch with 3 hosts  
 $ `sudo mn --topo single,3 --mac --controller remote --switch ovsk,protocols=OpenFlow13`
