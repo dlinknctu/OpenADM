@@ -5,36 +5,15 @@
 		"ip": "localhost",
 		"port": "5567"
 	},
-	"UIPusher": {
-		"enable":"False",
-		"dbip":"140.113.215.200",
-		"dbport":"27017",
-		"db":"omniui",
-		"user":"xxxxxx",
-		"password":"xxxxxx",
-		"queryinterval":"5"
-	},
 	"ControllerAdapter": {
-		"ip": "localhost",
-		"port": "8080",
-		"interval": "5"
-    },
-	"Flow_mod":{
-		"ip":"localhost",
-		"port":"8080"
-	},
-	"BusyLink_Detect": {
-		"ip": "localhost",
-		"port": "8080",
-		"interval": "5"
-	},
-	"DbCollection": {
-		"enable":"False",
-		"dbip":"140.113.215.200",
-		"dbport":"27017",
-		"db":"omniui",
-		"user":"xxxxxx",
-		"password":"xxxxxx",
-		"interval": "86400"
-	}
+        "test1": {
+	    	"ip": "192.168.1.159",
+	    	"port": "8080"
+        },
+        "test2": {
+            "ip": "192.168.1.159",
+            "port": "8080"
+        }
+	    "interval": "5"
+    }
 }
