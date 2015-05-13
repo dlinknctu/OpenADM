@@ -7,27 +7,22 @@ logger = logging.getLogger(__name__)
 class ControllerAdapter:
     def __init__(self,core,parm):
         """ ControllerAdapter init"""
-        self.controllerIP = "localhost"
-        self.controllerPort = "8080"
         self.timerInterval = 5
         self.switches={} #{controllername: []}
         self.links={} #{controllername: []}
-        self.inquiryHandler=[]
         self.controllerlist = {} #{controllername: {ip: "xx",port: "xx",interval: "xx"}}
         #load config
-        for name in parm:
+        self.timerInterval = parm["interval"]
+        for name in parm["controller"]:
             tmp = {}
-            if(name is "interval"):
-                self.timerInterval = parm["interval"]
-                continue
-            if(parm[name].has_key("ip")):
-                tmp["ip"] = parm[name]["ip"]
+            if(parm["controller"][name].has_key("ip")):
+                tmp["ip"] = parm["controller"][name]["ip"]
                 self.switches[name]={}
                 self.links[name]={}
-            if(parm[name].has_key("port")):
-                tmp["port"] = parm[name]["port"]
+            if(parm["controller"][name].has_key("port")):
+                tmp["port"] = parm["controller"][name]["port"]
             self.controllerlist[name] = tmp
-        print(self.controllerList())
+
         for name in self.controllerlist:
             logger.debug('Controller name =%s IP =%s  port = %s' % (name,self.controllerlist[name]["ip"],self.controllerlist[name]["port"]))
             logger.debug('timerInterval = %s' % (self.timerInterval))
@@ -50,7 +45,7 @@ class ControllerAdapter:
             conn.close()
         try:
             data = json.loads(response)
-            controllerName = self.getControllerName(controller)
+            controllerName = self.getControllerName(controller, port)
             self.switches[controllerName]= []
             for switch in data:
                 tmp = {}
@@ -72,7 +67,7 @@ class ControllerAdapter:
             conn.close()
         try:
             data = json.loads(response)
-            controllerName = self.getControllerName(controller)
+            controllerName = self.getControllerName(controller, port)
             self.links[controllerName] = []
             for link in data:
                 tmp = {}
@@ -87,7 +82,7 @@ class ControllerAdapter:
     def inquiryController(self, controller, port):
         self.inquiryLink(controller, port)
         self.inquirySwitch(controller, port)
-        controllerName = self.getControllerName(controller)
+        controllerName = self.getControllerName(controller, port)
         result = {}
         result['nodes'] = self.switches[controllerName]
         result['links'] = self.links[controllerName]
@@ -111,8 +106,8 @@ class ControllerAdapter:
     def controllerDetail(self,controllerName):
         return self.controllerlist[controllerName]
 
-    def getControllerName(self, ip):
+    def getControllerName(self, ip, port):
         for name in self.controllerlist:
-            if self.controllerlist[name]["ip"] is ip:
+            if self.controllerlist[name]["ip"] is ip and self.controllerlist[name]["port"] is port:
                 return name
         return None
