@@ -13,15 +13,15 @@ class ControllerAdapter:
         self.controllerlist = {} #{controllername: {ip: "xx",port: "xx",interval: "xx"}}
         #load config
         self.timerInterval = parm["interval"]
-        for name in parm["controller"]:
+        for i in range(len(parm["controller"])):
             tmp = {}
-            if(parm["controller"][name].has_key("ip")):
-                tmp["ip"] = parm["controller"][name]["ip"]
-                self.switches[name]={}
-                self.links[name]={}
-            if(parm["controller"][name].has_key("port")):
-                tmp["port"] = parm["controller"][name]["port"]
-            self.controllerlist[name] = tmp
+            if(parm["controller"][i].has_key("ip")):
+                tmp["ip"] = parm["controller"][i]["ip"]
+                self.switches[parm["controller"][i]["name"]]={}
+                self.links[parm["controller"][i]["name"]]={}
+            if(parm["controller"][i].has_key("port")):
+                tmp["port"] = parm["controller"][i]["port"]
+            self.controllerlist[parm["controller"][i]["name"]]=tmp
 
         for name in self.controllerlist:
             logger.debug('Controller name =%s IP =%s  port = %s' % (name,self.controllerlist[name]["ip"],self.controllerlist[name]["port"]))
