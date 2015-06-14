@@ -207,9 +207,9 @@ class Core:
 	def registerIPC(self, ipcname, handler):
 		self.ipcHandlers[ipcname] = handler
 
-	def invokeIPC(self, ipcname):
+	def invokeIPC(self, ipcname, *argument):
 		if ipcname in self.ipcHandlers:
-			return  self.ipcHandlers[ipcname]()
+			return  self.ipcHandlers[ipcname](*argument)
 		else:
 			print "invokeIPC fail. %s not found" % ipcname
 			return None
