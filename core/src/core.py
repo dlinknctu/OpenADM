@@ -20,6 +20,17 @@ app.config['CORS_ORIGINS'] = ['http://localhost']
 subscriptions = []
 logger = logging.getLogger(__name__)
 
+# define module state enum
+def enum(**enums):
+	return type('Enum', (), enums)
+Status = enum(PENDING=0,ACTIVE=1)
+
+class Module:
+	def __init__(self, name, status, dependencies):
+		self.name = name
+		self.status = status
+		self.dependencies = dependencies
+
 class ServerSentEvent(object):
 
 	def __init__(self, data):
@@ -100,44 +111,34 @@ class Core:
 		plugins.__path__ = []
 		plugins.__path__.append (os.path.join(rootPath, 'src', ControllerType))
 
-		moduleList = []
-		loadedModule = []
-		pastLoaded = []
-
-        # get module list
+		moduleList = {}
+		def loadModule(moduleName):
+			if config[moduleName].has_key('depend'):
+				module = Module(name=moduleName,status=Status.PENDING,dependencies=config[moduleName]['depend'])
+			else:
+				module = Module(name=moduleName,status=Status.PENDING,dependencies=[])
+			if module.name in moduleList.keys():
+				return
+			moduleList[module.name]=module
+			for dependency in module.dependencies:
+				print("{} PENDING!!!".format(module.name))
+				loadModule(dependency)
+				if dependency in moduleList.keys() and moduleList[dependency].status == Status.PENDING:
+					print(module.name, dependency)
+					print("dependencies loops, exit")
+					os.kill(os.getpid(),1)
+			instance = import_module('plugins.' + module.name.lower())
+			if(config.has_key(module.name)):
+				getattr(instance,module.name)(self,config[module.name])
+			else:
+				getattr(instance,module.name)(self,0)
+				print("module not found")
+			print("loading {}......".format(module.name))
+			module.status = Status.ACTIVE
+		# get module list
 		for module in config:
 			if module != "LogFile" and module != "REST" and module != "ControllerType" : # get modules other than LogFile and REST
-				moduleList.append(module)
-        # load modules
-		while set(moduleList) > set(loadedModule):
-			for module in moduleList:
-				if config[module].has_key('depend'):
-					depend_module = 0
-					tmp = config[module]['depend']
-					for depend in tmp:
-						if depend not in loadedModule:
-							depend_module = 1
-					if depend_module is 1:
-						continue
-				if module not in loadedModule:
-					logging.info("load {}!! ".format(module))
-					instance = import_module('plugins.' + module.lower())
-					if(config.has_key(module)):
-						getattr(instance,module)(self,config[module])
-					else:
-						getattr(instance,module)(self,0)
-					loadedModule.append(module)
-			if set(pastLoaded) == set(loadedModule):
-				errorModule = []
-				for module in moduleList:
-					if module not in loadedModule:
-						errorModule.append(module)
-				logging.critical("ERROR: Module Dependance")
-				logging.critical("The floowing modules has dependence problem:")
-				logging.critical(errorModule)
-				os.kill(os.getpid(),1)
-			pastLoaded = loadedModule[:]
-		logging.info("finish")
+				loadModule(module)
 		# Start REST service
 		if config.has_key("REST"):
 			restIP = config['REST']['ip']
@@ -241,7 +242,7 @@ class Core:
 
 	def invokeIPC(self, ipcname, *argument):
 		if ipcname in self.ipcHandlers:
-			return  self.ipcHandlers[ipcname](*argument)
+			return	self.ipcHandlers[ipcname](*argument)
 		else:
 			print "invokeIPC fail. %s not found" % ipcname
 			return None
