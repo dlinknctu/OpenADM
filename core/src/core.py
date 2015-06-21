@@ -111,28 +111,28 @@ class Core:
 		plugins.__path__ = []
 		plugins.__path__.append (os.path.join(rootPath, 'src', ControllerType))
 
-		moduleList = {}
+		loadedModules = {}
 		def loadModule(moduleName):
 			if config[moduleName].has_key('depend'):
 				module = Module(name=moduleName,status=Status.PENDING,dependencies=config[moduleName]['depend'])
 			else:
 				module = Module(name=moduleName,status=Status.PENDING,dependencies=[])
-			if module.name in moduleList.keys():
+			if module.name in loadedModules.keys():
 				return
-			moduleList[module.name]=module
+			loadedModules[module.name]=module
 			for dependency in module.dependencies:
 				print("{} PENDING!!!".format(module.name))
-				loadModule(dependency)
-				if dependency in moduleList.keys() and moduleList[dependency].status == Status.PENDING:
+				if dependency in loadedModules.keys() and loadedModules[dependency].status == Status.PENDING:
 					print(module.name, dependency)
 					print("dependencies loops, exit")
 					os.kill(os.getpid(),1)
+				loadModule(dependency)
 			instance = import_module('plugins.' + module.name.lower())
 			if(config.has_key(module.name)):
 				getattr(instance,module.name)(self,config[module.name])
 			else:
-				getattr(instance,module.name)(self,0)
-				print("module not found")
+				print("module not found: {}".format(module.name))
+				os.kill(os.getpid(),1)
 			print("loading {}......".format(module.name))
 			module.status = Status.ACTIVE
 		# get module list
