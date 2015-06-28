@@ -37,6 +37,26 @@ var path = svg.append('svg:g').selectAll('path'),
 
 var lastSelectedItem = "";
 
+var opts = {
+    lines: 15, // The number of lines to draw
+    length: 9, // The length of each line
+    width: 3, // The line thickness
+    radius: 13, // The radius of the inner circle
+    corners: 1, // Corner roundness (0..1)
+    rotate: 0, // The rotation offset
+    direction: 1, // 1: clockwise, -1: counterclockwise
+    color: '#000', // #rgb or #rrggbb or array of colors
+    speed: 1, // Rounds per second
+    trail: 60, // Afterglow percentage
+    shadow: false, // Whether to render a shadow
+    hwaccel: false, // Whether to use hardware acceleration
+    className: 'spinner', // The CSS class to assign to the spinner
+    zIndex: 2e9, // The z-index (defaults to 2000000000)
+    top: 'auto', // Top position relative to parent in px
+    left: 'auto' // Left position relative to parent in px
+};
+var target = document.getElementById('waiting');
+
 // update force layout (called automatically each iteration)
 function tick() {
 	// draw directed edges with proper padding from node centers
@@ -91,12 +111,16 @@ function mouseclick() {
         var actions = flows[i].actions;
         var actionsStrArr = [];
         for(var j in actions) {
-            actionsStrArr.push(actions[j].type + " " + actions[j].value);
+            if("value" in actions[j]) {
+                actionsStrArr.push(actions[j].type + " " + actions[j].value);
+            } else {
+                actionsStrArr.push(actions[j].type);
+            }
         }
 		$("#flows").append("<tr>\
-		<td>" + flows[i].wildcards + "</td>\
         <td>" + flows[i].ingressPort + "</td>\
         <td>" + flows[i].vlan + "</td>\
+        <td>" + flows[i].vlanP + "</td>\
         <td>" + flows[i].srcMac + "</td>\
         <td>" + flows[i].dstMac + "</td>\
         <td>" + flows[i].dlType + "</td>\
@@ -276,52 +300,59 @@ function updateTopo(json) {
 function loadJSONP(){
 	$.ajax({
 	   type: "GET",
-	   url: "http://localhost:5567/info/topology",
+	   url: getTopologyUrl(),
 	   dataType: "jsonp",
 	   jsonpCallback: "omniui",
 	   success: function(json){
 	       updateTopo(json);
+           spinner.stop();
 	   },
 	   error: function(){
-	       alert('Fail loading JSONP');
+	       alert('Fail loading topology');
+           spinner.stop();
 	   }
 	});
 }
 
 function sendFlow(f){
-    var opts = {
-        lines: 15, // The number of lines to draw
-        length: 9, // The length of each line
-        width: 3, // The line thickness
-        radius: 13, // The radius of the inner circle
-        corners: 1, // Corner roundness (0..1)
-        rotate: 0, // The rotation offset
-        direction: 1, // 1: clockwise, -1: counterclockwise
-        color: '#000', // #rgb or #rrggbb or array of colors
-        speed: 1, // Rounds per second
-        trail: 60, // Afterglow percentage
-        shadow: false, // Whether to render a shadow
-        hwaccel: false, // Whether to use hardware acceleration
-        className: 'spinner', // The CSS class to assign to the spinner
-        zIndex: 2e9, // The z-index (defaults to 2000000000)
-        top: 'auto', // Top position relative to parent in px
-        left: 'auto' // Left position relative to parent in px
-    };
-    var target = document.getElementById('waiting');
-    var spinner = new Spinner(opts);
 
-    var url = "http://localhost:5567/flowmod";
+    for(var i in f) {
+        if(f[i]!=null) f[i] = f[i].replace(/\s+/g, "");
+    }
+    var url = getFlowModUrl();
     var data = JSON.stringify(f);
-    var callback = function(data) {
-        var stat = JSON.parse(data[2]);
-        console.log(data);
-        //alert(stat["status"]);
-        spinner.stop();
+    var callback = function(resp) {
+        console.log(resp);
         loadJSONP();
+        $("#info").empty();
+        clearcolor();
     };
+    console.log(data);
     spinner.spin(target);
-    $.post(url, JSON.stringify(f), callback, "json");
+    $.post(url, data, callback, "json");
 }
 
-//load topo now
-loadJSONP();
+function linkcolorchange(msg){
+    var link = $("path.link");
+    var length = link.length;
+    for(var k=0;k<length;k++){
+        if(link[k].textContent == msg){
+            link[k].style.stroke = "#ff0000";
+            break;
+        }
+    }
+}
+
+function serverSentEvent() {
+    var evtSrc = new EventSource(getSubscribeUrl());
+    evtSrc.addEventListener('updatetopo', function(e) {
+        updateTopo(JSON.parse(e.data));
+    }, false);
+    evtSrc.addEventListener('busylink', function(e) {
+        var data = JSON.parse(e.data);
+        for(var i in data) {
+            linkcolorchange(data[i]);
+        }
+    }, false);
+}
+

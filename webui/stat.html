@@ -8,9 +8,10 @@
 		<script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
 		<script type="text/javascript" src="js/jquery-ui-1.10.4.custom.min.js"></script>
 		<script type="text/javascript" src="js/d3.v3.min.js"></script>
-		<script type="text/javascript">
+		<script type="text/javascript" src="js/config.js"></script>
+        <script type="text/javascript">
 			$(document).ready(function() {
-				var url = "http://localhost:5567/stat"
+				var url = getStatUrl();
 				
 				$("#radio").buttonset();
 
@@ -175,7 +176,7 @@
 						<input type="radio" id="radio5" name="interval" value="4"><label for="radio5">Annually</label>
 					</div>
 					<button id="addform" type="button">Append</button>
-					<button id="update" type="botton">Update</button>
+					<button id="update" type="button">Update</button>
 				</div>
 			</div>
 		
