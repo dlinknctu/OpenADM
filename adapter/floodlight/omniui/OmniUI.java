@@ -56,6 +56,7 @@ public class OmniUI implements IFloodlightModule,IOFMessageListener,IOFSwitchLis
 	private void sendPost(String url, String data) throws Exception {
 		URL obj = new URL(url);
 		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+		con.setRequestProperty("Content-Type", "application/json");
 		con.setRequestMethod("POST");
 		con.setDoOutput(true);
 		DataOutputStream wr = new DataOutputStream(con.getOutputStream());
@@ -165,7 +166,7 @@ public class OmniUI implements IFloodlightModule,IOFMessageListener,IOFSwitchLis
 			OFMatch match = new OFMatch();
 			match.loadFromPacket(pi.getPacketData(), pi.getInPort());
 			String url = "http://localhost:5567/publish/packet";
-			String data = String.format("{'dpid':'%s', 'in_port':'%s', 'mac_src':'%s', 'mac_dst':'%s', 'ether_type':'0x%x', 'ip_src':'%s', 'ip_dst':'%s', 'protocol':'0x%x', 'port_src':'%s', 'port_dst':'%s'}", HexString.toHexString(sw.getId()), match.getInputPort(), HexString.toHexString(match.getDataLayerSource()), HexString.toHexString(match.getDataLayerDestination()), match.getDataLayerType(), intToIp(match.getNetworkSource()), intToIp(match.getNetworkDestination()), match.getNetworkProtocol(), match.getTransportSource(), match.getTransportDestination());
+			String data = String.format("{\"dpid\":\"%s\", \"in_port\":\"%s\", \"mac_src\":\"%s\", \"mac_dst\":\"%s\", \"ether_type\":\"0x%x\", \"ip_src\":\"%s\", \"ip_dst\":\"%s\", \"protocol\":\"0x%x\", \"port_src\":\"%s\", \"port_dst\":\"%s\"}", HexString.toHexString(sw.getId()), match.getInputPort(), HexString.toHexString(match.getDataLayerSource()), HexString.toHexString(match.getDataLayerDestination()), match.getDataLayerType(), intToIp(match.getNetworkSource()), intToIp(match.getNetworkDestination()), match.getNetworkProtocol(), match.getTransportSource(), match.getTransportDestination());
 			try{
 				sendPost(url, data);
 			}catch (Exception e){
@@ -186,7 +187,7 @@ public class OmniUI implements IFloodlightModule,IOFMessageListener,IOFSwitchLis
 	public void switchRemoved(long switchId) {
 		//logger.info("SWITCH REMOVE : {}",HexString.toHexString(switchId));
 		String url = "http://localhost:5567/publish/deldevice";
-		String data = String.format("{'dpid':'%s'}", HexString.toHexString(switchId));
+		String data = String.format("{\"dpid\":\"%s\"}", HexString.toHexString(switchId));
 		try{
 			sendPost(url, data);
 		}catch (Exception e){
@@ -199,7 +200,7 @@ public class OmniUI implements IFloodlightModule,IOFMessageListener,IOFSwitchLis
 		//logger.info("SWITCH ACTIVATED : dpid {}",HexString.toHexString(switchId));
 		FlowModResource.sendEntriesToSwitch(switchId);
 		String url = "http://localhost:5567/publish/adddevice";
-		String data = String.format("{'dpid':'%s'}", HexString.toHexString(switchId));
+		String data = String.format("{\"dpid\":\"%s\"}", HexString.toHexString(switchId));
 		try{
 			sendPost(url, data);
 		}catch (Exception e){
@@ -224,7 +225,7 @@ public class OmniUI implements IFloodlightModule,IOFMessageListener,IOFSwitchLis
 			logger.info("No process IOFSwitch.PortChangeType.OTHER_UPDATE");
 			return;
 		}
-		String data = String.format("{'dpid':'%s', 'port':'%s'}", HexString.toHexString(switchId), port.getPortNumber());
+		String data = String.format("{\"dpid\":\"%s\", \"port\":\"%s\"}", HexString.toHexString(switchId), port.getPortNumber());
 		try{
 			sendPost(url, data);
 		}catch (Exception e){
@@ -241,15 +242,15 @@ public class OmniUI implements IFloodlightModule,IOFMessageListener,IOFSwitchLis
 			switch(updateList.get(i).getOperation()){
 				case LINK_UPDATED:
 					url = "http://localhost:5567/publish/addlink";
-					data = String.format("{'src_dpid':'%s', 'dst_dpid':'%s', 'src_port':'%s', 'dst_port':'%s'}", HexString.toHexString(updateList.get(i).getSrc()), HexString.toHexString(updateList.get(i).getDst()), updateList.get(i).getSrcPort(), updateList.get(i).getDstPort());
+					data = String.format("{\"src_dpid\":\"%s\", \"dst_dpid\":\"%s\", \"src_port\":\"%s\", \"dst_port\":\"%s\"}", HexString.toHexString(updateList.get(i).getSrc()), HexString.toHexString(updateList.get(i).getDst()), updateList.get(i).getSrcPort(), updateList.get(i).getDstPort());
 					break;
 				case LINK_REMOVED:
 					url = "http://localhost:5567/publish/dellink";
-					data = String.format("{'src_dpid':'%s', 'dst_dpid':'%s', 'src_port':'%s', 'dst_port':'%s'}", HexString.toHexString(updateList.get(i).getSrc()), HexString.toHexString(updateList.get(i).getDst()), updateList.get(i).getSrcPort(), updateList.get(i).getDstPort());
+					data = String.format("{\"src_dpid\":\"%s\", \"dst_dpid\":\"%s\", \"src_port\":\"%s\", \"dst_port\":\"%s\"}", HexString.toHexString(updateList.get(i).getSrc()), HexString.toHexString(updateList.get(i).getDst()), updateList.get(i).getSrcPort(), updateList.get(i).getDstPort());
 					break;
 				case PORT_UP:
 					url = "http://localhost:5567/publish/addport";
-					data = String.format("{'dpid':'%s', 'port':'%s'}", HexString.toHexString(updateList.get(i).getSrc()), updateList.get(i).getSrcPort());
+					data = String.format("{\"dpid\":\"%s\", \"port\":\"%s\"}", HexString.toHexString(updateList.get(i).getSrc()), updateList.get(i).getSrcPort());
 					break;
 				default:
 					break;
@@ -276,7 +277,7 @@ public class OmniUI implements IFloodlightModule,IOFMessageListener,IOFSwitchLis
 			String url = "http://localhost:5567/publish/addhost";
 			String data2 = "";
 			for(int i=0; i<sw.length; i++){
-				String info = String.format("{'dpid':'%s', 'port':'%d'}", HexString.toHexString(sw[i].getSwitchDPID()), sw[i].getPort());
+				String info = String.format("{\"dpid\":\"%s\", \"port\":\"%d\"}", HexString.toHexString(sw[i].getSwitchDPID()), sw[i].getPort());
 				data2 += info;
 				if(i != sw.length-1) data2 += ",";
 			}
@@ -292,7 +293,7 @@ public class OmniUI implements IFloodlightModule,IOFMessageListener,IOFSwitchLis
 		public void deviceRemoved(IDevice device) {
 			//logger.info("DEVICE REMOVED: {}", device);
 			String url = "http://localhost:5567/publish/delhost";
-			String data = String.format("{'mac':'%s'}", HexString.toHexString(device.getMACAddress()));
+			String data = String.format("{\"mac\":\"%s\"}", HexString.toHexString(device.getMACAddress()));
 			try{
 				sendPost(url, data);
 			}catch (Exception e){
@@ -307,12 +308,12 @@ public class OmniUI implements IFloodlightModule,IOFMessageListener,IOFSwitchLis
 			SwitchPort[] sw = device.getAttachmentPoints();
 			if( sw.length == 0){
 				url = "http://localhost:5567/publish/delhost";
-				data = String.format("{'mac':%s}", HexString.toHexString(device.getMACAddress()));
+				data = String.format("{\"mac\":\"%s\"}", HexString.toHexString(device.getMACAddress()));
 			}else{
 				url = "http://localhost:5567/publish/addhost";
 				String data2 = "";
 				for(int i=0; i<sw.length; i++){
-					String info = String.format("{'dpid':'%s', 'port':'%d'}", HexString.toHexString(sw[i].getSwitchDPID()), sw[i].getPort());
+					String info = String.format("{\"dpid\":\"%s\", \"port\":\"%d\"}", HexString.toHexString(sw[i].getSwitchDPID()), sw[i].getPort());
 					data2 += info;
 					if(i != sw.length-1) data2 += ",";
 				}
@@ -332,14 +333,14 @@ public class OmniUI implements IFloodlightModule,IOFMessageListener,IOFSwitchLis
 			String data2 = "";
 			SwitchPort[] sw = device.getAttachmentPoints();
 			for(int i=0; i<sw.length; i++){
-				String info = String.format("{'dpid':'%s', 'port':'%d'}", HexString.toHexString(sw[i].getSwitchDPID()), sw[i].getPort());
+				String info = String.format("{\"dpid\":\"%s\", \"port\":\"%d\"}", HexString.toHexString(sw[i].getSwitchDPID()), sw[i].getPort());
 				data2 += info;
 				if(i != sw.length-1) data2 += ",";
 			}
 			Integer[] ips = device.getIPv4Addresses();
 			String ips2 = "";
 			for(int i=0; i<ips.length; i++){
-				ips2 += ("'"+intToIp(ips[i])+"'");
+				ips2 += ("\""+intToIp(ips[i])+"\"");
 				if(i != ips.length-1) ips2 += ",";
 			}
 			String data = String.format("{\"mac\":\"%s\", \"ips\":\"[%s]\", \"aps\":\"%s\"}", HexString.toHexString(device.getMACAddress()), ips2, data2);
