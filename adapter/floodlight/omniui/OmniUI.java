@@ -290,7 +290,7 @@ public class OmniUI implements IFloodlightModule,IOFMessageListener,IOFSwitchLis
 				data2 += info;
 				if(i != sw.length-1) data2 += ",";
 			}
-			String data = String.format("{\"mac\":\"%s\", \"aps\":\"%s\"}", HexString.toHexString(device.getMACAddress()), data2);
+			String data = String.format("{\"mac\":\"%s\", \"aps\":[%s]}", HexString.toHexString(device.getMACAddress()), data2);
 			try{
 				sendPost(url, data);
 			}catch (Exception e){
@@ -326,7 +326,7 @@ public class OmniUI implements IFloodlightModule,IOFMessageListener,IOFSwitchLis
 					data2 += info;
 					if(i != sw.length-1) data2 += ",";
 				}
-				data = String.format("{\"mac\":\"%s\", \"aps\":\"%s\"}", HexString.toHexString(device.getMACAddress()), data2);
+				data = String.format("{\"mac\":\"%s\", \"aps\":[%s]}", HexString.toHexString(device.getMACAddress()), data2);
 			}
 			try{
 				sendPost(url, data);
@@ -352,7 +352,7 @@ public class OmniUI implements IFloodlightModule,IOFMessageListener,IOFSwitchLis
 				ips2 += ("\""+intToIp(ips[i])+"\"");
 				if(i != ips.length-1) ips2 += ",";
 			}
-			String data = String.format("{\"mac\":\"%s\", \"ips\":\"[%s]\", \"aps\":\"%s\"}", HexString.toHexString(device.getMACAddress()), ips2, data2);
+			String data = String.format("{\"mac\":\"%s\", \"ips\":[%s], \"aps\":[%s]}", HexString.toHexString(device.getMACAddress()), ips2, data2);
 			try{
 				sendPost(url, data);
 			}catch (Exception e){

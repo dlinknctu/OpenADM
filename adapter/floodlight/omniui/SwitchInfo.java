@@ -27,19 +27,19 @@ public class SwitchInfo extends JsonSerializer<SwitchInfo> {
 	public List< OFPortStatisticsReply > portList;
 	public List< OFFlowStatisticsReply > flowList;
 
-    // Do NOT delete this, it's required for the serializer
-    public SwitchInfo() {}
+	// Do NOT delete this, it's required for the serializer
+	public SwitchInfo() {}
 	
 	public SwitchInfo(Long dpid){
 		this.dpid=dpid;
 	}
 
-    private String intToIp(int i) {
-        return ((i >> 24 ) & 0xFF) + "." +
-               ((i >> 16 ) & 0xFF) + "." +
-               ((i >>  8 ) & 0xFF) + "." +
-               ( i        & 0xFF);
-    }
+	private String intToIp(int i) {
+		return ((i >> 24 ) & 0xFF) + "." +
+			   ((i >> 16 ) & 0xFF) + "." +
+			   ((i >>  8 ) & 0xFF) + "." +
+			   ( i		  & 0xFF);
+	}
 
 	//Port 
 	private void setOFStatisticsPort(List<OFStatistics> portInfo){
@@ -55,11 +55,11 @@ public class SwitchInfo extends JsonSerializer<SwitchInfo> {
 				jgen.writeStartArray();
 				for(OFPortStatisticsReply port: portList){
 					jgen.writeStartObject();
-					jgen.writeNumberField("port",(int)((port.getPortNumber())&(0xffff)));
-					jgen.writeNumberField("rxpacket",port.getreceivePackets());
-					jgen.writeNumberField("txpacket",port.getTransmitPackets());
-					jgen.writeNumberField("rxbyte",port.getReceiveBytes());
-					jgen.writeNumberField("txbyte",port.getTransmitBytes());
+					jgen.writeStringField("port",String.valueOf((int)((port.getPortNumber())&(0xffff))));
+					jgen.writeStringField("rxpacket",String.valueOf(port.getreceivePackets()));
+					jgen.writeStringField("txpacket",String.valueOf(port.getTransmitPackets()));
+					jgen.writeStringField("rxbyte",String.valueOf(port.getReceiveBytes()));
+					jgen.writeStringField("txbyte",String.valueOf(port.getTransmitBytes()));
 					jgen.writeEndObject();
 				}
 				jgen.writeEndArray();
@@ -77,7 +77,7 @@ public class SwitchInfo extends JsonSerializer<SwitchInfo> {
 			flowList.add( ((OFFlowStatisticsReply)ofs));
 		}
 	}
-	
+
 	public void serializeFlow(JsonGenerator jgen){
 		if(flowList != null){
 			try{
@@ -86,27 +86,27 @@ public class SwitchInfo extends JsonSerializer<SwitchInfo> {
 				for(OFFlowStatisticsReply flow: flowList){
 					jgen.writeStartObject();
 					OFMatch match = flow.getMatch();
-					jgen.writeNumberField("ingressPort",(int)(match.getInputPort()&0xffff));
-					jgen.writeStringField("srcMac",HexString.toHexString(match.getDataLayerSource()));
-					jgen.writeStringField("dstMac",HexString.toHexString(match.getDataLayerDestination()));
-			        jgen.writeStringField("dstIP", intToIp(match.getNetworkDestination()));
-		  	      	jgen.writeNumberField("dstIPMask", match.getNetworkDestinationMaskLen());
-			        jgen.writeNumberField("netProtocol", match.getNetworkProtocol());
-			        jgen.writeStringField("srcIP", intToIp(match.getNetworkSource()));
-			        jgen.writeNumberField("srcIPMask", match.getNetworkSourceMaskLen());
-			        jgen.writeNumberField("dstPort", match.getTransportDestination());
-			        jgen.writeNumberField("srcPort", match.getTransportSource());
-					jgen.writeNumberField("vlan", match.getDataLayerVirtualLan());
-			        jgen.writeNumberField("vlanP", match.getDataLayerVirtualLanPriorityCodePoint());
-					jgen.writeNumberField("wildcards", match.getWildcards());
-					jgen.writeNumberField("tosBits", match.getNetworkTypeOfService());
-					jgen.writeNumberField("counterByte", flow.getByteCount());
-					jgen.writeNumberField("counterPacket", flow.getPacketCount());
-					jgen.writeNumberField("idleTimeout", (int)(flow.getIdleTimeout()&0xffff));
-					jgen.writeNumberField("hardTimeout", (int)(flow.getHardTimeout()&0xffff));
-					jgen.writeNumberField("priority", (int)(flow.getPriority()&0xffff));
-					jgen.writeNumberField("duration", flow.getDurationSeconds());
-					jgen.writeNumberField("dlType",match.getDataLayerType());
+					jgen.writeStringField("ingressPort", String.valueOf((int)(match.getInputPort()&0xffff)));
+					jgen.writeStringField("srcMac", HexString.toHexString(match.getDataLayerSource()));
+					jgen.writeStringField("dstMac", HexString.toHexString(match.getDataLayerDestination()));
+					jgen.writeStringField("dstIP", intToIp(match.getNetworkDestination()));
+					jgen.writeStringField("dstIPMask", String.valueOf(match.getNetworkDestinationMaskLen()));
+					jgen.writeStringField("netProtocol", String.valueOf(match.getNetworkProtocol()));
+					jgen.writeStringField("srcIP", intToIp(match.getNetworkSource()));
+					jgen.writeStringField("srcIPMask", String.valueOf(match.getNetworkSourceMaskLen()));
+					jgen.writeStringField("dstPort", String.valueOf(match.getTransportDestination()));
+					jgen.writeStringField("srcPort", String.valueOf(match.getTransportSource()));
+					jgen.writeStringField("vlan", String.valueOf(match.getDataLayerVirtualLan()));
+					jgen.writeStringField("vlanP", String.valueOf(match.getDataLayerVirtualLanPriorityCodePoint()));
+					jgen.writeStringField("wildcards", String.valueOf(match.getWildcards()));
+					jgen.writeStringField("tosBits", String.valueOf(match.getNetworkTypeOfService()));
+					jgen.writeStringField("counterByte", String.valueOf(flow.getByteCount()));
+					jgen.writeStringField("counterPacket", String.valueOf(flow.getPacketCount()));
+					jgen.writeStringField("idleTimeout", String.valueOf((int)(flow.getIdleTimeout()&0xffff)));
+					jgen.writeStringField("hardTimeout", String.valueOf((int)(flow.getHardTimeout()&0xffff)));
+					jgen.writeStringField("priority", String.valueOf((int)(flow.getPriority()&0xffff)));
+					jgen.writeStringField("duration", String.valueOf(flow.getDurationSeconds()));
+					jgen.writeStringField("dlType",String.valueOf(match.getDataLayerType()));
 					serializeAction(jgen, flow.getActions());
 					jgen.writeEndObject();
 				}
@@ -169,19 +169,19 @@ public class SwitchInfo extends JsonSerializer<SwitchInfo> {
 			setOFStatisticsFlow(information);
 		}
 	}
-			
+
 	@Override
-    public void serialize(SwitchInfo swi, JsonGenerator jgen, SerializerProvider arg2)
-            throws IOException, JsonProcessingException {
-    	    jgen.writeStartObject();
+	public void serialize(SwitchInfo swi, JsonGenerator jgen, SerializerProvider arg2)
+			throws IOException, JsonProcessingException {
+			jgen.writeStartObject();
 			jgen.writeStringField("dpid",HexString.toHexString(swi.dpid));
 			swi.serializeFlow(jgen);
 			swi.serializePort(jgen);
 			jgen.writeEndObject();
-    }
+	}
 
-    @Override
-    public Class<SwitchInfo> handledType() {
-        return SwitchInfo.class;
-    }
+	@Override
+	public Class<SwitchInfo> handledType() {
+		return SwitchInfo.class;
+	}
 }
