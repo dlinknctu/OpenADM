@@ -91,7 +91,7 @@ public class SwitchInfo extends JsonSerializer<SwitchInfo> {
 					jgen.writeStringField("dstMac", HexString.toHexString(match.getDataLayerDestination()));
 					jgen.writeStringField("dstIP", intToIp(match.getNetworkDestination()));
 					jgen.writeStringField("dstIPMask", String.valueOf(match.getNetworkDestinationMaskLen()));
-					jgen.writeStringField("netProtocol", String.valueOf(match.getNetworkProtocol()));
+					jgen.writeStringField("netProtocol", "0x"+Integer.toHexString(match.getNetworkProtocol()));
 					jgen.writeStringField("srcIP", intToIp(match.getNetworkSource()));
 					jgen.writeStringField("srcIPMask", String.valueOf(match.getNetworkSourceMaskLen()));
 					jgen.writeStringField("dstPort", String.valueOf(match.getTransportDestination()));
@@ -106,7 +106,7 @@ public class SwitchInfo extends JsonSerializer<SwitchInfo> {
 					jgen.writeStringField("hardTimeout", String.valueOf((int)(flow.getHardTimeout()&0xffff)));
 					jgen.writeStringField("priority", String.valueOf((int)(flow.getPriority()&0xffff)));
 					jgen.writeStringField("duration", String.valueOf(flow.getDurationSeconds()));
-					jgen.writeStringField("dlType",String.valueOf(match.getDataLayerType()));
+					jgen.writeStringField("dlType","0x"+Integer.toHexString(match.getDataLayerType()));
 					serializeAction(jgen, flow.getActions());
 					jgen.writeEndObject();
 				}
