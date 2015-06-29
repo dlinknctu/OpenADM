@@ -55,11 +55,11 @@ public class SwitchInfo extends JsonSerializer<SwitchInfo> {
 				jgen.writeStartArray();
 				for(OFPortStatisticsReply port: portList){
 					jgen.writeStartObject();
-					jgen.writeNumberField("PortNumber",(int)((port.getPortNumber())&(0xffff)));
-					jgen.writeNumberField("recvPackets",port.getreceivePackets());
-					jgen.writeNumberField("transmitPackets",port.getTransmitPackets());
-					jgen.writeNumberField("recvBytes",port.getReceiveBytes());
-					jgen.writeNumberField("transmitBytes",port.getTransmitBytes());
+					jgen.writeNumberField("port",(int)((port.getPortNumber())&(0xffff)));
+					jgen.writeNumberField("rxpacket",port.getreceivePackets());
+					jgen.writeNumberField("txpacket",port.getTransmitPackets());
+					jgen.writeNumberField("rxbyte",port.getReceiveBytes());
+					jgen.writeNumberField("txbyte",port.getTransmitBytes());
 					jgen.writeEndObject();
 				}
 				jgen.writeEndArray();

@@ -3,6 +3,8 @@ package net.floodlightcontroller.omniui;
 import java.util.Collection;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.openflow.protocol.OFMessage;
 import org.openflow.protocol.OFType;
@@ -23,6 +25,7 @@ import org.openflow.protocol.OFFlowRemoved;
 import org.openflow.protocol.OFPacketIn;
 import org.openflow.protocol.OFMatch;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.Set;
 import org.openflow.util.HexString;
@@ -42,6 +45,9 @@ import net.floodlightcontroller.devicemanager.IDeviceListener;
 import net.floodlightcontroller.devicemanager.IDeviceService;
 import net.floodlightcontroller.devicemanager.SwitchPort;
 
+import org.json.JSONObject;
+import org.json.JSONArray;
+
 public class OmniUI implements IFloodlightModule,IOFMessageListener,IOFSwitchListener,ILinkDiscoveryListener {
 	
 	protected IFloodlightProviderService floodlightProvider;
@@ -51,6 +57,7 @@ public class OmniUI implements IFloodlightModule,IOFMessageListener,IOFSwitchLis
 	protected IRestApiService restApi;
 	protected static Logger logger;
 	public static final String StaticFlowName = "omniui";
+	protected Timer timer;
 
 	// HTTP POST request
 	private void sendPost(String url, String data) throws Exception {
@@ -129,6 +136,8 @@ public class OmniUI implements IFloodlightModule,IOFMessageListener,IOFSwitchLis
 		floodlightProvider = context.getServiceImpl(IFloodlightProviderService.class);
 		restApi = context.getServiceImpl(IRestApiService.class);
 		logger = LoggerFactory.getLogger(OmniUI.class);
+		timer = new Timer();
+		timer.schedule(new PollTask(), 5000, 5000);
 	}
 
 	@Override
@@ -371,5 +380,63 @@ public class OmniUI implements IFloodlightModule,IOFMessageListener,IOFSwitchLis
 
 	private String intToIp(int i) {
 		return ((i >> 24 ) & 0xFF) + "." + ((i >> 16 ) & 0xFF) + "." + ((i >>  8 ) & 0xFF) + "." + ( i & 0xFF);
+	}
+
+	class PollTask extends TimerTask {
+		@Override
+		public void run(){
+			try{
+				String url = "http://localhost:8080/wm/omniui/switch/json";
+				URL obj = new URL(url);
+				HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+				con.setRequestMethod("GET");
+				BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+				String inputLine;
+				StringBuffer response = new StringBuffer();
+				while ((inputLine = in.readLine()) != null) {
+					response.append(inputLine);
+				}
+				in.close();
+
+				String s = response.toString();
+				JSONArray myJsonArray = new JSONArray(s);
+				for(int i=0 ; i < myJsonArray.length() ;i++){
+					JSONObject myjObject = myJsonArray.getJSONObject(i);
+					String dpid = myjObject.getString("dpid");
+
+					JSONArray flowJsonArray = myjObject.getJSONArray("flows");
+					sendflowmsg(dpid, flowJsonArray);
+
+					JSONArray portJsonArray = myjObject.getJSONArray("ports");
+					for(int j=0 ; j < portJsonArray.length() ;j++){
+						JSONObject portjObject = portJsonArray.getJSONObject(j);
+						portjObject.putOnce("dpid", dpid);
+					}
+					sendportmsg(portJsonArray);
+				}
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+		}
+		protected void sendflowmsg(String dpid, JSONArray flows){
+			String url = "http://localhost:5567/publish/flow";
+			String data = String.format("{\"dpid\":\"%s\", \"flows\":%s}", dpid, flows.toString());
+			try{
+				sendPost(url, data);
+			}catch (Exception e){
+				logger.info("sendPost failed.");
+			}
+		}
+		protected void sendportmsg(JSONArray ports){
+			String url = "http://localhost:5567/publish/port";
+			for(int j=0 ; j < ports.length() ;j++){
+				try{
+					String data = String.format("%s", ports.getJSONObject(j).toString());
+					sendPost(url, data);
+				}catch (Exception e){
+					logger.info("sendPost failed.");
+				}
+			}
+		}
 	}
 }
