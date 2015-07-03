@@ -47,7 +47,7 @@ import net.floodlightcontroller.devicemanager.SwitchPort;
 
 import org.json.JSONObject;
 import org.json.JSONArray;
-import org.restlet.resource.Get;
+import org.restlet.resource.Post;
 import org.restlet.resource.ServerResource;
 
 public class OmniUI extends ServerResource implements IFloodlightModule,IOFMessageListener,IOFSwitchListener,ILinkDiscoveryListener {
@@ -62,7 +62,7 @@ public class OmniUI extends ServerResource implements IFloodlightModule,IOFMessa
 	protected Timer timer;
 	protected static String controller_name;
 
-	@Get()
+	@Post()
 	public String retrieve(String name){
 		controller_name = name;
 		return "OK";
