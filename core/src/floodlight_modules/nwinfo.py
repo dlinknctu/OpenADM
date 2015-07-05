@@ -1,7 +1,6 @@
 import httplib
 import logging
 import json
-import socket
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
