@@ -47,5 +47,11 @@
 		"user":"xxxxxx",
 		"password":"xxxxxx",
 		"interval": "86400"
+	},
+	"NWInfo": {
+		"controller_ip": "localhost",
+		"controller_port": "6633",
+		"controller_name": "foobar",
+		"adapter_port": "8080"
 	}
 }

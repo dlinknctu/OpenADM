@@ -144,6 +144,14 @@ class Core:
 			restIP = config['REST']['ip']
 			restPort = config['REST']['port']
 
+			def notify(e, d):
+				msg = {
+					'event': e,
+					'data': d
+				}
+				for sub in subscriptions[:]:
+					sub.put(msg)
+
 			@app.route('/debug')
 			@cross_origin()
 			def debug():
@@ -153,21 +161,17 @@ class Core:
 			@app.route('/publish/<event>', methods=['POST'])
 			@cross_origin()
 			def publish(event):
-				def notify(e, d):
-					msg = {
-						'event': e,
-						'data': d
-					}
-					for sub in subscriptions[:]:
-						sub.put(msg)
-
 				if event in sseHandlers:
 
 					#
 					# Process data, push event
 					#
 
-					gevent.spawn(notify, event, sseHandlers[event]())
+					rs = sseHandlers[event](request.json)
+					if rs is None:
+						logger.warn('\'%s\' event has been ignored' % event)
+						return 'OK'
+					gevent.spawn(notify, event, rs)
 				else:
 					abort(404, 'No such event: \'/publish/%s\'' % event)
 
@@ -180,6 +184,10 @@ class Core:
 				def gen():
 					q = Queue()
 					subscriptions.append(q)
+					for e in sseHandlers.keys():
+						rs = sseHandlers[e]('debut')
+						if rs is not None:
+							gevent.spawn(notify, e, rs)
 					try:
 						while True:
 							result = q.get()
