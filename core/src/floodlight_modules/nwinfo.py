@@ -81,7 +81,7 @@ class NWInfo:
         '''
         if raw == 'debut':
             return json.dumps(self.controllers)
-        key = raw['name']
+        key = raw['controller']
         self.controllers[key] = raw
         logger.debug('Controller information: %s' % self.controllers[key])
 
