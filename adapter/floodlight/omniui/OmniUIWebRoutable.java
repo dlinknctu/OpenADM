@@ -10,6 +10,7 @@ public class OmniUIWebRoutable implements RestletRoutable {
 	@Override
 	public Restlet getRestlet(Context context) {
 		Router router = new Router(context);
+		router.attach("/controller/info", ControllerResource.class);
 		router.attach("/controller/name", OmniUI.class);
 		router.attach("/switch/json", SwitchResource.class);
 		router.attach("/link/json", LinkResource.class);
