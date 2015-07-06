@@ -16,7 +16,7 @@ from pkg_resources import Requirement, resource_filename
 rootPath = resource_filename(Requirement.parse("omniui"),"")
 
 app = Flask(__name__)
-app.config['CORS_ORIGINS'] = ['http://localhost']
+app.config['CORS_ORIGINS'] = ['*']
 subscriptions = []
 logger = logging.getLogger(__name__)
 
