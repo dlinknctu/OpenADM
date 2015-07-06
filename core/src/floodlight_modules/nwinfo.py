@@ -14,7 +14,9 @@ class NWInfo:
     '''
 
     def __init__(self, core, param):
-        #self.controller_name = param['ControllerName'] # read from config.json
+        '''Initialize network information structure
+        '''
+        self.controllers = {}
         self.packetins = []
         self.ports = {}
         self.links = {}
@@ -34,6 +36,7 @@ class NWInfo:
         HTTP requests from Web UI.
         '''
         # Server-Sent Event handlers handle the requests from the southbound
+        core.registerSSEHandler('controller', self.controllerHandler)
         core.registerSSEHandler('packet', self.packetHandler)
         core.registerSSEHandler('addlink', self.addlinkHandler)
         core.registerSSEHandler('dellink', self.dellinkHandler)
@@ -70,6 +73,20 @@ class NWInfo:
         else:
             logger.info('Controller identification (%s:%s -> %s): %s' %
                     (controller_ip, controller_port, controller_name, res.read()))
+
+    def controllerHandler(self, raw):
+        '''Controller information event
+
+        Datastore: controller <type 'dict'>
+        '''
+        if raw == 'debut':
+            return json.dumps(self.controllers)
+        key = raw['name']
+        self.controllers[key] = raw
+        logger.debug('Controller information: %s' % self.controllers[key])
+
+        result = json.dumps(self.controllers[key])
+        return result
 
     def packetHandler(self, raw):
         '''Packet-In event
