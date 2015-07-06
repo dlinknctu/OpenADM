@@ -3,7 +3,8 @@ var DataTable = require('./dataTable/DataTable.jsx');
 var mui = require('material-ui');
 var Toggle = mui.Toggle;
 var DropDownMenu = mui.DropDownMenu;
-var flowModJson = require('../../constants/flow-mod.json');
+var Ofp10_FlowMod = require('../../constants/ofp10-flow-mod.json');
+var Ofp13_FlowMod = require('../../constants/ofp13-flow-mod.json');
 var _ = require('underscore');
 var FlowTableAction = require('../../actions/FlowTableAction.js');
 var FlowModStore = require('../../stores/FlowModStore.js');
@@ -17,25 +18,106 @@ var customComponent = React.createClass({
         return state;
     },
     componentDidMount: function() {
-        var field = FlowModStore.getFieldVal(this.props.rowData.field);
-        if(field !== null){
+    	var type = this.props.rowData.type;
+    	var field = FlowModStore.getFieldVal(this.props.rowData.field);
+
+        if(type != "action" && field !== null){
        		this.setState(field);
        	}
+       	else if(type == "action"){
+       		var actions = FlowModStore.getFieldVal("actions");
+       		if(!actions){
+       			return;
+       		}
+       		var actionList = actions["val"].split(",");
+
+       		for(var subaction in actionList ){
+       			var action = actionList[subaction].split("=");
+       			if(action[0] === this.props.rowData.field && action[0] !== "STRIP_VLAN"){
+
+			   		this.setState({
+	       				"name": action[0],
+	       				"val": action[1]
+	       			});
+	       			return;
+       			}
+       			if(action[0] === this.props.rowData.field && action[0] === "STRIP_VLAN"){
+       				this.setState({
+	       				"name": action[0],
+	       				"val": "true"
+	       			});
+	       			return;
+       			}
+       		}
+       	}
+    },
+    handleActionChange:function(name, val){
+    	var actions = FlowModStore.getFieldVal("actions");
+    	if(!actions){
+       		return;
+       	}
+		var actionList = actions["val"].split(",");
+
+		var indx = 0;
+		for(;indx < actionList.length; ++indx){
+			if(actionList[indx].indexOf(name) >= 0){
+				if(val.toString().trim().length == 0 || (name === "STRIP_VLAN" && val === false))
+					actionList.splice(indx,1);
+				else{
+					if(name === "STRIP_VLAN")
+						actionList[indx] = name;
+					else
+						actionList[indx] = name + "=" + val;
+				}
+				break;
+			}
+
+			if((indx+1) == actionList.length && name !== "STRIP_VLAN")
+				actionList.push(name + "=" + val);
+			else if((indx+1) == actionList.length && name == "STRIP_VLAN")
+				actionList.push(name);
+		}
+
+		var field = {
+			"name": name,
+			"val": val
+		};
+		var actions = {
+			"name": "actions",
+			"val": actionList.toString()
+		};
+
+		this.setState(field);
+		FlowTableAction.updateFlowMod(actions);
     },
 	handleChange:function(e){
-		var field = {
-			"name": e.target.name,
-			"val": e.target.value
-		};
-		this.setState(field);
-		FlowTableAction.updateFlowMod(field);
+		var field = {};
+		if(this.props.rowData.type == "action"){
+			this.handleActionChange(e.target.name, e.target.value);
+		}else{
+			var field = {
+				"name": e.target.name,
+				"val": e.target.value
+			};
+			this.setState(field);
+			FlowTableAction.updateFlowMod(field);
+		}
+
+
 	},
 	handleToggle: function(e){
-		var field = {
-			"name": e.target.name,
-			"val": e.target.checked
-		};
-		FlowTableAction.updateFlowMod(field);
+
+		if(this.props.rowData.type == "action"){
+			console.log(e.target.checked);
+		 	this.handleActionChange(e.target.name, e.target.checked);
+		}else{
+			var field = {
+				"name": e.target.name,
+				"val": e.target.checked
+			};
+			this.setState(field);
+			FlowTableAction.updateFlowMod(field);
+		}
 	},
   	render: function(){
 	  	var inputType = this.props.data;
@@ -52,7 +134,7 @@ var customComponent = React.createClass({
 			"textRendering": "auto",
 			"WebkitWritingMode": "horizontal-tb",
 			"fontSize": "11pt",
-			"width":"180px"
+			"width":"200px"
 		};
 	   	if(inputType == "text"){
 			return <input type = "text"
@@ -62,19 +144,44 @@ var customComponent = React.createClass({
 						  name={this.props.rowData.field}
 						  value={this.state.val}/>
 		}
-		else if(inputType == "toggle")
+		else if(inputType == "toggle"){
+			var isToggled = (this.state.val===null)? true : (this.state.val==='true');
 			return <Toggle name={this.props.rowData.field}
-						   onToggle={this.handleToggle}/>
+					   	   onToggle={this.handleToggle}
+					   	   defaultToggled={isToggled}/>
+
+		}
    }
 });
 
 var FlowMod = React.createClass({
 	componentWillMount: function() {
+
         FlowTableAction.fetchFlowMod();
+        var initialCommand = FlowModStore.getInitCmd();
+
+        this.setState({
+        	"initialCommand": initialCommand
+        });
+    	var field = {
+			"name": "command",
+			"val": initialCommand
+		};
+		FlowTableAction.updateFlowMod(field);
     },
+
 	getFlowModData: function(){
 		var flowTableData = [];
 		var objectCnt = 0;
+		var flowModJson;
+
+		if(this.props.openFlowVersion === 1.0){
+			flowModJson = Ofp10_FlowMod;
+
+		}else if(this.props.openFlowVersion === 1.3){
+			flowModJson = Ofp10_FlowMod;
+		}
+
 		_.each(flowModJson, function(value, key){
 			var tempArr = [];
 
@@ -99,12 +206,36 @@ var FlowMod = React.createClass({
 			}
 		}.bind(this));
 
-
 		return flowTableData;
+	},
+	getDefaultProps: function(){
+		return{
+            "openFlowVersion": 1.0,
+        };
+	},
+	getInitialState: function(){
+		var state = {
+    		"initialCommand": "ADD"
+    	};
+        return state;
+	},
+	getSelectedIndex: function(menuItems){
+		for(var item in menuItems){
+			if(menuItems[item].text === this.state.initialCommand){
+				return parseInt(item);
+			}
+		}
+	},
+	menuOnChange: function(e, selectedIndex, menuItem){
+		var cmd = menuItem["text"];
+		var field = {
+			"name": "command",
+			"val": cmd
+		};
+		FlowTableAction.updateFlowMod(field);
 	},
     render: function() {
     	var flowModField = this.getFlowModData();
-
     	var metadata = [
     		{
 			  	"columnName": "type",
@@ -137,11 +268,15 @@ var FlowMod = React.createClass({
 			"float":"right",
 			"width":"150px"
 		};
+		var dropDownMenuIndex = this.getSelectedIndex(menuItems);
 
     	return (
     		<div style={{marginTop: "-60px"}}>
-
-	    		<DropDownMenu menuItems={menuItems} autoWidth={false} style={flow_mod_cmd}/>
+	    		<DropDownMenu menuItems={menuItems}
+	    				      autoWidth={false}
+	    				      style={flow_mod_cmd}
+	    				      selectedIndex={dropDownMenuIndex}
+	    				      onChange={this.menuOnChange}/>
 
 	    		<DataTable results={flowModField} columnMetadata={metadata} showFilter={true}
 	    		columns={["type", "field", "input"]}
@@ -151,7 +286,5 @@ var FlowMod = React.createClass({
     	);
     }
 });
-
-
 
 module.exports = FlowMod;

@@ -1,19 +1,25 @@
 var alt = require('../alt.js');
 var FlowTableAction = require('../actions/FlowTableAction.js');
+var _ = require("underscore");
 
 class FlowModStore {
 	constructor() {
 		this.flowMod = [];
+		this.hasInitialData = false;
+		this.initialCommand = "ADD";
+		this.isLoading = false;
 		this.errorMessage = null;
 
 		this.bindListeners({
       		handleUpdateFlowMod: FlowTableAction.updateFlowMod,
       		handleFetchFlowMod: FlowTableAction.fetchFlowMod,
       		handleFlowModFailed: FlowTableAction.flowModFailed,
+      		handleInitialFlowMod: FlowTableAction.triggerFlowMod,
     	});
 
     	this.exportPublicMethods({
-	      getFieldVal: this.getFieldVal
+	    	getFieldVal: this.getFieldVal,
+	    	getInitCmd: this.getInitCmd
 	    });
 	}
 
@@ -22,15 +28,20 @@ class FlowModStore {
 		for(var i = 0; i < length; ++i){
 			if(this.flowMod[i].name === field.name){
 				this.flowMod.splice(i,1);
+				break;
 			}
 		}
+
 		if(field.val !== null && field.val.toString().trim().length !== 0){
 			this.flowMod.push(field);
 		}
 	}
 
 	handleFetchFlowMod(){
-		this.flowMod = [];
+		if(!this.hasInitialData){
+			this.flowMod = [];
+			this.initialCommand = "ADD";
+		}
 	}
 
 	handleFlowModFailed(errorMessage){
@@ -44,8 +55,42 @@ class FlowModStore {
 	        	return flowMod[i];
 	      	}
 	    }
-
 	    return null;
+	}
+
+	getInitCmd(){
+		var { initialCommand } = this.getState();
+		return initialCommand;
+	}
+
+	handleInitialFlowMod(arr){	// arr is [triggerDialog, data, command]
+
+		var data = arr[1];
+		if(!data){
+			this.hasInitialData = false;
+			return;
+		}
+
+		this.hasInitialData = true;
+		this.initialCommand = arr[2];
+		this.flowMod = [];
+		
+		var cmd = arr[2];
+		var command = new Object;
+		
+		//set openflow field
+		for(var key in data) {
+            var field = new Object;
+            field["name"] = key;
+            field["val"] = data[key];
+            if(field["name"] !== "counterByte" && field["name"] !== "counterPacket")
+            	this.flowMod.push(field);
+        }
+
+        //set command
+		command["name"] = "command";
+        command["val"] = cmd;
+		this.flowMod.push(command);	
 	}
 }
 

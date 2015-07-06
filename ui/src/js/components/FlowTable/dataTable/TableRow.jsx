@@ -21,11 +21,23 @@ var TableRow = React.createClass({
             fontSize:"11pt",
             borderBottom: "1px solid #E1E1E1",
             textAlign: "left"
-          };
-
-        var data = _.pairs(this.props.columns.length === 0 ? this.props.data : _.pick(this.props.data, this.props.columns))
+        };
+        var resultKeys = _.keys(this.props.data);
+        var resultData = this.props.data;
+       
+        //check is there data lost or not
+        for(var i = 0; i < this.props.columns.length; ++i){
+            
+            if(!_.contains(resultKeys, this.props.columns[i])){
+                var element= new Object;
+                element[this.props.columns[i]] = "";
+                _.extend(resultData, element);
+            }
+        }
+        var data = _.pairs(this.props.columns.length === 0 ? resultData : _.pick(resultData, this.props.columns))
 
         var nodes = data.map(function(col, index) {
+
             var returnValue = null;
             var meta = _.findWhere(that.props.columnMetadata, {columnName: col[0]});
 

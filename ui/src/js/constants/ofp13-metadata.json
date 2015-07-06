@@ -1,72 +1,77 @@
 [
 	{
-	  	"columnName": "dpid",
+		"columnName": "flowMod",
 	  	"order": 1,
-	  	"visible": true
+	  	"visible": true,
 	},
 	{
-	  	"columnName": "cookie",
+	  	"columnName": "dpid",
 	  	"order": 2,
 	  	"visible": true
 	},
 	{
-	  	"columnName": "vlan",
+	  	"columnName": "cookie",
 	  	"order": 3,
 	  	"visible": true
 	},
 	{
-	  	"columnName": "in_port",
+	  	"columnName": "vlan",
 	  	"order": 4,
 	  	"visible": true
 	},
 	{
-	  	"columnName": "nw_src",
+	  	"columnName": "in_port",
 	  	"order": 5,
 	  	"visible": true
 	},
 	{
-	  	"columnName": "nw_dst",
+	  	"columnName": "nw_src",
 	  	"order": 6,
 	  	"visible": true
 	},
 	{
-	  	"columnName": "nw_proto",
+	  	"columnName": "nw_dst",
 	  	"order": 7,
 	  	"visible": true
 	},
 	{
-	  	"columnName": "dl_src",
+	  	"columnName": "nw_proto",
 	  	"order": 8,
 	  	"visible": true
 	},
 	{
+	  	"columnName": "dl_src",
+	  	"order": 9,
+	  	"visible": true
+	},
+	{
 	  	"columnName": "dl_dst",
-	  	"order": 9,
-	  	"visible": true
-	},
-	{
-	  	"columnName": "dl_type",
-	  	"order": 9,
-	  	"visible": true
-	},
-	{
-		"columnName": "actions",
 	  	"order": 10,
 	  	"visible": true
 	},
 	{
-		"columnName": "priority",
+	  	"columnName": "dl_type",
 	  	"order": 11,
 	  	"visible": true
 	},
 	{
-		"columnName": "idle_timeout",
+		"columnName": "actions",
 	  	"order": 12,
 	  	"visible": true
 	},
 	{
-		"columnName": "hard_timeout",
+		"columnName": "priority",
 	  	"order": 13,
+	  	"visible": true
+	},
+	{
+		"columnName": "idle_timeout",
+	  	"order": 14,
+	  	"visible": true
+	},
+	{
+		"columnName": "hard_timeout",
+	  	"order": 15,
 	  	"visible": true
 	}
 

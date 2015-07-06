@@ -38,8 +38,8 @@ class Domain extends React.Component {
   }
 
   onLayoutChange(e){
-    // this.setState({ layout: e });
-    // this._saveToLocalStorage();
+    this.setState({ layout: e });
+    this._saveToLocalStorage();
   }
 
   _saveToLocalStorage() {
@@ -74,7 +74,7 @@ class Domain extends React.Component {
             </Module>
             <Module key={2} name="FlowTable"
             _grid={{ x: 0, y: 4, w: 12, h:4, minW: 10, minH:4 }}>
-                <FlowTable />
+                <FlowTable openFlowVersion={1.0} filter={"none"} />
             </Module>
         </ReactGridLayout>
       </FullWidthSection>

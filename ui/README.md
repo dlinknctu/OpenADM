@@ -7,7 +7,7 @@
  - Alt (flux implementation)
  - Material-ui
 
-### How to use
+ ### How to use
+---
  - npm install
  - npm run dev
- - open http://localhost:8080

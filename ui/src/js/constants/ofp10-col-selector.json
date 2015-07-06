@@ -1,0 +1,23 @@
+[
+	"switch",
+	"ingressPort",
+    "wildcards",
+    "actions",
+    "priority",
+    "active",
+    "srcMac",
+    "dstMac",     
+    "vlan",
+    "vlanP",
+    "dlType",
+    "tosBits",
+    "netProtocol",
+    "srcIP",
+    "dstIP",
+    "srcPort",
+    "dstPort",
+    "idleTimeout",
+    "hardTimeout",
+    "counterPacket",
+    "counterByte"
+]

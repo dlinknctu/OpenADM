@@ -60,7 +60,7 @@ var TablePagination = React.createClass({
 			  maxHeight: "20px",
 			  marginTop: "0",
 			  height: "38px",
-			  padding: "6px 10px",
+			  padding: "0",
 			  backgroundColor: "#fff",
 			  border: "1px solid #D1D1D1",
 			  borderRadius: "4px",

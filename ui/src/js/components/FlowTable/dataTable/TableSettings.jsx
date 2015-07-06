@@ -81,8 +81,7 @@ var TableSettings = React.createClass({
             width: (this.props.openFlowVersion === 1.0)? "20%" : "50%"
         };
         return (
-            <div className={"dataTable-column-selection checkbox"} 
-                 style={style}>
+            <div style={style}>
                 <input type={"checkbox"} name={"check"} onChange={this.handleChange} checked={isChecked} data-name={col} key={"check"+ col}/>
                 <span ref={col}>{" " + displayName}</span>
             </div>
@@ -162,7 +161,7 @@ var TableSettings = React.createClass({
               maxHeight: "20px",
               marginTop: "0",
               height: "38px",
-              padding: "6px 10px",
+              padding: "0",
               backgroundColor: "#fff",
               border: "1px solid #D1D1D1",
               borderRadius: "4px",
@@ -186,12 +185,11 @@ var TableSettings = React.createClass({
 			);
 
 		return (
-			<div style={{backgroundColor: "#FFF", border: "1px solid #DDD", color: "#222", padding: "10px", marginBottom: "10px", fontFamily: "Arial"}} >
+			<div style={{backgroundColor: "#FFF", border: "2px solid #DDD", color: "#222", padding: "10px", marginBottom: "10px", fontFamily: "Arial"}} >
                 <div style={{"float": "right", marginTop: "-70px", marginRight: "-10px","width": "25%"}}>
                    <Selector columns={this.props.columns} focusCheckBox={this.setAccordionOpen}/>
                 </div>
-				<div className={"dataTable-columns"} style={{clear: "both", display: "table", width: "100%", borderBottom: "1px solid #EDEDED", marginBottom: "10px"}} >
-
+				<div style={{clear: "both", display: "table", width: "100%", borderBottom: "1px solid #EDEDED", marginBottom: "10px"}} >
 				    {nodes}
 				</div>
 				{setPageSize}

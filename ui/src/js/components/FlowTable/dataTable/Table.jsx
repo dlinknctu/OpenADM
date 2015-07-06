@@ -21,7 +21,7 @@ var Table = React.createClass({
       }
     },
     render: function() {
-      //console.log("dataTable=" + this.props.data);
+      
       var that = this;
 
       var nodes = null;
