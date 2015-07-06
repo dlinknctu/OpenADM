@@ -91,7 +91,7 @@ public class OmniUI extends ServerResource implements IFloodlightModule,IOFMessa
 			response.append(inputLine);
 		}
 		in.close();
-		System.out.println(response.toString());
+		//System.out.println(response.toString());
 	}
 
 	@Override
@@ -168,7 +168,7 @@ public class OmniUI extends ServerResource implements IFloodlightModule,IOFMessa
 	public net.floodlightcontroller.core.IListener.Command receive(IOFSwitch sw, OFMessage msg, FloodlightContext cntx) {
 		switch (msg.getType()) {
 		case FLOW_MOD:
-			logger.info("FLOW MOD MSG : {}",msg);
+			//logger.info("FLOW MOD MSG : {}",msg);
 			return Command.CONTINUE;
 		case FLOW_REMOVED:
 			OFFlowRemoved msg2 = (OFFlowRemoved) msg;
@@ -178,7 +178,7 @@ public class OmniUI extends ServerResource implements IFloodlightModule,IOFMessa
 			}
 			return Command.CONTINUE;
 		case BARRIER_REPLY:
-			logger.info("BARRIER REPLY : {}",msg);
+			//logger.info("BARRIER REPLY : {}",msg);
 			FlowModResource.setMsg2();
 			return Command.CONTINUE;
 		case PACKET_IN:

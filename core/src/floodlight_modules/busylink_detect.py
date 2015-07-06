@@ -1,7 +1,6 @@
 import httplib
 import logging
 import json
-import core
 logger = logging.getLogger(__name__)
 
 class BusyLink_Detect:
@@ -18,6 +17,8 @@ class BusyLink_Detect:
 		self.finalState = 3
 		self.threshold = 0.8
 		self.statistics = {}
+		self.links = {}
+		self.switches= {}
 		self.BLD_result = []
 
 		#load config
@@ -135,7 +136,7 @@ class BusyLink_Detect:
 			for switch in data:
 				tmp = {}
 				for port in switch['ports']:
-					tmp[port['PortNumber']] = port['recvBytes']
+					tmp[int(port['port'])] = int(port['rxbyte'])
 				self.switches[switch['dpid']] = tmp
 		except Exception, e:
 			logger.error("json parse error for switch: "+str(e))
