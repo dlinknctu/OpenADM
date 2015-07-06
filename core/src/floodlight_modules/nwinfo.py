@@ -286,18 +286,16 @@ class NWInfo:
 
         # Build link between host and switches
         tmp = []
-        for ap in raw['aps']:
-            key2 = (raw['mac'], ap['dpid'], ap['port'])
-            mac_uuid = abs(int(str(hash(raw['mac']))[8:]))
-            sw_uuid = abs(int(str(hash(ap['dpid']))[8:]))
-            if key2 in self.links.keys():
-                pass
-            self.links[key2] = [{'uuid': mac_uuid,
-                                 'mac': raw['mac']},
-                                {'uuid': sw_uuid,
-                                 'dpid': ap['dpid'],
-                                 'port': ap['port']}]
-            tmp.append(self.links[key2])
+        for key2 in self.links.keys():
+            if raw['mac'] in key2:
+                mac_uuid = abs(int(str(hash(key2[0]))[8:]))
+                sw_uuid = abs(int(str(hash(key2[1]))[8:]))
+                del self.links[key2]
+                tmp.append([{'uuid': mac_uuid,
+                             'mac': key2[0]},
+                            {'uuid': sw_uuid,
+                             'dpid': key2[1],
+                             'port': key2[2]}])
 
         result = json.dumps(tmp)
         return result

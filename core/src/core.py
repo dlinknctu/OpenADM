@@ -144,13 +144,16 @@ class Core:
 			restIP = config['REST']['ip']
 			restPort = config['REST']['port']
 
-			def notify(e, d):
+			def notify(e, d, q=None):
 				msg = {
 					'event': e,
 					'data': d
 				}
-				for sub in subscriptions[:]:
-					sub.put(msg)
+                                if q is not None:
+                                    q.put(msg)
+                                else:
+                                    for sub in subscriptions[:]:
+                                            sub.put(msg)
 
 			@app.route('/debug')
 			@cross_origin()
@@ -187,7 +190,7 @@ class Core:
 					for e in sseHandlers.keys():
 						rs = sseHandlers[e]('debut')
 						if rs is not None:
-							gevent.spawn(notify, e, rs)
+							gevent.spawn(notify, e, rs, q)
 					try:
 						while True:
 							result = q.get()
