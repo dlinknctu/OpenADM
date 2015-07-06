@@ -1,0 +1,73 @@
+[
+	{
+	  	"columnName": "dpid",
+	  	"order": 1,
+	  	"visible": true
+	},
+	{
+	  	"columnName": "cookie",
+	  	"order": 2,
+	  	"visible": true
+	},
+	{
+	  	"columnName": "vlan",
+	  	"order": 3,
+	  	"visible": true
+	},
+	{
+	  	"columnName": "in_port",
+	  	"order": 4,
+	  	"visible": true
+	},
+	{
+	  	"columnName": "nw_src",
+	  	"order": 5,
+	  	"visible": true
+	},
+	{
+	  	"columnName": "nw_dst",
+	  	"order": 6,
+	  	"visible": true
+	},
+	{
+	  	"columnName": "nw_proto",
+	  	"order": 7,
+	  	"visible": true
+	},
+	{
+	  	"columnName": "dl_src",
+	  	"order": 8,
+	  	"visible": true
+	},
+	{
+	  	"columnName": "dl_dst",
+	  	"order": 9,
+	  	"visible": true
+	},
+	{
+	  	"columnName": "dl_type",
+	  	"order": 9,
+	  	"visible": true
+	},
+	{
+		"columnName": "actions",
+	  	"order": 10,
+	  	"visible": true
+	},
+	{
+		"columnName": "priority",
+	  	"order": 11,
+	  	"visible": true
+	},
+	{
+		"columnName": "idle_timeout",
+	  	"order": 12,
+	  	"visible": true
+	},
+	{
+		"columnName": "hard_timeout",
+	  	"order": 13,
+	  	"visible": true
+	}
+
+]

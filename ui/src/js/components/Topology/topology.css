@@ -1,0 +1,31 @@
+.link {
+  stroke: #ddd;
+  stroke-width: 4;
+  cursor: crosshair;
+}
+.node {
+  cursor: move;
+  /* 邊框 拉拉不喜歡所以拿掉
+  stroke: #ccc;
+  stroke-width: 2px;*/
+}
+.node.choose {
+  fill: #f00;
+}
+.node.fixed {
+  stroke: #000;
+  stroke-width: 1px;
+  r: 13;
+}
+.switch {
+  fill: rgb(255, 188, 0);
+}
+.ap {
+  fill: rgb(0, 157, 83);
+}
+.host {
+  fill: rgb(250, 71, 47);
+}
+.device {
+  fill: rgb(0, 101, 234);
+}

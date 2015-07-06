@@ -1,0 +1,37 @@
+[
+    {
+        "src": "*",
+        "dst": "140.113.0.0/16",
+        "transport_prot:port": "*",
+        "action": "DENY"
+    },
+    {
+        "src": "140.113.0.0/16",
+        "dst": "*",
+        "transport_prot:port": "UDP:53",
+        "action": "ALLOW"
+    },
+    {
+        "src": "140.113.240.0/16",
+        "dst": "*",
+        "transport_prot:port": "TCP:80",
+        "action": "ALLOW"
+    },
+    {
+        "src": "140.113.240.0/16",
+        "dst": "*",
+        "transport_prot:port": "TCP:443",
+        "action": "ALLOW"
+    },
+    {
+        "src": "140.113.240.0/16",
+        "dst": "*",
+        "transport_prot:port": "*",
+        "action": "DENY"
+    },                                                                                                                                                                                {
+        "src": "140.113.0.0/16",
+        "dst": "*",
+        "transport_prot:port": "*",
+        "action": "ALLOW"
+    }
+]
