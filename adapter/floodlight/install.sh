@@ -17,6 +17,13 @@ sed '2i\
    ' $file > $file.tmp
 mv $file.tmp $file
 
+echo -e 'Configuring dependencies'
+wget www.java2s.com/Code/JarDownload/java/java-json.jar.zip
+unzip java-json.jar.zip -d floodlight/lib
+sed -i '/<patternset id="lib">/a\
+	<include name="java-json.jar" />
+	' floodlight/build.xml
+
 # Compile Floodlight
 echo -e '\033[32mCompile Floodlight\033[0m'
 cd floodlight
