@@ -4,7 +4,7 @@ echo -e "\033[32mClone Floodlight 0.91 from GitHub repository\033[0m"
 git clone https://github.com/floodlight/floodlight.git -b v0.91 floodlight
 
 echo -e '\033[32mCopy OmniUI module into Floodlight directory\033[0m'
-cp -r adapter/floodlight/omniui floodlight/src/main/java/net/floodlightcontroller/
+cp -r omniui/adapter/floodlight/omniui floodlight/src/main/java/net/floodlightcontroller/
 
 echo -e '\033[32mModify META-INF\033[0m'
 echo "net.floodlightcontroller.omniui.OmniUI" >> \
