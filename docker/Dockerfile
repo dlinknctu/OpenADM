@@ -13,7 +13,7 @@ RUN echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true 
     apt-get install -y nodejs npm && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /var/cache/oracle-jdk7-installer
-WORKDIR /usr/local/bin
+WORKDIR /usr/bin
 RUN ln -s nodejs node
 
 # Setup environment variable
