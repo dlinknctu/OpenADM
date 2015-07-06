@@ -17,6 +17,7 @@ class BusyLink_Detect:
 		self.finalState = 3
 		self.threshold = 0.8
 		self.statistics = {}
+		self.capacity = {}
 		self.links = {}
 		self.switches= {}
 		self.BLD_result = []

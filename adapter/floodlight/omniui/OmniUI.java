@@ -94,6 +94,64 @@ public class OmniUI extends ServerResource implements IFloodlightModule,IOFMessa
 		//System.out.println(response.toString());
 	}
 
+	void sendflowmsg(String dpid, JSONArray flows){
+		String url = "http://localhost:5567/publish/flow";
+		String data = String.format("{\"controller\":\"%s\", \"dpid\":\"%s\", \"flows\":%s}",controller_name , dpid, flows.toString());
+		try{
+			sendPost(url, data);
+		}catch (Exception e){
+			logger.info("sendPost failed.");
+		}
+	}
+
+	void sendportmsg(JSONArray ports){
+		String url = "http://localhost:5567/publish/port";
+		for(int j=0 ; j < ports.length() ;j++){
+			try{
+				String data = String.format("%s", ports.getJSONObject(j).toString());
+				sendPost(url, data);
+			}catch (Exception e){
+				logger.info("sendPost failed.");
+			}
+		}
+	}
+
+	void polling(){
+		try{
+			String url = "http://localhost:8080/wm/omniui/switch/json";
+			URL obj = new URL(url);
+			HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+			con.setRequestMethod("GET");
+			BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+			String inputLine;
+			StringBuffer response = new StringBuffer();
+			while ((inputLine = in.readLine()) != null) {
+				response.append(inputLine);
+			}
+			in.close();
+
+			String s = response.toString();
+			JSONArray myJsonArray = new JSONArray(s);
+			for(int i=0 ; i < myJsonArray.length() ;i++){
+				JSONObject myjObject = myJsonArray.getJSONObject(i);
+				String dpid = myjObject.getString("dpid");
+
+				JSONArray flowJsonArray = myjObject.getJSONArray("flows");
+				sendflowmsg(dpid, flowJsonArray);
+
+				JSONArray portJsonArray = myjObject.getJSONArray("ports");
+				for(int j=0 ; j < portJsonArray.length() ;j++){
+					JSONObject portjObject = portJsonArray.getJSONObject(j);
+					portjObject.putOnce("controller", controller_name);
+					portjObject.putOnce("dpid", dpid);
+				}
+				sendportmsg(portJsonArray);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+
 	@Override
 	public String getName() {
 		// TODO Auto-generated method stub
@@ -179,6 +237,7 @@ public class OmniUI extends ServerResource implements IFloodlightModule,IOFMessa
 			return Command.CONTINUE;
 		case BARRIER_REPLY:
 			//logger.info("BARRIER REPLY : {}",msg);
+			if(FlowModResource.barrier) polling();
 			FlowModResource.setMsg2();
 			return Command.CONTINUE;
 		case PACKET_IN:
@@ -301,7 +360,7 @@ public class OmniUI extends ServerResource implements IFloodlightModule,IOFMessa
 				data2 += info;
 				if(i != sw.length-1) data2 += ",";
 			}
-			String data = String.format("{\"controller\":\"%s\", \"mac\":\"%s\", \"aps\":[%s]}", controller_name, HexString.toHexString(device.getMACAddress()), data2);
+			String data = String.format("{\"controller\":\"%s\", \"mac\":\"%s\", \"aps\":[%s]}", controller_name, HexString.toHexString(device.getMACAddress()).substring(6), data2);
 			try{
 				sendPost(url, data);
 			}catch (Exception e){
@@ -337,7 +396,7 @@ public class OmniUI extends ServerResource implements IFloodlightModule,IOFMessa
 					data2 += info;
 					if(i != sw.length-1) data2 += ",";
 				}
-				data = String.format("{\"controller\":\"%s\", \"mac\":\"%s\", \"aps\":[%s]}", controller_name, HexString.toHexString(device.getMACAddress()), data2);
+				data = String.format("{\"controller\":\"%s\", \"mac\":\"%s\", \"aps\":[%s]}", controller_name, HexString.toHexString(device.getMACAddress()).substring(6), data2);
 			}
 			try{
 				sendPost(url, data);
@@ -396,59 +455,7 @@ public class OmniUI extends ServerResource implements IFloodlightModule,IOFMessa
 	class PollTask extends TimerTask {
 		@Override
 		public void run(){
-			try{
-				String url = "http://localhost:8080/wm/omniui/switch/json";
-				URL obj = new URL(url);
-				HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-				con.setRequestMethod("GET");
-				BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-				String inputLine;
-				StringBuffer response = new StringBuffer();
-				while ((inputLine = in.readLine()) != null) {
-					response.append(inputLine);
-				}
-				in.close();
-
-				String s = response.toString();
-				JSONArray myJsonArray = new JSONArray(s);
-				for(int i=0 ; i < myJsonArray.length() ;i++){
-					JSONObject myjObject = myJsonArray.getJSONObject(i);
-					String dpid = myjObject.getString("dpid");
-
-					JSONArray flowJsonArray = myjObject.getJSONArray("flows");
-					sendflowmsg(dpid, flowJsonArray);
-
-					JSONArray portJsonArray = myjObject.getJSONArray("ports");
-					for(int j=0 ; j < portJsonArray.length() ;j++){
-						JSONObject portjObject = portJsonArray.getJSONObject(j);
-						portjObject.putOnce("controller", controller_name);
-						portjObject.putOnce("dpid", dpid);
-					}
-					sendportmsg(portJsonArray);
-				}
-			}catch(Exception e){
-				e.printStackTrace();
-			}
-		}
-		protected void sendflowmsg(String dpid, JSONArray flows){
-			String url = "http://localhost:5567/publish/flow";
-			String data = String.format("{\"controller\":\"%s\", \"dpid\":\"%s\", \"flows\":%s}",controller_name , dpid, flows.toString());
-			try{
-				sendPost(url, data);
-			}catch (Exception e){
-				logger.info("sendPost failed.");
-			}
-		}
-		protected void sendportmsg(JSONArray ports){
-			String url = "http://localhost:5567/publish/port";
-			for(int j=0 ; j < ports.length() ;j++){
-				try{
-					String data = String.format("%s", ports.getJSONObject(j).toString());
-					sendPost(url, data);
-				}catch (Exception e){
-					logger.info("sendPost failed.");
-				}
-			}
+			polling();
 		}
 	}
 }
