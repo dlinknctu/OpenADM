@@ -96,11 +96,15 @@ class NWInfo:
         if raw == 'debut':
             return json.dumps(self.links.values())
         key = (raw['src_dpid'], raw['dst_dpid'], raw['src_port'], raw['dst_port'])
+        src_uuid = abs(int(str(hash(raw['src_dpid']))[8:]))
+        dst_uuid = abs(int(str(hash(raw['dst_dpid']))[8:]))
         if key in self.links.keys():
             return None
-        self.links[key] = [{'src_dpid': raw['src_dpid'],
+        self.links[key] = [{'uuid': src_uuid,
+                            'src_dpid': raw['src_dpid'],
                             'src_port': raw['src_port']},
-                           {'dst_dpid': raw['dst_dpid'],
+                           {'uuid': dst_uuid,
+                            'dst_dpid': raw['dst_dpid'],
                             'dst_port': raw['dst_port']}]
         logger.debug('Total links after addition: %d' % len(self.links))
 
@@ -126,9 +130,13 @@ class NWInfo:
             return None
         logger.debug('Total links after deletion: %d' % len(self.links))
 
-        result = json.dumps([{'src_dpid': raw['src_dpid'],
+        src_uuid = abs(int(str(hash(raw['src_dpid']))[8:]))
+        dst_uuid = abs(int(str(hash(raw['dst_dpid']))[8:]))
+        result = json.dumps([{'uuid': src_uuid,
+                              'src_dpid': raw['src_dpid'],
                               'src_port': raw['src_port']},
-                             {'dst_dpid': raw['dst_dpid'],
+                             {'uuid': dst_uuid,
+                              'dst_dpid': raw['dst_dpid'],
                               'dst_port': raw['dst_port']}])
         return result
 
@@ -179,7 +187,8 @@ class NWInfo:
         key = raw['dpid']
         if key in self.devices.keys():
             return None
-        self.devices[key] = {'dpid': raw['dpid'], 'type': 'switch'}
+        uuid = abs(int(str(hash(key))[8:]))
+        self.devices[key] = {'uuid': uuid, 'dpid': raw['dpid'], 'type': 'switch'}
         logger.debug('Total devices after addition: %d' % len(self.devices))
 
         result = json.dumps(self.devices[key])
@@ -201,7 +210,8 @@ class NWInfo:
             return None
         logger.debug('Total devices after deletion: %d' % len(self.devices))
 
-        result = json.dumps({'dpid': raw['dpid'], 'type': 'switch'})
+        uuid = abs(int(str(hash(key))[8:]))
+        result = json.dumps({'uuid': uuid, 'dpid': raw['dpid'], 'type': 'switch'})
         return result
 
     def addhostHandler(self, raw):
@@ -213,14 +223,32 @@ class NWInfo:
         if raw == 'debut':
             return json.dumps(self.hosts.values())
         key = raw['mac']
+        uuid = abs(int(str(hash(key))[8:]))
         if key in self.hosts.keys():
             return None
-        self.hosts[key] = {'mac': raw['mac'],
+        self.hosts[key] = {'uuid': uuid,
+                           'mac': raw['mac'],
                            'ips': raw.get('ips', []),
-                           'aps': raw['aps']}
+                           'aps': raw['aps'],
+                           'type': 'host'}
+        # Build link between host and switches
+        tmp = []
+        for ap in raw['aps']:
+            key2 = (raw['mac'], ap['dpid'], ap['port'])
+            mac_uuid = abs(int(str(hash(raw['mac']))[8:]))
+            sw_uuid = abs(int(str(hash(ap['dpid']))[8:]))
+            if key2 in self.links.keys():
+                pass
+            self.links[key2] = [{'uuid': mac_uuid,
+                                 'mac': raw['mac']},
+                                {'uuid': sw_uuid,
+                                 'dpid': ap['dpid'],
+                                 'port': ap['port']}]
+            tmp.append(self.links[key2])
+
         logger.debug('Total hosts after addition: %d' % len(self.hosts))
 
-        result = json.dumps(self.hosts[key])
+        result = json.dumps(tmp)
         return result
 
     def delhostHandler(self, raw):
@@ -239,7 +267,22 @@ class NWInfo:
             return None
         logger.debug('Total hosts after deletion: %d' % len(self.hosts))
 
-        result = json.dumps({'mac': raw['mac']})
+        # Build link between host and switches
+        tmp = []
+        for ap in raw['aps']:
+            key2 = (raw['mac'], ap['dpid'], ap['port'])
+            mac_uuid = abs(int(str(hash(raw['mac']))[8:]))
+            sw_uuid = abs(int(str(hash(ap['dpid']))[8:]))
+            if key2 in self.links.keys():
+                pass
+            self.links[key2] = [{'uuid': mac_uuid,
+                                 'mac': raw['mac']},
+                                {'uuid': sw_uuid,
+                                 'dpid': ap['dpid'],
+                                 'port': ap['port']}]
+            tmp.append(self.links[key2])
+
+        result = json.dumps(tmp)
         return result
 
     def portHandler(self, raw):
