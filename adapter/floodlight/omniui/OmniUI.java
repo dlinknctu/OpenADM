@@ -404,7 +404,7 @@ public class OmniUI extends ServerResource implements IFloodlightModule,IOFMessa
 				HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 				con.setRequestMethod("GET");
 				BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-				String data = in.readLine();
+				String data = String.format("{\"controller\":\"%s\", %s}",controller_name, in.readLine());
 				in.close();
 				String url2 = "http://localhost:5567/publish/controller";
 				sendPost(url2, data);

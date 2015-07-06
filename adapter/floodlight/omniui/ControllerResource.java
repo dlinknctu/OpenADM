@@ -12,7 +12,7 @@ public class ControllerResource extends ServerResource {
             String cmd = "cat /etc/issue";
             Process process = Runtime.getRuntime().exec(cmd);
             LineNumberReader br = new LineNumberReader(new InputStreamReader(process.getInputStream()));
-            String os = br.readLine();
+            String os = br.readLine().replaceAll("\\\\\\w+","");
 
             cmd = "free -h";
             process = Runtime.getRuntime().exec(cmd);
@@ -33,7 +33,7 @@ public class ControllerResource extends ServerResource {
             line = br.readLine();
             String cpuload = line.split(" ")[0];
 
-            String data = String.format("{\"controller\":\"floodlight\", \"os\":\"%s\", \"mem_total\":\"%s\", \"mem_used\":\"%s\", \"mem_free\":\"%s\", \"cpu\":\"%s\"}", os, total, used, free, cpuload);
+            String data = String.format("\"type\":\"floodlight\", \"os\":\"%s\", \"mem_total\":\"%s\", \"mem_used\":\"%s\", \"mem_free\":\"%s\", \"cpu\":\"%s\"", os, total, used, free, cpuload);
             return data;
         }catch (Exception e){
             e.printStackTrace();
