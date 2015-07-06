@@ -1,4 +1,4 @@
-script: ./run-tests.sh
+script: ./run.sh test
 sudo: false
 cache:
     directories:
