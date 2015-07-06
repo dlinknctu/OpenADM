@@ -79,7 +79,7 @@ module.exports = {
     devtool: 'eval', //'#source-map'
     devServer: {
         host: '0.0.0.0',
-        port: '8080',
+        port: '8000',
         hot: true,
         contentBase: Path.resolve(__dirname, "./build"),
         filename: '[name].js',

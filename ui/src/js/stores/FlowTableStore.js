@@ -28,7 +28,7 @@ class FlowTableStore {
 	}
 
 	parseActions(dpid, flow, actionList){
-		
+
 		//set switch dpid
 		var object = new Object;
 		object["switch"] = dpid;
@@ -47,11 +47,11 @@ class FlowTableStore {
 						actionStr = actionList[action].type;
 						actions.push(actionStr);
 					}
-					
+
 				}
 				flow["actions"] = actions.toString();
-				
-			}	
+
+			}
 		}
 		_.extend(object, flow);
 		return object;
@@ -120,27 +120,25 @@ class FlowTableStore {
 			var field = new Object;
 			field[flowMod[key].name.toString()] = flowMod[key].val;
 			_.extend(data,field)
-			
+
 		}
 		var postJson = JSON.stringify(data);
-		this.isLoading = true;
-		
-		$.ajax({
-			dataType: 'json',
-			type: 'POST',
-		 	url: url,
-		 	data: postJson,
-		 	success: function(data) {
-		       console.log(data);
-		       this.isLoading = false;
-		       this.fetchNewData = true;
-		       this.emitChange();
-		    }.bind(this),
-		    error: function(xhr, status, err) {
-		       console.error(url, status, err.toString());
-		       this.isLoading = false;
-		    }.bind(this)
-		});
+
+		fetch(url, {
+          method: 'post',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: postJson
+        })
+        .then((data) => {
+            console.log('request succeeded with JSON response', data.status);
+            this.fetchNewData = true;
+            this.emitChange();
+        }).catch((error) => {
+            console.log('request failed', error)
+        })
 	}
 }
 

@@ -25,6 +25,7 @@ class Topology extends React.Component {
             links: [],   // [ [{src_port, src_dpid}, { dst_port, dst_dpid }], ]
             focusNode: { type: 'none', id: 'none', lastFocusNode: {}},
             // { type, id }  mac or dpid lastFocusNode (for dishighlight)
+            topologyLayout: {}
         }
     }
 
@@ -46,7 +47,26 @@ class Topology extends React.Component {
             .size([width, height])
             .charge(-400)
             .linkDistance(40)
-            .on("tick", tick);
+            .on("tick", function() {
+                link.attr("x1", d => d.source.x )
+                    .attr("y1", d => d.source.y )
+                    .attr("x2", d => d.target.x )
+                    .attr("y2", d => d.target.y );
+
+                node.selectAll('text')
+                  .each( function(d,i) {
+                      var text = d3.select(this);
+                      text.attr('x', d.x - 5)
+                          .attr('y', d.y + 5);
+                  });
+
+                node.selectAll('circle')
+                  .each( function(d,i) {
+                      var circle = d3.select(this);
+                      circle.attr('cx', d.x)
+                            .attr('cy', d.y);
+                  });
+              });
 
         var svg = d3.select("#topology").append("svg")
             .attr("width", width)
@@ -54,6 +74,8 @@ class Topology extends React.Component {
 
         var link = svg.selectAll(".link"),
             node = svg.selectAll(".node");
+
+        let allnode = this.state.devices.concat(this.state.hosts);
 
         topologyLayout.nodes(graph.nodes)
           .links(graph.links)
@@ -132,28 +154,25 @@ class Topology extends React.Component {
             .attr("fill",function(d, i) {  return  "#fff";  })
             .attr("font-size",function(d, i) {  return  "1em"; });
 
+        function start() {
+          link = link.data(topologyLayout.links(), (d) => {
+            return d.source.id + "-" + d.target.id;
+          });
+          link.enter().insert("line", ".node").attr("class", "link");
+          link.exit().remove();
 
-        function tick() {
-          link.attr("x1", d => d.source.x )
-              .attr("y1", d => d.source.y )
-              .attr("x2", d => d.target.x )
-              .attr("y2", d => d.target.y );
+          node = node.data(topologyLayout.nodes(), (d) => d.id );
+          node.enter().append("circle").attr("class", (d) => {
+            return "node " + d.id;
+          }).attr("r", 8);
+          node.exit().remove();
 
-          node.selectAll('text')
-            .each( function(d,i) {
-                var text = d3.select(this);
-                text.attr('x', d.x - 5)
-                    .attr('y', d.y + 5);
-            });
-
-          node.selectAll('circle')
-            .each( function(d,i) {
-                var circle = d3.select(this);
-                circle.attr('cx', d.x)
-                      .attr('cy', d.y);
-            });
+          topologyLayout.start();
         }
 
+        this.setState({
+          topologyLayout: topologyLayout
+        });
     }
 
     handleFocusNode(node, domNode){
@@ -165,6 +184,7 @@ class Topology extends React.Component {
             }
         });
         console.log('You choose ', this.state.focusNode);
+        console.log(d3.select("#topology"));
     }
 
     handleSubscribe(){
@@ -223,6 +243,7 @@ class Topology extends React.Component {
         this.setState({
             links: this.state.links.concat(link)
         });
+        console.log("add link", links);
     }
     dellink(e) {
         var link = JSON.parse(e.data);
