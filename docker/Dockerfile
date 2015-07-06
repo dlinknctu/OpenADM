@@ -19,6 +19,7 @@ RUN ln -s nodejs node
 # Setup environment variable
 ENV HOME /root
 ENV JAVA_HOME /usr/lib/jvm/java-7-oracle
+ENV PATH $PATH:/root/.local/bin
 
 # Fetch and install
 WORKDIR $HOME

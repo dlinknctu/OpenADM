@@ -12,7 +12,7 @@ function test_core {
 
 function install_core {
     cd $rootpath/core
-    python setup.py install
+    python setup.py install --user
 }
 
 function install_ui {
