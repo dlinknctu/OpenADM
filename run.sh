@@ -15,15 +15,20 @@ function install_core {
     python setup.py install
 }
 
-function test_ui {
+function install_ui {
     cd $rootpath/ui
     npm install
+}
+
+function test_ui {
+    cd $rootpath/ui
     npm test
 }
 
 function install {
     install_floodlight
     install_core
+    install_ui
 }
 
 function test {
