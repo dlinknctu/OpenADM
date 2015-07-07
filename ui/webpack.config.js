@@ -8,7 +8,7 @@ module.exports = {
         "bundle": [
             Path.resolve(__dirname, 'src/index.html'),
             Path.resolve(__dirname, 'src/boot.js'),
-            'webpack-dev-server/client?http://localhost:8080',
+            'webpack-dev-server/client?http://localhost:8000',
             'webpack/hot/only-dev-server',
         ]
     },

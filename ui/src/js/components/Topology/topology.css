@@ -1,22 +1,20 @@
 .link {
   stroke: #555;
-  stroke-width: 2;
+  stroke-width: 5;
+  opacity:1;
   cursor: crosshair;
 }
 .node {
   cursor: move;
-  z-index: 0;
-  /* 邊框 拉拉不喜歡所以拿掉
-  stroke: #ccc;
-  stroke-width: 2px;*/
+  r: 15;
 }
 .node.choose {
   fill: rgb(255, 0, 0);
 }
 .node.fixed {
-  stroke: #faa;
-  stroke-width: 1px;
-  r: 15;
+  stroke: #baa;
+  stroke-width: 2px;
+  r: 18;
 }
 .switch {
   fill: rgb(255, 188, 0);
