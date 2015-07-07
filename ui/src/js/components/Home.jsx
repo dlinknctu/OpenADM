@@ -46,7 +46,7 @@ class Home extends React.Component {
                 rowData={rowData}
                 columnOrder={colOrder}
                 headerColumns={headerCols}
-                displaySelectAll={false} />
+                displayRowCheckbox={false} />
 
             </FullWidthSection>
     );

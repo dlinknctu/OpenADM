@@ -1,5 +1,4 @@
 require('react-grid-layout/node_modules/react-resizable/css/styles.css');
-
 let React = require('react');
 let { RaisedButton, Paper, Styles } = require('material-ui');
 let FullWidthSection = require('./FullWidthSection.jsx');
@@ -29,10 +28,9 @@ class Domain extends React.Component {
 
     this.state = {
         layout: ls.layout ||[],
-        focusNode: { id: "none", type: '' },
+        focusNode: { id: "none", type: 'none' },
         controllerStatus: {}
     }
-    console.log('default state', this.state.layout);
   }
 
   onLayoutChange(e){
@@ -47,11 +45,23 @@ class Domain extends React.Component {
         }));
       }
   }
+  handleChagneFocusID(node){
+    if ( node.id != null){
+        this.setState({
+            focusNode: {
+                id: node.id,
+                type: node.type
+            }
+        });
+    }else {
 
-  handleControllerStatus(status){
-    this.setState({
-        controllerStatus: status
-    });
+        this.setState({
+            focusNode: {
+                id: "none",
+                type: 'none'
+            }
+        });
+    }
   }
 
   handleControllerStatus(status){
@@ -61,7 +71,10 @@ class Domain extends React.Component {
   }
 
   render() {
-
+    var dpid = "none";
+    if (this.state.focusNode.type === 'switch' && this.state.focusNode.id !== "none"){
+        var dpid = this.state.focusNode.id;
+    }
     return (
       <FullWidthSection>
         <h1>Module</h1>
@@ -72,8 +85,7 @@ class Domain extends React.Component {
                          className="layout"
                          autoSize={true}
                          rowHeight={100}
-                         cols={12}
-                          >
+                         cols={12}>
             <Module key={0} name="Topology"
             _grid={{ x: 0, y: 0, w: 4, h: 4, minW: 4, minH:4, isDraggable: false }}>
                 <Topology focusNode={this.state.focusNode}
@@ -88,8 +100,7 @@ class Domain extends React.Component {
         <Paper style={{ width: '99%',marginLeft:"10",padding:"10"}}>
           <h2>Flow Table</h2>
           <FlowTable openFlowVersion={1.0}
-                     filter={
-                      (this.state.focusNode.type === 'switch') ? this.state.focusNode.id : "none"}/>
+                     filter={dpid}/>
         </Paper>
       </FullWidthSection>
     );

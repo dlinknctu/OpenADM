@@ -11,10 +11,7 @@ var TYPE = {
   'HOST': 'host',
   'DEVICE': 'device'
 }
-var OmniUI = {
-  nodes: [],
-  links: []
-}
+
 var topologyNodes =[];
 var topologyLinks = [];
 var link = {}; // svg link
@@ -28,6 +25,7 @@ class Topology extends React.Component {
         super(props);
         this.state = {
             isSubscribe: false,
+            isSetTopology: false,
             isFinish: true,
             errorMessage: null,
             lastFocusNode: {},
@@ -42,9 +40,10 @@ class Topology extends React.Component {
 
     initialTopology(){
       // var renderDom = document.getElementById('container');
-      // var width = renderDom.offsetWidth ? renderDom.offsetWidth : 500,
-      // var height = renderDom.offsetHeight ? renderDom.offsetHeight : 500;
-        const width = 600;
+      // var renderDom = this.refs.topology.getDOMNode();
+      // var width = renderDOM.offsetWidth ? renderDOM.offsetWidth : 500;
+      // var height = renderDOM.offsetHeight ? renderDOM.offsetHeight : 500;
+        const width = 500;
         const height = 500;
 
         var svg = d3.select("#topology").append("svg")
@@ -76,10 +75,9 @@ class Topology extends React.Component {
                           .attr('y', d.y + 5);
                   });
               });
-
-        force.nodes(OmniUI.nodes)
-            .links(OmniUI.links)
-            .start();
+        // force.nodes(OmniUI.nodes)
+        //     .links(OmniUI.links)
+        //     .start();
         topologyNodes = force.nodes();
         topologyLinks = force.links();
         var drag = force.drag().on("dragstart", function(d){
@@ -91,11 +89,10 @@ class Topology extends React.Component {
 
   updateTopology() {
     var _this = this;
-
+  try {
     link = link.data(topologyLinks, d => d.source.uuid + "-" + d.target.uuid)
-    link.enter().append("line").attr("class", "link").attr("z-index", "-1");
+    link.enter().insert("line", ":first-child").attr("class", "link").attr("z-index", "-1");
     link.exit().remove();
-
     node = node.data(topologyNodes);
     node.enter()
       .append('g')
@@ -110,9 +107,13 @@ class Topology extends React.Component {
          .attr("font-size","1em");
       })
       .on("click", click)
-      .on("dblclick", dblclick);
-      // node.call(drag);
+      .on("dblclick", dblclick)
+      .call(force.drag);
     node.exit().remove();
+    }catch(e){
+      console.log("eeeeeeeeeeerr === " ,topologyLinks,topologyNodes);
+      console.log(e);
+    }
 
     force.start();
 
@@ -122,6 +123,10 @@ class Topology extends React.Component {
     function click(d) {
       if (d.type !== 'switch')
         return 0;
+      /**
+       * 三種情況
+       * 第一次點節點, 點相同節點, 點過節點再點別的
+       */
       if (focusNode.id === 'none' ){
           d3.select(this)
             .selectAll('circle')
@@ -141,7 +146,8 @@ class Topology extends React.Component {
         focusNode = {
           id: 'none',
           type: 'switch',
-          uuid: '0'
+          uuid: '0',
+          focusDom: this
         };
         _this.handleTopologyNodeClick();
       }
@@ -157,7 +163,8 @@ class Topology extends React.Component {
           focusNode = {
             id: d.dpid,
             type: d.type,
-            uuid: d.uuid
+            uuid: d.uuid,
+            focusDom: this
           };
           _this.handleTopologyNodeClick();
       }
@@ -171,17 +178,13 @@ class Topology extends React.Component {
         .selectAll('circle')
         .classed("choose", false);
     }
-    var drag = force.drag().on("dragstart", function(d){
-          d3.select(this)
-            .selectAll('circle')
-            .classed("fixed", d.fixed = true);
-        }).bind(this);
   }
 
   _findNodeIndex(uuid) {
       for (var i=0; i < topologyNodes.length; i++) {
-          if (topologyNodes[i].uuid === uuid)
+          if (topologyNodes[i].uuid === uuid){
               return i
+            }
       };
   }
 
@@ -220,54 +223,57 @@ class Topology extends React.Component {
   };
 
   handleTopologyNodeClick() {
-    this.props.onChagneFocusID(focusNode);
+    if (focusNode.type === "switch" && focusNode.id != null){
+        this.props.onChagneFocusID(focusNode);
+    }
   }
 
-    handleSubscribe(){
-        if (typeof(this.state.evtSrc) !== "object") {
-            var url = config.OmniUICoreURL + "subscribe";
+  handleSubscribe(){
+    if (typeof(this.state.evtSrc) !== "object") {
+        var url = config.OmniUICoreURL + "subscribe";
 
-            var evtSrc = new EventSource(url);
-            this.setState({
-                evtSrc: evtSrc
-            });
-            evtSrc.addEventListener('addlink', e => {
-                this.addlink(e);
-            });
-            evtSrc.addEventListener('dellink', e => {
-                this.dellink(e);
-            });
-            evtSrc.addEventListener('adddevice', e => {
-                this.adddevice(e);
-            });
-            evtSrc.addEventListener('deldevice', e => {
-                this.deldevice(e);
-            });
-            evtSrc.addEventListener('addport', e => {
-                this.addport(e) ;
-            });
-            evtSrc.addEventListener('delport', e => {
-                this.delport(e);
-            });
-            evtSrc.addEventListener('addhost', e => {
-                this.addhost(e);
-            });
-            evtSrc.addEventListener('delhost', e => {
-                this.delhost(e);
-            });
-            evtSrc.addEventListener('controller', e => {
-                this.props.handleControllerStatus(JSON.parse(e.data));
-            });
-          }
-    }
+        var evtSrc = new EventSource(url);
+        this.setState({
+            evtSrc: evtSrc
+        });
+        evtSrc.addEventListener('addlink', e => {
+            this.addlink(e);
+        });
+        evtSrc.addEventListener('dellink', e => {
+            this.dellink(e);
+        });
+        evtSrc.addEventListener('adddevice', e => {
+            this.adddevice(e);
+        });
+        evtSrc.addEventListener('deldevice', e => {
+            this.deldevice(e);
+        });
+        evtSrc.addEventListener('addport', e => {
+            this.addport(e) ;
+        });
+        evtSrc.addEventListener('delport', e => {
+            this.delport(e);
+        });
+        evtSrc.addEventListener('addhost', e => {
+            this.addhost(e);
+        });
+        evtSrc.addEventListener('delhost', e => {
+            this.delhost(e);
+        });
+        evtSrc.addEventListener('controller', e => {
+            this.props.handleControllerStatus(JSON.parse(e.data));
+        });
+      }
+  }
 
-    adddevice(e) {
-        var device = JSON.parse(e.data);
-        if ( device.length === 0)
+  adddevice(e) {
+      var device = JSON.parse(e.data);
+      if ( device.length === 0)
           return 0;
-        //console.info("Add Switch ", device);
+      console.info("Add Switch ", device);
         setTimeout((a) => {
           for (var i = 0; i < device.length; i++) {
+            if (device[i].uuid == null) return;
             this.addTopologyNode(device[i]);
           };
         }, 500);
@@ -289,10 +295,11 @@ class Topology extends React.Component {
         var link = JSON.parse(e.data);
         if( link.length === 0)
           return 0;
-        //console.info("Add Link ", link);
+        console.info("Add Link ", link);
         setTimeout((a) => {
           for (var i = 0; i < link.length; i++) {
-            this.addTopologyLink(link[i][0].uuid, link[i][1].uuid);
+            if (link[i][0].uuid !== null && link[i][1].uuid)
+              this.addTopologyLink(link[i][0].uuid, link[i][1].uuid);
           };
         }, 1000);
     }
@@ -301,7 +308,7 @@ class Topology extends React.Component {
         var link = JSON.parse(e.data);
         if( link.length === 0)
           return 0;
-        //console.info('Delete link ', link);
+        // console.info('Delete link ', link);
         setTimeout((a) => {
           for (var i = 0; i < link.length; i++) {
             this.delTopologyLink(link[i][0].uuid, link[i][1].uuid);
@@ -313,7 +320,7 @@ class Topology extends React.Component {
       var host = JSON.parse(e.data);
         if ( host.length === 0)
           return 0;
-        //console.info('Add host ', host);
+        // console.info('Add host ', host);
         setTimeout((a) => {
           for (var i = 0; i < host.length; i++) {
             this.addTopologyNode(host[i]);
@@ -325,7 +332,7 @@ class Topology extends React.Component {
       var host = JSON.parse(e.data);
         if ( host.length === 0)
           return 0;
-        //console.info('Delete host ', host);
+        // console.info('Delete host ', host);
         setTimeout((a) => {
           for (var i = 0; i < host.length; i++) {
             this.delTopologyNode(host[i]);
@@ -333,7 +340,6 @@ class Topology extends React.Component {
         }, 500);
     }
 
-    }
     addport(e) {
         var port = JSON.parse(e.data);
     }
@@ -343,7 +349,6 @@ class Topology extends React.Component {
 
     render() {
         return (
-          <div>
             <div id="topology"
                 ref="topology">
             </div>
