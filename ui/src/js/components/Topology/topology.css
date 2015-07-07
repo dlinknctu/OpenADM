@@ -1,8 +1,7 @@
 .link {
-  stroke: #666;
-  stroke-width: 1;
+  stroke: #555;
+  stroke-width: 2;
   cursor: crosshair;
-  z-index: 100;
 }
 .node {
   cursor: move;

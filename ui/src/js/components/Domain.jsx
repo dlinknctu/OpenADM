@@ -62,8 +62,6 @@ class Domain extends React.Component {
 
   render() {
 
-    console.log("點選switch dpip", this.state.focusNode.id);
-
     return (
       <FullWidthSection>
         <h1>Module</h1>

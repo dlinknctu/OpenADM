@@ -1,4 +1,3 @@
-
 import React from 'react';
 import config from "../../../../config/config.json";
 require("whatwg-fetch");
@@ -13,10 +12,7 @@ var TYPE = {
   'DEVICE': 'device'
 }
 var OmniUI = {
-  nodes: [
-    // {"id": "00:00:00:00:0f", "uuid": 120311234,"type": "host"},
-    // {"id": "00:00:00:00:0a", "uuid": 320312351,"type": "host"}
-  ],
+  nodes: [],
   links: []
 }
 var topologyNodes =[];
@@ -48,8 +44,8 @@ class Topology extends React.Component {
       // var renderDom = document.getElementById('container');
       // var width = renderDom.offsetWidth ? renderDom.offsetWidth : 500,
       // var height = renderDom.offsetHeight ? renderDom.offsetHeight : 500;
-        const width = 400;
-        const height = 300;
+        const width = 600;
+        const height = 500;
 
         var svg = d3.select("#topology").append("svg")
               .attr("width", width)
@@ -124,6 +120,8 @@ class Topology extends React.Component {
      * will merge
      */
     function click(d) {
+      if (d.type !== 'switch')
+        return 0;
       if (focusNode.id === 'none' ){
           d3.select(this)
             .selectAll('circle')
@@ -222,7 +220,6 @@ class Topology extends React.Component {
   };
 
   handleTopologyNodeClick() {
-    console.log("handleTopologyNodeClick", focusNode);
     this.props.onChagneFocusID(focusNode);
   }
 
@@ -268,6 +265,7 @@ class Topology extends React.Component {
         var device = JSON.parse(e.data);
         if ( device.length === 0)
           return 0;
+        //console.info("Add Switch ", device);
         setTimeout((a) => {
           for (var i = 0; i < device.length; i++) {
             this.addTopologyNode(device[i]);
@@ -279,6 +277,7 @@ class Topology extends React.Component {
         var device = JSON.parse(e.data);
         if ( device.length === 0)
           return 0;
+        //console.info("Delete Switch ", device);
         setTimeout((a) => {
           for (var i = 0; i < device.length; i++) {
             this.delTopologyNode(device[i]);
@@ -290,7 +289,7 @@ class Topology extends React.Component {
         var link = JSON.parse(e.data);
         if( link.length === 0)
           return 0;
-        console.log('add link ', link);
+        //console.info("Add Link ", link);
         setTimeout((a) => {
           for (var i = 0; i < link.length; i++) {
             this.addTopologyLink(link[i][0].uuid, link[i][1].uuid);
@@ -302,7 +301,7 @@ class Topology extends React.Component {
         var link = JSON.parse(e.data);
         if( link.length === 0)
           return 0;
-        console.log('del link ', link);
+        //console.info('Delete link ', link);
         setTimeout((a) => {
           for (var i = 0; i < link.length; i++) {
             this.delTopologyLink(link[i][0].uuid, link[i][1].uuid);
@@ -311,10 +310,10 @@ class Topology extends React.Component {
     }
 
     addhost(e) {
-        var host = JSON.parse(e.data);
-        console.log("add host ", host );
+      var host = JSON.parse(e.data);
         if ( host.length === 0)
           return 0;
+        //console.info('Add host ', host);
         setTimeout((a) => {
           for (var i = 0; i < host.length; i++) {
             this.addTopologyNode(host[i]);
@@ -323,10 +322,10 @@ class Topology extends React.Component {
     }
 
     delhost(e) {
-      host = JSON.parse(e.data);
-      console.log("del host ", host );
+      var host = JSON.parse(e.data);
         if ( host.length === 0)
           return 0;
+        //console.info('Delete host ', host);
         setTimeout((a) => {
           for (var i = 0; i < host.length; i++) {
             this.delTopologyNode(host[i]);
