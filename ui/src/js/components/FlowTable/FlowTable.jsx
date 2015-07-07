@@ -243,6 +243,7 @@ var FlowTable = React.createClass({
                 </div>
                 <div className={"flow-table-section"}>
                     <DataTable results={this.state.flows}
+                               filterDPID={this.state.filter}
                                columns={this.state.storageColumn}
                                columnMetadata={FlowTableColumnMetadata}
                                useFixedLayout={this.props.useFixedLayout}
