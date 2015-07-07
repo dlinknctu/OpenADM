@@ -183,7 +183,8 @@ class Topology extends React.Component {
          .attr("font-size","1em");
       })
       .on("click", click)
-      .on("dblclick", dblclick).call(force.drag);
+      .on("dblclick", dblclick);
+      // node.call(drag);
     node.exit().remove();
 
     force.start();
@@ -238,6 +239,11 @@ class Topology extends React.Component {
         .selectAll('circle')
         .classed("choose", false);
     }
+    var drag = force.drag().on("dragstart", function(d){
+          d3.select(this)
+            .selectAll('circle')
+            .classed("fixed", d.fixed = true);
+        }).bind(this);
   }
 
   _findNodeIndex(uuid) {
@@ -399,6 +405,7 @@ class Topology extends React.Component {
             this.delTopologyNode(host[i]);
           };
         }, 500);
+    }
 
     }
     addport(e) {

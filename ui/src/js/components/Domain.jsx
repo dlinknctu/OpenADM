@@ -58,6 +58,12 @@ class Domain extends React.Component {
     });
   }
 
+  handleControllerStatus(status){
+    this.setState({
+        controllerStatus: status
+    });
+  }
+
   render() {
 
     return (
