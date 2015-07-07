@@ -6,13 +6,14 @@ var TableSettings = require('./TableSettings.jsx');
 var mui = require('material-ui');
 var Dialog = mui.Dialog;
 var FlatButton = mui.FlatButton;
+var Avatar = mui.Avatar;
 var _ = require("underscore");
 var OpenFlow10_Fields = require('../../../constants/ofp10-col-selector.json');
 var OpenFlow13_Fields = require('../../../constants/ofp13-col-selector.json');
 
 var DataTable = React.createClass({
-	getDefaultProps: function(){
-		return{
+    getDefaultProps: function(){
+        return{
             "columns": [],
             "columnMetadata": [],
             "resultsPerPage":5,
@@ -38,18 +39,18 @@ var DataTable = React.createClass({
             "settingsToggleClassName": "settings",
             "openFlowVersion": 1.0
         };
-	},
-	getCurrentResults: function(){
+    },
+    getCurrentResults: function(){
         //if we have filter return filteredResults else return all results
-		return this.state.filteredResults || this.props.results;
-	},
-	getMetadataColumns: function(){
-		// get the columns which is unvisible
+        return this.state.filteredResults || this.props.results;
+    },
+    getMetadataColumns: function(){
+        // get the columns which is unvisible
         var meta = _.map(_.where(this.props.columnMetadata, {visible: false}), function(item){ return item.columnName});
 
         return meta;
     },
-	getColumns: function(){
+    getColumns: function(){
         var that = this;
         var results = this.getCurrentResults();
 
@@ -57,14 +58,14 @@ var DataTable = React.createClass({
         if (results === undefined || results.length === 0){ return [];}
 
         var columns = this.state.filteredColumns;
-        var meta = this.getMetadataColumns(); 
+        var meta = this.getMetadataColumns();
 
         //if we didn't set default or filter
         if (columns.length === 0){
             columns =  _.keys(_.omit(results[0], meta)); //remove meta columns
         }
 
-        columns = _.difference(columns, meta); 
+        columns = _.difference(columns, meta);
 
         columns = _.sortBy(columns, function(item){
             var metaItem = _.findWhere(that.props.columnMetadata, {columnName: item});
@@ -84,7 +85,7 @@ var DataTable = React.createClass({
             page: 0,
             filter: filter
         };
-       
+
         // Obtain the state results.
        updatedState.filteredResults = _.filter(this.props.results, function(item) {
 
@@ -121,7 +122,7 @@ var DataTable = React.createClass({
         }
         else
             return "";
-     
+
     },
     columnChooserClose: function(){
         this.setState({
@@ -152,7 +153,7 @@ var DataTable = React.createClass({
         this.setMaxPage();
     },
     setColumns: function(columns){
-        
+
         columns = _.isArray(columns) ? columns : [columns];
         this.props.refreshLocalStorage(columns);
         this.setState({
@@ -174,7 +175,7 @@ var DataTable = React.createClass({
         else
             return  "";
     },
-    getTopSection: function(filter, settings, columnSelector){
+    getTopSection: function(filter, settings, columnSelector,  dpidSection){
         if (this.props.showFilter === false && this.props.showSettings === false){
             return "";
         }
@@ -194,9 +195,15 @@ var DataTable = React.createClass({
         };
 
         var settingsStyles = {
-            "float": "left",
+            float: "left",
             width: "50%",
             textAlign: "right"
+        };
+        var dpidStyles = {
+            float: "right",
+            position:"relative",
+            top:"-90px",
+            right: "15px"
         };
 
         var standardActions = [
@@ -205,16 +212,21 @@ var DataTable = React.createClass({
 
        return (
             <div className={"top-section"} style={topContainerStyles}>
+
                 <div className={"dataTable-filter"} style={filterStyles}>
                     {filter}
+
                 </div>
                 <div className={"dataTable-settings"} style={settingsStyles}>
                     {settings}
                 </div>
+                <div style={dpidStyles}>
+                    {dpidSection}
+                </div>
                 <Dialog ref="tableSettingsDialog"
                         title={this.props.settingsText}
                         actions={standardActions}
-                        onDismiss={this.columnChooserClose} 
+                        onDismiss={this.columnChooserClose}
                         style={{"overflow": "scroll"}}
                         contentInnerStyle={{maxWidth:"1500px", width:"1300px"}}
                         contentStyle={{maxWidth:"1500px", width:"1350px"}}>
@@ -224,7 +236,7 @@ var DataTable = React.createClass({
         );
     },
     getDataForRender: function(data, cols, pageList){
-    	var that = this;
+        var that = this;
         //get the correct page size
         if(this.state.sortColumn !== "")
         {
@@ -300,7 +312,7 @@ var DataTable = React.createClass({
         var that = this;
         var state = {
             page:0,     //back to first page
-            sortColumn: sort,   //the selected column  
+            sortColumn: sort,   //the selected column
             sortAscending: true
         };
 
@@ -312,23 +324,23 @@ var DataTable = React.createClass({
         this.setState(state);
     },
     getPagingSection: function(currentPage, maxPage){
-    	//infiniteScroll does not need pager
+        //infiniteScroll does not need pager
         if ((this.props.showPager && !this.props.enableInfiniteScroll) === false) {
             return "";
         }
-        
-        return (
-        	<div className={"dataTable-footer"}>
-        		<TablePagination next={this.nextPage}
-        						 previous={this.previousPage}
-        						 currentPage={currentPage}
-        						 maxPage={maxPage}
-        						 setPage={this.setPage}
-        						 nextText={this.props.nextText}
-        						 previousText={this.props.previousText}
 
-        		/>
-        	</div>
+        return (
+            <div className={"dataTable-footer"}>
+                <TablePagination next={this.nextPage}
+                                 previous={this.previousPage}
+                                 currentPage={currentPage}
+                                 maxPage={maxPage}
+                                 setPage={this.setPage}
+                                 nextText={this.props.nextText}
+                                 previousText={this.props.previousText}
+
+                />
+            </div>
         );
     },
     componentWillReceiveProps: function(nextProps) {
@@ -350,40 +362,40 @@ var DataTable = React.createClass({
     },
     componentWillMount: function() {
         this.setMaxPage();
-		this.setState({
-			filteredColumns: this.props.columns
-		});
+        this.setState({
+            filteredColumns: this.props.columns
+        });
     },
-	getContentSection: function(data, cols, pagingContent, hasMorePages){
-		return (
-			<div>
-				<Table useFixedLayout={this.props.useFixedLayout}
-					   columnMetadata={this.props.columnMetadata}
-					   showPager={this.props.showPager}
-					   pagingContent={pagingContent}
-					   data={data}
-					   columns={cols}
-					   className={this.props.tableClassName}
-					   enableInfiniteScroll={this.props.enableInfiniteScroll}
-					   nextPage={this.nextPage}
-					   changeSort={this.changeSort}
-					   sortColumn={this.state.sortColumn}
-					   sortAscending={this.state.sortAscending}
-					   useFixedHeader={this.props.useFixedHeader}
-					   sortAscendingClassName={this.props.sortAscendingClassName}
-					   sortDescendingClassName={this.props.sortDescendingClassName}
-					   bodyHeight={this.props.bodyHeight}
-					   infiniteScrollSpacerHeight={this.props.infiniteScrollSpacerHeight}
-					   hasMorePages={hasMorePages}
-				/>
-			</div>
-		);
-	},
+    getContentSection: function(data, cols, pagingContent, hasMorePages){
+        return (
+            <div>
+                <Table useFixedLayout={this.props.useFixedLayout}
+                       columnMetadata={this.props.columnMetadata}
+                       showPager={this.props.showPager}
+                       pagingContent={pagingContent}
+                       data={data}
+                       columns={cols}
+                       className={this.props.tableClassName}
+                       enableInfiniteScroll={this.props.enableInfiniteScroll}
+                       nextPage={this.nextPage}
+                       changeSort={this.changeSort}
+                       sortColumn={this.state.sortColumn}
+                       sortAscending={this.state.sortAscending}
+                       useFixedHeader={this.props.useFixedHeader}
+                       sortAscendingClassName={this.props.sortAscendingClassName}
+                       sortDescendingClassName={this.props.sortDescendingClassName}
+                       bodyHeight={this.props.bodyHeight}
+                       infiniteScrollSpacerHeight={this.props.infiniteScrollSpacerHeight}
+                       hasMorePages={hasMorePages}
+                />
+            </div>
+        );
+    },
     isNoDataResults: function(results) {
         if((typeof results === "undefined") || (results.length === 0))
             return true;
         else
-            return false; 
+            return false;
     },
     getNoDataSection: function(topSection){
         return (
@@ -393,22 +405,30 @@ var DataTable = React.createClass({
             </div>
         );
     },
-    
-	render: function(){
-		var that = this;
-		var results = this.getCurrentResults(); // Attempt to assign to the filtered results, if we have any.
+    getDpidSection: function(dpid){
+        if(!dpid || dpid === "none") return "";
+        return(
+            <div>
+                <Avatar src="https://cdn2.iconfinder.com/data/icons/windows-8-metro-style/512/switch.png"/>
+                <span style={{position:"relative",bottom:"15px",marginLeft:"10px"}}>{dpid}</span>
+            </div>
+        );
+    },
+    render: function(){
+        var that = this;
+        var results = this.getCurrentResults(); // Attempt to assign to the filtered results, if we have any.
 
-		var keys = [];
+        var keys = [];
         var visibleCols = this.getColumns();
 
         //figure out which columns are displayed and show only those
-        var data = this.getDataForRender(results, visibleCols, true);  
+        var data = this.getDataForRender(results, visibleCols, true);
 
         //figure out if we want to show the filter section
         var filter = this.getFilter();
         var settings = this.getSettings();
-       
-        
+
+
         // Grab the column keys from the first results
         if(this.props.openFlowVersion === 1.0){
             keys = OpenFlow10_Fields;
@@ -417,7 +437,8 @@ var DataTable = React.createClass({
             keys = OpenFlow13_Fields;
         }
         var columnSelector = this.getColumnSelectorSection(keys, visibleCols);
-        var topSection = this.getTopSection(filter, settings, columnSelector);
+        var dpidSection = this.getDpidSection(this.props.filterDPID);
+        var topSection = this.getTopSection(filter, settings, columnSelector, dpidSection);
 
         // Grab the current and max page values.
         var currentPage = this.getCurrentPage();
@@ -425,28 +446,44 @@ var DataTable = React.createClass({
         // Determine if we need to enable infinite scrolling on the table.
         var hasMorePages = (currentPage + 1) < maxPage;
 
-        
+
         // Grab the paging content if it's to be displayed
         var pagingContent = this.getPagingSection(currentPage, maxPage);
-		var resultContent = this.getContentSection(data, visibleCols, pagingContent, hasMorePages);
+        var resultContent = this.getContentSection(data, visibleCols, pagingContent, hasMorePages);
 
         if(this.isNoDataResults(results)){
             return this.getNoDataSection(topSection);
         }
-        
+
         var dataTableStyle = {
             "font-family": "Arial, Helvetica, sans-serif",
             "margin-bottom": "20px"
         }
-		return (
-			<div className={dataTableStyle}>
+
+        var contentStyle;
+        if(!this.props.filterDPID || this.props.filterDPID === "none"){
+            contentStyle = {
+                 border: "1px solid #DDD",
+            };
+
+        }else{
+            contentStyle = {
+                 border: "1px solid #DDD",
+                 marginTop:"-20px"
+            };
+        }
+        return (
+
+            <div className={dataTableStyle}>
                 {topSection}
-				<div className={"dataTable-container"} style={{border: "1px solid #DDD"}}>
-					{resultContent}
-				</div>
-			</div>
-		);
-	}
+
+                <div className={"dataTable-container"} style={contentStyle}>
+                    {resultContent}
+                </div>
+            </div>
+
+        );
+    }
 });
 
 module.exports = DataTable;
