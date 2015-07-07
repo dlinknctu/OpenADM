@@ -28,7 +28,9 @@ class Domain extends React.Component {
     }
 
     this.state = {
-        layout: ls.layout ||[]
+        layout: ls.layout ||[],
+        focusNode: { id: "none", type: '' },
+        controllerStatus: {}
     }
     console.log('default state', this.state.layout);
   }
@@ -50,6 +52,12 @@ class Domain extends React.Component {
       }
   }
 
+  handleControllerStatus(status){
+    this.setState({
+        controllerStatus: status
+    });
+  }
+
   render() {
 
     return (
@@ -66,11 +74,13 @@ class Domain extends React.Component {
                           >
             <Module key={0} name="Topology"
             _grid={{ x: 0, y: 0, w: 4, h: 4, minW: 4, minH:4, isDraggable: false }}>
-                <Topology />
+                <Topology focusNode={this.state.focusNode}
+                onChagneFocusID={this.handleChagneFocusID.bind(this)}
+                handleControllerStatus={this.handleControllerStatus.bind(this)} />
             </Module>
             <Module key={1} name="Controller Status"
             _grid={{ x: 4, y: 0, w: 4, h: 3}}>
-                <Status />
+                <Status status={this.state.controllerStatus}/>
             </Module>
             <Module key={2} name="FlowTable"
             _grid={{ x: 0, y: 4, w: 12, h:4, minW: 10, minH:4 }}>

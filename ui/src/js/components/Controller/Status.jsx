@@ -1,35 +1,20 @@
 import React from 'react';
-let { Table } = require('material-ui');
+let { List, ListItem } = require('material-ui');
 
 class Status extends React.Component {
     render() {
-        let colOrder = [ 'OS', 'IP', 'CPU', 'Memory', 'ControllerType'];
-        let rowData = [
-            {
-                OS: { content: 'ubuntu 14.04' },
-                IP: { content: '140.113.215.182' },
-                ControllerType: { content: 'floodlight' },
-                CPU: { content: '20%' },
-                Memory: { content: '- 2123/4096 -' },
-            }
-        ];
-
-        let headerCols = {
-          OS: { content: 'OS version', tooltip: 'SDN Domain Name' },
-          IP: { content: 'IP', tooltip: 'Controller IP' },
-          controllerType: { content: 'Controller Type', tooltip: 'The type of Controller' },
-          CPU: { content: 'CPU (%)', tooltip: 'Controller (CPU) Loading' },
-          Memory: { content: 'Memory', tooltip: 'Memory (MB)' },
-        };
 
         return (
-            <div>
-                <Table
-                  rowData={rowData}
-                  columnOrder={colOrder}
-                  headerColumns={headerCols}
-                  displaySelectAll={false} />
-            </div>
+            <List>
+                <ListItem>Controller Type: {this.props.status.type}</ListItem>
+                <ListItem>name: {this.props.status.controller}</ListItem>
+                <ListItem>OS: {this.props.status.os}</ListItem>
+                <ListItem>CPU: {this.props.status.cpu}</ListItem>
+                <ListItem>
+                    Memory{this.props.status.mem_used}/{this.props.status.mem_total}
+                </ListItem>
+                <ListItem>Memory Free: {this.props.status.mem_free}</ListItem>
+            </List>
         );
     }
 }

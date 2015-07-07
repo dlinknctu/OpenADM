@@ -1,10 +1,12 @@
 .link {
-  stroke: #ddd;
-  stroke-width: 4;
+  stroke: #666;
+  stroke-width: 2;
   cursor: crosshair;
+  z-index: -1;
 }
 .node {
   cursor: move;
+  z-index: 0;
   /* 邊框 拉拉不喜歡所以拿掉
   stroke: #ccc;
   stroke-width: 2px;*/

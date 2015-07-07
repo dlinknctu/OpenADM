@@ -1,3 +1,4 @@
+
 import React from 'react';
 import config from "../../../../config/config.json";
 require("whatwg-fetch");
@@ -11,6 +12,19 @@ var TYPE = {
   'HOST': 'host',
   'DEVICE': 'device'
 }
+var OmniUI = {
+  nodes: [
+    // {"id": "00:00:00:00:0f", "uuid": 120311234,"type": "host"},
+    // {"id": "00:00:00:00:0a", "uuid": 320312351,"type": "host"}
+  ],
+  links: []
+}
+var topologyNodes =[];
+var topologyLinks = [];
+var link = {}; // svg link
+var node = {}; // svg node
+var force = {};
+var focusNode = {};
 
 class Topology extends React.Component {
 
@@ -20,172 +34,264 @@ class Topology extends React.Component {
             isSubscribe: false,
             isFinish: true,
             errorMessage: null,
-            devices: [], // [ {type switch, dpip}, ]
-            hosts: [],   // [ {ips , mac, aps{ port, dpid }}, ]
-            links: [],   // [ [{src_port, src_dpid}, { dst_port, dst_dpid }], ]
-            focusNode: { type: 'none', id: 'none', lastFocusNode: {}},
+            lastFocusNode: {},
             // { type, id }  mac or dpid lastFocusNode (for dishighlight)
-            topologyLayout: {}
         }
     }
 
     componentDidMount() {
-        this.handleSubscribe();
-
-        var d3dom = this.refs.topology.getDOMNode();
-        this.drawTopology();
+      this.handleSubscribe();
+      this.initialTopology();
     }
-    componentDidUpdate(){
 
-    }
-    drawTopology(){
-        var _this = this;
+    initialTopology(){
+      // var renderDom = document.getElementById('container');
+      // var width = renderDom.offsetWidth ? renderDom.offsetWidth : 500,
+      // var height = renderDom.offsetHeight ? renderDom.offsetHeight : 500;
         const width = 400;
         const height = 300;
 
-        var topologyLayout = d3.layout.force()
-            .size([width, height])
-            .charge(-400)
-            .linkDistance(40)
-            .on("tick", function() {
+        var svg = d3.select("#topology").append("svg")
+              .attr("width", width)
+              .attr("height", height);
+
+        link = svg.selectAll(".link");
+        node = svg.selectAll(".node");
+
+        force = d3.layout.force()
+              .size([width, height])
+              .charge(-400)
+              .linkDistance(40)
+              .on("tick", function() {
                 link.attr("x1", d => d.source.x )
                     .attr("y1", d => d.source.y )
                     .attr("x2", d => d.target.x )
                     .attr("y2", d => d.target.y );
-
+                node.selectAll('circle')
+                  .each(function(d,i){
+                      var circle = d3.select(this);
+                      circle.attr('cx', d.x)
+                            .attr('cy', d.y);
+                  });
                 node.selectAll('text')
                   .each( function(d,i) {
                       var text = d3.select(this);
                       text.attr('x', d.x - 5)
                           .attr('y', d.y + 5);
                   });
-
-                node.selectAll('circle')
-                  .each( function(d,i) {
-                      var circle = d3.select(this);
-                      circle.attr('cx', d.x)
-                            .attr('cy', d.y);
-                  });
               });
 
-        var svg = d3.select("#topology").append("svg")
-            .attr("width", width)
-            .attr("height", height);
-
-        var link = svg.selectAll(".link"),
-            node = svg.selectAll(".node");
-
-        let allnode = this.state.devices.concat(this.state.hosts);
-
-        topologyLayout.nodes(graph.nodes)
-          .links(graph.links)
-          .start();
-
-        link = link.data(graph.links)
-        .enter().append("line")
-        .attr("class", "link");
-
-        node = node.data(graph.nodes)
-          .enter()
-          .append('g')
-          .each(function(node) {
-            let g = d3.select(this);
-            switch(node.type) {
-              case TYPE.SWITCH:
-                g.append('circle')
-                 .attr("class", "node switch")
-                 .attr("r", 10);
-                  break;
-              case TYPE.AP:
-                g.append('circle')
-                 .attr("class", "node ap")
-                 .attr("r", 10);
-                  break;
-              case TYPE.DEVICE:
-                g.append('circle')
-                 .attr("class", "node device")
-                 .attr("r", 10);
-                  break;
-              case TYPE.HOST:
-                g.append('circle')
-                 .attr("class", "node host")
-                 .attr("r", 10);
-                 break;
-            }
-          })
-          .on("click", function (node) {
-            if (_this.state.focusNode.id === 'none' ){
-                _this.handleFocusNode(node, this);
-                d3.select(this)
-                  .selectAll('circle')
-                  .classed("choose", node.choose = true);
-            }
-            else if (_this.state.focusNode.id !== node.id){
-                d3.select(this)
-                  .selectAll('circle')
-                  .classed("choose", node.choose = true);
-                d3.select(_this.state.focusNode.lastFocusNode)
-                .selectAll('circle')
-                .classed("choose", node.choose = false);
-
-                _this.handleFocusNode(node, this);
-            }
-          })
-          .on("dblclick", function (node) {
-              d3.select(this)
-                .selectAll('circle')
-                .classed("fixed", node.fixed = false);
-              d3.select(_this.state.focusNode.lastFocusNode)
-                .selectAll('circle')
-                .classed("choose", node.choose = false);
-              _this.handleFocusNode(node, null);
-            }
-          )
-          .call(topologyLayout.drag()
-            .on("dragstart", function(d) {
+        force.nodes(OmniUI.nodes)
+            .links(OmniUI.links)
+            .start();
+        topologyNodes = force.nodes();
+        topologyLinks = force.links();
+        var drag = force.drag().on("dragstart", function(d){
               d3.select(this)
                 .selectAll('circle')
                 .classed("fixed", d.fixed = true);
-            })
-          );
-        //text
-        node.append("text")
-            .text(function(d, i) { return d.type[0].toUpperCase(); })
-            .attr("fill",function(d, i) {  return  "#fff";  })
-            .attr("font-size",function(d, i) {  return  "1em"; });
+            });
 
-        function start() {
-          link = link.data(topologyLayout.links(), (d) => {
-            return d.source.id + "-" + d.target.id;
-          });
-          link.enter().insert("line", ".node").attr("class", "link");
-          link.exit().remove();
+        link = link.data(topologyLinks, function(d) {
+          return d.source.uuid + "-" + d.target.uuid;
+        }).enter().append("line")
+          .attr("class", "link");
 
-          node = node.data(topologyLayout.nodes(), (d) => d.id );
-          node.enter().append("circle").attr("class", (d) => {
-            return "node " + d.id;
-          }).attr("r", 8);
-          node.exit().remove();
+        node = node.data(topologyNodes)
+          .enter()
+          .append('g')
+          .each(function(d, i) {
+            var g = d3.select(this);
+            g.append('circle')
+             .attr("class", "node "+ d.type)
+             .attr("r", 10);
+            g.append("text")
+             .text(d => d.type[0].toUpperCase())
+             .attr("fill", "#fff")
+             .attr("font-size","1em");
+          })
+          .on("click", click)
+          .on("dblclick", dblclick)
+          .call(drag);
 
-          topologyLayout.start();
-        }
-
-        this.setState({
-          topologyLayout: topologyLayout
-        });
-    }
-
-    handleFocusNode(node, domNode){
-        this.setState({
-            focusNode: {
-                type: node.type,
-                id: node.id,
-                lastFocusNode: domNode
+          function click(d) {
+            if (focusNode.id === 'none' ){
+                d3.select(this)
+                  .selectAll('circle')
+                  .classed("choose", d.choose = true);
+                  focusNode = {
+                    id: d.id,
+                    type: d.type,
+                    uuid: d.uuid,
+                    focusDom: this
+                  };
             }
-        });
-        console.log('You choose ', this.state.focusNode);
-        console.log(d3.select("#topology"));
+            else if (focusNode.id === d.id){
+              d3.select(this)
+                .selectAll('circle')
+                .classed("choose", d.choose = false);
+              focusNode = {
+                id: 'none',
+                type: 'switch',
+                uuid: '0'
+              };
+            }
+            else if (focusNode.id !== d.id){
+              // highlight click and unhighlight perview
+                d3.select(this)
+                  .selectAll('circle')
+                  .classed("choose", d.choose = true);
+                d3.select(focusNode.focusDom)
+                .selectAll('circle')
+                .classed("choose", d.choose = false);
+
+                focusNode = {
+                  id: d.id,
+                  type: d.type,
+                  uuid: d.uuid
+                };
+            }
+          }
+          function dblclick(d) {
+            // 取消 pin and chooose
+            d3.select(this)
+              .selectAll('circle')
+              .classed("fixed", d.fixed = false);
+            d3.select(this)
+              .selectAll('circle')
+              .classed("choose", false);
+          }
+
     }
+
+  updateTopology() {
+    link = link.data(topologyLinks, d => d.source.uuid + "-" + d.target.uuid)
+    link.enter().append("line").attr("class", "link");
+    link.exit().remove();
+
+    node = node.data(topologyNodes);
+    node.enter()
+      .append('g')
+      .each(function(d, i) {
+        var g = d3.select(this);
+        g.append('circle')
+         .attr("class", "node "+ d.type)
+         .attr("r", 10);
+        g.append("text")
+         .text(d => d.type[0].toUpperCase())
+         .attr("fill", "#fff")
+         .attr("font-size","1em");
+      })
+      .on("click", click)
+      .on("dblclick", dblclick).call(force.drag);
+    node.exit().remove();
+
+    force.start();
+
+    /**
+     * will merge
+     */
+    function click(d) {
+      if (focusNode.id === 'none' ){
+          d3.select(this)
+            .selectAll('circle')
+            .classed("choose", d.choose = true);
+            focusNode = {
+              id: d.id,
+              type: d.type,
+              uuid: d.uuid,
+              focusDom: this
+            };
+      }
+      else if (focusNode.id === d.id){
+        d3.select(this)
+          .selectAll('circle')
+          .classed("choose", d.choose = false);
+        focusNode = {
+          id: 'none',
+          type: 'switch',
+          uuid: '0'
+        };
+      }
+      else if (focusNode.id !== d.id){
+        // highlight click and unhighlight perview
+          d3.select(this)
+            .selectAll('circle')
+            .classed("choose", d.choose = true);
+          d3.select(focusNode.focusDom)
+          .selectAll('circle')
+          .classed("choose", d.choose = false);
+
+          focusNode = {
+            id: d.id,
+            type: d.type,
+            uuid: d.uuid
+          };
+      }
+    }
+    function dblclick(d) {
+      // 取消 pin and chooose
+      d3.select(this)
+        .selectAll('circle')
+        .classed("fixed", d.fixed = false);
+      d3.select(this)
+        .selectAll('circle')
+        .classed("choose", false);
+    }
+  }
+
+  _findNodeIndex(uuid) {
+      for (var i=0; i < topologyNodes.length; i++) {
+          if (topologyNodes[i].uuid === uuid)
+              return i
+      };
+  }
+
+  // 直接給新的node
+  addTopologyNode(newNode){
+     topologyNodes.push(newNode);
+     this.updateTopology();
+  }
+  // delet node give uuid
+  delTopologyNode(uuid){
+    for (var i=0; i < topologyNodes.length; i++) {
+        if (topologyNodes[i].uuid === uuid)
+            topologyNodes.pop(i);
+    };
+    this.updateTopology();
+  }
+
+  // 給兩個uuid會建立兩個之間的link
+  addTopologyLink(source, target) {
+    topologyLinks.push({
+      "source": this._findNodeIndex(source),
+      "target": this._findNodeIndex(target)
+    });
+
+    this.updateTopology();
+  };
+  // 給兩個uuid會刪除兩個之間的link
+  delTopologyLink(source,target){
+      for(var i=0;i< topologyLinks.length;i++){
+          if(topologyLinks[i].source.uuid == source && topologyLinks[i].target.uuid == target){
+              topologyLinks.splice(i,1);
+              break;
+          }
+      }
+      this.updateTopology();
+  };
+
+  handleTopologyNodeClick() {
+    console.log("handleTopologyNodeClick");
+  }
+
+  handleFocusNode(node, domNode){
+      this.setState({
+        lastFocusNode: domNode
+      });
+      //callback to Domain module
+      this.props.onChagneFocusID(node.id, node.type);
+  }
 
     handleSubscribe(){
         if (typeof(this.state.evtSrc) !== "object") {
@@ -219,51 +325,81 @@ class Topology extends React.Component {
             evtSrc.addEventListener('delhost', e => {
                 this.delhost(e);
             });
-        }
+            evtSrc.addEventListener('controller', e => {
+                this.props.handleControllerStatus(JSON.parse(e.data));
+            });
+          }
     }
 
     adddevice(e) {
         var device = JSON.parse(e.data);
-        this.setState({
-            devices: this.state.devices.concat(device)
-        });
+        if ( device.length === 0)
+          return 0;
+        setTimeout((a) => {
+          for (var i = 0; i < device.length; i++) {
+            this.addTopologyNode(device[i]);
+          };
+        }, 500);
     }
+
     deldevice(e) {
         var device = JSON.parse(e.data);
-        this.setState({
-            devices: this.state.devices.filter( (element) => {
-                return (
-                    element.dpid != device.dpid
-                );
-            })
-        });
+        if ( device.length === 0)
+          return 0;
+        setTimeout((a) => {
+          for (var i = 0; i < device.length; i++) {
+            this.delTopologyNode(device[i]);
+          };
+        }, 500);
     }
+
     addlink(e) {
         var link = JSON.parse(e.data);
-        this.setState({
-            links: this.state.links.concat(link)
-        });
-        console.log("add link", links);
+        if( link.length === 0)
+          return 0;
+        console.log('add link ', link);
+        setTimeout((a) => {
+          for (var i = 0; i < link.length; i++) {
+            this.addTopologyLink(link[i][0].uuid, link[i][1].uuid);
+          };
+        }, 1000);
     }
+
     dellink(e) {
         var link = JSON.parse(e.data);
-        this.setState({
-            links: this.state.links.filter( (element) => {
-                return (
-                    !((element.dpid == device[0].dpid) &&
-                        (element.dpid == device[1].dpid))
-                );
-            })
-        });
+        if( link.length === 0)
+          return 0;
+        console.log('del link ', link);
+        setTimeout((a) => {
+          for (var i = 0; i < link.length; i++) {
+            this.delTopologyLink(link[i][0].uuid, link[i][1].uuid);
+          };
+        }, 1000);
     }
+
     addhost(e) {
         var host = JSON.parse(e.data);
-        this.setState({
-            hosts: this.state.devices.concat(host)
-        });
+        console.log("add host ", host );
+        if ( host.length === 0)
+          return 0;
+        setTimeout((a) => {
+          for (var i = 0; i < host.length; i++) {
+            this.addTopologyNode(host[i]);
+          };
+        }, 500);
     }
+
     delhost(e) {
-        var host = JSON.parse(e.data);
+      host = JSON.parse(e.data);
+      console.log("del host ", host );
+        if ( host.length === 0)
+          return 0;
+        setTimeout((a) => {
+          for (var i = 0; i < host.length; i++) {
+            this.delTopologyNode(host[i]);
+          };
+        }, 500);
+
     }
     addport(e) {
         var port = JSON.parse(e.data);
@@ -274,6 +410,7 @@ class Topology extends React.Component {
 
     render() {
         return (
+          <div>
             <div id="topology"
                 ref="topology">
             </div>
