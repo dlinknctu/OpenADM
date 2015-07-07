@@ -6,11 +6,11 @@ class Status extends React.Component {
         return (
             <List>
                 <ListItem>Controller Type: {this.props.status.type}</ListItem>
-                <ListItem>name: {this.props.status.controller}</ListItem>
-                <ListItem>OS: {this.props.status.os}</ListItem>
+                <ListItem>Name: {this.props.status.controller}</ListItem>
+                <ListItem>OS:{this.props.status.os}</ListItem>
                 <ListItem>CPU: {this.props.status.cpu}</ListItem>
                 <ListItem>
-                    Memory{this.props.status.mem_used}/{this.props.status.mem_total}
+                    Memory: {this.props.status.mem_used}/{this.props.status.mem_total}
                 </ListItem>
                 <ListItem>Memory Free: {this.props.status.mem_free}</ListItem>
             </List>

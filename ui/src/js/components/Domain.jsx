@@ -46,15 +46,14 @@ class Domain extends React.Component {
       }
   }
   handleChagneFocusID(node){
-    if ( node.id != null){
+    if ( node.id != 'none'){
         this.setState({
             focusNode: {
                 id: node.id,
-                type: node.type
+                type: node.type,
             }
         });
     }else {
-
         this.setState({
             focusNode: {
                 id: "none",
@@ -93,7 +92,7 @@ class Domain extends React.Component {
                 handleControllerStatus={this.handleControllerStatus.bind(this)} />
             </Module>
             <Module key={1} name="Controller Status"
-            _grid={{ x: 4, y: 0, w: 4, h: 3}}>
+            _grid={{ x: 4, y: 0, w: 3, h: 4}}>
                 <Status status={this.state.controllerStatus}/>
             </Module>
         </ReactGridLayout>

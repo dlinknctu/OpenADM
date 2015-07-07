@@ -17,7 +17,7 @@ var topologyLinks = [];
 var link = {}; // svg link
 var node = {}; // svg node
 var force = {};
-var focusNode = {};
+var focusNode = { id: "none", type: 'none', uuid: 'none', focusDom: 'none' };
 
 class Topology extends React.Component {
 
@@ -48,15 +48,17 @@ class Topology extends React.Component {
 
         var svg = d3.select("#topology").append("svg")
               .attr("width", width)
-              .attr("height", height);
+              .attr("height", height)
+              .style({'overflow': 'overlay','z-index': '0','left': '25px', 'top': '25px' });
 
         link = svg.selectAll(".link");
         node = svg.selectAll(".node");
 
         force = d3.layout.force()
-              .size([width, height])
+              .size([width/3*2, height/3*2])
               .charge(-400)
               .linkDistance(40)
+              .linkStrength(0.3)
               .on("tick", function() {
                 link.attr("x1", d => d.source.x )
                     .attr("y1", d => d.source.y )
@@ -75,16 +77,14 @@ class Topology extends React.Component {
                           .attr('y', d.y + 5);
                   });
               });
-        // force.nodes(OmniUI.nodes)
-        //     .links(OmniUI.links)
-        //     .start();
         topologyNodes = force.nodes();
         topologyLinks = force.links();
         var drag = force.drag().on("dragstart", function(d){
               d3.select(this)
                 .selectAll('circle')
                 .classed("fixed", d.fixed = true);
-            });
+        });
+
     }
 
   updateTopology() {
@@ -104,17 +104,14 @@ class Topology extends React.Component {
         g.append("text")
          .text(d => d.type[0].toUpperCase())
          .attr("fill", "#fff")
-         .attr("font-size","1em");
+         .attr("font-size","1em")
+         .attr("cursor","move");
       })
       .on("click", click)
       .on("dblclick", dblclick)
       .call(force.drag);
     node.exit().remove();
-    }catch(e){
-      console.log("eeeeeeeeeeerr === " ,topologyLinks,topologyNodes);
-      console.log(e);
-    }
-
+    }catch(e){}
     force.start();
 
     /**
@@ -125,48 +122,45 @@ class Topology extends React.Component {
         return 0;
       /**
        * 三種情況
-       * 第一次點節點, 點相同節點, 點過節點再點別的
+       * 第一次點節點, 點相同節點 , 點過節點再點別的
        */
-      if (focusNode.id === 'none' ){
-          d3.select(this)
-            .selectAll('circle')
-            .classed("choose", d.choose = true);
-            focusNode = {
-              id: d.dpid,
-              type: d.type,
-              uuid: d.uuid,
-              focusDom: this
-            };
-            _this.handleTopologyNodeClick();
-      }
-      else if (focusNode.id === d.id){
+      if(focusNode.uuid === 'none' && focusNode.id === 'none' && d.type === 'switch' ){
         d3.select(this)
           .selectAll('circle')
-          .classed("choose", d.choose = false);
+          .classed("choose", true);
+        focusNode = {
+          id: d.dpid,
+          type: d.type,
+          uuid: d.uuid,
+          focusDom: this
+        }
+       _this.handleTopologyNodeClick();
+      }else if (focusNode.uuid === d.uuid && focusNode.type === d.type){
+        d3.select(this)
+          .selectAll('circle')
+          .classed("choose", false);
         focusNode = {
           id: 'none',
-          type: 'switch',
-          uuid: '0',
+          type: 'none',
+          uuid: 'none',
+          focusDom: 'none'
+        };
+        _this.handleTopologyNodeClick();
+      }else if (focusNode.uuid !== d.uuid && focusNode.id !== 'none' && focusNode.type === d.type)
+      {
+        d3.select(this)
+          .selectAll('circle')
+          .classed("choose", true);
+        d3.select(focusNode.focusDom)
+          .selectAll('circle')
+          .classed("choose", false);
+        focusNode = {
+          id: d.dpid,
+          type: d.type,
+          uuid: d.uuid,
           focusDom: this
         };
         _this.handleTopologyNodeClick();
-      }
-      else if (focusNode.id !== d.id){
-        // highlight click and unhighlight perview
-          d3.select(this)
-            .selectAll('circle')
-            .classed("choose", d.choose = true);
-          d3.select(focusNode.focusDom)
-          .selectAll('circle')
-          .classed("choose", d.choose = false);
-
-          focusNode = {
-            id: d.dpid,
-            type: d.type,
-            uuid: d.uuid,
-            focusDom: this
-          };
-          _this.handleTopologyNodeClick();
       }
     }
     function dblclick(d) {
@@ -223,7 +217,7 @@ class Topology extends React.Component {
   };
 
   handleTopologyNodeClick() {
-    if (focusNode.type === "switch" && focusNode.id != null){
+    if (focusNode.id != null){
         this.props.onChagneFocusID(focusNode);
     }
   }
@@ -283,11 +277,13 @@ class Topology extends React.Component {
         var device = JSON.parse(e.data);
         if ( device.length === 0)
           return 0;
-        //console.info("Delete Switch ", device);
+        console.info("Delete Switch ", device);
         setTimeout((a) => {
-          for (var i = 0; i < device.length; i++) {
-            this.delTopologyNode(device[i]);
-          };
+          try{
+            for (var i = 0; i < device.length; i++) {
+              this.delTopologyNode(device[i]);
+            };
+          }catch(e){}
         }, 500);
     }
 
@@ -297,10 +293,12 @@ class Topology extends React.Component {
           return 0;
         console.info("Add Link ", link);
         setTimeout((a) => {
-          for (var i = 0; i < link.length; i++) {
-            if (link[i][0].uuid !== null && link[i][1].uuid)
-              this.addTopologyLink(link[i][0].uuid, link[i][1].uuid);
-          };
+          try {
+            for (var i = 0; i < link.length; i++) {
+              if (link[i][0].uuid !== null && link[i][1].uuid)
+                this.addTopologyLink(link[i][0].uuid, link[i][1].uuid);
+            };
+          }catch(e){}
         }, 1000);
     }
 
@@ -308,11 +306,13 @@ class Topology extends React.Component {
         var link = JSON.parse(e.data);
         if( link.length === 0)
           return 0;
-        // console.info('Delete link ', link);
+        console.info('Delete link ', link);
         setTimeout((a) => {
-          for (var i = 0; i < link.length; i++) {
-            this.delTopologyLink(link[i][0].uuid, link[i][1].uuid);
-          };
+          try {
+            for (var i = 0; i < link.length; i++) {
+              this.delTopologyLink(link[i][0].uuid, link[i][1].uuid);
+            };
+          }catch(e){}
         }, 1000);
     }
 
@@ -320,11 +320,13 @@ class Topology extends React.Component {
       var host = JSON.parse(e.data);
         if ( host.length === 0)
           return 0;
-        // console.info('Add host ', host);
+        console.info('Add host ', host);
         setTimeout((a) => {
-          for (var i = 0; i < host.length; i++) {
-            this.addTopologyNode(host[i]);
-          };
+          try {
+            for (var i = 0; i < host.length; i++) {
+              this.addTopologyNode(host[i]);
+            };
+          }catch(e){}
         }, 500);
     }
 
@@ -332,11 +334,13 @@ class Topology extends React.Component {
       var host = JSON.parse(e.data);
         if ( host.length === 0)
           return 0;
-        // console.info('Delete host ', host);
+        console.info('Delete host ', host);
         setTimeout((a) => {
-          for (var i = 0; i < host.length; i++) {
-            this.delTopologyNode(host[i]);
-          };
+          try{
+            for (var i = 0; i < host.length; i++) {
+              this.delTopologyNode(host[i]);
+            };
+          }catch(e){}
         }, 500);
     }
 
