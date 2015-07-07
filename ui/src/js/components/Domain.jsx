@@ -35,10 +35,6 @@ class Domain extends React.Component {
     console.log('default state', this.state.layout);
   }
 
-  componentDidMount() {
-
-  }
-
   onLayoutChange(e){
     this.setState({ layout: e });
     this._saveToLocalStorage();
@@ -65,6 +61,8 @@ class Domain extends React.Component {
   }
 
   render() {
+
+    console.log("點選switch dpip", this.state.focusNode.id);
 
     return (
       <FullWidthSection>

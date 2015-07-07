@@ -1,6 +1,6 @@
 .link {
   stroke: #666;
-  stroke-width: 2;
+  stroke-width: 1;
   cursor: crosshair;
   z-index: 100;
 }
@@ -12,12 +12,12 @@
   stroke-width: 2px;*/
 }
 .node.choose {
-  fill: #f00;
+  fill: rgb(255, 0, 0);
 }
 .node.fixed {
-  stroke: #000;
+  stroke: #faa;
   stroke-width: 1px;
-  r: 13;
+  r: 15;
 }
 .switch {
   fill: rgb(255, 188, 0);

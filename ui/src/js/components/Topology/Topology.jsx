@@ -91,82 +91,13 @@ class Topology extends React.Component {
                 .selectAll('circle')
                 .classed("fixed", d.fixed = true);
             });
-
-        link = link.data(topologyLinks, function(d) {
-          return d.source.uuid + "-" + d.target.uuid;
-        }).enter().append("line")
-          .attr("class", "link");
-
-        node = node.data(topologyNodes)
-          .enter()
-          .append('g')
-          .each(function(d, i) {
-            var g = d3.select(this);
-            g.append('circle')
-             .attr("class", "node "+ d.type)
-             .attr("r", 10);
-            g.append("text")
-             .text(d => d.type[0].toUpperCase())
-             .attr("fill", "#fff")
-             .attr("font-size","1em");
-          })
-          .on("click", click)
-          .on("dblclick", dblclick)
-          .call(drag);
-
-          function click(d) {
-            if (focusNode.id === 'none' ){
-                d3.select(this)
-                  .selectAll('circle')
-                  .classed("choose", d.choose = true);
-                  focusNode = {
-                    id: d.id,
-                    type: d.type,
-                    uuid: d.uuid,
-                    focusDom: this
-                  };
-            }
-            else if (focusNode.id === d.id){
-              d3.select(this)
-                .selectAll('circle')
-                .classed("choose", d.choose = false);
-              focusNode = {
-                id: 'none',
-                type: 'switch',
-                uuid: '0'
-              };
-            }
-            else if (focusNode.id !== d.id){
-              // highlight click and unhighlight perview
-                d3.select(this)
-                  .selectAll('circle')
-                  .classed("choose", d.choose = true);
-                d3.select(focusNode.focusDom)
-                .selectAll('circle')
-                .classed("choose", d.choose = false);
-
-                focusNode = {
-                  id: d.id,
-                  type: d.type,
-                  uuid: d.uuid
-                };
-            }
-          }
-          function dblclick(d) {
-            // 取消 pin and chooose
-            d3.select(this)
-              .selectAll('circle')
-              .classed("fixed", d.fixed = false);
-            d3.select(this)
-              .selectAll('circle')
-              .classed("choose", false);
-          }
-
     }
 
   updateTopology() {
+    var _this = this;
+
     link = link.data(topologyLinks, d => d.source.uuid + "-" + d.target.uuid)
-    link.enter().append("line").attr("class", "link");
+    link.enter().append("line").attr("class", "link").attr("z-index", "-1");
     link.exit().remove();
 
     node = node.data(topologyNodes);
@@ -176,7 +107,7 @@ class Topology extends React.Component {
         var g = d3.select(this);
         g.append('circle')
          .attr("class", "node "+ d.type)
-         .attr("r", 10);
+         .attr("r", 15);
         g.append("text")
          .text(d => d.type[0].toUpperCase())
          .attr("fill", "#fff")
@@ -198,11 +129,12 @@ class Topology extends React.Component {
             .selectAll('circle')
             .classed("choose", d.choose = true);
             focusNode = {
-              id: d.id,
+              id: d.dpid,
               type: d.type,
               uuid: d.uuid,
               focusDom: this
             };
+            _this.handleTopologyNodeClick();
       }
       else if (focusNode.id === d.id){
         d3.select(this)
@@ -213,6 +145,7 @@ class Topology extends React.Component {
           type: 'switch',
           uuid: '0'
         };
+        _this.handleTopologyNodeClick();
       }
       else if (focusNode.id !== d.id){
         // highlight click and unhighlight perview
@@ -224,10 +157,11 @@ class Topology extends React.Component {
           .classed("choose", d.choose = false);
 
           focusNode = {
-            id: d.id,
+            id: d.dpid,
             type: d.type,
             uuid: d.uuid
           };
+          _this.handleTopologyNodeClick();
       }
     }
     function dblclick(d) {
@@ -288,15 +222,8 @@ class Topology extends React.Component {
   };
 
   handleTopologyNodeClick() {
-    console.log("handleTopologyNodeClick");
-  }
-
-  handleFocusNode(node, domNode){
-      this.setState({
-        lastFocusNode: domNode
-      });
-      //callback to Domain module
-      this.props.onChagneFocusID(node.id, node.type);
+    console.log("handleTopologyNodeClick", focusNode);
+    this.props.onChagneFocusID(focusNode);
   }
 
     handleSubscribe(){
