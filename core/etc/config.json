@@ -5,45 +5,53 @@
 		"ip": "localhost",
 		"port": "5567"
 	},
-    "UIPusher": {
-        "enable":"False",
-        "dbip":"140.113.215.200",
-        "dbport":"27017",
-        "db":"omniui",
-        "user":"xxxxxx",
-        "password":"xxxxxx",
-        "queryinterval":"5"
-    },
+	"UIPusher": {
+		"enable":"False",
+		"dbip":"140.113.215.200",
+		"dbport":"27017",
+		"db":"omniui",
+		"user":"xxxxxx",
+		"password":"xxxxxx",
+		"queryinterval":"5"
+	},
 	"ControllerAdapter": {
-        "controller":
-        [
-            "test1": {
-	    	    "ip": "192.168.1.158",
-	    	    "port": "8080"
-            },
-            "test2": {
-                "ip": "192.168.1.159",
-                "port": "8080"
-            }
-        ],
-	    "interval": "5"
-    },
-    "Flow_mod":{
-        "ip":"localhost",
-        "port":"8080"
-    },
-    "BusyLink_Detect": {
-        "ip": "localhost",
-        "port": "8080",
-        "interval": "5"
-    },
-    "DbCollection": {
-        "enable":"False",
-        "dbip":"140.113.215.200",
-        "dbport":"27017",
-        "db":"omniui",
-        "user":"xxxxxx",
-        "password":"xxxxxx",
-        "interval": "86400"
-    }
+		"controller":
+		[
+			{
+				"name":"test1",
+				"ip": "192.168.1.158",
+				"port": "8080"
+			},
+			{
+				"name":"test2",
+				"ip": "192.168.1.159",
+				"port": "8080"
+			}
+		],
+		"interval": "5"
+	},
+	"Flow_mod":{
+		"ip":"localhost",
+		"port":"8080"
+	},
+	"BusyLink_Detect": {
+		"ip": "localhost",
+		"port": "8080",
+		"interval": "5"
+	},
+	"DbCollection": {
+		"enable":"False",
+		"dbip":"140.113.215.200",
+		"dbport":"27017",
+		"db":"omniui",
+		"user":"xxxxxx",
+		"password":"xxxxxx",
+		"interval": "86400"
+	},
+	"NWInfo": {
+		"controller_ip": "localhost",
+		"controller_port": "6633",
+		"controller_name": "foobar",
+		"adapter_port": "8080"
+	}
 }

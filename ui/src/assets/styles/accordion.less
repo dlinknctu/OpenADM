@@ -1,0 +1,100 @@
+.accordion {
+	padding-bottom: 10px;
+	width: 100%;
+  font-family:Arial;
+}
+
+.accordion-checkbox {
+  float: left;
+  width: 150px;
+}
+
+.section {
+  position: relative;
+  width: 95%;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  button {
+    position: absolute;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    height: 3em;
+    width: 3em;
+    outline: 0;
+    border: 0;
+    background: none;
+    text-indent: -9999%;
+    pointer-events: none;
+    &:before {
+      content: '';
+      display: block;
+      position: absolute;
+      height: 12px;
+      width: 4px;
+      border-radius: .3em;
+      background: grey;
+      transform-origin: 50%;
+      top: 50%;
+      left: 50%;
+      transition: all .25s ease-in-out;
+      transform: translate(75%, -50%) rotate(45deg);
+    }
+    &:after {
+      content: '';
+      display: block;
+      position: absolute;
+      height: 12px;
+      width: 4px;
+      border-radius: .3em;
+      background: grey;
+      transform-origin: 50%;
+      top: 50%;
+      left: 50%;
+      transition: all .25s ease-in-out;
+      transform: translate(-75%, -50%) rotate(-45deg);
+    }
+  }
+}
+
+.section.open {
+
+  button {
+    &:before, &:after {
+      height: 14px;
+    }
+    &:before {
+      transform: translate(0%, -50%) rotate(-45deg);
+    }
+    &:after {
+      transform: translate(0%, -50%) rotate(45deg);
+    }
+  }
+  .articlewrap {
+    height: auto;
+  }
+}
+
+.articlewrap {
+  height: 0;
+  overflow: hidden;
+  transition: all .2s ease-in;
+}
+
+.sectionhead {
+  height: 20px;
+  overflow: hidden;
+  background-color:#f5f5f5;
+  cursor: pointer;
+  color: black;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  padding: 10px 5px 5px 10px;
+  padding-right: 2.1em;
+}
+
+.article {
+  padding: 0.5em 1em 1.5em 1em;
+  color: #333;
+  line-height: 1.3;
+}

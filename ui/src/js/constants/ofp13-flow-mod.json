@@ -1,0 +1,326 @@
+{
+	"misc":[
+		{
+			"fieldName": "dpid",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "cookie",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "cookie_mask",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "table_id",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "idle_timeout",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "hard_timeout",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "priority",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "buffer_id",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "out_port",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "out_group",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "flags",
+			"inputType": "text"
+		}
+	],
+	"match":[
+		{
+			"fieldName": "in_port",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "in_phy_port",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "metadata",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "dl_dst",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "dl_src",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "eth_dst",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "eth_src",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "dl_type",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "eth_type",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "dl_vlan",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "vlan_vid",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "vlan_pcp",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "ip_dscp",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "ip_ecn",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "nw_proto",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "ip_proto",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "nw_src",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "nw_dst",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "nw_dst",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "ipv4_src",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "ipv4_dst",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "tp_src",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "tp_dsc",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "tcp_src",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "tcp_dst",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "udp_src",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "udp_dst",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "sctp_src",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "sctp_dst",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "icmpv4_type",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "icmpv4_code",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "arp_op",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "arp_spa",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "arp_tpa",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "arp_sha",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "arp_tha",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "ipv6_src",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "ipv6_dst",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "ipv6_flabel",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "icmpv6_type",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "icmpv6_code",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "ipv6_nd_target",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "ipv6_nd_sll",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "ipv6_nd_tll",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "mpls_label",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "mpls_tc",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "mpls_bos",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "pbb_isid",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "tunnel_id",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "ipv6_exthdr",
+			"inputType": "text"
+		}
+	],
+	"action":[
+		{
+			"fieldName": "OUTPUT",
+			"placeholder": "port",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "COPY_TTL_OUT",
+			"inputType": "toggle"
+		},
+		{
+			"fieldName": "COPY_TTL_IN",
+			"inputType": "toggle"
+		},
+		{
+			"fieldName": "SET_MPLS_TTL",
+			"placeholder": "ethertype",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "DEC_MPLS_TTL",
+			"inputType": "toggle"
+		},
+		{
+			"fieldName": "PUSH_VLAN",
+			"placeholder": "ethertype",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "POP_VLAN",
+			"inputType": "toggle"
+		},
+		{
+			"fieldName": "PUSH_MPLS",
+			"placeholder": "ethertype",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "POP_MPLS",
+			"placeholder": "ethertype",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "SET_QUEUE",
+			"placeholder": "queue_id",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "GROUP",
+			"placeholder": "group_id",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "SET_NW_TTL",
+			"placeholder": "nw_ttl",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "DEC_NW_TTL",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "SET_FIELD",
+			"placeholder": "field:vlaue",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "PUSH_PBB",
+			"placeholder": "ethertype",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "POP_PBB",
+			"inputType": "toggle"
+		}
+	]
+}

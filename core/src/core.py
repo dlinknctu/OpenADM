@@ -20,6 +20,17 @@ app.config['CORS_ORIGINS'] = ['http://localhost']
 subscriptions = []
 logger = logging.getLogger(__name__)
 
+# define module state enum
+def enum(**enums):
+	return type('Enum', (), enums)
+Status = enum(PENDING=0,ACTIVE=1)
+
+class Module:
+	def __init__(self, name, status, dependencies):
+		self.name = name
+		self.status = status
+		self.dependencies = dependencies
+
 class ServerSentEvent(object):
 
 	def __init__(self, data):
@@ -82,6 +93,8 @@ class Core:
 		if config.has_key("LogFile"):
 			logFile = config['LogFile']
 		logging.basicConfig(filename = logFile, level = logLevel, format = '%(asctime)s - %(levelname)s: %(message)s')
+		console = logging.StreamHandler()
+		console.setLevel(logging.DEBUG)
 		#Modulize the controller adapter
 		if config.has_key("ControllerType"):
 			ControllerType = str(config['ControllerType']) + "_modules"
@@ -98,18 +111,49 @@ class Core:
 		plugins.__path__ = []
 		plugins.__path__.append (os.path.join(rootPath, 'src', ControllerType))
 
+		loadedModules = {}
+		def loadModule(moduleName):
+			if config[moduleName].has_key('depend'):
+				module = Module(name=moduleName,status=Status.PENDING,dependencies=config[moduleName]['depend'])
+			else:
+				module = Module(name=moduleName,status=Status.PENDING,dependencies=[])
+			if module.name in loadedModules.keys():
+				return
+			loadedModules[module.name]=module
+			for dependency in module.dependencies:
+				print("{} PENDING!!!".format(module.name))
+				if dependency in loadedModules.keys() and loadedModules[dependency].status == Status.PENDING:
+					print(module.name, dependency)
+					print("dependencies loops, exit")
+					os.kill(os.getpid(),1)
+				loadModule(dependency)
+			instance = import_module('plugins.' + module.name.lower())
+			if(config.has_key(module.name)):
+				getattr(instance,module.name)(self,config[module.name])
+			else:
+				print("module not found: {}".format(module.name))
+				os.kill(os.getpid(),1)
+			print("loading {}......".format(module.name))
+			module.status = Status.ACTIVE
+		# get module list
 		for module in config:
-			if module != "LogFile" and module != "REST" and module != "ControllerType" : # load modules other than LogFile and REST
-				instance = import_module('plugins.' + module.lower())
-				if(config.has_key(module)):
-					getattr(instance,module)(self,config[module])
-				else:
-					getattr(instance,module)(self,0)
-
+			if module != "LogFile" and module != "REST" and module != "ControllerType" : # get modules other than LogFile and REST
+				loadModule(module)
 		# Start REST service
 		if config.has_key("REST"):
 			restIP = config['REST']['ip']
 			restPort = config['REST']['port']
+
+			def notify(e, d, q=None):
+				msg = {
+					'event': e,
+					'data': d
+				}
+                                if q is not None:
+                                    q.put(msg)
+                                else:
+                                    for sub in subscriptions[:]:
+                                            sub.put(msg)
 
 			@app.route('/debug')
 			@cross_origin()
@@ -120,21 +164,17 @@ class Core:
 			@app.route('/publish/<event>', methods=['POST'])
 			@cross_origin()
 			def publish(event):
-				def notify(e, d):
-					msg = {
-						'event': e,
-						'data': d
-					}
-					for sub in subscriptions[:]:
-						sub.put(msg)
-
 				if event in sseHandlers:
 
 					#
 					# Process data, push event
 					#
 
-					gevent.spawn(notify, event, sseHandlers[event]())
+					rs = sseHandlers[event](request.json)
+					if rs is None:
+						logger.warn('\'%s\' event has been ignored' % event)
+						return 'OK'
+					gevent.spawn(notify, event, rs)
 				else:
 					abort(404, 'No such event: \'/publish/%s\'' % event)
 
@@ -147,6 +187,10 @@ class Core:
 				def gen():
 					q = Queue()
 					subscriptions.append(q)
+					for e in sseHandlers.keys():
+						rs = sseHandlers[e]('debut')
+						if rs is not None:
+							gevent.spawn(notify, e, rs, q)
 					try:
 						while True:
 							result = q.get()
@@ -209,7 +253,7 @@ class Core:
 
 	def invokeIPC(self, ipcname, *argument):
 		if ipcname in self.ipcHandlers:
-			return  self.ipcHandlers[ipcname](*argument)
+			return	self.ipcHandlers[ipcname](*argument)
 		else:
 			print "invokeIPC fail. %s not found" % ipcname
 			return None
@@ -246,5 +290,5 @@ def main():
 	coreInstance = Core()
 	coreInstance.start()
 	
-if __name__ ==  "__main__":
+if __name__ ==	"__main__":
 	main()

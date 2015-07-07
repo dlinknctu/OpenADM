@@ -1,0 +1,120 @@
+{
+	"misc":[
+		{
+			"fieldName": "switch",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "priority",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "idleTimeout",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "hardTimeout",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "active",
+			"inputType": "toggle"
+		}
+	],
+	"match":[
+		{
+			"fieldName": "ingressPort",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "srcMac",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "dstMac",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "vlan",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "vlanP",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "dlType",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "tosBits",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "netProtocol",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "srcIP",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "dstIP",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "dstPort",
+			"inputType": "text"
+		}
+	],
+	"action":[
+		{
+			"fieldName": "OUTPUT",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "ENQUEUE",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "STRIP_VLAN",
+			"inputType": "toggle"
+		},
+		{
+			"fieldName": "SET_VLAN_ID",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "SET_VLAN_P",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "SET_DL_SRC",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "SET_DL_DST",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "SET_NW_TOS",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "SET_NW_SRC",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "SET_NW_DST",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "SET_TP_SRC",
+			"inputType": "text"
+		},
+		{
+			"fieldName": "SET_TP_DST",
+			"inputType": "text"
+		}
+	]
+}
