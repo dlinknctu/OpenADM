@@ -14,7 +14,7 @@ class FlowTableStore {
 		this.isLoading = false;
 		this.fetchNewData = false;
 		this.bindListeners({
-      		handleUpdateFlowTable: FlowTableAction.updateFlowTable,
+      		handleInitialFlowTable: FlowTableAction.initialFlowTable,
       		handleFetchFlowTable: FlowTableAction.fetchFlowTable,
       		handleTriggerFlowMod: FlowTableAction.triggerFlowMod,
       		handleFlowTableFailed: FlowTableAction.flowTableFailed,
@@ -25,17 +25,19 @@ class FlowTableStore {
 
       		handleSubmitFlowMod: FlowTableAction.submitFlowMod
     	});
+    
 	}
 
-	parseActions(dpid, flow, actionList){
 
+	parseActions(dpid, flow, actionList){
+		
 		//set switch dpid
 		var object = new Object;
 		object["switch"] = dpid;
 		//set switch flows
 		if(actionList != null){	//parse actions to string
 			if(actionList.length == 0){
-				flow= ""
+				flow["actions"]= ""
 			}else{
 				var actions = [];
 				for(var action in actionList){
@@ -47,17 +49,17 @@ class FlowTableStore {
 						actionStr = actionList[action].type;
 						actions.push(actionStr);
 					}
-
+					
 				}
 				flow["actions"] = actions.toString();
-
-			}
+				
+			}	
 		}
 		_.extend(object, flow);
 		return object;
 	}
 
-	handleUpdateFlowTable(sw){
+	handleInitialFlowTable(sw){
 		var resultData = [];
 		if(this.filter === "none"){
 			for(var i in sw){
@@ -115,30 +117,45 @@ class FlowTableStore {
 
 	handleSubmitFlowMod(url){
 		var data = {};
+		
 		var {flowMod} = FlowModStore.getState();
 		for(var key in flowMod){
 			var field = new Object;
+
 			field[flowMod[key].name.toString()] = flowMod[key].val;
 			_.extend(data,field)
-
 		}
 		var postJson = JSON.stringify(data);
+		this.isLoading = true;
+		console.log("POST", postJson);
 
 		fetch(url, {
-          method: 'post',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: postJson
-        })
-        .then((data) => {
-            console.log('request succeeded with JSON response', data.status);
-            this.fetchNewData = true;
-            this.emitChange();
-        }).catch((error) => {
-            console.log('request failed', error)
-        })
+		  method: 'post',
+		  headers: {
+		    'Accept': 'application/json',
+		    'Content-Type': 'application/json'
+		  },
+		  body: postJson
+		})
+		.then((data) => {
+		    console.log('request succeeded with JSON response', data.status);
+			setTimeout(()=>{ 
+				this.fetchNewData = true;
+			    this.isLoading = false;
+				this.emitChange();
+			},
+			5000);
+		}).catch((error) => {
+		    console.log('request failed', error)
+		})
+		
+		/*setTimeout(()=>{ 
+				this.fetchNewData = true;
+			    this.isLoading = false;
+				this.emitChange();
+		},
+		1000);*/
+		
 	}
 }
 

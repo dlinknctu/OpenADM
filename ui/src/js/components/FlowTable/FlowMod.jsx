@@ -12,12 +12,12 @@ var FlowModStore = require('../../stores/FlowModStore.js');
 var customComponent = React.createClass({
 	getInitialState: function() {
     	var state = {
-    		"name": null,
-    		"val": null
+    		"name": "",
+    		"val": ""
     	};
         return state;
     },
-    componentDidMount: function() {
+    componentWillMount: function() {
     	var type = this.props.rowData.type;
     	var field = FlowModStore.getFieldVal(this.props.rowData.field);
 
@@ -30,54 +30,50 @@ var customComponent = React.createClass({
        			return;
        		}
        		var actionList = actions["val"].split(",");
-
+       		
        		for(var subaction in actionList ){
        			var action = actionList[subaction].split("=");
        			if(action[0] === this.props.rowData.field && action[0] !== "STRIP_VLAN"){
-
 			   		this.setState({
 	       				"name": action[0],
 	       				"val": action[1]
 	       			});
-	       			return;
+	       			break;
        			}
        			if(action[0] === this.props.rowData.field && action[0] === "STRIP_VLAN"){
        				this.setState({
 	       				"name": action[0],
-	       				"val": "true"
+	       				"val": true
 	       			});
-	       			return;
+	       			break;
        			}
        		}
        	}
     },
     handleActionChange:function(name, val){
+
     	var actions = FlowModStore.getFieldVal("actions");
-    	if(!actions){
-       		return;
-       	}
-		var actionList = actions["val"].split(",");
+    	var valLen = val.toString().trim().length;
+    	var actionList;
+    	
+    	if(!actions)
+       		actionList=[];	
+       	else
+       		actionList = actions["val"].split(",");
 
-		var indx = 0;
-		for(;indx < actionList.length; ++indx){
-			if(actionList[indx].indexOf(name) >= 0){
-				if(val.toString().trim().length == 0 || (name === "STRIP_VLAN" && val === false))
+		
+		for(var indx = 0;indx < actionList.length; ++indx){
+			if(actionList[indx].indexOf(name) >= 0){		
 					actionList.splice(indx,1);
-				else{
-					if(name === "STRIP_VLAN")
-						actionList[indx] = name;
-					else
-						actionList[indx] = name + "=" + val;
-				}
-				break;
+					break;	
 			}
-
-			if((indx+1) == actionList.length && name !== "STRIP_VLAN")
-				actionList.push(name + "=" + val);
-			else if((indx+1) == actionList.length && name == "STRIP_VLAN")
-				actionList.push(name);
 		}
 
+		if(name !== "STRIP_VLAN" && valLen > 0)
+			actionList.push(name + "=" + val);
+		else if(name == "STRIP_VLAN" && val !== false)
+			actionList.push(name);
+		
 		var field = {
 			"name": name,
 			"val": val
@@ -86,7 +82,6 @@ var customComponent = React.createClass({
 			"name": "actions",
 			"val": actionList.toString()
 		};
-
 		this.setState(field);
 		FlowTableAction.updateFlowMod(actions);
     },
@@ -102,13 +97,11 @@ var customComponent = React.createClass({
 			this.setState(field);
 			FlowTableAction.updateFlowMod(field);
 		}
-
-
+		
 	},
-	handleToggle: function(e){
-
-		if(this.props.rowData.type == "action"){
-			console.log(e.target.checked);
+	handleToggle: function(e,toggled){
+		
+		if(this.props.rowData.field == "STRIP_VLAN"){
 		 	this.handleActionChange(e.target.name, e.target.checked);
 		}else{
 			var field = {
@@ -137,26 +130,26 @@ var customComponent = React.createClass({
 			"width":"200px"
 		};
 	   	if(inputType == "text"){
-			return <input type = "text"
+			return <input type = "text" 
 						  placeholder={placeholder? placeholder:''}
-						  style={txtFieldStyle}
+						  style={txtFieldStyle} 
 						  onChange={this.handleChange}
 						  name={this.props.rowData.field}
 						  value={this.state.val}/>
 		}
 		else if(inputType == "toggle"){
-			var isToggled = (this.state.val===null)? true : (this.state.val==='true');
-			return <Toggle name={this.props.rowData.field}
+			var defaultVal = (this.props.rowData.field == "active")? true : false;
+			var isToggled = (this.state.val=="")? defaultVal : (this.state.val.toString()==="true");
+			return <Toggle name={this.props.rowData.field} 
 					   	   onToggle={this.handleToggle}
 					   	   defaultToggled={isToggled}/>
-
 		}
    }
 });
 
 var FlowMod = React.createClass({
 	componentWillMount: function() {
-
+		
         FlowTableAction.fetchFlowMod();
         var initialCommand = FlowModStore.getInitCmd();
 
@@ -177,7 +170,7 @@ var FlowMod = React.createClass({
 
 		if(this.props.openFlowVersion === 1.0){
 			flowModJson = Ofp10_FlowMod;
-
+			
 		}else if(this.props.openFlowVersion === 1.3){
 			flowModJson = Ofp10_FlowMod;
 		}
@@ -185,13 +178,13 @@ var FlowMod = React.createClass({
 		_.each(flowModJson, function(value, key){
 			var tempArr = [];
 
-    		if(key == "misc")
+    		if(key == "misc")   		
     			tempArr = flowModJson.misc;
     		else if(key == "match")
     			tempArr = flowModJson.match;
     		else if(key == "action")
     			tempArr = flowModJson.action;
-
+    		
     		if(tempArr.length > 0) {
 	    		for (var index = 0; index < tempArr.length; ++index) {
 				    var object = {};
@@ -272,13 +265,13 @@ var FlowMod = React.createClass({
 
     	return (
     		<div style={{marginTop: "-60px"}}>
-	    		<DropDownMenu menuItems={menuItems}
-	    				      autoWidth={false}
-	    				      style={flow_mod_cmd}
+	    		<DropDownMenu menuItems={menuItems} 
+	    				      autoWidth={false} 
+	    				      style={flow_mod_cmd} 
 	    				      selectedIndex={dropDownMenuIndex}
 	    				      onChange={this.menuOnChange}/>
-
-	    		<DataTable results={flowModField} columnMetadata={metadata} showFilter={true}
+	    		
+	    		<DataTable results={flowModField} columnMetadata={metadata} showFilter={true} 
 	    		columns={["type", "field", "input"]}
 	    		enableInfiniteScroll={true}
 	    		bodyHeight={230}/>

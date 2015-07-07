@@ -84,11 +84,13 @@ class Domain extends React.Component {
             _grid={{ x: 4, y: 0, w: 4, h: 3}}>
                 <Status status={this.state.controllerStatus}/>
             </Module>
-            <Module key={2} name="FlowTable"
-            _grid={{ x: 0, y: 4, w: 12, h:4, minW: 10, minH:4 }}>
-                <FlowTable openFlowVersion={1.0} filter={"none"} />
-            </Module>
         </ReactGridLayout>
+        <Paper style={{ width: '99%',marginLeft:"10",padding:"10"}}>
+          <h2>Flow Table</h2>
+          <FlowTable openFlowVersion={1.0}
+                     filter={
+                      (this.state.focusNode.type === 'switch') ? this.state.focusNode.id : "none"}/>
+        </Paper>
       </FullWidthSection>
     );
   }

@@ -27,10 +27,6 @@
 			"inputType": "text"
 		},
 		{
-			"fieldName": "wildcards",
-			"inputType": "text"
-		},
-		{
 			"fieldName": "srcMac",
 			"inputType": "text"
 		},

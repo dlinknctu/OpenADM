@@ -1,7 +1,6 @@
 [
 	"switch",
 	"ingressPort",
-    "wildcards",
     "actions",
     "priority",
     "active",

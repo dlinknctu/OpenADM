@@ -77,13 +77,15 @@ class FlowModStore {
 		
 		var cmd = arr[2];
 		var command = new Object;
-		
+		var discardField = ["srcIPMask", "dstIPMask","duration", "counterByte", "counterPacket"];
 		//set openflow field
 		for(var key in data) {
             var field = new Object;
             field["name"] = key;
             field["val"] = data[key];
-            if(field["name"] !== "counterByte" && field["name"] !== "counterPacket")
+            if(_.indexOf(discardField, field["name"].toString()) >= 0){
+				continue;
+			}
             	this.flowMod.push(field);
         }
 

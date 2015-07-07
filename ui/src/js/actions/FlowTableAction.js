@@ -33,9 +33,9 @@ class FlowTableAction {
         fetch(url)
             .then((res) => res.json())
             .then((json) => {
-               this.actions.updateFlowTable(json);
+               this.actions.initialFlowTable(json);
             })
-            .catch((e) => console.log("Something bad happens!!", e));
+            .catch((e) => console.log(e));
     }
 
     updateFlowTable(flows) {
@@ -63,6 +63,10 @@ class FlowTableAction {
     /** fetch & update flow mod **/
     fetchFlowMod(){
         this.dispatch();
+    }
+
+    initialFlowTable(json){
+        this.dispatch(json);
     }
 
     updateFlowMod(field){

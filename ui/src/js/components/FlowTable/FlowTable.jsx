@@ -2,7 +2,7 @@ var React = require('react');
 var mui = require('material-ui');
 var FlatButton = mui.FlatButton;
 var RaisedButton = mui.RaisedButton;
-var CircularProgress = mui.CircularProgress;
+var LinearProgress = mui.LinearProgress;
 var Dialog = mui.Dialog;
 var FlowMod = require("./FlowMod.jsx");
 var DataTable = require('./dataTable/DataTable.jsx');
@@ -19,13 +19,13 @@ var customComponent = React.createClass({
             if(value == "" || value == null)
                 delete resultData[key];
         }
-
+       
         FlowTableAction.triggerFlowMod(true, resultData, "MOD_ST");
     },
     handle_DEL_ST: function(){
         this.refs.delCheck.show();
     },
-    execute_DEL_ST:function(){
+    closeDelCheckSection:function(){
         var resultData = this.props.rowData;
         for(var key in resultData) {
             var value = resultData[key];
@@ -33,11 +33,16 @@ var customComponent = React.createClass({
                 delete resultData[key];
         }
         FlowTableAction.triggerFlowMod(false, resultData, "DEL_ST");
+        var body = document.getElementsByTagName('body')[0];
+        body.style.overflow = '';
+    },
+    execute_DEL_ST:function(){
+        this.refs.delCheck.dismiss();
         FlowTableAction.submitFlowMod();
     },
     render: function(){
         var filedName = this.props.rowData.field;
-
+        
         var MOD_ST_btnStyle = {
             "height": "20px",
             "width": "80px",
@@ -60,53 +65,58 @@ var customComponent = React.createClass({
                 <span style={{fontSize:"20pt",fontWeight:"bold", marginLeft:"20px",position:"relative",top:"-15px"}}>Warning</span>
             </div>
         );
+         
         return(
             <div>
                 <Dialog ref="delCheck"
                     title={warningTitle}
                     actions={delActions}
+                    onDismiss={this.closeDelCheckSection}
                     contentStyle={{fontFamily:"Arial", width:"600px"}} >
                     <span style={{fontSize:"14pt"}}>
                     Are you sure to remove this flow?
                     </span>
                 </Dialog>
-                <RaisedButton label="MOD_ST"
-                              secondary={true}
-                       style={MOD_ST_btnStyle}
+                <RaisedButton label="MOD_ST" 
+                              secondary={true} 
+                       style={MOD_ST_btnStyle} 
                        labelStyle={{padding:"0",fontSize:"10pt",margin:"0",lineHeight: "20px"}}
                        onClick={this.handle_MOD_ST}/>
                 <br/>
-                <RaisedButton label="DEL_ST"
-                              primary={true}
-                              style={DEL_ST_btnStyle}
-                              labelStyle={{padding:"0",fontSize:"10pt",margin:"0",lineHeight: "20px"}}
-                              onClick={this.handle_DEL_ST}/>
+                <RaisedButton label="DEL_ST" 
+                      primary={true}  
+                      style={DEL_ST_btnStyle}
+                      labelStyle={{padding:"0",fontSize:"10pt",margin:"0",lineHeight: "20px"}}
+                      onClick={this.handle_DEL_ST}/>
             </div>
         );
-
+        
    }
 });
 
 var FlowTable = React.createClass({
     componentDidMount: function() {
         FlowTableStore.listen(this.flowTableChange);
-        FlowTableAction.fetchFlowTable(this.props.filter);
-        FlowTableAction.fetchStorageColumn();
-    },
-    componentWillUnmount: function() {
-        console.log(1234);
-        FlowTableStore.unlisten(this.flowTableChange);
     },
 
+    componentWillUnmount: function() {
+        FlowTableStore.unlisten(this.flowTableChange);
+    },
+    componentWillReceiveProps:function(nextProps){
+        FlowTableAction.fetchFlowTable(nextProps.filter);
+        FlowTableAction.fetchStorageColumn();
+    },
     flowTableChange: function(state){
         this.setState(state, function(){
             if(this.state.triggerFlowMod){
                 this.refs.flowModDialog.show();
             }
         });
+
         if(this.state.fetchNewData){
             FlowTableAction.fetchFlowTable(this.props.filter);
         }
+
     },
     getInitialState: function() {
     	var state = {
@@ -114,7 +124,7 @@ var FlowTable = React.createClass({
             storageColumn: [],
     		triggerFlowMod: false,
             isLoading: false,
-            fetchNewData:false
+            fetchNewData:false,
     	}
         return state;
     },
@@ -124,14 +134,14 @@ var FlowTable = React.createClass({
             "openFlowVersion": 1.0,
             "showFilter": true,
             "showSettings": true,
-            "showFlowMod": true
+            "showFlowMod": true,
         };
 	},
     getFlowModSection: function(){
     	if(this.state.triggerFlowMod){
 	    	return (
 	            <FlowMod openFlowVersion={this.props.openFlowVersion}
-                         flowModVals={this.onDialogSubmit} />
+                         flowModVals={this.onDialogSubmit} />    
 	    	);
     	}
     	else
@@ -139,6 +149,8 @@ var FlowTable = React.createClass({
     },
     closeFlowModSection: function() {
         FlowTableAction.triggerFlowMod(false, null);
+        var body = document.getElementsByTagName('body')[0];
+        body.style.overflow = '';
     },
     toggleFlowModSection: function(){
         FlowTableAction.triggerFlowMod(true, null);
@@ -154,7 +166,7 @@ var FlowTable = React.createClass({
 	            textAlign: "right",
 	            marginRight: "140px",
 	            marginBottom: "-50px"
-
+                
         	};
         	return (
         		<div style={addFlowStyles}>
@@ -167,14 +179,25 @@ var FlowTable = React.createClass({
     },
     updateStorageColumn: function(cols){
         FlowTableAction.updateStorageColumn(cols);
+    },  
+    getLoadingSection:function(){
+        return(
+            <div style={{textAlign:"center"}}>
+                <div style={{margin:"80px 0px 10px 15px",fontSize:"16pt"}}>
+                    Fectching Data...
+                </div>
+                <img src="https://performance.sucuri.net/assets/loading-bar.gif" 
+                     width="250px"/>
+            </div>
+        );
     },
 	render: function() {
-
+        
 		var flowModBtn = this.getFlowModBtn();
 		var flowModSection = this.getFlowModSection();
 		var standardActions = [
 		  { text: 'Cancel' },
-		  { text: 'Submit', onTouchTap: this.onFlowModSubmit }
+		  { text: 'Submit', onTouchTap: this.onFlowModSubmit, ref: 'submit' }
 		];
         var FlowTableColumnMetadata;
         if(this.props.openFlowVersion === 1.0){
@@ -182,9 +205,18 @@ var FlowTable = React.createClass({
             _.extend(FlowTableColumnMetadata[0],{"customComponent": customComponent});
         }
         else if(this.props.openFlowVersion === 1.3){
-
+            
         }
-
+        
+        if(this.state.isLoading){
+            var loadingSection = this.getLoadingSection();
+            return (
+                <div className={"flow-table"}>
+                    {loadingSection}
+                </div>
+            );
+        }
+        
 		return(
 			<div className={"flow-table"}>
                 <div className={"flow-mod-section"}>
@@ -192,11 +224,12 @@ var FlowTable = React.createClass({
 				<Dialog ref="flowModDialog"
                     title={"Flow Mod"}
                     actions={standardActions}
+                    actionFocus="submit"
                     onDismiss={this.closeFlowModSection}
-                    contentStyle={{fontFamily:"Arial"}} >
+                    contentStyle={{fontFamily:"Arial"}}>
 					{flowModSection}
 				</Dialog>
-                </div>
+                </div> 
 				<div className={"flow-table-section"}>
 		    		<DataTable results={this.state.flows}
 	               			   columns={this.state.storageColumn}
