@@ -12,7 +12,7 @@ class ControllerAdapter:
         self.links={} #{controllername: []}
         self.controllerlist = {} #{controllername: {ip: "xx",port: "xx",interval: "xx"}}
         #load config
-        self.timerInterval = parm["interval"]
+        self.timerInterval = int(parm["interval"])
         for i in range(len(parm["controller"])):
             tmp = {}
             if(parm["controller"][i].has_key("ip")):
