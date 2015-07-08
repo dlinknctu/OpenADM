@@ -18,7 +18,6 @@ class Master extends React.Component {
 
     constructor(props) {
         super(props);
-        this.handleClick = this.handleClick.bind(this);
         this._onLeftIconButtonTouchTap = this._onLeftIconButtonTouchTap.bind(this);
 
         this.state = {
@@ -45,7 +44,11 @@ class Master extends React.Component {
         this.refs.leftNav.toggle();
     }
 
-    handleClick() {
+    onChange(state) {
+        this.setState(state);
+    }
+
+    changeTheme(){
         if (this.state.isThemeDark) {
           ThemeManager.setTheme(ThemeManager.types.LIGHT);
             }
@@ -53,16 +56,11 @@ class Master extends React.Component {
           ThemeManager.setTheme(ThemeManager.types.DARK);
         }
         this.setState({ isThemeDark: !this.state.isThemeDark });
-
-    }
-
-    onChange(state) {
-        this.setState(state);
     }
 
     render() {
         var themeButton = (
-              <IconButton tooltip="theme" iconStyle={{ color: "white" }}>
+              <IconButton tooltip="theme" iconStyle={{ color: "white" }} onClick={this.changeTheme.bind(this)}>
                   <SvgIcon {...this.props}>
                     <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path>
                 </SvgIcon>
