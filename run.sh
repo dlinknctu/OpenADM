@@ -37,5 +37,34 @@ function test {
     test_core
 }
 
+function setup {
+	if [ $# != 2 ]; then
+		echo "Usage: $0 exec <IP> <Port>"
+		exit -1
+	fi
+
+	UI_CONFIG="$OPENADM_ROOT/ui/config/config.json"
+
+	# Config IP address
+	rm -rf $UI_CONFIG
+	echo "{" > $UI_CONFIG
+	echo "    \"OmniUICoreURL\": \"http://$1:$2/\"" >> $UI_CONFIG
+	echo "}" >> $UI_CONFIG
+}
+
+function controller {
+	$OPENADM_ROOT/../floodlight/floodlight.sh
+}
+
+function core {
+	/root/.local/bin/omniui
+}
+
+function ui {
+	cd $OPENADM_ROOT/ui/
+	npm run dev &> /tmp/omniui/ui.log &
+}
+
 rootpath=`pwd`
+OPENADM_ROOT=`dirname $0`
 $@
