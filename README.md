@@ -16,6 +16,39 @@ Features of OmniUI includes:
 - Dynamic flow migration
 - [Demo Video](http://vimeo.com/mcchan/omniui)
 
+###Quickstart using Docker image###
+1. Pull Docker image from Docker Hub <br/>
+  `docker pull dlinknctu/openadm`
+
+2. Run Docker container <br/>
+  `docker run -itdP --name openadm dlinknctu/openadm /bin/bash`
+
+3. Check port forwarding <br/>
+  ```
+  docker port openadm
+  # 5567 -> 32773 OpenADM core
+  # 6633 -> 32772 OpenFlow
+  # 8000 -> 32771  UI
+  ```
+4. Setup IP address <br/>
+  `docker exec openadm /root/omniui/run.sh setup 10.211.55.3 32773` <br/>
+  Note: The IP should be the one of Docker host instead of containter. The port should be the one mapped to port 5567
+
+5. Start controller, core and UI <br/>
+  ```
+  docker exec -it openadm /root/floodlight/floodlight.sh
+  docker exec -it openadm omniui
+  docker exec -it openadm bash -c "cd /root/omniui/ui && npm run dev"
+  ```
+
+6. Connect Mininet to controller <br/>
+  `sudo mn --mac --topo=tree,2 --controller=remote,ip=10.211.55.3,port=32772` <br/>
+  Note: The IP should be the one of Docker host instead of containter. The port should be the one mapped to port 6633
+
+7. Access web UI <br/>
+  `http://10.211.55.3:32771` <br/>
+  Note: The IP should be the one of Docker host instead of containter. The port should be the one mapped to port 8000
+
 ###Prerequisite###
 1. Install essential packages  
 **Floodlight**  
