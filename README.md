@@ -1,6 +1,6 @@
-OmniUI [![Build Status](https://travis-ci.org/dlinknctu/OmniUI.svg?branch=dev)](https://travis-ci.org/dlinknctu/OmniUI)
+OpenADM [![Build Status](https://travis-ci.org/dlinknctu/OmniUI.svg?branch=dev)](https://travis-ci.org/dlinknctu/OmniUI)
 ------
-A diagnosis, analytic and management framework for SDN  
+An opensource Aanalytic, Diagnosis and Management framework for SDN.
 http://www.slideshare.net/rascov/20140824-omni-ui
 
 ###Introduction###
