@@ -25,7 +25,7 @@
     "less": "^2.5.1",
     "less-loader": "^2.2.0",
     "lodash": "^3.9.3",
-    "material-ui": "^0.9.2",
+    "material-ui": "^0.10.4",
     "node-libs-browser": "^0.5.2",
     "normalize.less": "^1.0.0",
     "object-assign": "^3.0.0",

@@ -10,7 +10,7 @@ var TableSettings = React.createClass({
             "columnMetadata": [],
             "selectedColumns": [],
             "resultsPerPage": 0,
-            "openFlowVersion": 1.0, 
+            "openFlowVersion": 1.0,
         };
     },
     getInitialState: function(){
@@ -28,7 +28,7 @@ var TableSettings = React.createClass({
     		// the column is unchecked to checked,
             this.props.selectedColumns.push(event.target.dataset.name);
             this.props.setColumns(this.props.selectedColumns);
-        } 
+        }
         else {
             /* redraw with the selected columns minus the one just unchecked */
             this.props.setColumns(_.without(this.props.selectedColumns, event.target.dataset.name));
@@ -37,7 +37,7 @@ var TableSettings = React.createClass({
 
     setAccordionOpen: function(val){
         var columnType = ["in_", "out_", "dl_", "nw_", "_id","cookie", "timeout", "eth_", "vlan", "ip_", "ipv4_", "tcp_", "udp_", "sctp_", "icmpv4_", "arp_", "ipv6_", "icmpv6_", "mpls_"];
-        
+
         var title;
         for(var i = 0; i < columnType.length; ++i){
             if( val.indexOf(columnType[i]) != -1 ){
@@ -59,7 +59,7 @@ var TableSettings = React.createClass({
         });
 
         if(_.contains(this.state.openTitle, title) === false){
-            var openTitleList = this.state.openTitle; 
+            var openTitleList = this.state.openTitle;
             openTitleList.push(title);
             this.setState({openTitle: openTitleList});
         }
@@ -77,7 +77,7 @@ var TableSettings = React.createClass({
         }
 
         var style = {
-            "float": "left", 
+            "float": "left",
             width: (this.props.openFlowVersion === 1.0)? "20%" : "50%"
         };
         return (
@@ -119,27 +119,27 @@ var TableSettings = React.createClass({
             nodes = columnType.map(function(colType, index){
 
                 var innerNodes = [];
-                
+
                 for(var i = that.props.columns.length-1; i >= 0; --i){
                     var col = that.props.columns[i].toLowerCase();
                     if (col.indexOf(colType.toLowerCase()) >= 0) {
                         innerNodes.push(that.getCheckBoxSecton(that.props.columns[i]));
                         restCol = _.without(restCol, that.props.columns[i]);
-                    }  
+                    }
                 }
                 var type = colType.split("_");
                 var title = type[0]? type[0]: type[1];
                 var isOpen = that.getAccordionOpen(title);
                 return (
                     <div style={{"float": "left", width: "25%"}}>
-                        <Accordion title={title} isOpen={isOpen} 
-                                   removeOpenList={that.removeOpenList}>   
+                        <Accordion title={title} isOpen={isOpen}
+                                   removeOpenList={that.removeOpenList}>
                             {innerNodes}
                         </Accordion>
                     </div>
                 );
             });
-            
+
             // mixin columns
             var innerNodes = [];
             for(var i = 0; i < restCol.length; ++i) {
@@ -149,8 +149,8 @@ var TableSettings = React.createClass({
 
             nodes.push(
                 <div style={{"float": "left", width: "25%"}}>
-                    <Accordion title={"mixin"} isOpen={isOpen} 
-                               removeOpenList={that.removeOpenList}>   
+                    <Accordion title={"mixin"} isOpen={isOpen}
+                               removeOpenList={that.removeOpenList}>
                         {innerNodes}
                     </Accordion>
                 </div>
@@ -185,7 +185,7 @@ var TableSettings = React.createClass({
 			);
 
 		return (
-			<div style={{backgroundColor: "#FFF", border: "2px solid #DDD", color: "#222", padding: "10px", marginBottom: "10px", fontFamily: "Arial"}} >
+			<div style={{backgroundColor: "#FFF", border: "2px solid #DDD", color: "#222", padding: "10px", marginBottom: "10px", fontFamily: "Arial", marginTop:"40px"}} >
                 <div style={{"float": "right", marginTop: "-70px", marginRight: "-10px","width": "25%"}}>
                    <Selector columns={this.props.columns} focusCheckBox={this.setAccordionOpen}/>
                 </div>

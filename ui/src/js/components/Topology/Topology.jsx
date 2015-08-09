@@ -4,7 +4,7 @@ require("whatwg-fetch");
 
 let d3 = require('d3');
 require('./topology.css');
-var graph = require('./Topology_d3.js');
+
 var TYPE = {
   'SWITCH': 'switch',
   'AP': 'ap',
