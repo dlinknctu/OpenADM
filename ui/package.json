@@ -17,6 +17,7 @@
     "esprima-fb": "^15001.1.0-dev-harmony-fb",
     "file-loader": "^0.8.4",
     "griddle-react": "^0.2.13",
+    "immutable": "^3.7.4",
     "jest": "^0.1.40",
     "jest-cli": "^0.4.5",
     "jscs": "^1.13.1",

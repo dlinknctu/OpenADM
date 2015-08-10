@@ -1,5 +1,6 @@
 import React from 'react';
 import config from "../../../../config/config.json";
+import Immutable from "immutable";
 require("whatwg-fetch");
 
 let d3 = require('d3');
@@ -39,17 +40,19 @@ class Topology extends React.Component {
     }
 
     initialTopology(){
-      // var renderDom = document.getElementById('container');
-      // var renderDom = this.refs.topology.getDOMNode();
-      // var width = renderDOM.offsetWidth ? renderDOM.offsetWidth : 500;
-      // var height = renderDOM.offsetHeight ? renderDOM.offsetHeight : 500;
-        const width = 500;
-        const height = 500;
+
+        var renderDom = this.refs.topology.getDOMNode();
+        var width = renderDom.offsetWidth ? renderDom.offsetWidth : 444;
+        var height = renderDom.offsetHeight ? renderDom.offsetHeight - 200 : 300;
+;
+        // const width = 500;
+        // const height = 500;
 
         var svg = d3.select("#topology").append("svg")
               .attr("width", width)
               .attr("height", height)
-              .style({'overflow': 'overlay','z-index': '0','left': '25px', 'top': '25px' });
+              .style({ 'left': '25px', 'top': '25px' });
+              // .style({'overflow': 'overlay','z-index': '0','left': '25px', 'top': '25px' });
 
         link = svg.selectAll(".link");
         node = svg.selectAll(".node");
@@ -67,14 +70,14 @@ class Topology extends React.Component {
                 node.selectAll('circle')
                   .each(function(d,i){
                       var circle = d3.select(this);
-                      circle.attr('cx', d.x)
-                            .attr('cy', d.y);
+                      circle.attr('cx', d => Math.max(15, Math.min(width - 15, d.x)) )
+                            .attr('cy', d => Math.max(15, Math.min(height - 15, d.y)) );
                   });
                 node.selectAll('text')
                   .each( function(d,i) {
                       var text = d3.select(this);
-                      text.attr('x', d.x - 5)
-                          .attr('y', d.y + 5);
+                      text.attr('x', data => Math.max(15, Math.min(width - 15, d.x - 5)) )
+                          .attr('y', data => Math.max(15, Math.min(height - 15, d.y + 5)) );
                   });
               });
         topologyNodes = force.nodes();
@@ -190,8 +193,10 @@ class Topology extends React.Component {
   // delet node give uuid
   delTopologyNode(uuid){
     for (var i=0; i < topologyNodes.length; i++) {
-        if (topologyNodes[i].uuid === uuid)
+        if (topologyNodes[i].uuid === uuid){
             topologyNodes.pop(i);
+            console.log(`delete ${i} uuid ${uuid}`);
+        }
     };
     this.updateTopology();
   }
@@ -207,9 +212,11 @@ class Topology extends React.Component {
   };
   // 給兩個uuid會刪除兩個之間的link
   delTopologyLink(source,target){
+    console.log('delTopologyLink delTopologyLink');
       for(var i=0;i< topologyLinks.length;i++){
           if(topologyLinks[i].source.uuid == source && topologyLinks[i].target.uuid == target){
               topologyLinks.splice(i,1);
+               console.log(`delete ${i} uuid ${uuid}`);
               break;
           }
       }
@@ -307,13 +314,11 @@ class Topology extends React.Component {
         if( link.length === 0)
           return 0;
         console.info('Delete link ', link);
-        setTimeout((a) => {
           try {
             for (var i = 0; i < link.length; i++) {
               this.delTopologyLink(link[i][0].uuid, link[i][1].uuid);
             };
           }catch(e){}
-        }, 1000);
     }
 
     addhost(e) {
