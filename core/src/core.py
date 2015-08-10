@@ -175,6 +175,7 @@ class Core:
 						logger.warn('\'%s\' event has been ignored' % event)
 						return 'OK'
 					gevent.spawn(notify, event, rs)
+                                        time.sleep(0.05)
 				else:
 					abort(404, 'No such event: \'/publish/%s\'' % event)
 

@@ -113,9 +113,10 @@ class NWInfo:
         if raw == 'debut':
             return json.dumps(self.links.values())
         key = (raw['src_dpid'], raw['dst_dpid'], raw['src_port'], raw['dst_port'])
+        rkey = (raw['dst_dpid'], raw['src_dpid'], raw['dst_port'], raw['src_port'])
         src_uuid = abs(int(str(hash(raw['src_dpid']))[8:]))
         dst_uuid = abs(int(str(hash(raw['dst_dpid']))[8:]))
-        if key in self.links.keys():
+        if key in self.links.keys() or rkey in self.links.keys():
             return None
         self.links[key] = [{'uuid': src_uuid,
                             'src_dpid': raw['src_dpid'],
@@ -139,11 +140,19 @@ class NWInfo:
         '''
         if raw == 'debut':
             return None
-        try:
-            key = (raw['src_dpid'], raw['dst_dpid'], raw['src_port'], raw['dst_port'])
+        #try:
+        #    key = (raw['src_dpid'], raw['dst_dpid'], raw['src_port'], raw['dst_port'])
+        #    del self.links[key]
+        #except KeyError as e:
+        #    logger.warn('Key of link down event not found: %s' % str(e))
+        #    return None
+        key = (raw['src_dpid'], raw['dst_dpid'], raw['src_port'], raw['dst_port'])
+        rkey = (raw['dst_dpid'], raw['src_dpid'], raw['dst_port'], raw['src_port'])
+        if key in self.links.keys():
             del self.links[key]
-        except KeyError as e:
-            logger.warn('Key of link down event not found: %s' % str(e))
+        elif rkey in self.links.keys():
+            del self.links[rkey]
+        else:
             return None
         logger.debug('Total links after deletion: %d' % len(self.links))
 
