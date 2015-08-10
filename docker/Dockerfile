@@ -22,8 +22,8 @@ ENV PATH $PATH:/root/.local/bin
 
 # Fetch and install
 WORKDIR $HOME
-RUN git clone https://github.com/dlinknctu/omniui.git omniui
-WORKDIR $HOME/omniui
+RUN git clone https://github.com/dlinknctu/openadm.git openadm
+WORKDIR $HOME/openadm
 RUN ./run.sh install
 
 # Expose ports
