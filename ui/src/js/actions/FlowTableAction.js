@@ -5,14 +5,11 @@ require("whatwg-fetch");
 
 // app 第一次啟動時，存入一包 mock data 到 localStorage 供測試
 if( db.hasOwnProperty('flowTable_db') == false ){
-    // console.log( '\n無歷史資料，存入 mock data' );
-    db.setItem('flowTable_db', JSON.stringify({columns: 
+     console.log( '\n無歷史資料，存入 mock data' );
+    db.setItem('flowTable_db', JSON.stringify({columns:
       ["flowMod","switch","ingressPort","srcMac","dstMac","dlType","netProtocol","actions", "priority", "idleTimeout", "hardTimeout"]}));
 }
 
-// 接著一律從 db 讀取歷史資料
-var o = JSON.parse(db.getItem('flowTable_db'));
-var StorageColumn = o.columns ? o.columns : [];
 //=======================================================//
 
 class FlowTableAction {
@@ -20,7 +17,7 @@ class FlowTableAction {
         this.generateActions('triggerFlowMod');  // "triggerFlowMod" pass multiple value
     }
     /** fetch & update flows **/
-    fetchFlowTable(filter) { 
+    fetchFlowTable(filter) {
         this.dispatch(filter);
         var url;
         if(filter == "none"){
@@ -29,7 +26,7 @@ class FlowTableAction {
             url = Config.getSwitchFlowUrl(filter);
 
         }
-        
+
         fetch(url)
             .then((res) => res.json())
             .then((json) => {
@@ -49,6 +46,9 @@ class FlowTableAction {
     /** fetch & update storage columns **/
     fetchStorageColumn(){
         this.dispatch();
+        // 接著一律從 db 讀取歷史資料
+        var o = JSON.parse(db.getItem('flowTable_db'));
+        var StorageColumn = o.columns ? o.columns : [];
         this.actions.updateStorageColumn(StorageColumn);
     }
 

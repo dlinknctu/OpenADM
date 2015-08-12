@@ -55,7 +55,7 @@ var DataTable = React.createClass({
         var results = this.getCurrentResults();
 
         //if we don't have any data don't mess with this
-        if (results === undefined || results.length === 0){ return [];}
+        //if (results === undefined || results.length === 0){ return [];}
 
         var columns = this.state.filteredColumns;
         var meta = this.getMetadataColumns();
@@ -153,7 +153,6 @@ var DataTable = React.createClass({
         this.setMaxPage();
     },
     setColumns: function(columns){
-
         columns = _.isArray(columns) ? columns : [columns];
         this.props.refreshLocalStorage(columns);
         this.setState({
@@ -294,7 +293,6 @@ var DataTable = React.createClass({
         }
     },
     getCurrentPage: function(){
-
         return this.state.page;
     },
     getCurrentMaxPage: function(){
@@ -343,8 +341,21 @@ var DataTable = React.createClass({
             </div>
         );
     },
+    diffColumns: function(new_cols){
+        var old_cols = this.state.filteredColumns;
+        if(new_cols.length != old_cols.length)
+            return true;
+        else
+            return false;
+    },
     componentWillReceiveProps: function(nextProps) {
         this.setMaxPage(nextProps.results);
+        var diff = this.diffColumns(nextProps.columns);
+        if(diff){
+            this.setState({
+                filteredColumns: nextProps.columns
+            });
+        }
     },
     getInitialState: function() {
         var state =  {

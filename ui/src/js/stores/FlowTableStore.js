@@ -5,158 +5,159 @@ var _ = require("underscore");
 var db = window.localStorage;
 
 class FlowTableStore {
-	constructor() {
-		this.flows = [];
-		this.filter = "";
-		this.storageColumn = [];
-		this.triggerFlowMod = false;
-		this.errorMessage = null;
-		this.isLoading = false;
-		this.fetchNewData = false;
-		this.bindListeners({
-      		handleInitialFlowTable: FlowTableAction.initialFlowTable,
-      		handleFetchFlowTable: FlowTableAction.fetchFlowTable,
-      		handleTriggerFlowMod: FlowTableAction.triggerFlowMod,
-      		handleFlowTableFailed: FlowTableAction.flowTableFailed,
+    constructor() {
+        this.flows = [];
+        this.filter = "";
+        this.storageColumn = [];
+        this.triggerFlowMod = false;
+        this.errorMessage = null;
+        this.isLoading = false;
+        this.fetchNewData = false;
+        this.bindListeners({
+            handleInitialFlowTable: FlowTableAction.initialFlowTable,
+            handleFetchFlowTable: FlowTableAction.fetchFlowTable,
+            handleTriggerFlowMod: FlowTableAction.triggerFlowMod,
+            handleFlowTableFailed: FlowTableAction.flowTableFailed,
 
-      		handleUpdateStorageColumn: FlowTableAction.updateStorageColumn,
-      		handleFetchStorageColumn: FlowTableAction.fetchStorageColumn,
-      		handleStorageColumnFailed: FlowTableAction.storageColumnFailed,
+            handleUpdateStorageColumn: FlowTableAction.updateStorageColumn,
+            handleFetchStorageColumn: FlowTableAction.fetchStorageColumn,
+            handleStorageColumnFailed: FlowTableAction.storageColumnFailed,
 
-      		handleSubmitFlowMod: FlowTableAction.submitFlowMod
-    	});
-    
-	}
+            handleSubmitFlowMod: FlowTableAction.submitFlowMod
+        });
+
+    }
 
 
-	parseActions(dpid, flow, actionList){
-		
-		//set switch dpid
-		var object = new Object;
-		object["switch"] = dpid;
-		//set switch flows
-		if(actionList != null){	//parse actions to string
-			if(actionList.length == 0){
-				flow["actions"]= ""
-			}else{
-				var actions = [];
-				for(var action in actionList){
-					var actionStr = "";
-					if(actionList[action].type && actionList[action].value){
-						actionStr = actionList[action].type + "=" +actionList[action].value;
-						actions.push(actionStr);
-					}else if(actionList[action].type && !actionList[action].value){
-						actionStr = actionList[action].type;
-						actions.push(actionStr);
-					}
-					
-				}
-				flow["actions"] = actions.toString();
-				
-			}	
-		}
-		_.extend(object, flow);
-		return object;
-	}
+    parseActions(dpid, flow, actionList){
 
-	handleInitialFlowTable(sw){
-		var resultData = [];
-		if(this.filter === "none"){
-			for(var i in sw){
-				var flows = sw[i].flows;
+        //set switch dpid
+        var object = new Object;
+        object["switch"] = dpid;
+        //set switch flows
+        if(actionList != null){ //parse actions to string
+            if(actionList.length == 0){
+                flow["actions"]= ""
+            }else{
+                var actions = [];
+                for(var action in actionList){
+                    var actionStr = "";
+                    if(actionList[action].type && actionList[action].value){
+                        actionStr = actionList[action].type + "=" +actionList[action].value;
+                        actions.push(actionStr);
+                    }else if(actionList[action].type && !actionList[action].value){
+                        actionStr = actionList[action].type;
+                        actions.push(actionStr);
+                    }
 
-				for(var j in flows){
-					var dpid = sw[i].dpid;
-					var actionList = flows[j].actions;
-					var object = this.parseActions(dpid, flows[j], actionList);
-					resultData.push(object);
-				}
-			}
-		} else {	// only one switch's flow
-			var flows = sw.flows;
+                }
+                flow["actions"] = actions.toString();
 
-			for(var j in flows){
-				var dpid = sw.dpid;
-				var actionList = flows[j].actions;
-				var object = this.parseActions(dpid, flows[j], actionList);
-				resultData.push(object);
-			}
-		}
-		this.flows = resultData;
-    	this.errorMessage = null;
-	}
+            }
+        }
+        _.extend(object, flow);
+        return object;
+    }
 
-	handleTriggerFlowMod(arr){	// arr is [triggerDialog, data, command]
-		var trigger = arr[0];
-		this.triggerFlowMod = trigger;
-	}
+    handleInitialFlowTable(sw){
+        var resultData = [];
+        if(this.filter === "none"){
+            for(var i in sw){
+                var flows = sw[i].flows;
 
-	handleFetchFlowTable(filter){
-		this.fetchNewData = false;
-		this.flows = [];
-		this.filter = filter;
-	}
+                for(var j in flows){
+                    var dpid = sw[i].dpid;
+                    var actionList = flows[j].actions;
+                    var object = this.parseActions(dpid, flows[j], actionList);
+                    resultData.push(object);
+                }
+            }
+        } else {    // only one switch's flow
+            var flows = sw.flows;
 
-	handleFlowTableFailed(errorMessage){
-		this.errorMessage = errorMessage;
-	}
+            for(var j in flows){
+                var dpid = sw.dpid;
+                var actionList = flows[j].actions;
+                var object = this.parseActions(dpid, flows[j], actionList);
+                resultData.push(object);
+            }
+        }
+        this.flows = resultData;
+        this.errorMessage = null;
+    }
 
-	handleUpdateStorageColumn(cols){
-		this.storageColumn = cols;
-		this.errorMessage = null;
-		db.setItem('flowTable_db', JSON.stringify({columns: cols}));
-	}
+    handleTriggerFlowMod(arr){  // arr is [triggerDialog, data, command]
+        var trigger = arr[0];
+        this.triggerFlowMod = trigger;
+    }
 
-	handleFetchStorageColumn(){
-		this.storageColumn = [];
-	}
+    handleFetchFlowTable(filter){
+        this.fetchNewData = false;
+        this.flows = [];
+        this.filter = filter;
+    }
 
-	handleStorageColumnFailed(errorMessage){
-		this.errorMessage = errorMessage;
-	}
+    handleFlowTableFailed(errorMessage){
+        this.errorMessage = errorMessage;
+    }
 
-	handleSubmitFlowMod(url){
-		var data = {};
-		
-		var {flowMod} = FlowModStore.getState();
-		for(var key in flowMod){
-			var field = new Object;
+    handleUpdateStorageColumn(cols){
+        db.setItem('flowTable_db', JSON.stringify({columns: cols}));
+        this.storageColumn = cols;
+        this.errorMessage = null;
+        this.emitChange();
+    }
 
-			field[flowMod[key].name.toString()] = flowMod[key].val;
-			_.extend(data,field)
-		}
-		var postJson = JSON.stringify(data);
-		this.isLoading = true;
-		console.log("POST", postJson);
+    handleFetchStorageColumn(){
+        this.storageColumn = [];
+    }
 
-		fetch(url, {
-		  method: 'post',
-		  headers: {
-		    'Accept': 'application/json',
-		    'Content-Type': 'application/json'
-		  },
-		  body: postJson
-		})
-		.then((data) => {
-		    console.log('request succeeded with JSON response', data.status);
-			setTimeout(()=>{ 
-				this.fetchNewData = true;
-			    this.isLoading = false;
-				this.emitChange();
-			},
-			5000);
-		}).catch((error) => {
-		    console.log('request failed', error)
-		})
-		
-		/*setTimeout(()=>{ 
-				this.fetchNewData = true;
-			    this.isLoading = false;
-				this.emitChange();
-		},
-		1000);*/
-		
-	}
+    handleStorageColumnFailed(errorMessage){
+        this.errorMessage = errorMessage;
+    }
+
+    handleSubmitFlowMod(url){
+        var data = {};
+
+        var {flowMod} = FlowModStore.getState();
+        for(var key in flowMod){
+            var field = new Object;
+
+            field[flowMod[key].name.toString()] = flowMod[key].val;
+            _.extend(data,field)
+        }
+        var postJson = JSON.stringify(data);
+        this.isLoading = true;
+        console.log("POST", postJson);
+
+        fetch(url, {
+          method: 'post',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: postJson
+        })
+        .then((data) => {
+            console.log('request succeeded with JSON response', data.status);
+            setTimeout(()=>{
+                this.fetchNewData = true;
+                this.isLoading = false;
+                this.emitChange();
+            },
+            5000);
+        }).catch((error) => {
+            console.log('request failed', error)
+        })
+
+        /*setTimeout(()=>{
+                this.fetchNewData = true;
+                this.isLoading = false;
+                this.emitChange();
+        },
+        1000);*/
+
+    }
 }
 
 module.exports = alt.createStore(FlowTableStore, 'FlowTableStore');
