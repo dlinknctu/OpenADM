@@ -25,11 +25,11 @@ class NWInfo:
         self.portstats = {}
         self.flowtables = {}
 
-        self.registration(core)
-        self.trigger(param['controller_ip'], param['controller_port'],
+        self.__registration(core)
+        self.__trigger(param['controller_ip'], param['controller_port'],
                 param['adapter_port'], param['controller_name'])
 
-    def registration(self, core):
+    def __registration(self, core):
         '''Registration for SSE handlers and RESTful APIs
 
         Handle the JSON format data which received from controller adapter and
@@ -56,7 +56,7 @@ class NWInfo:
 
         logger.info('Handlers and RESTful APIs registered')
 
-    def trigger(self, controller_ip, controller_port, adapter_port,
+    def __trigger(self, controller_ip, controller_port, adapter_port,
             controller_name):
         '''Trigger controller adapter to send events to us
 
@@ -74,17 +74,29 @@ class NWInfo:
             logger.info('Controller identification (%s:%s -> %s): %s' %
                     (controller_ip, controller_port, controller_name, res.read()))
 
+
+    '''Southbound Event Handler
+    '''
+
     def controllerHandler(self, raw):
         '''Controller information event
 
-        Datastore: controller <type 'dict'>
+        Datastore: controllers <type 'dict'>
         '''
+        # First impression, dump all we have
         if raw == 'debut':
             return json.dumps(self.controllers)
+
+        # Update controllers datastore
         key = raw['controller']
-        self.controllers[key] = raw
+        if raw != self.controllers.get(key, {}):
+            self.controllers[key] = raw
+        else:
+            logger.debug('Controller information is not changed')
+            return None
         logger.debug('Controller information: %s' % self.controllers[key])
 
+        # Tell browser what to update
         result = json.dumps(self.controllers[key])
         return result
 
@@ -93,11 +105,16 @@ class NWInfo:
 
         Datastore: packetins <type 'list'>
         '''
+        # First impression, dump all we have
+        # XXX: Actually we do not do this because of simplicity
         if raw == 'debut':
             return None
+
+        # Update packetins datastore
         self.packetins.append(raw)
         logger.debug('Total packet-in events: %d' % len(self.packetins))
 
+        # Tell browser what to append
         result = json.dumps(raw)
         return result
 
@@ -110,18 +127,24 @@ class NWInfo:
               source switch port,
               destination switch port)
         '''
+        # First impression, dump all we have
         if raw == 'debut':
             return json.dumps(self.links.values())
+
+        # Filter duplicated addlink events
         key = (raw['src_dpid'], raw['dst_dpid'], raw['src_port'], raw['dst_port'])
         rkey = (raw['dst_dpid'], raw['src_dpid'], raw['dst_port'], raw['src_port'])
-        if key in self.links.keys() or rkey in self.links.keys():
+        if key in self.links or rkey in self.links:
             return None
-        self.links[key] = [{'src_dpid': raw['src_dpid'],
-                            'src_port': raw['src_port']},
-                           {'dst_dpid': raw['dst_dpid'],
-                            'dst_port': raw['dst_port']}]
+
+        # Update links datastore
+        self.links[key] = [{'dpid': raw['src_dpid'],
+                            'port': raw['src_port']},
+                           {'dpid': raw['dst_dpid'],
+                            'port': raw['dst_port']}]
         logger.debug('Total links after addition: %d' % len(self.links))
 
+        # Tell browser what to add
         result = json.dumps(self.links[key])
         return result
 
@@ -134,28 +157,32 @@ class NWInfo:
               source switch port,
               destination switch port)
         '''
+        # First impression, do nothing
         if raw == 'debut':
             return None
-        #try:
-        #    key = (raw['src_dpid'], raw['dst_dpid'], raw['src_port'], raw['dst_port'])
-        #    del self.links[key]
-        #except KeyError as e:
-        #    logger.warn('Key of link down event not found: %s' % str(e))
-        #    return None
+
+        # Filter duplicated dellink events
         key = (raw['src_dpid'], raw['dst_dpid'], raw['src_port'], raw['dst_port'])
         rkey = (raw['dst_dpid'], raw['src_dpid'], raw['dst_port'], raw['src_port'])
-        if key in self.links.keys():
+        if key in self.links:
             del self.links[key]
-        elif rkey in self.links.keys():
+            # Craft returned data, tell browser what to delete
+            result = json.dumps([{'dpid': raw['src_dpid'],
+                                  'port': raw['src_port']},
+                                 {'dpid': raw['dst_dpid'],
+                                  'port': raw['dst_port']}])
+        elif rkey in self.links:
             del self.links[rkey]
+            # Craft returned data, tell browser what to delete
+            result = json.dumps([{'dpid': raw['dst_dpid'],
+                                  'port': raw['dst_port']},
+                                 {'dpid': raw['src_dpid'],
+                                  'port': raw['src_port']}])
         else:
+            logger.warn('Key of link down event not found: %s' % str(raw))
             return None
         logger.debug('Total links after deletion: %d' % len(self.links))
 
-        result = json.dumps([{'src_dpid': raw['src_dpid'],
-                              'src_port': raw['src_port']},
-                             {'dst_dpid': raw['dst_dpid'],
-                              'dst_port': raw['dst_port']}])
         return result
 
     def addportHandler(self, raw):
@@ -164,14 +191,20 @@ class NWInfo:
         Datastore: ports <type 'dict'>
         Key: (switch DPID, switch port)
         '''
+        # First impression, dump all we have
         if raw == 'debut':
             return json.dumps(self.ports.values())
+
+        # Filter duplicated addport events
         key = (raw['dpid'], raw['port'])
-        if key in self.ports.keys():
+        if key in self.ports:
             return None
+
+        # Update ports datastore
         self.ports[key] = {'dpid': raw['dpid'], 'port': raw['port']}
         logger.debug('Total ports after addition: %d' % len(self.ports))
 
+        # Tell browser what to add
         result = json.dumps(self.ports[key])
         return result
 
@@ -181,16 +214,20 @@ class NWInfo:
         Datastore: ports <type 'dict'>
         Key: (switch DPID, switch port)
         '''
+        # First impression, do nothing
         if raw == 'debut':
             return None
-        try:
-            key = (raw['dpid'], raw['port'])
+
+        # Filter duplicated delport events
+        key = (raw['dpid'], raw['port'])
+        if key in self.ports:
             del self.ports[key]
-        except KeyError as e:
-            logger.warn('Key of port down event not found: %s' % str(e))
+        else:
+            logger.warn('Key of port down event not found: %s' % str(raw))
             return None
         logger.debug('Total ports after deletion: %d' % len(self.ports))
 
+        # Craft returned data, tell browser what to delete
         result = json.dumps({'dpid': raw['dpid'], 'port': raw['port']})
         return result
 
@@ -200,14 +237,20 @@ class NWInfo:
         Datastore: devices <type 'dict'>
         Key: switch DPID
         '''
+        # First impression, dump all we have
         if raw == 'debut':
             return json.dumps(self.devices.values())
+
+        # Filter duplicated adddevice events
         key = raw['dpid']
-        if key in self.devices.keys():
+        if key in self.devices:
             return None
+
+        # Update devices datastore
         self.devices[key] = {'dpid': raw['dpid'], 'type': 'switch'}
         logger.debug('Total devices after addition: %d' % len(self.devices))
 
+        # Tell browser what to add
         result = json.dumps(self.devices[key])
         return result
 
@@ -217,16 +260,20 @@ class NWInfo:
         Datastore: devices <type 'dict'>
         Key: switch DPID
         '''
+        # First impression, do nothing
         if raw == 'debut':
             return None
-        try:
-            key = raw['dpid']
+
+        # Filter duplicated deldevice events
+        key = raw['dpid']
+        if key in self.devices:
             del self.devices[key]
-        except KeyError as e:
-            logger.warn('Key of device down event not found: %s' % str(e))
+        else:
+            logger.warn('Key of device down event not found: %s' % str(raw))
             return None
         logger.debug('Total devices after deletion: %d' % len(self.devices))
 
+        # Craft returned data, tell browser what to delete
         result = json.dumps({'dpid': raw['dpid'], 'type': 'switch'})
         return result
 
@@ -236,29 +283,24 @@ class NWInfo:
         Datastore: hosts <type 'dict'>
         Key: host MAC address
         '''
+        # First impression, dump all we have
         if raw == 'debut':
             return json.dumps(self.hosts.values())
+
+        # Filter duplicated addhost events
         key = raw['mac']
         if key in self.hosts.keys():
             return None
+
+        # Update hosts datastore
         self.hosts[key] = {'mac': raw['mac'],
                            'ips': raw.get('ips', []),
                            'aps': raw['aps'],
                            'type': 'host'}
-        # Build link between host and switches
-        tmp = []
-        for ap in raw['aps']:
-            key2 = (raw['mac'], ap['dpid'], ap['port'])
-            if key2 in self.links.keys():
-                pass
-            self.links[key2] = [{'mac': raw['mac']},
-                                {'dpid': ap['dpid'],
-                                 'port': ap['port']}]
-            tmp.append(self.links[key2])
-
         logger.debug('Total hosts after addition: %d' % len(self.hosts))
 
-        result = json.dumps(tmp)
+        # Tell browser what to add
+        result = json.dumps(self.hosts[key])
         return result
 
     def delhostHandler(self, raw):
@@ -267,26 +309,21 @@ class NWInfo:
         Datastore: hosts <type 'dict'>
         Key: host MAC address
         '''
+        # First impression, do nothing
         if raw == 'debut':
             return None
-        try:
-            key = raw['mac']
+
+        # Filter duplicated delhost events
+        key = raw['mac']
+        if key in self.hosts:
             del self.hosts[key]
-        except KeyError as e:
-            logger.warn('Key of host down event not found: %s' % str(e))
+        else:
+            logger.warn('Key of host down event not found: %s' % str(raw))
             return None
         logger.debug('Total hosts after deletion: %d' % len(self.hosts))
 
-        # Build link between host and switches
-        tmp = []
-        for key2 in self.links.keys():
-            if raw['mac'] in key2:
-                del self.links[key2]
-                tmp.append([{'mac': key2[0]},
-                            {'dpid': key2[1],
-                             'port': key2[2]}])
-
-        result = json.dumps(tmp)
+        # Craft returned data, tell browser what to delete
+        result = json.dumps({'mac': raw['mac']})
         return result
 
     def portHandler(self, raw):
@@ -297,8 +334,11 @@ class NWInfo:
 
         This kind of event will not sent to WebUI actively.
         '''
+        # First impression, do nothing
         if raw == 'debut':
             return None
+
+        # Update portstats datastore
         key = (raw['dpid'], raw['port'])
         self.portstats[key] = {'dpid': raw['dpid'],
                                'port': raw['port'],
@@ -318,8 +358,11 @@ class NWInfo:
 
         This kind of event will not sent to WebUI actively.
         '''
+        # First impression, do nothing
         if raw == 'debut':
             return None
+
+        # Update portstats datastore
         key = raw['dpid']
         sorted(raw['flows'], key=lambda k: k['counterByte'], reverse=True)
         self.flowtables[key] = {'dpid': raw['dpid'],
@@ -327,6 +370,10 @@ class NWInfo:
         logger.debug('flow entries: %d' % len(self.flowtables[key]['flows']))
 
         return None
+
+
+    '''RESTful API handler
+    '''
 
     def getPortCounter(self, req):
         '''Return port statistics of a specific switch port
