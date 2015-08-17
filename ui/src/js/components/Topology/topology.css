@@ -1,8 +1,15 @@
 .link {
-  stroke: rgb(153, 204, 255);
-  stroke-width: 1.8;
   cursor: crosshair;
 }
+.s2s{
+  stroke: rgb(153, 204, 255);
+  stroke-width: 5px;
+}
+.s2h{
+  stroke: rgb(100, 204, 0);
+  stroke-width: 3px;
+}
+
 .node {
   cursor: move;
   stroke: #fff;

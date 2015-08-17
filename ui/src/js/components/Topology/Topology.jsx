@@ -13,12 +13,11 @@ var TYPE = {
   'DEVICE': 'device'
 }
 
-var topologyNodes =[];
-var topologyLinks = [];
+var topoNodes = [];
+var topoLinks = [];
 var link = {}; // svg link
 var node = {}; // svg node
 var force = {};
-var focusNode = { id: "none", type: 'none', uuid: 'none', focusDom: 'none' };
 
 class Topology extends React.Component {
 
@@ -28,14 +27,12 @@ class Topology extends React.Component {
             isSubscribe: false,
             isSetTopology: false,
             isFinish: true,
-            errorMessage: null,
-            lastFocusNode: {},
-            // { type, id }  mac or dpid lastFocusNode (for dishighlight)
+            errorMessage: null
         }
     }
-
     componentDidMount() {
-      this.handleSubscribe();
+      if (!this.state.isSubscribe)
+        this.handleSubscribe();
       this.initialTopology();
     }
 
@@ -43,317 +40,269 @@ class Topology extends React.Component {
 
         var renderDom = this.refs.topology.getDOMNode();
         var width = renderDom.offsetWidth ? renderDom.offsetWidth : 444;
-        var height = renderDom.offsetHeight ? renderDom.offsetHeight - 200 : 300;
-;
-        // const width = 500;
-        // const height = 500;
+        var height = renderDom.offsetHeight ? renderDom.offsetHeight : 300;
 
-        var svg = d3.select("#topology").append("svg")
-              .attr("width", width)
-              .attr("height", height)
-              .style({ 'left': '25px', 'top': '25px' });
-              // .style({'overflow': 'overlay','z-index': '0','left': '25px', 'top': '25px' });
-
-        link = svg.selectAll(".link");
-        node = svg.selectAll(".node");
+        var svg = d3.select('#topology')
+          .append('svg')
+          .attr('width', width)
+          .attr('height', height)
+          .style({ 'left': '25px', 'top': '25px' })
+          .call(
+            d3.behavior.zoom()
+            .scaleExtent([0.1, 10])
+            .on("zoom", ()=>{
+              container.attr("transform",
+                             `translate(${d3.event.translate})scale(${d3.event.scale})`);
+            }));
+        var container = svg.append('g');
 
         force = d3.layout.force()
-              .size([width/3*2, height/3*2])
-              .charge(-400)
-              .linkDistance(40)
-              .linkStrength(0.3)
-              .on("tick", function() {
-                link.attr("x1", d => d.source.x )
-                    .attr("y1", d => d.source.y )
-                    .attr("x2", d => d.target.x )
-                    .attr("y2", d => d.target.y );
-                node.selectAll('circle')
-                  .each(function(d,i){
-                      var circle = d3.select(this);
-                      circle.attr('cx', d => Math.max(15, Math.min(width - 15, d.x)) )
-                            .attr('cy', d => Math.max(15, Math.min(height - 15, d.y)) );
-                  });
-                node.selectAll('text')
-                  .each( function(d,i) {
-                      var text = d3.select(this);
-                      text.attr('x', data => Math.max(15, Math.min(width - 15, d.x - 5)) )
-                          .attr('y', data => Math.max(15, Math.min(height - 15, d.y + 5)) );
-                  });
+          .size([width/3*2, height/3*2])
+          .charge(-400)
+          .linkDistance(40)
+          .linkStrength(0.3)
+          .nodes(topoNodes)
+          .links(topoLinks)
+          .linkDistance(width / 4)
+          .on('tick', () => {
+            link
+              .attr('x1', d => d.source.x)
+              .attr('y1', d => d.source.y)
+              .attr('x2', d => d.target.x)
+              .attr('y2', d => d.target.y);
+            node.selectAll('circle')
+              .each(function(d, i) {
+                d3.select(this)
+                  .attr('cx', d => d.x)
+                  .attr('cy', d => d.y);
               });
-        topologyNodes = force.nodes();
-        topologyLinks = force.links();
-        var drag = force.drag().on("dragstart", function(d){
+            node.selectAll('text')
+              .each(function(d, i) {
+                d3.select(this)
+                  .attr('x', d => d.x - 5)
+                  .attr('y', d => d.y + 5);
+              });
+          });
+          force.drag()
+            .on("dragstart", function(d){
+              d3.event.sourceEvent.stopPropagation();
+            })
+            .on("drag", function(d){
               d3.select(this)
-                .selectAll('circle')
-                .classed("fixed", d.fixed = true);
-        });
+                .select('circle')
+                .classed("choose", true);
+            })
+            .on("dragend", function(d) {
+              d3.select(this)
+                .select('circle')
+                .classed("fixed", d.fixed = true)
+                .classed("choose", false);
+            });
 
+
+        link = container.selectAll('.link').data(topoLinks);
+        node = container.selectAll('.node').data(topoNodes)
     }
 
-  updateTopology() {
-    var _this = this;
-  try {
-    link = link.data(topologyLinks, d => d.source.uuid + "-" + d.target.uuid)
-    link.enter().insert("line", ":first-child").attr("class", "link").attr("z-index", "-1");
-    link.exit().remove();
-    node = node.data(topologyNodes);
-    node.enter()
-      .append('g')
-      .each(function(d, i) {
-        var g = d3.select(this);
-        g.append('circle')
-         .attr("class", "node "+ d.type)
-         .attr("r", 15);
-        g.append("text")
-         .text(d => d.type[0].toUpperCase())
-         .attr("fill", "#fff")
-         .attr("font-size","1em")
-         .attr("cursor","move");
-      })
-      .on("click", click)
-      .on("dblclick", dblclick)
-      .call(force.drag);
-    node.exit().remove();
-    }catch(e){}
-    force.start();
+    updateTopo() {
+      // Links
+      link = link.data(force.links());
+      link
+        .enter()
+        .insert("line", ":first-child")
+        .attr('class', d => (d.type === 's2s') ? 'link s2s' : 'link s2h');
+      link.exit().remove();
 
-    /**
-     * will merge
-     */
-    function click(d) {
-      if (d.type !== 'switch')
-        return 0;
-      /**
-       * 三種情況
-       * 第一次點節點, 點相同節點 , 點過節點再點別的
-       */
-      if(focusNode.uuid === 'none' && focusNode.id === 'none' && d.type === 'switch' ){
-        d3.select(this)
-          .selectAll('circle')
-          .classed("choose", true);
-        focusNode = {
-          id: d.dpid,
-          type: d.type,
-          uuid: d.uuid,
-          focusDom: this
-        }
-       _this.handleTopologyNodeClick();
-      }else if (focusNode.uuid === d.uuid && focusNode.type === d.type){
-        d3.select(this)
-          .selectAll('circle')
-          .classed("choose", false);
-        focusNode = {
-          id: 'none',
-          type: 'none',
-          uuid: 'none',
-          focusDom: 'none'
-        };
-        _this.handleTopologyNodeClick();
-      }else if (focusNode.uuid !== d.uuid && focusNode.id !== 'none' && focusNode.type === d.type)
-      {
-        d3.select(this)
-          .selectAll('circle')
-          .classed("choose", true);
-        d3.select(focusNode.focusDom)
-          .selectAll('circle')
-          .classed("choose", false);
-        focusNode = {
-          id: d.dpid,
-          type: d.type,
-          uuid: d.uuid,
-          focusDom: this
-        };
-        _this.handleTopologyNodeClick();
-      }
+      // Node
+      node = node.data(force.nodes());
+      node
+        .enter()
+        .append('g')
+        .each(function(d, i) {
+          var g = d3.select(this);
+          g.append('circle')
+            .attr('class', e => (e.type === 'switch') ?
+              'node switch' : 'node host')
+            .attr("r", 15);
+          g.append("text")
+            .text(d => (d.type === 'switch') ? d.type[0].toUpperCase() +
+              _.last(d.dpid) :
+              d.type[0].toUpperCase() +
+              _.last(d.mac)
+            )
+            .attr("fill", "#fff")
+            .attr("font-size", "1em")
+            .attr("cursor", "move");
+        })
+        .on("click", d => {
+            console.log("Click = ", d);
+        })
+        .call(force.drag());
+
+      node.exit().remove();
+      force.start();
     }
-    function dblclick(d) {
-      // 取消 pin and chooose
-      d3.select(this)
-        .selectAll('circle')
-        .classed("fixed", d.fixed = false);
-      d3.select(this)
-        .selectAll('circle')
-        .classed("choose", false);
-    }
-  }
 
-  _findNodeIndex(uuid) {
-      for (var i=0; i < topologyNodes.length; i++) {
-          if (topologyNodes[i].uuid === uuid){
-              return i
-            }
-      };
-  }
-
-  // 直接給新的node
-  addTopologyNode(newNode){
-     topologyNodes.push(newNode);
-     this.updateTopology();
-  }
-  // delet node give uuid
-  delTopologyNode(uuid){
-    for (var i=0; i < topologyNodes.length; i++) {
-        if (topologyNodes[i].uuid === uuid){
-            topologyNodes.pop(i);
-            console.log(`delete ${i} uuid ${uuid}`);
-        }
-    };
-    this.updateTopology();
-  }
-
-  // 給兩個uuid會建立兩個之間的link
-  addTopologyLink(source, target) {
-    topologyLinks.push({
-      "source": this._findNodeIndex(source),
-      "target": this._findNodeIndex(target)
-    });
-
-    this.updateTopology();
-  };
-  // 給兩個uuid會刪除兩個之間的link
-  delTopologyLink(source,target){
-    console.log('delTopologyLink delTopologyLink');
-      for(var i=0;i< topologyLinks.length;i++){
-          if(topologyLinks[i].source.uuid == source && topologyLinks[i].target.uuid == target){
-              topologyLinks.splice(i,1);
-               console.log(`delete ${i} uuid ${uuid}`);
-              break;
-          }
-      }
-      this.updateTopology();
-  };
-
-  handleTopologyNodeClick() {
-    if (focusNode.id != null){
-        this.props.onChagneFocusID(focusNode);
-    }
-  }
-
-  handleSubscribe(){
-    if (typeof(this.state.evtSrc) !== "object") {
+    handleSubscribe(){
         var url = config.OmniUICoreURL + "subscribe";
-
         var evtSrc = new EventSource(url);
         this.setState({
-            evtSrc: evtSrc
-        });
-        evtSrc.addEventListener('addlink', e => {
-            this.addlink(e);
-        });
-        evtSrc.addEventListener('dellink', e => {
-            this.dellink(e);
+            isSubscribe: true
         });
         evtSrc.addEventListener('adddevice', e => {
-            this.adddevice(e);
+          this.addDevice(JSON.parse(e.data))
         });
         evtSrc.addEventListener('deldevice', e => {
-            this.deldevice(e);
+          this.delDevice(JSON.parse(e.data))
         });
-        evtSrc.addEventListener('addport', e => {
-            this.addport(e) ;
+        evtSrc.addEventListener('addlink', e => {
+          this.addLink(JSON.parse(e.data))
         });
-        evtSrc.addEventListener('delport', e => {
-            this.delport(e);
+        evtSrc.addEventListener('dellink', e => {
+          this.delLink(JSON.parse(e.data))
         });
         evtSrc.addEventListener('addhost', e => {
-            this.addhost(e);
+          this.addHost(JSON.parse(e.data))
         });
         evtSrc.addEventListener('delhost', e => {
-            this.delhost(e);
+          this.delHost(JSON.parse(e.data))
+        });
+        evtSrc.addEventListener('addport', e => {
+            this.addport(JSON.parse(e.data)) ;
+        });
+        evtSrc.addEventListener('delport', e => {
+            this.delport(JSON.parse(e.data));
         });
         evtSrc.addEventListener('controller', e => {
             this.props.handleControllerStatus(JSON.parse(e.data));
         });
+    }
+
+    addDevice(e) {
+      console.info("addDevice=", e);
+      if (e.length !== undefined) {
+        e.map(d => {
+          topoNodes.push(d);
+        });
+      } else
+        topoNodes.push(e);
+      this.updateTopo();
+    }
+
+    delDevice(e) {
+      console.info("delDevice ", e);
+      let delIndex;
+      for (let j = 0; j < topoNodes.length; j++) {
+        if (topoNodes[j].dpid === e.dpid) {
+          delIndex = j;
+          break;
+        }
       }
-  }
-
-  adddevice(e) {
-      var device = JSON.parse(e.data);
-      if ( device.length === 0)
-          return 0;
-      console.info("Add Switch ", device);
-        setTimeout((a) => {
-          for (var i = 0; i < device.length; i++) {
-            if (device[i].uuid == null) return;
-            this.addTopologyNode(device[i]);
-          };
-        }, 500);
+      topoNodes.pop(delIndex);
+      this.updateTopo();
     }
 
-    deldevice(e) {
-        var device = JSON.parse(e.data);
-        if ( device.length === 0)
-          return 0;
-        console.info("Delete Switch ", device);
-        setTimeout((a) => {
-          try{
-            for (var i = 0; i < device.length; i++) {
-              this.delTopologyNode(device[i]);
-            };
-          }catch(e){}
-        }, 500);
+    addLink(e) {
+      if (e[0][0] !== undefined) {
+        console.info("addLink", e);
+        e.map(d => {
+          topoLinks.push({
+            source: this._findNodeIndex('switch', d[0].dpid),
+            target: this._findNodeIndex('switch', d[1].dpid),
+            sourcePort: d[0].port,
+            targetPort: d[1].port,
+            type: 's2s',
+            linkId: d
+          });
+        });
+
+        this.updateTopo();
+      } else {
+        console.log('add single link ', e);
+        topoLinks.push({
+          source: this._findNodeIndex('switch', e[0].dpid),
+          target: this._findNodeIndex('switch', e[1].dpid),
+          sourcePort: e[0].port,
+          targetPort: e[1].port,
+          type: 's2s',
+          linkId: e
+        });
+        this.updateTopo();
+      }
     }
 
-    addlink(e) {
-        var link = JSON.parse(e.data);
-        if( link.length === 0)
-          return 0;
-        console.info("Add Link ", link);
-        setTimeout((a) => {
-          try {
-            for (var i = 0; i < link.length; i++) {
-              if (link[i][0].uuid !== null && link[i][1].uuid)
-                this.addTopologyLink(link[i][0].uuid, link[i][1].uuid);
-            };
-          }catch(e){}
-        }, 1000);
+    delLink(e) {
+      console.info("delLink", e);
+      if (_.remove(topoLinks, d => _.isEqual(d.linkId, e)))
+        this.updateTopo();
+      else
+        console.log("Link Not found");
     }
 
-    dellink(e) {
-        var link = JSON.parse(e.data);
-        if( link.length === 0)
-          return 0;
-        console.info('Delete link ', link);
-          try {
-            for (var i = 0; i < link.length; i++) {
-              this.delTopologyLink(link[i][0].uuid, link[i][1].uuid);
-            };
-          }catch(e){}
+    addHost(e) {
+
+      if (e.length !== undefined) {
+        console.info("addHost ", e);
+        e.map( host => {
+          this._addHostNode(host).then((i)=>{
+            host.aps.map((link, index) => {
+              topoLinks.push({
+                source: this._findNodeIndex('switch', link.dpid),
+                target: i-1,
+                sourcePort: link.port,
+                targetPort: index,
+                type: 's2h',
+                linkId: host.mac
+              });
+            })
+          });
+        });
+
+      } else {
+        console.info("add single Host ", e);
+        this._addHostNode(e).then((i)=>{
+          e.aps.map((link, index) => {
+            topoLinks.push({
+              source: this._findNodeIndex('switch', link.dpid),
+              target: i-1,
+              sourcePort: link.port,
+              targetPort: index,
+              type: 's2h',
+              linkId: e.mac
+            });
+          })
+        });
+      }
     }
 
-    addhost(e) {
-      var host = JSON.parse(e.data);
-        if ( host.length === 0)
-          return 0;
-        console.info('Add host ', host);
-        setTimeout((a) => {
-          try {
-            for (var i = 0; i < host.length; i++) {
-              this.addTopologyNode(host[i]);
-            };
-          }catch(e){}
-        }, 500);
+    _addHostNode(d) {
+      return new Promise((resolve, reject) => {
+        resolve(topoNodes.push(d));
+      })
     }
 
-    delhost(e) {
-      var host = JSON.parse(e.data);
-        if ( host.length === 0)
-          return 0;
-        console.info('Delete host ', host);
-        setTimeout((a) => {
-          try{
-            for (var i = 0; i < host.length; i++) {
-              this.delTopologyNode(host[i]);
-            };
-          }catch(e){}
-        }, 500);
+    delHost(e) {
+      console.info("delHost", e);
+      if (_.remove(topoLinks, d => _.isEqual(d.linkId, e.mac)))
+        this.updateTopo();
+      else
+        console.log("Link Not found");
+    }
+
+    _findNodeIndex(type, uuid) {
+      switch (type) {
+        case "switch":
+          return _.findIndex(topoNodes, d => d.type === type && d.dpid === uuid);
+        case "host":
+          return _.findIndex(topoNodes, d => d.type === type && d.mac === uuid);
+      }
     }
 
     addport(e) {
-        var port = JSON.parse(e.data);
+        var port = e;
     }
     delport(e) {
-        var port = JSON.parse(e.data);
+        var port = e;
     }
 
     render() {
