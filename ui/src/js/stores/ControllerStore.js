@@ -14,7 +14,6 @@ class ControllerStore {
     }
 
     handleGetControllerList(controllerLists){
-        console.log("這不會跑吧", controllerLists);
         this.controllerLists = controllerLists;
     }
 }
