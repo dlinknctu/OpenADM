@@ -70,7 +70,7 @@ class Master extends React.Component {
             <AppCanvas>
               <AppBar
                 onLeftIconButtonTouchTap={this._onLeftIconButtonTouchTap}
-                title="OmniUI"
+                title="OpenADM"
                 zDepth={0}
                 iconElementRight={themeButton}/>
 

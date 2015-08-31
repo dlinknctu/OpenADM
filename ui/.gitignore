@@ -1,4 +1,4 @@
-config/
+config/config.json
 ### OSX ###
 .DS_Store
 .AppleDouble
