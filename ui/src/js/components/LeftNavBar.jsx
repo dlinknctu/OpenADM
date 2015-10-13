@@ -51,7 +51,7 @@ class LeftNavBar extends React.Component {
   render() {
     let header = (
       <div style={this.getStyles()} onTouchTap={this._onHeaderClick}>
-        OmniUI
+        OpenADM
       </div>
     );
 
