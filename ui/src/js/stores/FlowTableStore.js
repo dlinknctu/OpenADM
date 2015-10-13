@@ -147,7 +147,7 @@ class FlowTableStore {
             },
             5000);
         }).catch((error) => {
-            console.log('request failed', error)
+            console.log('Request failed', error)
         })
 
         /*setTimeout(()=>{

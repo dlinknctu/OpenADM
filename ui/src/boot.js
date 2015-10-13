@@ -1,5 +1,5 @@
 require('./assets/styles/main.less');
-
+require("babel/polyfill");
 import React from "react";
 import Router from "react-router";
 import MasterRoutes from "./js/routes.jsx";

@@ -12,7 +12,7 @@ class ControllerAction {
             .then((json) => {
                 this.dispatch(json);
             })
-            .catch((e) => console.log("Something bad happens!!", e));
+            .catch((e) => console.log("Catch Error !!", e));
 
         this.dispatch();
 

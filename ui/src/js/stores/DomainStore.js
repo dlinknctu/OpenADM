@@ -13,7 +13,7 @@ class DomainStore {
     }
 
     handleSubscribe(e){
-        console.log('訂閱成功與否: ', e);
+
     }
 }
 
