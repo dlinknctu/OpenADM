@@ -1,14 +1,15 @@
 require('react-grid-layout/node_modules/react-resizable/css/styles.css');
+require('./Domain.less');
 let React = require('react');
 let { RaisedButton, Paper, Styles } = require('material-ui');
 let FullWidthSection = require('./FullWidthSection.jsx');
 let ReactGridLayout = require('react-grid-layout');
 let { Spacing, Typography } = Styles;
-let Module = require('./Module.jsx');
-let Topology = require('./Topology/Topology.jsx')
+let Topology = require('./Topology/Topology.jsx');
 let Status = require('./Controller/Status.jsx');
 let FlowTable = require('./FlowTable/FlowTable.jsx');
 let Firewall = require('./Firewall/Firewall.jsx');
+let config =  require('../../../config/config.json');
 let _ = require('lodash');
 
 class Domain extends React.Component {
@@ -22,15 +23,22 @@ class Domain extends React.Component {
       try {
         ls = JSON.parse(global.localStorage.getItem('rgl-7')) || {};
       } catch(e) {
-        console.log('error: ', e);
+        console.log('Catch error: ', e);
       }
     }
 
     this.state = {
         layout: ls.layout ||[],
         focusNode: { id: "none", type: 'none' },
-        controllerStatus: {}
+        controllerStatus: {},
+        evnetSource: new EventSource(`${config.OmniUICoreURL}subscribe`)
     }
+  }
+
+  componentDidMount() {
+    this.state.evnetSource.addEventListener('controller', e => {
+        this.handleControllerStatus(JSON.parse(e.data));
+    });
   }
 
   onLayoutChange(e){
@@ -45,25 +53,20 @@ class Domain extends React.Component {
         }));
       }
   }
+
   handleChagneFocusID(node){
-    if ( node.id != 'none'){
+    if (node.type === 'switch'){
         this.setState({
             focusNode: {
-                id: node.id,
-                type: node.type,
-            }
-        });
-    }else {
-        this.setState({
-            focusNode: {
-                id: "none",
-                type: 'none'
+                id: node.dpid,
+                type: node.type
             }
         });
     }
   }
 
   handleControllerStatus(status){
+
     this.setState({
         controllerStatus: status
     });
@@ -72,39 +75,34 @@ class Domain extends React.Component {
   render() {
     var dpid = "none";
     if (this.state.focusNode.type === 'switch' && this.state.focusNode.id !== "none"){
-        var dpid = this.state.focusNode.id;
+        dpid = this.state.focusNode.id;
     }
+    let styles = {
+        "root": { "position": "absolute", "height": "99vh", "width": "100%", "marginTop": "65px" },
+    };
     return (
-      <FullWidthSection>
-        <h1>Module</h1>
-        <ReactGridLayout layout={this.state.layout}
-                         margin={[10, 10]}
-                         padding={10}
-                         onLayoutChange={this.onLayoutChange}
-                         className="layout"
-                         autoSize={true}
-                         rowHeight={100}
-                         cols={12}>
-            <Module key={0} name="Topology"
-            _grid={{ x: 0, y: 0, w: 4, h: 4, minW: 4, minH:4, isDraggable: false }}>
-                <Topology focusNode={this.state.focusNode}
-                onChagneFocusID={this.handleChagneFocusID.bind(this)}
-                handleControllerStatus={this.handleControllerStatus.bind(this)} />
-            </Module>
-            <Module key={1} name="Controller Status"
-            _grid={{ x: 4, y: 0, w: 3, h: 4}}>
+      <div style={styles.root}>
+          <ReactGridLayout
+              cols={12}
+              rowHeight={30}
+              verticalCompact={false}
+              layout={this.state.layout}
+              onLayoutChange={this.onLayoutChange.bind(this)}
+              className="gridlayout">
+            <div className="module" key={1}  _grid={{w: 2, h: 13, x: 8, y: 0, minH: 13, minW: 2 }}>
                 <Status status={this.state.controllerStatus}/>
-            </Module>
-        </ReactGridLayout>
-        <Paper style={{ width: '99%',marginLeft:"10",padding:"10"}}>
-          <h2>Flow Table</h2>
-          <FlowTable openFlowVersion={1.0}
-                     filter={dpid}/>
-        </Paper>
-      </FullWidthSection>
+            </div>
+            <Topology evnetSource={this.state.evnetSource}
+                  onChagneFocusID={this.handleChagneFocusID.bind(this)} />
+          </ReactGridLayout>
+          <Paper style={{ zIndex: 3, width: '99%', marginLeft:"10", padding:"10", bottom: "30px", position: "fixed"}}>
+            <h2>Flow Table</h2>
+            <FlowTable openFlowVersion={1.0}
+                       filter={dpid}/>
+          </Paper>
+      </div>
     );
   }
 }
-
 
 export default Domain;
