@@ -1,10 +1,8 @@
 import React from 'react';
-import config from "../../../../config/config.json";
 import Immutable from "immutable";
-require("whatwg-fetch");
 
 let d3 = require('d3');
-require('./topology.css');
+require('./topology.less');
 
 var TYPE = {
   'SWITCH': 'switch',
@@ -23,29 +21,34 @@ class Topology extends React.Component {
 
     constructor(props) {
         super(props);
+        let stickyTopo;
+        if (global.localStorage) {
+          try {
+            stickyTopo = new Map(JSON.parse(global.localStorage.getItem('topology'))) || null;
+          } catch(e) {
+            console.log('Catch Error: ', e);
+          }
+        }
         this.state = {
-            isSubscribe: false,
-            isSetTopology: false,
             isFinish: true,
-            errorMessage: null
+            errorMessage: null,
+            stickyTopo: stickyTopo
         }
     }
     componentDidMount() {
-      if (!this.state.isSubscribe)
         this.handleSubscribe();
-      this.initialTopology();
+        this.initialTopology();
     }
 
     initialTopology(){
 
         var renderDom = this.refs.topology.getDOMNode();
+
         var width = renderDom.offsetWidth ? renderDom.offsetWidth : 444;
-        var height = renderDom.offsetHeight ? renderDom.offsetHeight : 300;
+        var height = renderDom.offsetHeight ? renderDom.offsetHeight : 600;
+        console.log(renderDom.offsetHeight);
 
         var svg = d3.select('#topology')
-          .append('svg')
-          .attr('width', width)
-          .attr('height', height)
           .style({ 'left': '25px', 'top': '25px' })
           .call(
             d3.behavior.zoom()
@@ -58,12 +61,11 @@ class Topology extends React.Component {
 
         force = d3.layout.force()
           .size([width/3*2, height/3*2])
-          .charge(-400)
-          .linkDistance(40)
-          .linkStrength(0.3)
+          .charge(-2000)
+          .linkStrength(0.5)
           .nodes(topoNodes)
           .links(topoLinks)
-          .linkDistance(width / 4)
+          .linkDistance(width / 6)
           .on('tick', () => {
             link
               .attr('x1', d => d.source.x)
@@ -83,21 +85,6 @@ class Topology extends React.Component {
                   .attr('y', d => d.y + 5);
               });
           });
-          force.drag()
-            .on("dragstart", function(d){
-              d3.event.sourceEvent.stopPropagation();
-            })
-            .on("drag", function(d){
-              d3.select(this)
-                .select('circle')
-                .classed("choose", true);
-            })
-            .on("dragend", function(d) {
-              d3.select(this)
-                .select('circle')
-                .classed("fixed", d.fixed = true)
-                .classed("choose", false);
-            });
 
 
         link = container.selectAll('.link').data(topoLinks);
@@ -105,6 +92,7 @@ class Topology extends React.Component {
     }
 
     updateTopo() {
+      let _this = this;
       // Links
       link = link.data(force.links());
       link
@@ -134,21 +122,66 @@ class Topology extends React.Component {
             .attr("font-size", "1em")
             .attr("cursor", "move");
         })
-        .on("click", d => {
-            console.log("Click = ", d);
+        .on("click", function(d) {
+            _this.props.onChagneFocusID(d);
+            d3.select(this)
+                .select('circle')
+                .classed("choose", false);
+        })
+        .on("dblclick", function(d) {
+            d3.select(this)
+                .select('circle')
+                .classed("fixed", d.fixed = false);
+
+            let id = d.type === "switch" ? d.dpid : d.mac;
+            let newTopo =  _this.state.stickyTopo.delete(id);
+            _this.setState({
+              stickyTopo: newTopo
+            });
+            _this._saveToLocalStorage();
         })
         .call(force.drag());
+
+        force.drag()
+          .on("dragstart", function(d){
+            d3.event.sourceEvent.stopPropagation();
+            d3.select(this)
+              .select('circle')
+              .classed("fixed", d.fixed = true)
+              .classed("dragging", true);
+          })
+          .on("drag", function(d){
+
+          })
+          .on("dragend", function(d) {
+              d3.select(this)
+                .select('circle')
+                .classed("dragging", false)
+                .classed("fixed", d.fixed = true);
+
+              let id = d.type === "switch" ? d.dpid : d.mac;
+              let newTopo =  _this.state.stickyTopo.set(id, { x: d.x, y: d.y });
+              _this.setState({
+                stickyTopo: newTopo
+              });
+              _this._saveToLocalStorage();
+
+          });
 
       node.exit().remove();
       force.start();
     }
+  _saveToLocalStorage() {
+      if (global.localStorage) {
+          if (this.state.stickyTopo.entries() !== null ){
+            global.localStorage.setItem('topology', JSON.stringify(
+              Array.from( this.state.stickyTopo.entries() )));
+          }
+      }
+  }
 
     handleSubscribe(){
-        var url = config.OmniUICoreURL + "subscribe";
-        var evtSrc = new EventSource(url);
-        this.setState({
-            isSubscribe: true
-        });
+        let evtSrc = this.props.evnetSource;
         evtSrc.addEventListener('adddevice', e => {
           this.addDevice(JSON.parse(e.data))
         });
@@ -173,15 +206,15 @@ class Topology extends React.Component {
         evtSrc.addEventListener('delport', e => {
             this.delport(JSON.parse(e.data));
         });
-        evtSrc.addEventListener('controller', e => {
-            this.props.handleControllerStatus(JSON.parse(e.data));
-        });
     }
 
     addDevice(e) {
       console.info("addDevice=", e);
       if (e.length !== undefined) {
         e.map(d => {
+          let position = this.state.stickyTopo.get(d.dpid) || null;
+          if (position)
+            d = _.assign(d, { x: position.x, y: position.y, fixed: true });
           topoNodes.push(d);
         });
       } else
@@ -244,6 +277,10 @@ class Topology extends React.Component {
       if (e.length !== undefined) {
         console.info("addHost ", e);
         e.map( host => {
+          let position = this.state.stickyTopo.get(host.mac) || null;
+          if (position)
+            host = _.assign(host, { x: position.x, y: position.y, fixed: true });
+
           this._addHostNode(host).then((i)=>{
             host.aps.map((link, index) => {
               topoLinks.push({
@@ -254,7 +291,8 @@ class Topology extends React.Component {
                 type: 's2h',
                 linkId: host.mac
               });
-            })
+            });
+            this.updateTopo();
           });
         });
 
@@ -270,6 +308,7 @@ class Topology extends React.Component {
               type: 's2h',
               linkId: e.mac
             });
+          this.updateTopo();
           })
         });
       }
@@ -283,8 +322,11 @@ class Topology extends React.Component {
 
     delHost(e) {
       console.info("delHost", e);
-      if (_.remove(topoLinks, d => _.isEqual(d.linkId, e.mac)))
-        this.updateTopo();
+
+      if (_.remove(topoLinks, d => _.isEqual(d.linkId, e.mac))){
+        if (_.remove(topoNodes, d => _.isEqual(d.mac, e.mac)))
+          this.updateTopo();
+      }
       else
         console.log("Link Not found");
     }
@@ -299,19 +341,26 @@ class Topology extends React.Component {
     }
 
     addport(e) {
-        var port = e;
+      console.info("addport", e);
+      var port = e;
     }
     delport(e) {
-        var port = e;
+      console.info("delport", e);
+      var port = e;
     }
 
     render() {
         return (
-            <div id="topology"
+            <svg id="topology"
+            className="topology"
                 ref="topology">
-            </div>
+            </svg>
         );
     }
 }
 
+Topology.propTypes = {
+    onChagneFocusID: React.PropTypes.func.isRequired,
+    evnetSource: React.PropTypes.object.isRequired
+}
 export default Topology;
