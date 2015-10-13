@@ -53,6 +53,7 @@ class NWInfo:
         core.registerRestApi('port', self.getPortCounter)
         core.registerRestApi('flow', self.getAllFlows)
         core.registerRestApi('flow/top', self.getTopFlows)
+        core.registerRestApi('reset_datastore', self.resetDatastore)
 
         logger.info('Handlers and RESTful APIs registered')
 
@@ -438,6 +439,25 @@ class NWInfo:
             tmp = [{'dpid': id, 'flows': self.flowtables[id]['flows'][0:10]}
                    for id in self.flowtables.keys()]
             result = json.dumps(tmp)
+
+        return result
+
+    def resetDatastore(self, req):
+        """Manually reset the datastore inside the NWInfo module
+
+        Usage:
+            /reset_datastore
+        """
+        self.controllers = {}
+        self.packetins = []
+        self.ports = {}
+        self.links = {}
+        self.devices = {}
+        self.hosts = {}
+        self.portstats = {}
+        self.flowtables = {}
+
+        result = json.dumps({'status': 'OK'})
 
         return result
 
