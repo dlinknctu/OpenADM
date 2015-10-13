@@ -3,19 +3,19 @@ import logging
 import json
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 class NWInfo:
-    '''Network information maintainer for each SDN domain
+    """Network information maintainer for each SDN domain
 
     This module will handle the raw data which are received from controller
     adapter. Changes are reflected in the internal network information
     structures. Also it will register some RESTful APIs to the core.
-    '''
+    """
 
     def __init__(self, core, param):
-        '''Initialize network information structure
-        '''
+        """Initialize network information structure
+        """
         self.controllers = {}
         self.packetins = []
         self.ports = {}
@@ -30,11 +30,11 @@ class NWInfo:
                 param['adapter_port'], param['controller_name'])
 
     def __registration(self, core):
-        '''Registration for SSE handlers and RESTful APIs
+        """Registration for SSE handlers and RESTful APIs
 
         Handle the JSON format data which received from controller adapter and
         HTTP requests from Web UI.
-        '''
+        """
         # Server-Sent Event handlers handle the requests from the southbound
         core.registerSSEHandler('controller', self.controllerHandler)
         core.registerSSEHandler('packet', self.packetHandler)
@@ -58,11 +58,11 @@ class NWInfo:
 
     def __trigger(self, controller_ip, controller_port, adapter_port,
             controller_name):
-        '''Trigger controller adapter to send events to us
+        """Trigger controller adapter to send events to us
 
         The controller adapter requires a controller name. Otherwise it will
         not send any events.
-        '''
+        """
         conn = httplib.HTTPConnection(controller_ip, int(adapter_port))
         try:
             conn.request("POST", "/wm/omniui/controller/name", controller_name)
@@ -75,14 +75,14 @@ class NWInfo:
                     (controller_ip, controller_port, controller_name, res.read()))
 
 
-    '''Southbound Event Handler
-    '''
+    """Southbound Event Handler
+    """
 
     def controllerHandler(self, raw):
-        '''Controller information event
+        """Controller information event
 
         Datastore: controllers <type 'dict'>
-        '''
+        """
         # First impression, dump all we have
         if raw == 'debut':
             return json.dumps(self.controllers)
@@ -101,10 +101,10 @@ class NWInfo:
         return result
 
     def packetHandler(self, raw):
-        '''Packet-In event
+        """Packet-In event
 
         Datastore: packetins <type 'list'>
-        '''
+        """
         # First impression, dump all we have
         # XXX: Actually we do not do this because of simplicity
         if raw == 'debut':
@@ -119,29 +119,26 @@ class NWInfo:
         return result
 
     def addlinkHandler(self, raw):
-        '''Add link event
+        """Add link event
 
         Datastore: links <type 'dict'>
-        Key: (source switch DPID,
-              destination switch DPID,
-              source switch port,
-              destination switch port)
-        '''
+        Key: (switch_1 dpid, switch_1 port,
+              switch_2 dpid, switch_2 port)
+        """
         # First impression, dump all we have
         if raw == 'debut':
             return json.dumps(self.links.values())
 
         # Filter duplicated addlink events
-        key = (raw['src_dpid'], raw['dst_dpid'], raw['src_port'], raw['dst_port'])
-        rkey = (raw['dst_dpid'], raw['src_dpid'], raw['dst_port'], raw['src_port'])
+        key = (raw['link'][0]['dpid'], raw['link'][0]['port'],
+               raw['link'][1]['dpid'], raw['link'][1]['port'])
+        rkey = (raw['link'][1]['dpid'], raw['link'][1]['port'],
+                raw['link'][0]['dpid'], raw['link'][0]['port'])
         if key in self.links or rkey in self.links:
             return None
 
         # Update links datastore
-        self.links[key] = [{'dpid': raw['src_dpid'],
-                            'port': raw['src_port']},
-                           {'dpid': raw['dst_dpid'],
-                            'port': raw['dst_port']}]
+        self.links[key] = raw['link']
         logger.debug('Total links after addition: %d' % len(self.links))
 
         # Tell browser what to add
@@ -149,35 +146,29 @@ class NWInfo:
         return result
 
     def dellinkHandler(self, raw):
-        '''Delete link event
+        """Delete link event
 
         Datastore: links <type 'dict'>
-        Key: (source switch DPID,
-              destination switch DPID,
-              source switch port,
-              destination switch port)
-        '''
+        Key: (switch_1 dpid, switch_1 port,
+              switch_2 dpid, switch_2 port)
+        """
         # First impression, do nothing
         if raw == 'debut':
             return None
 
         # Filter duplicated dellink events
-        key = (raw['src_dpid'], raw['dst_dpid'], raw['src_port'], raw['dst_port'])
-        rkey = (raw['dst_dpid'], raw['src_dpid'], raw['dst_port'], raw['src_port'])
+        key = (raw['link'][0]['dpid'], raw['link'][0]['port'],
+               raw['link'][1]['dpid'], raw['link'][1]['port'])
+        rkey = (raw['link'][1]['dpid'], raw['link'][1]['port'],
+                raw['link'][0]['dpid'], raw['link'][0]['port'])
         if key in self.links:
             del self.links[key]
             # Craft returned data, tell browser what to delete
-            result = json.dumps([{'dpid': raw['src_dpid'],
-                                  'port': raw['src_port']},
-                                 {'dpid': raw['dst_dpid'],
-                                  'port': raw['dst_port']}])
+            result = json.dumps([raw['link'][0], raw['link'][1]])
         elif rkey in self.links:
             del self.links[rkey]
             # Craft returned data, tell browser what to delete
-            result = json.dumps([{'dpid': raw['dst_dpid'],
-                                  'port': raw['dst_port']},
-                                 {'dpid': raw['src_dpid'],
-                                  'port': raw['src_port']}])
+            result = json.dumps([raw['link'][1], raw['link'][0]])
         else:
             logger.warn('Key of link down event not found: %s' % str(raw))
             return None
@@ -186,11 +177,11 @@ class NWInfo:
         return result
 
     def addportHandler(self, raw):
-        '''Add port event
+        """Add port event
 
         Datastore: ports <type 'dict'>
-        Key: (switch DPID, switch port)
-        '''
+        Key: (switch dpid, switch port)
+        """
         # First impression, dump all we have
         if raw == 'debut':
             return json.dumps(self.ports.values())
@@ -201,7 +192,7 @@ class NWInfo:
             return None
 
         # Update ports datastore
-        self.ports[key] = {'dpid': raw['dpid'], 'port': raw['port']}
+        self.ports[key] = raw
         logger.debug('Total ports after addition: %d' % len(self.ports))
 
         # Tell browser what to add
@@ -209,11 +200,11 @@ class NWInfo:
         return result
 
     def delportHandler(self, raw):
-        '''Delete port event
+        """Delete port event
 
         Datastore: ports <type 'dict'>
-        Key: (switch DPID, switch port)
-        '''
+        Key: (switch dpid, switch port)
+        """
         # First impression, do nothing
         if raw == 'debut':
             return None
@@ -228,15 +219,15 @@ class NWInfo:
         logger.debug('Total ports after deletion: %d' % len(self.ports))
 
         # Craft returned data, tell browser what to delete
-        result = json.dumps({'dpid': raw['dpid'], 'port': raw['port']})
+        result = json.dumps(raw)
         return result
 
     def adddeviceHandler(self, raw):
-        '''Add device event
+        """Add device event
 
         Datastore: devices <type 'dict'>
-        Key: switch DPID
-        '''
+        Key: switch dpid
+        """
         # First impression, dump all we have
         if raw == 'debut':
             return json.dumps(self.devices.values())
@@ -247,7 +238,9 @@ class NWInfo:
             return None
 
         # Update devices datastore
-        self.devices[key] = {'dpid': raw['dpid'], 'type': 'switch'}
+        self.devices[key] = raw
+        # Type of the device
+        self.devices[key]['type'] = 'switch'
         logger.debug('Total devices after addition: %d' % len(self.devices))
 
         # Tell browser what to add
@@ -255,11 +248,11 @@ class NWInfo:
         return result
 
     def deldeviceHandler(self, raw):
-        '''Delete device event
+        """Delete device event
 
         Datastore: devices <type 'dict'>
-        Key: switch DPID
-        '''
+        Key: switch dpid
+        """
         # First impression, do nothing
         if raw == 'debut':
             return None
@@ -274,15 +267,15 @@ class NWInfo:
         logger.debug('Total devices after deletion: %d' % len(self.devices))
 
         # Craft returned data, tell browser what to delete
-        result = json.dumps({'dpid': raw['dpid'], 'type': 'switch'})
+        result = json.dumps(raw)
         return result
 
     def addhostHandler(self, raw):
-        '''Add host event
+        """Add host event
 
         Datastore: hosts <type 'dict'>
         Key: host MAC address
-        '''
+        """
         # First impression, dump all we have
         if raw == 'debut':
             return json.dumps(self.hosts.values())
@@ -293,10 +286,9 @@ class NWInfo:
             return None
 
         # Update hosts datastore
-        self.hosts[key] = {'mac': raw['mac'],
-                           'ips': raw.get('ips', []),
-                           'aps': raw['aps'],
-                           'type': 'host'}
+        self.hosts[key] = raw
+        # Type of the host
+        self.hosts[key]['type'] = 'host'
         logger.debug('Total hosts after addition: %d' % len(self.hosts))
 
         # Tell browser what to add
@@ -304,11 +296,11 @@ class NWInfo:
         return result
 
     def delhostHandler(self, raw):
-        '''Delete host handler
+        """Delete host handler
 
         Datastore: hosts <type 'dict'>
         Key: host MAC address
-        '''
+        """
         # First impression, do nothing
         if raw == 'debut':
             return None
@@ -323,41 +315,36 @@ class NWInfo:
         logger.debug('Total hosts after deletion: %d' % len(self.hosts))
 
         # Craft returned data, tell browser what to delete
-        result = json.dumps({'mac': raw['mac']})
+        result = json.dumps(raw)
         return result
 
     def portHandler(self, raw):
-        '''Update switch port statistics event (polling)
+        """Update switch port statistics event (polling)
 
         Datastore: portstats <type 'dict'>
-        Key: (switch DPID, switch port)
+        Key: (switch dpid, switch port)
 
         This kind of event will not sent to WebUI actively.
-        '''
+        """
         # First impression, do nothing
         if raw == 'debut':
             return None
 
         # Update portstats datastore
         key = (raw['dpid'], raw['port'])
-        self.portstats[key] = {'dpid': raw['dpid'],
-                               'port': raw['port'],
-                               'rxbyte': raw['rxbyte'],
-                               'rxpacket': raw['rxpacket'],
-                               'txbyte': raw['txbyte'],
-                               'txpacket': raw['txpacket']}
+        self.portstats[key] = raw
         logger.debug('port statistics number: %d' % len(self.portstats))
 
         return None
 
     def flowHandler(self, raw):
-        '''Update flow table event (polling)
+        """Update flow table event (polling)
 
         Datastore: flowtables <type 'dict'>
-        Key: switch DPID
+        Key: switch dpid
 
         This kind of event will not sent to WebUI actively.
-        '''
+        """
         # First impression, do nothing
         if raw == 'debut':
             return None
@@ -372,18 +359,18 @@ class NWInfo:
         return None
 
 
-    '''RESTful API handler
-    '''
+    """RESTful API handler
+    """
 
     def getPortCounter(self, req):
-        '''Return port statistics of a specific switch port
+        """Return port statistics of a specific switch port
 
         Usage:
             /port?dpid=<sw_dpid>&port=<sw_port>
             /port?dpid=<sw_dpid>
             /port?port=<sw_port>
             /port
-        '''
+        """
         dpid = req.args.get('dpid')
         port = req.args.get('port')
         if dpid != None and port != None:
@@ -411,12 +398,12 @@ class NWInfo:
         return result
 
     def getAllFlows(self, req):
-        '''Return all flow entries of switches
+        """Return all flow entries of switches
 
         Usage:
             /flow?dpid=<sw_dpid>
             /flow
-        '''
+        """
         dpid = req.args.get('dpid')
         if dpid is not None:
             try:
@@ -433,12 +420,12 @@ class NWInfo:
         return result
 
     def getTopFlows(self, req):
-        '''Return top flow entries of switches (default 10)
+        """Return top flow entries of switches (default 10)
 
         Usage:
             /flow/top?dpid=<sw_dpid>
             /flow/top
-        '''
+        """
         dpid = req.args.get('dpid')
         if dpid is not None:
             try:
