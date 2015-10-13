@@ -297,9 +297,13 @@ public class OmniUI extends ServerResource implements IFloodlightModule,IOFMessa
 			//logger.info("DEVICE ADD: {}", device);
 			SwitchPort[] sw = device.getAttachmentPoints();
 			String url = "http://localhost:5567/publish/addhost";
+			Integer[] ips = device.getIPv4Addresses();
+			String ip_r = "";
+			if(ips.length != 0) ip_r = intToIp(ips[0]);
+			Short[] vlans = device.getVlanId();
 			try{
 				for(int i=0; i<sw.length; i++){
-					String data = String.format("{\"controller\":\"%s\", \"mac\":\"%s\", \"vlan\":\"%d\", \"type\":\"%s\", \"ip\":\"\", \"location\":{\"dpid\":\"%s\", \"port\":\"%d\"}}", controller_name, HexString.toHexString(device.getMACAddress()).substring(6), 0, "wired", HexString.toHexString(sw[i].getSwitchDPID()), sw[i].getPort());
+					String data = String.format("{\"controller\":\"%s\", \"mac\":\"%s\", \"vlan\":\"%d\", \"type\":\"%s\", \"ip\":\"%s\", \"location\":{\"dpid\":\"%s\", \"port\":\"%d\"}}", controller_name, HexString.toHexString(device.getMACAddress()).substring(6), vlans[0], "wired", ip_r, HexString.toHexString(sw[i].getSwitchDPID()), sw[i].getPort());
 					sendPost(url, data);
 				}
 			}catch (Exception e){
@@ -334,9 +338,13 @@ public class OmniUI extends ServerResource implements IFloodlightModule,IOFMessa
 				}
 			}else{
 				url = "http://localhost:5567/publish/addhost";
+				Integer[] ips = device.getIPv4Addresses();
+				String ip_r = "";
+				if(ips.length != 0) ip_r = intToIp(ips[0]);
+				Short[] vlans = device.getVlanId();
 				try{
 					for(int i=0; i<sw.length; i++){
-						data = String.format("{\"controller\":\"%s\", \"mac\":\"%s\", \"vlan\":\"%d\", \"type\":\"%s\", \"ip\":\"\", \"location\":{\"dpid\":\"%s\", \"port\":\"%d\"}}", controller_name, HexString.toHexString(device.getMACAddress()).substring(6), 0, "wired", HexString.toHexString(sw[i].getSwitchDPID()), sw[i].getPort());
+						data = String.format("{\"controller\":\"%s\", \"mac\":\"%s\", \"vlan\":\"%d\", \"type\":\"%s\", \"ip\":\"%s\", \"location\":{\"dpid\":\"%s\", \"port\":\"%d\"}}", controller_name, HexString.toHexString(device.getMACAddress()).substring(6), vlans[0], "wired", ip_r, HexString.toHexString(sw[i].getSwitchDPID()), sw[i].getPort());
 						sendPost(url, data);
 					}
 				}catch (Exception e){
@@ -349,13 +357,12 @@ public class OmniUI extends ServerResource implements IFloodlightModule,IOFMessa
 		public void deviceIPV4AddrChanged(IDevice device) {
 			//logger.info("DEVICE ADDR CHANGED: {}", device);
 			String url = "http://localhost:5567/publish/addhost";
-			String data2 = "";
 			SwitchPort[] sw = device.getAttachmentPoints();
 			Integer[] ips = device.getIPv4Addresses();
-			String ips2 = "";
+			Short[] vlans = device.getVlanId();
 			try{
 				for(int i=0; i<ips.length; i++){
-					String data = String.format("{\"controller\":\"%s\", \"mac\":\"%s\", \"vlan\":\"%d\", \"type\":\"%s\", \"ip\":\"%s\", \"location\":{\"dpid\":\"%s\", \"port\":\"%d\"}}", controller_name, HexString.toHexString(device.getMACAddress()).substring(6), 0, "wired", intToIp(ips[i]), HexString.toHexString(sw[i].getSwitchDPID()), sw[i].getPort());
+					String data = String.format("{\"controller\":\"%s\", \"mac\":\"%s\", \"vlan\":\"%d\", \"type\":\"%s\", \"ip\":\"%s\", \"location\":{\"dpid\":\"%s\", \"port\":\"%d\"}}", controller_name, HexString.toHexString(device.getMACAddress()).substring(6), vlans[0], "wired", intToIp(ips[i]), HexString.toHexString(sw[i].getSwitchDPID()), sw[i].getPort());
 					sendPost(url, data);
 				}
 			}catch (Exception e){
@@ -365,7 +372,21 @@ public class OmniUI extends ServerResource implements IFloodlightModule,IOFMessa
 
 		@Override
 		public void deviceVlanChanged(IDevice device) {
-			logger.info("DEVICE VLAN CHANGED: {}", device);
+			//logger.info("DEVICE VLAN CHANGED: {}", device);
+			String url = "http://localhost:5567/publish/addhost";
+			SwitchPort[] sw = device.getAttachmentPoints();
+			Integer[] ips = device.getIPv4Addresses();
+			String ip_r = "";
+			if(ips.length != 0) ip_r = intToIp(ips[0]);
+			Short[] vlans = device.getVlanId();
+			try{
+				for(int i=0; i<vlans.length; i++){
+					String data = String.format("{\"controller\":\"%s\", \"mac\":\"%s\", \"vlan\":\"%d\", \"type\":\"%s\", \"ip\":\"%s\", \"location\":{\"dpid\":\"%s\", \"port\":\"%d\"}}", controller_name, HexString.toHexString(device.getMACAddress()).substring(6), vlans[i], "wired", ip_r, HexString.toHexString(sw[i].getSwitchDPID()), sw[i].getPort());
+					sendPost(url, data);
+				}
+			}catch (Exception e){
+				logger.info("sendPost failed.");
+			}
 		}
 		@Override
 		public String getName() {
