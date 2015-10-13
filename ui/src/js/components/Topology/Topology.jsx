@@ -224,15 +224,10 @@ class Topology extends React.Component {
 
     delDevice(e) {
       console.info("delDevice ", e);
-      let delIndex;
-      for (let j = 0; j < topoNodes.length; j++) {
-        if (topoNodes[j].dpid === e.dpid) {
-          delIndex = j;
-          break;
-        }
-      }
-      topoNodes.pop(delIndex);
-      this.updateTopo();
+      if (_.remove(topoNodes, d => _.isEqual(d.dpid, e.dpid)))
+        this.updateTopo();
+      else
+        console.log("Device Not found");
     }
 
     addLink(e) {
@@ -281,35 +276,33 @@ class Topology extends React.Component {
           if (position)
             host = _.assign(host, { x: position.x, y: position.y, fixed: true });
 
-          this._addHostNode(host).then((i)=>{
-            host.aps.map((link, index) => {
+          this._addHostNode(host)
+            .then((i) => {
+              let sourceNode = this._findNodeIndex('switch', host.location.dpid);
               topoLinks.push({
-                source: this._findNodeIndex('switch', link.dpid),
-                target: i-1,
-                sourcePort: link.port,
-                targetPort: index,
-                type: 's2h',
-                linkId: host.mac
-              });
+              source: sourceNode,
+              target: i-1,
+              sourcePort: host.location.port,
+              type: 's2h',
+              linkId: host.mac
             });
-            this.updateTopo();
-          });
+              this.updateTopo();
+            }).catch(err => {
+              console.log("Add host error ", err);
+            });
         });
 
       } else {
         console.info("add single Host ", e);
         this._addHostNode(e).then((i)=>{
-          e.aps.map((link, index) => {
-            topoLinks.push({
-              source: this._findNodeIndex('switch', link.dpid),
-              target: i-1,
-              sourcePort: link.port,
-              targetPort: index,
-              type: 's2h',
-              linkId: e.mac
-            });
+          topoLinks.push({
+            source: this._findNodeIndex('switch', e.location.dpid),
+            target: i-1,
+            sourcePort: e.location.port,
+            type: 's2h',
+            linkId: e.mac
+          });
           this.updateTopo();
-          })
         });
       }
     }
@@ -341,11 +334,11 @@ class Topology extends React.Component {
     }
 
     addport(e) {
-      console.info("addport", e);
+      // console.info("addport", e);
       var port = e;
     }
     delport(e) {
-      console.info("delport", e);
+      // console.info("delport", e);
       var port = e;
     }
 
