@@ -97,7 +97,6 @@ var customComponent = React.createClass({
 var FlowTable = React.createClass({
     componentDidMount: function() {
         FlowTableStore.listen(this.flowTableChange);
-        //console.log("didmount", this.props.filter);
         this.setState({filter: this.props.filter},function(){
             FlowTableAction.fetchFlowTable(this.props.filter);
             FlowTableAction.fetchStorageColumn();
@@ -108,7 +107,6 @@ var FlowTable = React.createClass({
         FlowTableStore.unlisten(this.flowTableChange);
     },
     componentWillReceiveProps:function(nextProps){
-        //console.log("receive", nextProps.filter,this.state.filter);
         if(nextProps.filter !== this.state.filter){
             this.setState({filter: nextProps.filter},function(){
                 FlowTableAction.fetchFlowTable(nextProps.filter);
