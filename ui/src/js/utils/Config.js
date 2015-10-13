@@ -2,13 +2,13 @@ var url = require('../../../config/config.json');
 
 var Config = {
   	getFlowModUrl: function () {
-    	return url.OmniUICoreURL + "flowmod";
+    	return url.OpenADMCoreURL + "flowmod";
   	},
   	getTopFlowUrl: function(){
-  		return url.OmniUICoreURL + "flow/top";
+  		return url.OpenADMCoreURL + "flow/top";
   	},
   	getSwitchFlowUrl: function(dpid){
-  		return url.OmniUICoreURL + "flow?dpid="+dpid;
+  		return url.OpenADMCoreURL + "flow?dpid="+dpid;
   	}
 };
 

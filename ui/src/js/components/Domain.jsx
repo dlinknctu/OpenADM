@@ -31,7 +31,7 @@ class Domain extends React.Component {
         layout: ls.layout ||[],
         focusNode: { id: "none", type: 'none' },
         controllerStatus: {},
-        evnetSource: new EventSource(`${config.OmniUICoreURL}subscribe`)
+        evnetSource: new EventSource(`${config.OpenADMCoreURL}subscribe`)
     }
   }
 
