@@ -1,4 +1,4 @@
-require('react-grid-layout/node_modules/react-resizable/css/styles.css');
+require('react-resizable/css/styles.css');
 require('./domain.less');
 let React = require('react');
 let { RaisedButton, Paper, Styles } = require('material-ui');
