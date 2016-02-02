@@ -10,10 +10,10 @@ RUN echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true 
     apt-get install -y git-core wget unzip && \
     apt-get install -y python-minimal python-pip python-dev && \
     apt-get install -y oracle-java7-installer ant && \
-    apt-get install -y nodejs npm && \
     rm -rf /var/lib/apt/lists/* && \
-    rm -rf /var/cache/oracle-jdk7-installer
-RUN ln -s /usr/bin/nodejs /usr/bin/node
+    rm -rf /var/cache/oracle-jdk7-installer && \
+    wget -qO- https://deb.nodesource.com/setup_5.x | bash - && \
+    apt-get install -y nodejs
 
 # Setup environment variable
 ENV HOME /root

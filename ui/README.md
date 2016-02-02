@@ -1,5 +1,10 @@
-### OmniUi
+### OpenADM
 ---
+### Usage
+
+Setting OpenADM core host ip and port in config/config.json (default: http://127.0.0.1:5567/)
+
+### Contains
  - React
  - Webpack
  - Babel
@@ -7,7 +12,7 @@
  - Alt (flux implementation)
  - Material-ui
 
- ### How to use
+### How to use
 ---
  - npm install
  - npm run dev
