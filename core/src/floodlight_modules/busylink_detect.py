@@ -88,7 +88,7 @@ class BusyLink_Detect:
 			return 10*(1024**2)/8.0			#10Mb
 		return 0
 
-	def busyLinkDetect(self,event):
+	def busyLinkDetect(self):
 		self.BLD_result = []
 		#calculate link's countBytes and capacity
 		for link_id in self.links:
@@ -96,6 +96,14 @@ class BusyLink_Detect:
 			srcp = self.links[link_id]['sourcePort']
 			dest = self.links[link_id]['target']
 			destp = self.links[link_id]['targetPort']
+
+			if (src not in self.switches) | (dest not in self.switches):
+				print 'Not Ready'
+				return
+			elif (srcp not in self.switches[src]) | (destp not in self.switches[dest]):
+				print 'Not Ready'
+				return
+
 			total_bytes = self.switches[src][srcp] + self.switches[dest][destp]
 			self.links[link_id]['countBytes'] = total_bytes
 			self.links[link_id]['capacity'] = min(self.capacity["%s_%d" % (src,srcp)],self.capacity["%s_%d" % (dest,destp)])
@@ -130,5 +138,7 @@ class BusyLink_Detect:
 
 			print '*****Busy Link ID*****'
 			print json.dumps(data)
+		else:
+			print 'No BusyLink'
 			#conn = httplib.HTTPConnection(self.coreIP,self.corePort)
 			#conn.request('POST','/publish/busylink')
