@@ -135,6 +135,7 @@ class OmniUI(app_manager.RyuApp):
             'dpid': ''.join(temp),
             'controller': controllerName
         }
+
         self.port_to_feature[addDevice['dpid']] = {}
 
         print json.dumps(addDevice)
@@ -163,7 +164,9 @@ class OmniUI(app_manager.RyuApp):
             'dpid': ''.join(temp),
             'controller': controllerName
         }
-        del self.port_to_feature[delDevice['dpid']]
+
+        if delDevice['dpid'] in self.port_to_feature:
+            del self.port_to_feature[delDevice['dpid']]
 
         print json.dumps(delDevice)
         self.post_json_to_core("http://localhost:5567/publish/deldevice", json.dumps(delDevice))
@@ -190,7 +193,10 @@ class OmniUI(app_manager.RyuApp):
                 'port': str(port.port_no),
                 'controller': controllerName
             }
-            del self.port_to_feature[modPort['dpid']][modPort['port']]
+
+            if modPort['dpid'] in self.port_to_feature:
+                if modPort['port'] in self.port_to_feature[modPort['dpid']]:
+                    del self.port_to_feature[modPort['dpid']][modPort['port']]
 
             print json.dumps(modPort)
             self.post_json_to_core("http://localhost:5567/publish/delport", json.dumps(modPort))
@@ -208,7 +214,9 @@ class OmniUI(app_manager.RyuApp):
                 'port': str(port.port_no),
                 'controller': controllerName
             }
-            self.port_to_feature[modPort['dpid']][modPort['port']] = str(port.currentFeatures)
+
+            if modPort['dpid'] in self.port_to_feature:
+                self.port_to_feature[modPort['dpid']][modPort['port']] = str(port.currentFeatures)
 
             print json.dumps(modPort)
             self.post_json_to_core("http://localhost:5567/publish/addport", json.dumps(modPort))
@@ -232,7 +240,9 @@ class OmniUI(app_manager.RyuApp):
             'port': str(port.port_no),
             'controller': controllerName
         }
-        self.port_to_feature[addPort['dpid']][addPort['port']] = str(port.currentFeatures)
+
+        if addPort['dpid'] in self.port_to_feature:
+            self.port_to_feature[addPort['dpid']][addPort['port']] = str(port.currentFeatures)
 
         print json.dumps(addPort)
         self.post_json_to_core("http://localhost:5567/publish/addport", json.dumps(addPort))
@@ -256,7 +266,10 @@ class OmniUI(app_manager.RyuApp):
             'port': str(port.port_no),
             'controller': controllerName
         }
-        del self.port_to_feature[delPort['dpid']][delPort['port']]
+
+        if delPort['dpid'] in self.port_to_feature:
+            if delPort['port'] in self.port_to_feature[delPort['dpid']]:
+                del self.port_to_feature[delPort['dpid']][delPort['port']]
 
         print json.dumps(delPort)
         self.post_json_to_core("http://localhost:5567/publish/delport", json.dumps(delPort))
