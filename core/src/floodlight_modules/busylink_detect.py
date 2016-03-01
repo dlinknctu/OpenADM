@@ -48,6 +48,8 @@ class BusyLink_Detect:
             self.capacity = {}
             self.switches = {}
             for port in data:
+                if int(port['capacity']) == 0:
+                    continue
                 self.capacity["%s_%d" % (port['dpid'],int(port['port']))] = self.parsePortFeatures(int(port['capacity']))
                 if port['dpid'] in self.switches:
                     self.switches[port['dpid']][int(port['port'])] = int(port['rxbyte'])
