@@ -49,6 +49,60 @@ Features of OmniUI includes:
   `http://10.211.55.3:32771` <br/>
   Note: The IP should be the one of Docker host instead of containter. The port should be the one mapped to port 8000
 
+### Manual Install without Docker
+
+Developers who do not familiar with Docker can install OpenADM natively without Docker. OpenADM has been tested on Ubuntu operating system. Before proceeding further, please be sure you have Ubuntu 14.04 LTS installed and Internet connectivity.
+
+1. Get root privilege:
+
+```
+$ sudo su -
+```
+
+2. Install dependencies:
+
+```
+$ echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
+    apt-get update && \
+    apt-get install -y software-properties-common && \
+    add-apt-repository -y ppa:webupd8team/java && \
+    apt-get update && \
+    apt-get install -y git-core wget unzip python-minimal python-pip python-dev oracle-java7-installer ant && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /var/cache/oracle-jdk7-installer && \
+    wget -qO- https://deb.nodesource.com/setup_5.x | bash - && \
+    apt-get install -y nodejs
+```
+
+3. Drop root privilege, then clone the OpenADM repository under the home directory:
+
+```
+$ exit
+$ git clone https://github.com/dlinknctu/openadm.git ~/openadm
+```
+
+4. Install OpenADM bundle (including Floodlight, OpenADM Core, OpenADM WebUI):
+
+```
+$ cd openadm
+$ ./run.sh install
+```
+
+5. Modify `OpenADMCoreUrl` in `~/openadm/ui/config/config.json` to be the machine's IP address which runs OpenADM Core.
+
+6. Open three terminals and execute the command respectively (you can use `screen` or `tmux`):
+
+* Floodlight: `~/floodlight/floodlight.sh`
+* OpenADM Core: `~/.local/bin/omniui`
+* OpenADM WebUI: `cd ~/openadm/ui && npm run dev`
+* Mininet (optional): `sudo mn --topo=tree,2 --controller=remote`
+
+It is recommended that always start the services in this order: **Floodlight -> OpenADM Core -> Mininet (optional)**
+
+If you're using OpenFlow switches instead of Mininet, please be sure that the OpenFlow switches are properly configured with correct controller, i.e. Floodlight controller's IP and port.
+
+7. Open a browser then connect to the machine's IP address and port 8000 (e.g. 127.0.0.1:8000) which runs OpenADM WebUI.
+
 ###Prerequisite###
 1. Install essential packages  
 **Floodlight**  
