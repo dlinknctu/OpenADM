@@ -705,9 +705,9 @@ class Switches(app_manager.RyuApp):
             # then delete host on it
             hostlist = self.hosts.get_by_dpid(dp.id)
             for host in hostlist:
-                del self.hosts[host.mac]
                 ev = event.EventHostDelete(host)
                 self.send_event_to_observers(ev)
+                del self.hosts[host.mac]
 
             switch = self._get_switch(dp.id)
             if switch:
@@ -766,9 +766,9 @@ class Switches(app_manager.RyuApp):
                 # then delete host on it
                 for host in self.hosts.values():
                     if port.__eq__(host.port):
-                        del self.hosts[host.mac]
                         ev = event.EventHostDelete(host)
                         self.send_event_to_observers(ev)
+                        del self.hosts[host.mac]
                         break
                 self.ports.del_port(port)
                 self._link_down(port)
@@ -793,9 +793,9 @@ class Switches(app_manager.RyuApp):
                     # then delete host on it
                     for host in self.hosts.values():
                         if port.__eq__(host.port):
-                            del self.hosts[host.mac]
                             ev = event.EventHostDelete(host)
                             self.send_event_to_observers(ev)
+                            del self.hosts[host.mac]
                             break
                     self._link_down(port)
                 self.lldp_event.set()
@@ -871,6 +871,8 @@ class Switches(app_manager.RyuApp):
             # remove hosts from edge port
             for host in self.hosts.values():
                 if not self._is_edge_port(host.port):
+                    ev = event.EventHostDelete(host)
+                    self.send_event_to_observers(ev)
                     del self.hosts[host.mac]
 
         if not self.links.update_link(src, dst):
