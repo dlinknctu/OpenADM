@@ -174,9 +174,9 @@ class Host(object):
 
     def to_dict(self):
         d = {'mac': self.mac,
-             'vlan': self.vlan,
              'ipv4': self.ipv4,
              'ipv6': self.ipv6,
+             'vlan': self.vlan,
              'port': self.port.to_dict()}
         return d
 
@@ -210,16 +210,13 @@ class HostState(dict):
         if not host:
             return
 
-        if vlan != None and vlan not in host.vlan:
+        if vlan != None:
+            if vlan in host.vlan:
+                if host.vlan.index(vlan) == (len(host.vlan)-1):
+                    return 'old'
+                host.vlan.remove(vlan)
             host.vlan.append(vlan)
             return 'new'
-        elif vlan != None:
-            if host.vlan.index(vlan) == (len(host.vlan)-1):
-                return 'old'
-            else:
-                host.vlan.remove(vlan)
-                host.vlan.append(vlan)
-                return 'new'
 
     def update_ip(self, host, ip_v4=None, ip_v6=None):
         mac = host.mac
@@ -230,27 +227,21 @@ class HostState(dict):
         if not host:
             return
 
-        if ip_v4 != None and ip_v4 not in host.ipv4:
+        if ip_v4 != None:
+            if ip_v4 in host.ipv4:
+                if host.ipv4.index(ip_v4) == (len(host.ipv4)-1):
+                    return 'old'
+                host.ipv4.remove(ip_v4)
             host.ipv4.append(ip_v4)
             return 'new'
-        elif ip_v4 != None:
-            if host.ipv4.index(ip_v4) == (len(host.ipv4)-1):
-                return 'old'
-            else:
-                host.ipv4.remove(ip_v4)
-                host.ipv4.append(ip_v4)
-                return 'new'
 
-        if ip_v6 != None and ip_v6 not in host.ipv6:
+        if ip_v6 != None:
+            if ip_v6 in host.ipv6:
+                if host.ipv6.index(ip_v6) == (len(host.ipv6)-1):
+                    return 'old'
+                host.ipv6.remove(ip_v6)
             host.ipv6.append(ip_v6)
             return 'new'
-        elif ip_v6 != None:
-            if host.ipv6.index(ip_v6) == (len(host.ipv6)-1):
-                return 'old'
-            else:
-                host.ipv6.remove(ip_v6)
-                host.ipv6.append(ip_v6)
-                return 'new'
 
     def get_by_dpid(self, dpid):
         result = []
@@ -779,7 +770,6 @@ class Switches(app_manager.RyuApp):
                         self.send_event_to_observers(ev)
                         del self.hosts[host.mac]
                         break
-
                 self.ports.del_port(port)
                 self._link_down(port)
                 self.lldp_event.set()
@@ -807,7 +797,6 @@ class Switches(app_manager.RyuApp):
                             self.send_event_to_observers(ev)
                             del self.hosts[host.mac]
                             break
-
                     self._link_down(port)
                 self.lldp_event.set()
 
@@ -937,24 +926,25 @@ class Switches(app_manager.RyuApp):
                 self.send_event_to_observers(ev)
 
         # arp packet, update ip address
-        arp_pkt = pkt.get_protocol(arp.arp)
-        if arp_pkt:
+        if eth.ethertype == ether_types.ETH_TYPE_ARP:
+            arp_pkt = pkt.get_protocols(arp.arp)[0]
             ans = self.hosts.update_ip(host, ip_v4=arp_pkt.src_ip)
             if ans == 'new':
                 ev = event.EventHostAdd(host)
                 self.send_event_to_observers(ev)
 
         # ipv4 packet, update ipv4 address
-        ipv4_pkt = pkt.get_protocol(ipv4.ipv4)
-        if ipv4_pkt:
+        elif eth.ethertype == ether_types.ETH_TYPE_IP:
+            ipv4_pkt = pkt.get_protocols(ipv4.ipv4)[0]
             ans = self.hosts.update_ip(host, ip_v4=ipv4_pkt.src)
             if ans == 'new':
                 ev = event.EventHostAdd(host)
                 self.send_event_to_observers(ev)
 
         # ipv6 packet, update ipv6 address
-        ipv6_pkt = pkt.get_protocol(ipv6.ipv6)
-        if ipv6_pkt:
+        elif eth.ethertype == ether_types.ETH_TYPE_IPV6:
+            # TODO: need to handle NDP
+            ipv6_pkt = pkt.get_protocols(ipv6.ipv6)[0]
             self.hosts.update_ip(host, ip_v6=ipv6_pkt.src)
 
     def send_lldp_packet(self, port):
