@@ -530,7 +530,7 @@ class Switches(app_manager.RyuApp):
                event.EventPortAdd, event.EventPortDelete,
                event.EventPortModify,
                event.EventLinkAdd, event.EventLinkDelete,
-               event.EventHostAdd]
+               event.EventHostAdd, event.EventHostDelete]
 
     DEFAULT_TTL = 120  # unused. ignored.
     LLDP_PACKET_LEN = len(LLDPPacket.lldp_packet(0, 0, DONTCARE_STR, 0))
