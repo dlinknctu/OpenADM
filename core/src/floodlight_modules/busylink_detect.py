@@ -8,6 +8,7 @@ class BusyLink_Detect:
         """ BusyLinkDetect init"""
         self.coreIP = "localhost"
         self.corePort = "5567"
+        self.openflowVersion = "1.0"
 
         self.baseState = 1
         self.finalState = 3
@@ -18,6 +19,16 @@ class BusyLink_Detect:
         self.switches = {}
         self.BLD_result = []
 
+        # Load config
+        if parm:
+            if parm.has_key("ip"):
+                self.coreIP = parm["ip"]
+            if parm.has_key("port"):
+                self.corePort = parm["port"]
+            if parm.has_key("version"):
+                self.openflowVersion = parm["version"]
+
+        # Get link and port information from nwinfo
         core.registerEventHandler("linkbag", self.getLink)
         core.registerEventHandler("portbag", self.getPort)
 
@@ -50,7 +61,10 @@ class BusyLink_Detect:
             for port in data:
                 if int(port['capacity']) == 0:
                     continue
-                self.capacity["%s_%d" % (port['dpid'],int(port['port']))] = self.parsePortFeatures(int(port['capacity']))
+                if self.openflowVersion == "1.3"
+                    self.capacity["%s_%d" % (port['dpid'],int(port['port']))] = self.parsePortFeatures_v1_3(int(port['capacity']))
+                else:
+                    self.capacity["%s_%d" % (port['dpid'],int(port['port']))] = self.parsePortFeatures_v1_0(int(port['capacity']))
                 if port['dpid'] in self.switches:
                     self.switches[port['dpid']][int(port['port'])] = int(port['rxbyte'])
                 else:
@@ -66,39 +80,64 @@ class BusyLink_Detect:
         if self.statistics[id]['state'] >= self.finalState:
             self.statistics[id]['state'] = self.finalState
             self.BLD_result.append(id)
-    
+
     def underthreshold(self,id):
         self.statistics[id]['state'] -= 1
         if self.statistics[id]['state'] < self.baseState:
             self.statistics[id]['state'] = self.baseState
-    
-    def parsePortFeatures(self,features):
+
+    def parsePortFeatures_v1_0(self,features):
         if features == 0:
             return 0
         turn_binary = bin(features)[2:]
         binary_len = len(turn_binary)
         if binary_len < 12:
             turn_binary = '0'*(12-binary_len) + turn_binary
-        
+
         if turn_binary[5] == '1':
             return 10*(1024**3)/8.0            #10Gb
         if turn_binary[6] == '1' or turn_binary[7] == '1':
-            return 1024**3/8.0                #1Gb
+            return 1024**3/8.0                 #1Gb
         if turn_binary[8] == '1' or turn_binary[9] == '1':
-            return 100*(1024**2)/8.0        #100Mb
+            return 100*(1024**2)/8.0           #100Mb
+        if turn_binary[10] == '1' or turn_binary[11] == '1':
+            return 10*(1024**2)/8.0            #10Mb
+        return 0
+
+    def parsePortFeatures_v1_3(self,features):
+        if features == 0:
+            return 0
+        turn_binary = bin(features)[2:]
+        binary_len = len(turn_binary)
+        if binary_len < 12:
+            turn_binary = '0'*(12-binary_len) + turn_binary
+
+        if turn_binary[2] == '1':
+            return 1024**4/8.0                 #1Tb
+        if turn_binary[3] == '1':
+            return 100*(1024**3)/8.0           #100Gb
+        if turn_binary[4] == '1':
+            return 40*(1024**3)/8.0            #40Gb
+        if turn_binary[5] == '1':
+            return 10*(1024**3)/8.0            #10Gb
+        if turn_binary[6] == '1' or turn_binary[7] == '1':
+            return 1024**3/8.0                 #1Gb
+        if turn_binary[8] == '1' or turn_binary[9] == '1':
+            return 100*(1024**2)/8.0           #100Mb
         if turn_binary[10] == '1' or turn_binary[11] == '1':
             return 10*(1024**2)/8.0            #10Mb
         return 0
 
     def busyLinkDetect(self):
         self.BLD_result = []
-        #calculate link's countBytes and capacity
+        # Calculate link's countBytes and capacity
         for link_id in self.links:
             src = self.links[link_id]['source']
             srcp = self.links[link_id]['sourcePort']
             dest = self.links[link_id]['target']
             destp = self.links[link_id]['targetPort']
 
+            # Check if needed information all arrived
             if (src not in self.switches) | (dest not in self.switches):
                 print 'Not Ready'
                 return
@@ -109,14 +148,14 @@ class BusyLink_Detect:
             total_bytes = self.switches[src][srcp] + self.switches[dest][destp]
             self.links[link_id]['countBytes'] = total_bytes
             self.links[link_id]['capacity'] = min(self.capacity["%s_%d" % (src,srcp)],self.capacity["%s_%d" % (dest,destp)])
-        
-        #initialize self.statistics value
+
+        # Initialize self.statistics value
         if len(self.statistics) == 0:
             self.statistics = dict(self.links)
             for link_id in self.statistics:
                 self.statistics[link_id]['state'] = self.baseState
-        
-        #check threshold
+
+        # Check threshold
         for link_id in self.links:
             if link_id in self.statistics:
                 if (self.links[link_id]['countBytes'] - self.statistics[link_id]['countBytes']) / self.statistics[link_id]['capacity'] >= self.threshold:
@@ -127,12 +166,12 @@ class BusyLink_Detect:
             else:
                 self.statistics[link_id] = dict(self.links[link_id])
                 self.statistics[link_id]['state'] = self.baseState
-        #remove unexisted link info
+        # Remove unexisted link info
         for link_id in self.statistics:
             if link_id not in self.links:
                 del self.statistics[link_id]
-        
-        #return result
+
+        # Return result
         if len(self.BLD_result) > 0:
             data = {}
             for i in range(len(self.BLD_result)):
