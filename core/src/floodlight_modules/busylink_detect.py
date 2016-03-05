@@ -61,7 +61,7 @@ class BusyLink_Detect:
             for port in data:
                 if int(port['capacity']) == 0:
                     continue
-                if self.openflowVersion == "1.3"
+                if self.openflowVersion == "1.3":
                     self.capacity["%s_%d" % (port['dpid'],int(port['port']))] = self.parsePortFeatures_v1_3(int(port['capacity']))
                 else:
                     self.capacity["%s_%d" % (port['dpid'],int(port['port']))] = self.parsePortFeatures_v1_0(int(port['capacity']))
