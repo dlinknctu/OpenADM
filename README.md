@@ -31,14 +31,14 @@ Features of OmniUI includes:
   # 8000 -> 32771  UI
   ```
 4. Setup IP address <br/>
-  `docker exec openadm /root/omniui/run.sh setup 10.211.55.3 32773` <br/>
+  `docker exec openadm /root/openadm/run.sh setup 10.211.55.3 32773` <br/>
   Note: The IP should be the one of Docker host instead of containter. The port should be the one mapped to port 5567
 
 5. Start controller, core and UI <br/>
   ```
   docker exec -it openadm /root/floodlight/floodlight.sh
   docker exec -it openadm omniui
-  docker exec -it openadm bash -c "cd /root/omniui/ui && npm run dev"
+  docker exec -it openadm bash -c "cd /root/openadm/ui && npm run dev"
   ```
 
 6. Connect Mininet to controller <br/>

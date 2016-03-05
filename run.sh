@@ -48,7 +48,7 @@ function setup {
 	# Config IP address
 	rm -rf $UI_CONFIG
 	echo "{" > $UI_CONFIG
-	echo "    \"OmniUICoreURL\": \"http://$1:$2/\"" >> $UI_CONFIG
+	echo "    \"OpenADMCoreURL\": \"http://$1:$2/\"" >> $UI_CONFIG
 	echo "}" >> $UI_CONFIG
 }
 
