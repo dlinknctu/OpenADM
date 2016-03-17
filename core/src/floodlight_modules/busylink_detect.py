@@ -175,7 +175,9 @@ class BusyLink_Detect:
         if len(self.BLD_result) > 0:
             data = {}
             for i in range(len(self.BLD_result)):
-                data[i] = self.BLD_result[i]
+                busylinkName = 'link' + str(i)
+                data[busylinkName] = [{'dpid': self.links[self.BLD_result[i]]['source'], 'port': self.links[self.BLD_result[i]]['sourcePort']},
+                                      {'dpid': self.links[self.BLD_result[i]]['target'], 'port': self.links[self.BLD_result[i]]['targetPort']}]
 
             print '*****Busy Link ID*****'
             print json.dumps(data)
