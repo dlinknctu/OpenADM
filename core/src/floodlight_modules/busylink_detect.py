@@ -173,14 +173,12 @@ class BusyLink_Detect:
 
         # Return result
         if len(self.BLD_result) > 0:
-            data = {}
-            for i in range(len(self.BLD_result)):
-                busylinkName = 'link' + str(i)
-                data[busylinkName] = [{'dpid': self.links[self.BLD_result[i]]['source'], 'port': self.links[self.BLD_result[i]]['sourcePort']},
-                                      {'dpid': self.links[self.BLD_result[i]]['target'], 'port': self.links[self.BLD_result[i]]['targetPort']}]
-
             print '*****Busy Link ID*****'
-            print json.dumps(data)
+            for i in range(len(self.BLD_result)):
+                data = {'link': []}
+                data['link'].append({'dpid': self.links[self.BLD_result[i]]['source'], 'port': self.links[self.BLD_result[i]]['sourcePort']})
+                data['link'].append({'dpid': self.links[self.BLD_result[i]]['target'], 'port': self.links[self.BLD_result[i]]['targetPort']})
+                print json.dumps(data)
         else:
             print 'No BusyLink'
             #conn = httplib.HTTPConnection(self.coreIP,self.corePort)
