@@ -18,6 +18,7 @@
 	"BusyLink_Detect": {
 		"ip": "localhost",
 		"port": "5567",
+		"controller_name": "foobar",
 		"interval": "5",
 		"version": "1.0"
 	}

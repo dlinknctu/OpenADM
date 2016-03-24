@@ -8,6 +8,7 @@ class BusyLink_Detect:
         """ BusyLinkDetect init"""
         self.coreIP = "localhost"
         self.corePort = "5567"
+        self.controllerName = "DEFAULT"
         self.openflowVersion = "1.0"
 
         self.baseState = 1
@@ -25,6 +26,8 @@ class BusyLink_Detect:
                 self.coreIP = parm["ip"]
             if parm.has_key("port"):
                 self.corePort = parm["port"]
+            if parm.has_key("controller_name"):
+                self.controllerName = parm["controller_name"]
             if parm.has_key("version"):
                 self.openflowVersion = parm["version"]
 
@@ -175,7 +178,7 @@ class BusyLink_Detect:
         if len(self.BLD_result) > 0:
             print '*****Busy Link ID*****'
             for i in range(len(self.BLD_result)):
-                data = {'link': []}
+                data = {'link': [], 'controller': self.controllerName}
                 data['link'].append({'dpid': self.links[self.BLD_result[i]]['source'], 'port': self.links[self.BLD_result[i]]['sourcePort']})
                 data['link'].append({'dpid': self.links[self.BLD_result[i]]['target'], 'port': self.links[self.BLD_result[i]]['targetPort']})
                 print json.dumps(data)
