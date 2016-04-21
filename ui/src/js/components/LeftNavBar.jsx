@@ -1,98 +1,80 @@
-let React = require('react');
-let Router = require('react-router');
-let { MenuItem, LeftNav, Styles } = require('material-ui');
-let { Colors, Spacing, Typography } = Styles;
+import React from 'react';
+import AppBar from 'material-ui/lib/app-bar';
+import LeftNav from 'material-ui/lib/left-nav';
+import LeftNavBarItem from './LeftNavBarItem.jsx';
+import { shallowEqual } from 'recompose';
 
-/** for fake domain, will get it form db */
-var fake_id = [
-    { id: '1', name: '工程三館' },
-    { id: '2', name: '工程四館' },
-    { id: '3', name: '工程五館' }
+const menuItems = [
+  { route: 'domain', text: 'Domain' },
+  { route: 'domain/three', text: '工三' },
+  { route: 'domain/four', text: '工四' },
+  { route: 'setting', text: 'Setting' },
+  { route: 'not', text: '404 page' },
 ];
-
-var domainList = fake_id.map(function(obj) {
-    return { route: '/domain/' + obj.id, text: obj.name };
-});
-
-var menuItems = [
-    { route: 'home', text: 'Home' },
-    { route: 'domain', text: 'Domain' },
-    { route: 'uds', text: 'UDS' },
-    { type: MenuItem.Types.SUBHEADER, text: 'Domain List' },
-];
-menuItems = menuItems.concat(domainList);
-
 
 class LeftNavBar extends React.Component {
 
-  constructor() {
-    super();
-    this.toggle = this.toggle.bind(this);
-    this._getSelectedIndex = this._getSelectedIndex.bind(this);
-    this._onLeftNavChange = this._onLeftNavChange.bind(this);
-    this._onHeaderClick = this._onHeaderClick.bind(this);
-  }
-
-  getStyles() {
-    return {
-      cursor: 'pointer',
-      //.mui-font-style-headline
-      fontSize: '24px',
-      color: Typography.textFullWhite,
-      lineHeight: Spacing.desktopKeylineIncrement + 'px',
-      fontWeight: Typography.fontWeightLight,
-      backgroundColor: Colors.cyan500,
-      paddingLeft: Spacing.desktopGutter,
-      paddingTop: '0px',
-      marginBottom: '8px'
+  constructor(props) {
+    super(props);
+    this.handleToggle = this.handleToggle.bind(this);
+    this.onTitleTouchTap = this.onTitleTouchTap.bind(this);
+    this.onMenuListTap = this.onMenuListTap.bind(this);
+    this.state = {
+      open: false,
     };
   }
 
+  shouldComponentUpdate(nextProps, nextState, nextContext) {
+    return !shallowEqual(this.state, nextState) ||
+           !shallowEqual(this.context, nextContext);
+  }
+
+  onTitleTouchTap() {
+    this.context.router.push('/');
+    this.setState({ open: !this.state.open });
+  }
+
+  onMenuListTap(route) {
+    this.context.router.push(`/${route}`);
+    this.setState({ open: !this.state.open });
+  }
+
+  handleToggle() {
+    this.setState({ open: !this.state.open });
+  }
+
   render() {
-    let header = (
-      <div style={this.getStyles()} onTouchTap={this._onHeaderClick}>
-        OpenADM
-      </div>
-    );
+    const menuLists = menuItems.map((data, index) => {
+      const isActive = this.context.router.isActive(data.route);
+      return (
+        <LeftNavBarItem
+          key={index}
+          primaryText={data.text}
+          isActive={isActive}
+          route={data.route}
+          handleClick={this.onMenuListTap}
+        />);
+    });
 
     return (
       <LeftNav
-        ref="leftNav"
         docked={false}
-        isInitiallyOpen={false}
-        header={header}
-        menuItems={menuItems}
-        selectedIndex={this._getSelectedIndex()}
-        onChange={this._onLeftNavChange} />
+        open={this.state.open}
+        onRequestChange={this.handleToggle}
+      >
+        <AppBar
+          title="OpenADM"
+          showMenuIconButton={false}
+          onTitleTouchTap={this.onTitleTouchTap}
+        />
+        {menuLists}
+      </LeftNav>
     );
   }
-
-  toggle() {
-    this.refs.leftNav.toggle();
-  }
-
-  _getSelectedIndex() {
-    let currentItem;
-
-    for (let i = menuItems.length - 1; i >= 0; i--) {
-      currentItem = menuItems[i];
-      if (currentItem.route && this.context.router.isActive(currentItem.route)) return i;
-    }
-  }
-
-  _onLeftNavChange(e, key, payload) {
-    this.context.router.transitionTo(payload.route);
-  }
-
-  _onHeaderClick() {
-    this.context.router.transitionTo('home');
-    this.refs.leftNav.close();
-  }
-
 }
 
 LeftNavBar.contextTypes = {
-  router: React.PropTypes.func
+  router: React.PropTypes.object,
 };
 
 export default LeftNavBar;

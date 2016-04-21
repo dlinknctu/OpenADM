@@ -1,64 +1,68 @@
-let React = require('react');
-let { ClearFix, Mixins, Styles } = require('material-ui');
-let { StylePropable, StyleResizable } = Mixins;
-let DesktopGutter = Styles.Spacing.desktopGutter;
+import React from 'react';
+import ClearFix from 'material-ui/lib/clearfix';
+import spacing from 'material-ui/lib/styles/spacing';
+import styleResizable from 'material-ui/lib/mixins/style-resizable';
+const desktopGutter = spacing.desktopGutter;
 
-
-let FullWidthSection = React.createClass({
-
-  mixins: [StylePropable, StyleResizable],
+const FullWidthSection = React.createClass({
 
   propTypes: {
-    useContent: React.PropTypes.bool,
+    children: React.PropTypes.node,
+    contentStyle: React.PropTypes.object,
     contentType: React.PropTypes.string,
-    contentStyle: React.PropTypes.object
+    style: React.PropTypes.object,
+    useContent: React.PropTypes.bool,
   },
+
+  mixins: [
+    styleResizable,
+  ],
 
   getDefaultProps() {
     return {
       useContent: false,
-      contentType: 'div'
+      contentType: 'div',
     };
   },
 
   getStyles() {
-    return  {
+    return {
       root: {
-        padding: DesktopGutter + 'px',
-        boxSizing: 'border-box'
+        padding: desktopGutter,
+        boxSizing: 'border-box',
       },
       content: {
-          maxWidth: '1200px',
-          margin: '0 auto'
+        maxWidth: 1200,
+        margin: '0 auto',
       },
       rootWhenSmall: {
-          paddingTop: (DesktopGutter * 2) + 'px',
-          paddingBottom: (DesktopGutter * 2) + 'px'
+        paddingTop: desktopGutter * 2,
+        paddingBottom: desktopGutter * 2,
       },
       rootWhenLarge: {
-          paddingTop: (DesktopGutter * 3) + 'px',
-          paddingBottom: (DesktopGutter * 3) + 'px'
-      }
+        paddingTop: desktopGutter * 3,
+        paddingBottom: desktopGutter * 3,
+      },
     };
   },
 
   render() {
-    let {
+    const {
       style,
       useContent,
       contentType,
       contentStyle,
-      ...other
+      ...other,
     } = this.props;
 
-    let styles = this.getStyles();
+    const styles = this.getStyles();
 
     let content;
     if (useContent) {
       content =
         React.createElement(
           contentType,
-          {style: this.mergeAndPrefix(styles.content, contentStyle)},
+          { style: Object.assign(styles.content, contentStyle) },
           this.props.children
         );
     } else {
@@ -66,16 +70,18 @@ let FullWidthSection = React.createClass({
     }
 
     return (
-      <ClearFix {...other}
-        style={this.mergeAndPrefix(
+      <ClearFix
+        {...other}
+        style={Object.assign(
           styles.root,
           style,
-          this.isDeviceSize(StyleResizable.statics.Sizes.SMALL) && styles.rootWhenSmall,
-          this.isDeviceSize(StyleResizable.statics.Sizes.LARGE) && styles.rootWhenLarge)}>
+          this.isDeviceSize(styleResizable.statics.Sizes.SMALL) && styles.rootWhenSmall,
+          this.isDeviceSize(styleResizable.statics.Sizes.LARGE) && styles.rootWhenLarge)}
+      >
         {content}
       </ClearFix>
     );
-  }
+  },
 });
 
-module.exports = FullWidthSection;
+export default FullWidthSection;

@@ -1,24 +1,53 @@
-require('./assets/styles/main.less');
-require("babel/polyfill");
-import React from "react";
-import Router from "react-router";
-import MasterRoutes from "./js/routes.jsx";
+import './assets/styles/main.less';
+import React from 'react';
+import { render } from 'react-dom';
+import { syncHistoryWithStore } from 'react-router-redux';
+import { browserHistory } from 'react-router';
+import { fromJS } from 'immutable';
+import configureStore from './js/stores/configureStore';
+import Root from './js/Root.js';
 
-import injectTapEventPlugin from "react-tap-event-plugin";
+import injectTapEventPlugin from 'react-tap-event-plugin';
 injectTapEventPlugin();
 
-if (typeof document !== "undefined" && window) {
-  window.onload = function() {
-    Router
-    .create({
-      routes: MasterRoutes,
-      // location: Router.HistoryLocation,
-      scrollBehavior: Router.ScrollToTopBehavior
-    })
-    .run((Handler, state) => {
-        React.render(<Handler {...state}/>, document.getElementById("app"));
-    });
+const initialState = fromJS({
+  counter: { count: 0, name: 'default' },
+  routing: { locationBeforeTransitions: null },
+  layout: [
+    { i: 'topology', x: 0, y: 0, w: 1, h: 2 },
+    { i: 'flowtable', x: 1, y: 0, w: 3, h: 2 },
+    { i: 'controllerStatus', x: 4, y: 0, w: 1, h: 2 },
+  ],
+  setting: {},
+  topology: {
+    filterType: [
+      { type: 'type', filter: 'switch' },
+      { type: 'id', filter: '00:0a:00:00:00:51:85:91' },
+    ],
+    selectNodes: [],
+    level: 0,
+    nodes: [],
+    links: [],
+  },
+  controllerStatus: {},
+  flowtable: {
+    filterString: '',
+    visibleField: ['ipv4'],
+  },
+});
 
-  };
+const store = configureStore(initialState, browserHistory);
+const history = syncHistoryWithStore(
+  browserHistory,
+  store,
+  { selectLocationState: state => state.get('routing').toJS() }
+);
+
+if (typeof(document) !== 'undefined' && window) {
+  window.onload = () => render(
+    <Root store={store} history={history} />,
+    document.getElementById('app')
+  );
 }
 
+export default store;
