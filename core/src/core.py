@@ -12,11 +12,14 @@ import threading
 from threading import Thread
 from flask import Flask, Response, request, abort, render_template
 from flask_cors import *
+from flask_socketio import SocketIO, emit, send, disconnect
 from pkg_resources import Requirement, resource_filename
 rootPath = resource_filename(Requirement.parse("omniui"),"")
 
 app = Flask(__name__)
 app.config['CORS_ORIGINS'] = ['*']
+app.config['SECRET_KEY'] = 'omniui'
+socketio = SocketIO(app)
 subscriptions = []
 logger = logging.getLogger(__name__)
 
@@ -137,33 +140,41 @@ class Core:
 			module.status = Status.ACTIVE
 		# get module list
 		for module in config:
-			if module != "LogFile" and module != "REST" and module != "ControllerType" : # get modules other than LogFile and REST
+			if module != "LogFile" and module != "WEBSOCKET" and module != "ControllerType" : # get modules other than LogFile and WEBSOCKET
 				loadModule(module)
-		# Start REST service
-		if config.has_key("REST"):
-			restIP = config['REST']['ip']
-			restPort = config['REST']['port']
+		# Start WEBSOCKET service
+		if config.has_key("WEBSOCKET"):
+			restIP = config['WEBSOCKET']['ip']
+			restPort = config['WEBSOCKET']['port']
 
 			def notify(e, d, q=None):
 				msg = {
 					'event': e,
 					'data': d
 				}
-                                if q is not None:
-                                    q.put(msg)
-                                else:
-                                    for sub in subscriptions[:]:
-                                            sub.put(msg)
+				if q is not None:
+					q.put(msg)
+				else:
+					for sub in subscriptions[:]:
+						sub.put(msg)
+	
+			@socketio.on('connect', namespace='/websocket')
+			def do_connect():
+				print('Client connected')
 
-			@app.route('/debug')
-			@cross_origin()
+			@socketio.on('leave', namespace='/websocket')
+			def do_disconnect():
+				print('Client disconnected')
+				disconnect()
+
+			@socketio.on('debug', namespace='/websocket')
 			def debug():
-				return 'Currently %d subscriptions' % len(subscriptions)
+				emit('debug', {'data' : 'Currently %d subscriptions' % len(subscriptions) })
 
 			# Receive data from SB
-			@app.route('/publish/<event>', methods=['POST'])
-			@cross_origin()
-			def publish(event):
+			@socketio.on('publish', namespace='/websocket')
+			def publish(message):
+				event = message['event']
 				if event in sseHandlers:
 
 					#
@@ -173,16 +184,15 @@ class Core:
 					rs = sseHandlers[event](request.json)
 					if rs is None:
 						logger.warn('\'%s\' event has been ignored' % event)
-						return 'OK'
+						emit('publish', {'data' : 'OK' })
 					gevent.spawn(notify, event, rs)
 				else:
-					abort(404, 'No such event: \'/publish/%s\'' % event)
+					emit('publish' , {'data' : 'No such event: \'/publish/%s\'' % event })
 
-				return 'OK'
+				emit('publish', {'data' : 'OK' })
 
 			# For clients to subscribe server-sent events
-			@app.route('/subscribe')
-			@cross_origin()
+			@socketio.on('subscribe', namespace='/websocket')
 			def subscribe():
 				def gen():
 					q = Queue()
@@ -191,47 +201,33 @@ class Core:
 						rs = sseHandlers[e]('debut')
 						if rs is not None:
 							gevent.spawn(notify, e, rs, q)
-					try:
-						while True:
-							result = q.get()
-							ev = ServerSentEvent(result)
-							yield ev.encode()
-					except GeneratorExit:
-						subscriptions.remove(q)
-
-				return Response(gen(), mimetype='text/event-stream')
+					for result in q :
+						ev = ServerSentEvent(result)
+						yield ev.encode()
+						if q.empty(): break
+					subscriptions.remove(q)
+				for response in gen():
+					emit('subscribe', {'data': response })
 
 			# handler for feature request
-			@app.route('/feature')
-			@cross_origin()
+			@socketio.on('feature', namespace='/websocket')
 			def featureRequest():
 				feature = {'ControllerType': str(config['ControllerType'])}
-				return "omniui(%s);" % json.dumps(feature)
+				emit('feature', {'data' : "omniui(%s);" % json.dumps(feature)} )
 
-			# general top level rest handler
-			@app.route('/<url>', methods=['GET', 'POST', 'OPTIONS', 'PUT'])
-			@cross_origin()
-			def topLevelRoute(url):
+			# handler other rest handlers
+			@socketio.on('other', namespace='/websocket')
+			def topLevelRoute(message):
+				url = message['url']
 				if url in restHandlers:
 					return restHandlers[url](request)
 				else:
-					abort(404, "Not found: '/%s'" % url)
-
-			# general second level rest handler
-			@app.route('/<prefix>/<suffix>', methods=['GET', 'POST', 'OPTIONS', 'PUT'])
-			@cross_origin()
-			def secondLevelRoute(prefix, suffix):
-				url = prefix + '/' + suffix
-				if url in restHandlers:
-					return restHandlers[url](request)
-				else:
-					abort(404, "Not found: '/%s'" % url)
+					emit('other', {'data' : "Not found: '/%s'" % url })
 
 			app.debug = True
-			server = WSGIServer((restIP, int(restPort)), app)
-			server.serve_forever()
+			socketio.run(app, host=restIP, port=int(restPort))
 
-	#Register REST API
+	#Register WEBSOCKET API
 	def registerRestApi(self, requestName, handler):
 		restHandlers[requestName] = handler
 
