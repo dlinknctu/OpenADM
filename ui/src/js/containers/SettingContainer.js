@@ -41,6 +41,8 @@ const mapDispatchToProps = (dispatch) => ({
   changeName: (payload) => dispatch(changeName(payload)),
   increase: (payload) => dispatch(counterIncrease(payload)),
   decrease: (payload) => dispatch(counterDecrease(payload)),
+  getMockData: () => dispatch({ type: 'GET_MOCK_DATA', payload: null }),
+  addNode: () => dispatch({ type: 'ADD_NODE', payload: null }),
 });
 
 const SettingContainer = compose(
@@ -48,11 +50,15 @@ const SettingContainer = compose(
   withHandlers({
     handleIncrease: ({ increase }) => () => increase(5),
     handleDecrease: ({ decrease }) => () => decrease(3),
+    handleGetMockData: ({ getMockData }) => () => getMockData(),
+    handleAddNode: ({ addNode }) => () => addNode(),
   })
 )((props) => (
     <div>
       <TopologyContainer />
       <h1>Setting</h1>
+      <RaisedButton label="mock" secondary onClick={props.handleGetMockData} />
+      <RaisedButton label="add node" secondary onClick={props.handleAddNode} />
       <pre>{JSON.stringify(props, undefined, 2)}</pre>
       <RaisedButton label="增加" secondary onClick={props.handleIncrease} />
       <RaisedButton label="減少" primary onClick={props.handleDecrease} />

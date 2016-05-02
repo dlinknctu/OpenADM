@@ -3,12 +3,13 @@ import thunk from 'redux-thunk';
 import promiseMiddleware from 'redux-promise';
 import { routerMiddleware } from 'react-router-redux';
 import rootReducer from '../reducers';
+import { socketIoMiddleware } from '../middlewares/socket';
 import { persistState } from 'redux-devtools';
 import DevTools from '../containers/DevTools';
 
 export default function configureStore(initialState, history) {
   const middleware = [
-    thunk, promiseMiddleware, routerMiddleware(history),
+    thunk, promiseMiddleware, routerMiddleware(history), socketIoMiddleware,
   ];
 
   const store = createStore(

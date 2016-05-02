@@ -1,3 +1,4 @@
 import { createAction } from 'redux-actions';
 
-export const layoutChange = createAction('LAYOUT_CHANGE');
+export const changeLayout = createAction('CHANGE_LAYOUT');
+export const resetLayout = createAction('RESET_LAYOUT');

@@ -1,4 +1,3 @@
-var config = {
-    publicPath: ""
-}
-module.exports = config;
+module.exports = {
+  coreURL: 'cswwwdev.cs.nctu.edu.tw',
+};

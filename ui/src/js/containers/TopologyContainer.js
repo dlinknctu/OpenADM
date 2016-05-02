@@ -3,32 +3,49 @@ import { connect } from 'react-redux';
 import Topology from '../components/Topology/Topology';
 import * as TopologyAction from '../actions/TopologyAction';
 
-
-const TopologyContainer = ({ topology, chooseTopologyNode }) => {
-  const names = topology.get('selectNodes')
-                        .map(data => `${data.get('name')},`);
+const TopologyContainer = ({
+  nodes,
+  links,
+  selectNodes,
+  chooseTopologyNode,
+  cancelTopologyNode,
+  updateTopology,
+  getMockData,
+}) => {
   return (
-  <div>
-    <h2>You choose : {names}</h2>
-    <Topology
-      nodes={topology.get('nodes')}
-      links={topology.get('links')}
-      chooseTopologyNode={chooseTopologyNode }
-    />
-  </div>);
+    <div>
+      <Topology
+        initalTopology={getMockData}
+        nodes={nodes}
+        links={links}
+        chooseTopologyNode={chooseTopologyNode}
+        cancelTopologyNode={cancelTopologyNode}
+        updateTopology={updateTopology}
+      />
+    </div>
+  );
 };
 
 const mapStateToProps = (state) => ({
-  topology: state.get('topology'),
+  nodes: state.getIn(['topology', 'nodes']),
+  links: state.getIn(['topology', 'links']),
+  selectNodes: state.getIn(['topology', 'selectNodes']),
 });
 
 const mapDispatchToProps = (dispatch) => ({
   chooseTopologyNode: (payload) => dispatch(TopologyAction.chooseTopologyNode(payload)),
+  cancelTopologyNode: (payload) => dispatch(TopologyAction.cancelTopologyNode(payload)),
+  updateTopology: (payload) => dispatch(TopologyAction.updateTopology(payload)),
+  getMockData: () => dispatch({ type: 'GET_MOCK_DATA', payload: null }),
 });
 
 TopologyContainer.propTypes = {
-  topology: PropTypes.object.isRequired,
+  nodes: PropTypes.object.isRequired,
+  links: PropTypes.object.isRequired,
+  selectNodes: PropTypes.object.isRequired,
   chooseTopologyNode: PropTypes.func.isRequired,
+  cancelTopologyNode: PropTypes.func.isRequired,
+  updateTopology: PropTypes.func.isRequired
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(TopologyContainer);

@@ -1,6 +1,4 @@
 import React, { Component, PropTypes } from 'react';
-import RaisedButton from 'material-ui/lib/raised-button';
-import TextField from 'material-ui/lib/text-field';
 import Paper from 'material-ui/lib/paper';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
@@ -10,8 +8,8 @@ import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import { layoutChange } from '../actions/LayoutAction';
 import ModuleContainer from './ModuleContainer';
+import TopologyContainer from './TopologyContainer';
 
-const Topology = () => <h1>topology</h1>;
 const Flowtable = () => <h1>flowtable</h1>;
 const ControllerStatus = () => <h1>Controller Status</h1>;
 
@@ -28,13 +26,11 @@ class DomainContainer extends Component {
   render() {
     return (
       <div>
-        <h1>Domain {this.props.domainName}</h1>
-        <Topology />
+        <TopologyContainer />
         <ModuleContainer>
           <Flowtable />
           <ControllerStatus />
         </ModuleContainer>
-        <pre>{JSON.stringify(this.props, undefined, 2)}</pre>
       </div>
     );
   }

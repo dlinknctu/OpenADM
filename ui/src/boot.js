@@ -5,6 +5,7 @@ import { syncHistoryWithStore } from 'react-router-redux';
 import { browserHistory } from 'react-router';
 import { fromJS } from 'immutable';
 import configureStore from './js/stores/configureStore';
+import { ioInit } from './js/middlewares/socket';
 import Root from './js/Root.js';
 
 import injectTapEventPlugin from 'react-tap-event-plugin';
@@ -14,9 +15,8 @@ const initialState = fromJS({
   counter: { count: 0, name: 'default' },
   routing: { locationBeforeTransitions: null },
   layout: [
-    { i: 'topology', x: 0, y: 0, w: 1, h: 2 },
-    { i: 'flowtable', x: 1, y: 0, w: 3, h: 2 },
-    { i: 'controllerStatus', x: 4, y: 0, w: 1, h: 2 },
+    { i: 'flowtable', x: 1, y: 0, w: 3, h: 3 },
+    { i: 'controllerStatus', x: 4, y: 0, w: 3, h: 3 },
   ],
   setting: {},
   topology: {
@@ -37,6 +37,7 @@ const initialState = fromJS({
 });
 
 const store = configureStore(initialState, browserHistory);
+// ioInit(store);
 const history = syncHistoryWithStore(
   browserHistory,
   store,

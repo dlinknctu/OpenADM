@@ -5,8 +5,9 @@ import ReactGridLayout, { WidthProvider } from 'react-grid-layout';
 const GridLayout = WidthProvider(ReactGridLayout);
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
-import { layoutChange } from '../actions/LayoutAction';
+import { changeLayout } from '../actions/LayoutAction';
 import { withHandlers, pure, compose } from 'recompose';
+import { fromJS, is } from 'immutable';
 
 const mapStateToProps = (state) => ({
   layout: state.get('layout'),
@@ -15,7 +16,12 @@ const mapStateToProps = (state) => ({
 const ModuleContainer = compose(
   connect(mapStateToProps),
   withHandlers({
-    onLayoutChange: ({ dispatch }) => layout => dispatch(layoutChange(layout)),
+    onLayoutChange: ({ layout, dispatch }) => newLayout => {
+      const imLayout = fromJS(newLayout);
+      if (!is(layout, imLayout)) {
+        dispatch(changeLayout(imLayout));
+      }
+    },
   }),
   pure
 )(({ layout, children, onLayoutChange }) => {
@@ -30,6 +36,7 @@ const ModuleContainer = compose(
       layout={layoutObj}
       cols={12}
       rowHeight={30}
+      verticalCompact={false}
       onLayoutChange={onLayoutChange}
     >
       {module}

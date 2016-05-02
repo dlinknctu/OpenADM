@@ -13,7 +13,7 @@ export default createDevTools(
     changePositionKey="ctrl-q"
     changeMonitorKey="ctrl-m"
   >
-    <Inspector />
+    <Inspector supportImmutable />
     <ChartMonitor />
     <MultipleMonitors>
       <LogMonitor />

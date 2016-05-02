@@ -1,32 +1,68 @@
 import React, { Component, PropTypes } from 'react';
 import { findDOMNode } from 'react-dom';
 import d3 from 'd3';
-import mock from './mockdata';
 import './topology.less';
 
 // *****************************************************
 // ** d3 functions to manipulate attributes
 // *****************************************************
+const width = 600;
+const height = 500;
+const force = d3.layout.force()
+  .charge(-5000)
+  .chargeDistance(400)
+  .linkDistance(30)
+  .linkStrength(1)
+  .friction(0.5)
+  .size([width, height]);
+const color = d3.scale.category20();
 
-const enterNode = (selection) => {
+const nodeDrag = force.drag()
+        .on("dragstart", function(d){
+          force.stop();
+          d3.select(this).classed('dragging', true);
+        })
+        .on("drag", function(d) {
+        })
+        .on("dragend", function(d) {
+          d3.select(this)
+          .classed('fixed', d.fixed = true)
+          .classed('dragging', false);
+          force.stop();
+        });
+
+const enterNode = (selection, chooseTopologyNode, cancelTopologyNode) => {
   selection.classed('node', true);
   selection.append('circle')
-    .attr('r', (d) => d.size)
-    .call(this.force.drag);
+    .attr('r', 10)
+    .call(nodeDrag)
+    .on('click', (d) => {
+      chooseTopologyNode(d.index);
+    })
+    .on('dblclick', function(d) {
+      cancelTopologyNode(d.index);
+      d3.select(this).classed('fixed', d.fixed = false);
+    });
 
   selection.append('text')
-    .attr('x', (d) => d.size + 5)
+    .attr('x', 5)
     .attr('dy', '.35em')
-    .text((d) => d.key);
+    .text((d) => d.index);
 };
 
 const updateNode = (selection) => {
-  selection.attr('transform', d => `translate(${d.x},${d.y})`);
+  setTimeout(() => {
+    selection.attr('transform', d => {
+      return `translate(${d.x},${d.y})`;
+    });
+  }, 0);
 };
 
 const enterLink = (selection) => {
   selection.classed('link', true)
-    .attr('stroke-width', d => d.size);
+    .attr('stroke', '#999')
+    .attr('stroke-opacity', 0.6)
+    .attr('stroke-width', d => Math.sqrt(d.value));
 };
 
 const updateLink = (selection) => {
@@ -43,86 +79,66 @@ const updateGraph = (selection) => {
     .call(updateLink);
 };
 
-const color = d3.scale.category20();
 class Topology extends Component {
 
   componentDidMount() {
-    const svg = d3.select(this.refs.mount)
-      .append('svg')
-      .attr('width', 500)
-      .attr('height', 500);
-    const force = d3.layout
-      .force()
-      .charge(-120)
-      .size([500, 500])
-      .linkDistance(50)
-      .nodes(mock.nodes)
-      .links(mock.links);
-    const link = svg.selectAll('line')
-      .data(mock.links)
-      .enter()
-        .append('line')
-        .style('stroke', '#999')
-        .style('stroke-opacity', 0.6)
-        .style('stroke-width', d => Math.sqrt(d.value));
-
-    const node = svg.selectAll('circle')
-      .data(mock.nodes)
-      .enter()
-        .append('circle')
-        .attr('r', 5)
-        .style('stroke', '#FFFFFF')
-        .style('stroke-width', 1.5)
-        .style('fill', (d) => color(d.group) )
-        .on('click', d => { this.props.chooseTopologyNode(d) })
-        .on('dblclick', function(d){ d3.select(this).classed('fixed', d.fixed = false) })
-        .call(
-          force
-            .drag()
-            .on('dragstart', function(d){ d3.select(this).classed('fixed', d.fixed = true)} )
-        );
-
+    this.props.initalTopology();
+    this.d3Graph = d3.select(findDOMNode(this.refs.graph));
     force.on('tick', () => {
-      node
-        .attr('cx', d => d.x)
-        .attr('cy', d => d.y);
-      link
-        .attr('x1', d => d.source.x)
-        .attr('y1', d => d.source.y)
-        .attr('x2', d => d.target.x)
-        .attr('y2', d => d.target.y);
+      this.d3Graph.call(updateGraph);
     });
-    force.start();
-    for (let i = 10000; i > 0; --i) force.tick();
-    force.stop();
-    this.force = force;
   }
-
   shouldComponentUpdate(nextProps) {
-    this.d3Graph = d3.select(findDOMNode(this.refs.mount));
+    console.log("shouldComponentUpdate");
+
+    if (nextProps.nodes.size === this.props.nodes.size &&
+      nextProps.links.size === this.props.links.size) {
+      return false;
+    }
+
+    const {
+      nodes,
+      links,
+      chooseTopologyNode,
+      cancelTopologyNode,
+      updateTopology
+    } = nextProps;
+    const newNodes = nodes.toJS();
+    const newLinks = links.toJS();
+    this.d3Graph = d3.select(findDOMNode(this.refs.graph));
 
     const d3Nodes = this.d3Graph.selectAll('.node')
-      .data(nextProps.nodes, (node) => node.key);
-    d3Nodes.enter().append('g').call(enterNode);
+      .data(newNodes);
+    d3Nodes.enter().append('g').call(enterNode, chooseTopologyNode, cancelTopologyNode);
     d3Nodes.exit().remove();
     d3Nodes.call(updateNode);
 
     const d3Links = this.d3Graph.selectAll('.link')
-      .data(nextProps.links, (link) => link.key);
+      .data(newLinks);
     d3Links.enter().insert('line', '.node').call(enterLink);
     d3Links.exit().remove();
     d3Links.call(updateLink);
 
-    this.force.nodes(nextProps.nodes).links(nextProps.links);
-    this.force.start();
+    force.nodes(newNodes).links(newLinks);
+    force.start();
+    for (let i = 50000; i > 0; --i) force.tick();
+    force.stop();
+    // setTimeout(() => updateTopology({ nodes: newNodes, links: newLinks }), 0);
 
     return false;
   }
 
   render() {
+    const style = {
+      position: 'absolute',
+      height: '89vh',
+      width: '100vw',
+      background: 'rgba(191, 191, 255, 0.5)',
+    };
     return (
-      <div ref="mount">
-      </div>
+      <svg width={width} height={height} style={style}>
+        <g ref="graph" />
+      </svg>
     );
   }
 }
