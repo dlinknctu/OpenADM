@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import Paper from 'material-ui/lib/paper';
+import Paper from 'material-ui/Paper';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import ReactGridLayout, { WidthProvider } from 'react-grid-layout';

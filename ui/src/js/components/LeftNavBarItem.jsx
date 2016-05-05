@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import MenuItem from 'material-ui/lib/menus/menu-item';
+import MenuItem from 'material-ui/MenuItem';
 import { onlyUpdateForKeys } from 'recompose';
 
 class LeftBavBarItem extends React.Component {

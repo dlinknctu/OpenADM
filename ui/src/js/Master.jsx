@@ -5,11 +5,11 @@
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
 import LeftNavBar from './components/LeftNavBar.jsx';
-import AppBar from 'material-ui/lib/app-bar';
-import AppCanvas from 'material-ui/lib/app-canvas';
-import FlatButton from 'material-ui/lib/flat-button';
+import AppBar from 'material-ui/AppBar';
+import AppCanvas from 'material-ui/internal/AppCanvas';
+import FlatButton from 'material-ui/FlatButton';
 import FullWidthSection from './components/FullWidthSection.jsx';
-import ThemeManager from 'material-ui/lib/styles/theme-manager';
+import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import Theme from '../theme.js';
 import { resetLayout } from './actions/LayoutAction';
 
@@ -23,7 +23,7 @@ class Master extends React.Component {
 
   getChildContext() {
     return {
-      muiTheme: ThemeManager.getMuiTheme(Theme),
+      muiTheme: getMuiTheme(Theme),
     };
   }
 

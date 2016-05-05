@@ -1,30 +1,34 @@
-import React, { PropTypes } from 'react';
+import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import Topology from '../components/Topology/Topology';
 import * as TopologyAction from '../actions/TopologyAction';
 
-const TopologyContainer = ({
-  nodes,
-  links,
-  selectNodes,
-  chooseTopologyNode,
-  cancelTopologyNode,
-  updateTopology,
-  getMockData,
-}) => {
-  return (
-    <div>
-      <Topology
-        initalTopology={getMockData}
-        nodes={nodes}
-        links={links}
-        chooseTopologyNode={chooseTopologyNode}
-        cancelTopologyNode={cancelTopologyNode}
-        updateTopology={updateTopology}
-      />
-    </div>
-  );
-};
+class TopologyContainer extends Component {
+  componentDidMount() {
+    this.props.getMockData();
+  }
+  render() {
+    const {
+      nodes,
+      links,
+      selectNodes,
+      chooseTopologyNode,
+      cancelTopologyNode,
+      updateTopology,
+    } = this.props
+    return (
+      <div>
+        <Topology
+          nodes={nodes}
+          links={links}
+          chooseTopologyNode={chooseTopologyNode}
+          cancelTopologyNode={cancelTopologyNode}
+          updateTopology={updateTopology}
+        />
+      </div>
+    );
+  }
+}
 
 const mapStateToProps = (state) => ({
   nodes: state.getIn(['topology', 'nodes']),
@@ -45,7 +49,7 @@ TopologyContainer.propTypes = {
   selectNodes: PropTypes.object.isRequired,
   chooseTopologyNode: PropTypes.func.isRequired,
   cancelTopologyNode: PropTypes.func.isRequired,
-  updateTopology: PropTypes.func.isRequired
+  updateTopology: PropTypes.func.isRequired,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(TopologyContainer);

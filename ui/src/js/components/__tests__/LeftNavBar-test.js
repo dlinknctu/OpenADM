@@ -5,8 +5,8 @@ expect.extend(expectJSX);
 import { shallow, mount } from 'enzyme';
 
 const LeftNavBarItem = require('../LeftNavBarItem.jsx');
-import MenuItem from 'material-ui/lib/menus/menu-item';
-import TextField from 'material-ui/lib/text-field';
+import MenuItem from 'material-ui/MenuItem';
+import TextField from 'material-ui/TextField';
 
 describe('LeftNavBarItem', () => {
 

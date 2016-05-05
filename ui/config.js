@@ -1,3 +1,3 @@
 module.exports = {
-  coreURL: 'cswwwdev.cs.nctu.edu.tw',
+  coreURL: 'http://docker.cs.nctu.edu.tw:32770',
 };

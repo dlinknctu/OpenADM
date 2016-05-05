@@ -9,7 +9,8 @@ import Dispatcher from 'redux-devtools-dispatch';
 import * as Actions from '../actions/GithubAction.js';
 
 export default createDevTools(
-  <DockMonitor toggleVisibilityKey="ctrl-h"
+  <DockMonitor
+    toggleVisibilityKey="ctrl-h"
     changePositionKey="ctrl-q"
     changeMonitorKey="ctrl-m"
   >

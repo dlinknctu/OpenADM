@@ -5,7 +5,7 @@ expect.extend(expectJSX);
 import { shallow } from 'enzyme';
 
 
-import TextField from 'material-ui/lib/text-field';
+import TextField from 'material-ui/TextField';
 import SearchBox from '../SearchBox.jsx';
 
 describe('SearchBox', () => {

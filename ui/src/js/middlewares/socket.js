@@ -12,7 +12,19 @@ import {
 let socket = null;
 
 export const ioInit = store => {
-  socket = io(coreURL, { transports: ['websocket'] });
+  // socket = io('http://docker.cs.nctu.edu.tw:32773/websocket', { origins: '*' });
+  // socket = io('http://cswwwdev.cs.nctu.edu.tw:5000/zylin', { origins: '*' });
+
+  socket.on('subscribes', function(d){
+    console.log("subscribes ", d);
+  });
+  socket.on('feature', function(d){
+    console.log("feature ", d);
+  });
+  socket.on('other', function(d){
+    console.log("other ", d);
+  });
+  window.gg = socket;
 
   socket.on('disconnect', () => {
     console.warn('Server disconnected');

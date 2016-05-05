@@ -1,6 +1,6 @@
 import React from 'react';
-import AppBar from 'material-ui/lib/app-bar';
-import LeftNav from 'material-ui/lib/left-nav';
+import AppBar from 'material-ui/AppBar';
+import LeftNav from 'material-ui/Drawer';
 import LeftNavBarItem from './LeftNavBarItem.jsx';
 import { shallowEqual } from 'recompose';
 
