@@ -28,6 +28,10 @@ from ryu.topology import event, switches
 
 global controllerName
 controllerName = 'DEFAULT'
+global coreIP
+coreIP = '127.0.0.1'
+global corePort
+corePort = '5567'
 
 class OmniUI(app_manager.RyuApp):
     OFP_VERSIONS = [ofproto_v1_0.OFP_VERSION, ofproto_v1_2.OFP_VERSION, ofproto_v1_3.OFP_VERSION]
@@ -139,7 +143,8 @@ class OmniUI(app_manager.RyuApp):
         self.port_to_feature[addDevice['dpid']] = {}
 
         print json.dumps(addDevice)
-        self.post_json_to_core("http://localhost:5567/publish/adddevice", json.dumps(addDevice))
+        tmpIP = "http://" + coreIP + ":" + corePort + "/publish/adddevice"
+        self.post_json_to_core(tmpIP, json.dumps(addDevice))
 
         # send add port event
         for port in switch.ports:
@@ -169,7 +174,8 @@ class OmniUI(app_manager.RyuApp):
             del self.port_to_feature[delDevice['dpid']]
 
         print json.dumps(delDevice)
-        self.post_json_to_core("http://localhost:5567/publish/deldevice", json.dumps(delDevice))
+        tmpIP = "http://" + coreIP + ":" + corePort + "/publish/deldevice"
+        self.post_json_to_core(tmpIP, json.dumps(delDevice))
 
     #
     # handle modify port event
@@ -199,7 +205,8 @@ class OmniUI(app_manager.RyuApp):
                     del self.port_to_feature[modPort['dpid']][modPort['port']]
 
             print json.dumps(modPort)
-            self.post_json_to_core("http://localhost:5567/publish/delport", json.dumps(modPort))
+            tmpIP = "http://" + coreIP + ":" + corePort + "/publish/delport"
+            self.post_json_to_core(tmpIP, json.dumps(modPort))
         else:
             print '***live***'
 
@@ -219,7 +226,8 @@ class OmniUI(app_manager.RyuApp):
                 self.port_to_feature[modPort['dpid']][modPort['port']] = str(port.currentFeatures)
 
             print json.dumps(modPort)
-            self.post_json_to_core("http://localhost:5567/publish/addport", json.dumps(modPort))
+            tmpIP = "http://" + coreIP + ":" + corePort + "/publish/addport"
+            self.post_json_to_core(tmpIP, json.dumps(modPort))
 
     #
     # handle add port event
@@ -245,7 +253,8 @@ class OmniUI(app_manager.RyuApp):
             self.port_to_feature[addPort['dpid']][addPort['port']] = str(port.currentFeatures)
 
         print json.dumps(addPort)
-        self.post_json_to_core("http://localhost:5567/publish/addport", json.dumps(addPort))
+        tmpIP = "http://" + coreIP + ":" + corePort + "/publish/addport"
+        self.post_json_to_core(tmpIP, json.dumps(addPort))
 
     #
     # handle delete port event
@@ -272,7 +281,8 @@ class OmniUI(app_manager.RyuApp):
                 del self.port_to_feature[delPort['dpid']][delPort['port']]
 
         print json.dumps(delPort)
-        self.post_json_to_core("http://localhost:5567/publish/delport", json.dumps(delPort))
+        tmpIP = "http://" + coreIP + ":" + corePort + "/publish/delport"
+        self.post_json_to_core(tmpIP, json.dumps(delPort))
 
     #
     # handle add link event
@@ -308,7 +318,8 @@ class OmniUI(app_manager.RyuApp):
         }
 
         print json.dumps(addLink)
-        self.post_json_to_core("http://localhost:5567/publish/addlink", json.dumps(addLink))
+        tmpIP = "http://" + coreIP + ":" + corePort + "/publish/addlink"
+        self.post_json_to_core(tmpIP, json.dumps(addLink))
 
     #
     # handle delete link event
@@ -344,7 +355,8 @@ class OmniUI(app_manager.RyuApp):
         }
 
         print json.dumps(delLink)
-        self.post_json_to_core("http://localhost:5567/publish/dellink", json.dumps(delLink))
+        tmpIP = "http://" + coreIP + ":" + corePort + "/publish/dellink"
+        self.post_json_to_core(tmpIP, json.dumps(delLink))
 
     #
     # handle add host event
@@ -374,7 +386,8 @@ class OmniUI(app_manager.RyuApp):
         }
 
         print json.dumps(addHost)
-        self.post_json_to_core("http://localhost:5567/publish/addhost", json.dumps(addHost))
+        tmpIP = "http://" + coreIP + ":" + corePort + "/publish/addhost"
+        self.post_json_to_core(tmpIP, json.dumps(addHost))
 
     #
     # handle delete host event
@@ -390,7 +403,8 @@ class OmniUI(app_manager.RyuApp):
         }
 
         print json.dumps(delHost)
-        self.post_json_to_core("http://localhost:5567/publish/delhost", json.dumps(delHost))
+        tmpIP = "http://" + coreIP + ":" + corePort + "/publish/delhost"
+        self.post_json_to_core(tmpIP, json.dumps(delHost))
 
     #
     # handle packet in event
@@ -489,7 +503,8 @@ class OmniUI(app_manager.RyuApp):
         packetIn["controller"] = controllerName
 
         print json.dumps(packetIn)
-        self.post_json_to_core("http://localhost:5567/publish/packet", json.dumps(packetIn))
+        tmpIP = "http://" + coreIP + ":" + corePort + "/publish/packet"
+        self.post_json_to_core(tmpIP, json.dumps(packetIn))
 
     #
     # for datapath
@@ -538,7 +553,8 @@ class OmniUI(app_manager.RyuApp):
         }
 
         print json.dumps(controllerstatsReply)
-        self.post_json_to_core("http://localhost:5567/publish/controller", json.dumps(controllerstatsReply))
+        tmpIP = "http://" + coreIP + ":" + corePort + "/publish/controller"
+        self.post_json_to_core(tmpIP, json.dumps(controllerstatsReply))
 
     #
     # polling flows
@@ -614,7 +630,8 @@ class OmniUI(app_manager.RyuApp):
                     i += 1
 
         print json.dumps(flowstatsReplyAPI)
-        self.post_json_to_core("http://localhost:5567/publish/flow", json.dumps(flowstatsReplyAPI))
+        tmpIP = "http://" + coreIP + ":" + corePort + "/publish/flow"
+        self.post_json_to_core(tmpIP, json.dumps(flowstatsReplyAPI))
         return flows
 
     #
@@ -655,7 +672,8 @@ class OmniUI(app_manager.RyuApp):
                 portstatsReplyAPI["capacity"] = self.port_to_feature[portstatsReplyAPI['dpid']][portstatsReplyAPI['port']] if portstatsReplyAPI['port'] in self.port_to_feature[portstatsReplyAPI['dpid']] else '0'
 
                 print json.dumps(portstatsReplyAPI)
-                self.post_json_to_core("http://localhost:5567/publish/port", json.dumps(portstatsReplyAPI))
+                tmpIP = "http://" + coreIP + ":" + corePort + "/publish/port"
+                self.post_json_to_core(tmpIP, json.dumps(portstatsReplyAPI))
         return ports
 
 
