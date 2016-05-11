@@ -170,7 +170,7 @@ class BusyLink_Detect:
                 self.statistics[link_id] = dict(self.links[link_id])
                 self.statistics[link_id]['state'] = self.baseState
         # Remove unexisted link info
-        for link_id in self.statistics:
+        for link_id in self.statistics.copy():
             if link_id not in self.links:
                 del self.statistics[link_id]
 
