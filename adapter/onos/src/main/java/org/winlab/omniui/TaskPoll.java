@@ -1,4 +1,7 @@
 package org.winlab.omniui;
+/** Copyright WinLab, NCTU
+ *  @author Ze-Yan Lin
+ */
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -16,8 +19,8 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-/**
- * Created by zylin on 2016/1/30.
+/**  Create By Ze-Yan Lin on 2016/1/30.
+ *  This class send info to OpenADM core regular
  */
 @Component(immediate = true)
 public class TaskPoll extends BaseResource {

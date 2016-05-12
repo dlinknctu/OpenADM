@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by zylin on 2016/1/27.
+ *  Copyright Winlab, NCTU
+ *  @author Ze-Yan LIn
+ *  Created on 2016/1/24.
+ *   Abstraction of link
  */
 public class Link {
     private String controller = Omniui.controller_name;

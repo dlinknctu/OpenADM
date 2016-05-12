@@ -1,17 +1,14 @@
 package org.winlab.omniui;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Arrays;
-import java.util.Properties;
-
-/**
- * Created by zylin on 2016/1/24.
+/** Copyright WinLab, NCTU
+ *  @author Ze-Yan Lin
+ *   Created on 2016/1/24.
+ *   This class is controller host info
  */
+
 public class Controller {
     private String controller = Omniui.controller_name;
     private String type = "ONOS";
@@ -25,6 +22,7 @@ public class Controller {
         getFreeMem();
         cpu = getLoad();
     }
+    /* Get the operation system info */
     private String getOS(){
         try {
             Process p = Runtime.getRuntime().exec("cat /etc/issue");
@@ -35,6 +33,7 @@ public class Controller {
             return "OS info failed";
         }
     }
+    /* Get the memory info */
     private void getFreeMem() {
         try {
             Process p = Runtime.getRuntime().exec("free -h");
@@ -52,6 +51,7 @@ public class Controller {
             Arrays.fill(error,"free mem info fail");
         }
     }
+    /* Get the cpu loading info */
     private String getLoad(){
         try {
             Process p = Runtime.getRuntime().exec("cat /proc/loadavg");
