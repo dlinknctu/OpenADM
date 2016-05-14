@@ -23,6 +23,7 @@ import subprocess
 from operator import attrgetter
 from ryu.ofproto.ether import ETH_TYPE_LLDP, ETH_TYPE_IPV6
 from ryu.lib import hub
+from ryu.lib.mac import haddr_to_bin
 from ryu.lib.packet import *
 from ryu.topology import event, switches
 
@@ -99,6 +100,14 @@ class OmniUI(app_manager.RyuApp):
         actions = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER,
                                           ofproto.OFPCML_NO_BUFFER)]
         self.add_flow(datapath, 0, match, actions)
+
+    def add_flow10(self, datapath, priority, match, actions):
+        ofproto = datapath.ofproto
+        parser = datapath.ofproto_parser
+
+        mod = parser.OFPFlowMod(datapath=datapath, match=match, cookie=0, command=ofproto.OFPFC_ADD, idle_timeout=0,
+                                hard_timeout=0, priority=priority, flags=ofproto.OFPFF_SEND_FLOW_REM, actions=actions)
+        datapath.send_msg(mod)
 
     def add_flow(self, datapath, priority, match, actions):
         ofproto = datapath.ofproto
@@ -447,8 +456,12 @@ class OmniUI(app_manager.RyuApp):
 
         # install a flow to avoid packet_in next time
         if out_port != ofproto.OFPP_FLOOD:
-            match = parser.OFPMatch(in_port=in_port, eth_dst=dst, eth_src=src)
-            self.add_flow(datapath, 1, match, actions)
+            if ofproto.OFP_VERSION == ofproto_v1_0.OFP_VERSION:
+                match = parser.OFPMatch(in_port=in_port, dl_dst=haddr_to_bin(dst))
+                self.add_flow10(datapath, 1, match, actions)
+            else:
+                match = parser.OFPMatch(in_port=in_port, eth_dst=dst, eth_src=src)
+                self.add_flow(datapath, 1, match, actions)
 
         data = None
         if msg.buffer_id == ofproto.OFP_NO_BUFFER:
