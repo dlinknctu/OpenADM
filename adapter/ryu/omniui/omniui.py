@@ -23,7 +23,6 @@ import subprocess
 from operator import attrgetter
 from ryu.ofproto.ether import ETH_TYPE_LLDP, ETH_TYPE_IPV6
 from ryu.lib import hub
-from ryu.lib.mac import haddr_to_bin
 from ryu.lib.packet import *
 from ryu.topology import event, switches
 
@@ -50,7 +49,6 @@ class OmniUI(app_manager.RyuApp):
         self.data['dpset'] = kwargs['dpset']
         self.data['waiters'] = self.waiters
         self.data['omniui'] = self
-        self.mac_to_port = {}
         self.port_to_feature = {}
         self.datapaths = {}
         self.monitor_thread = hub.spawn(self.monitor)
@@ -89,36 +87,6 @@ class OmniUI(app_manager.RyuApp):
             return
         del self.waiters[dp.id][msg.xid]
         lock.set()
-
-    @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
-    def switch_features_handler(self, ev):
-        datapath = ev.msg.datapath
-        ofproto = datapath.ofproto
-        parser = datapath.ofproto_parser
-
-        match = parser.OFPMatch()
-        actions = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER,
-                                          ofproto.OFPCML_NO_BUFFER)]
-        self.add_flow(datapath, 0, match, actions)
-
-    def add_flow10(self, datapath, priority, match, actions):
-        ofproto = datapath.ofproto
-        parser = datapath.ofproto_parser
-
-        mod = parser.OFPFlowMod(datapath=datapath, match=match, cookie=0, command=ofproto.OFPFC_ADD, idle_timeout=0,
-                                hard_timeout=0, priority=priority, flags=ofproto.OFPFF_SEND_FLOW_REM, actions=actions)
-        datapath.send_msg(mod)
-
-    def add_flow(self, datapath, priority, match, actions):
-        ofproto = datapath.ofproto
-        parser = datapath.ofproto_parser
-
-        inst = [parser.OFPInstructionActions(ofproto.OFPIT_APPLY_ACTIONS,
-                                             actions)]
-
-        mod = parser.OFPFlowMod(datapath=datapath, priority=priority,
-                                match=match, instructions=inst)
-        datapath.send_msg(mod)
 
     #
     # try post json to core
@@ -442,35 +410,6 @@ class OmniUI(app_manager.RyuApp):
         src = eth.src
         dst = eth.dst
 
-        self.mac_to_port.setdefault(dpid, {})
-        
-        # learn a mac address to avoid FLOOD next time.
-        self.mac_to_port[dpid][src] = in_port
-
-        if dst in self.mac_to_port[dpid]:
-            out_port = self.mac_to_port[dpid][dst]
-        else:
-            out_port = ofproto.OFPP_FLOOD
-
-        actions = [parser.OFPActionOutput(out_port)]
-
-        # install a flow to avoid packet_in next time
-        if out_port != ofproto.OFPP_FLOOD:
-            if ofproto.OFP_VERSION == ofproto_v1_0.OFP_VERSION:
-                match = parser.OFPMatch(in_port=in_port, dl_dst=haddr_to_bin(dst))
-                self.add_flow10(datapath, 1, match, actions)
-            else:
-                match = parser.OFPMatch(in_port=in_port, eth_dst=dst, eth_src=src)
-                self.add_flow(datapath, 1, match, actions)
-
-        data = None
-        if msg.buffer_id == ofproto.OFP_NO_BUFFER:
-            data = msg.data
-
-        out = parser.OFPPacketOut(datapath=datapath, buffer_id=msg.buffer_id,
-                                  in_port=in_port, actions=actions, data=data)
-        datapath.send_msg(out)
-
         print '*****packet in*****'
 
         packetIn = {}
@@ -602,7 +541,7 @@ class OmniUI(app_manager.RyuApp):
             flowstatsReplyAPI["flows"] = []
             i = 0
             for inflow in flows[key]:
-                if inflow["priority"] == 1:
+                if 'priority' in inflow:
                     flowstatsReplyAPI["flows"].append({})
                     flowstatsReplyAPI["flows"][i]["ingressPort"] = str(inflow['match']['in_port']) if 'in_port' in inflow['match'] else "0"
                     flowstatsReplyAPI["flows"][i]["dstMac"] = inflow['match']['dl_dst'] if 'dl_dst' in inflow['match'] else "0"
