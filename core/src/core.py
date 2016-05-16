@@ -46,23 +46,8 @@ class ServerSentEvent(object):
 			self.data: 'data'
 		}
 
-	def encode(self):
-		"""Encodes received data to valid SSE format
-
-		SSE payload format:
-			id: xxx\n
-			event: xxx\n
-			data: xxx\n\n
-
-		Return string:
-			'id: xxx\nevent: xxx\ndata: xxx\n\n'
-		"""
-		if not self.data:
-			return ''
-		lines = ['%s: %s' % (v, k)
-				for k, v in self.desc_map.iteritems() if k]
-
-		return '%s\n\n' % '\n'.join(lines)
+		self.eventName = eventName
+		self.handler = handler
 
 class EventHandler:
 	def __init__(self,eventName,handler):
@@ -89,8 +74,8 @@ class Core:
 		#Default values
 		logFile = '/tmp/omniui.log'
 		logLevel = logging.ERROR
-		restIP = 'localhost'
-		restPort = 5567
+		handleIP = 'localhost'
+		handlePort = 5567
 		ControllerType = ''
 		#Set Logger
 		if config.has_key("LogFile"):
@@ -144,8 +129,8 @@ class Core:
 				loadModule(module)
 		# Start WEBSOCKET service
 		if config.has_key("WEBSOCKET"):
-			restIP = config['WEBSOCKET']['ip']
-			restPort = config['WEBSOCKET']['port']
+			handleIP = config['WEBSOCKET']['ip']
+			handlePort = config['WEBSOCKET']['port']
 
 			def notify(e, d, q=None):
 				msg = {
@@ -172,9 +157,9 @@ class Core:
 				emit('debug', {'data' : 'Currently %d subscriptions' % len(subscriptions) })
 
 			# Receive data from SB
-			@socketio.on('publish', namespace='/websocket')
-			def publish(message):
-				event = message['event']
+			@app.route('/publish/<event>', methods=['POST'])
+			@cross_origin()
+			def publish(event):
 				if event in sseHandlers:
 
 					#
@@ -184,12 +169,12 @@ class Core:
 					rs = sseHandlers[event](request.json)
 					if rs is None:
 						logger.warn('\'%s\' event has been ignored' % event)
-						emit('publish', {'data' : 'OK' })
+						return 'OK'
 					gevent.spawn(notify, event, rs)
 				else:
-					emit('publish' , {'data' : 'No such event: \'/publish/%s\'' % event })
+					abort(404, 'No such event: \'/publish/%s\'' % event)
 
-				emit('publish', {'data' : 'OK' })
+				return 'OK'
 
 			# For clients to subscribe server-sent events
 			@socketio.on('subscribe', namespace='/websocket')
@@ -203,11 +188,11 @@ class Core:
 							gevent.spawn(notify, e, rs, q)
 					for result in q :
 						ev = ServerSentEvent(result)
-						yield ev.encode()
+						yield ev
 						if q.empty(): break
 					subscriptions.remove(q)
 				for response in gen():
-					emit('subscribe', {'data': response })
+					emit(response.event, {'data': response.data })
 
 			# handler for feature request
 			@socketio.on('feature', namespace='/websocket')
@@ -220,12 +205,12 @@ class Core:
 			def topLevelRoute(message):
 				url = message['url']
 				if url in restHandlers:
-					return restHandlers[url](request)
+					emit('other', {'data' : restHandlers[url](request)} )
 				else:
 					emit('other', {'data' : "Not found: '/%s'" % url })
 
 			app.debug = True
-			socketio.run(app, host=restIP, port=int(restPort))
+			socketio.run(app, host=handleIP, port=int(handlePort))
 
 	#Register WEBSOCKET API
 	def registerRestApi(self, requestName, handler):
