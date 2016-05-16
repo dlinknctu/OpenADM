@@ -706,15 +706,15 @@ class RestController(ControllerBase):
             'match': {
                 'wildcards': wildcards,
                 'in_port': int(flows.get('ingressPort', 0)),
-                'dl_src': flows.get('srcMac'),
-                'dl_dst': flows.get('dstMac'),
+                'dl_src': flows.get('srcMac', '00:00:00:00:00:00'),
+                'dl_dst': flows.get('dstMac', '00:00:00:00:00:00'),
                 'dl_vlan': int(flows.get('vlan', 0)),
                 'dl_vlan_pcp': int(flows.get('vlanP', 0)),
                 'dl_type': int(flows.get('dlType', 0)),
                 'nw_tos': int(flows.get('tosBits', 0)),
                 'nw_proto': int(flows.get('netProtocol', 0)),
-                'nw_src': flows.get('srcIP').split('/')[0],
-                'nw_dst': flows.get('dstIP').split('/')[0],
+                'nw_src': flows.get('srcIP', '0.0.0.0').split('/')[0],
+                'nw_dst': flows.get('dstIP', '0.0.0.0').split('/')[0],
                 'tp_src': int(flows.get('srcPort', 0)),
                 'tp_dst': int(flows.get('dstPort', 0))
             }
@@ -734,18 +734,18 @@ class RestController(ControllerBase):
         if actions_type == 'OUTPUT':
             ryuAction = {
                 'type': actions_type,
-                'port': actions.split('=')[1],
+                'port': int(actions.split('=')[1]),
                 'max_len': 0xffe5
             }
         elif actions_type == 'SET_VLAN_VID':
             ryuAction = {
                 'type': actions_type,
-                'vlan_vid': actions.split('=')[1]
+                'vlan_vid': int(actions.split('=')[1])
             }
         elif actions_type == 'SET_VLAN_PCP':
             ryuAction = {
                 'type': actions_type,
-                'vlan_pcp': actions.split('=')[1]
+                'vlan_pcp': int(actions.split('=')[1])
             }
         elif actions_type == 'STRIP_VLAN':
             ryuAction = {
@@ -774,25 +774,25 @@ class RestController(ControllerBase):
         elif actions_type == 'SET_NW_TOS':
             ryuAction = {
                 'type': actions_type,
-                'nw_tos': actions.split('=')[1]
+                'nw_tos': int(actions.split('=')[1])
             }
         elif actions_type == 'SET_TP_SRC':
             ryuAction = {
                 'type': actions_type,
-                'tp_src': actions.split('=')[1]
+                'tp_src': int(actions.split('=')[1])
             }
         elif actions_type == 'SET_TP_DST':
             ryuAction = {
                 'type': actions_type,
-                'tp_dst': actions.split('=')[1]
+                'tp_dst': int(actions.split('=')[1])
             }
         elif actions_type == 'ENQUEUE':
             actions_port = actions.split('=')[1].split(':')[0]
             actions_qid = actions.split('=')[1].split(':')[1]
             ryuAction = {
                 'type': actions_type,
-                'port': actions_port,
-                'queue_id': actions_qid
+                'port': int(actions_port),
+                'queue_id': int(actions_qid)
             }
         else:
             LOG.debug('Unknown action type')
@@ -901,7 +901,7 @@ class RestController(ControllerBase):
         if action_type == 'OUTPUT':
             ryuAction = {
                 'type': action_type,
-                'port': dic.split('=')[1]
+                'port': int(dic.split('=')[1])
             }
         elif action_type == 'COPY_TTL_OUT':
             ryuAction = {
