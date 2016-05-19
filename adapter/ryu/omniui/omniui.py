@@ -544,13 +544,13 @@ class OmniUI(app_manager.RyuApp):
                 if 'priority' in inflow:
                     flowstatsReplyAPI["flows"].append({})
                     flowstatsReplyAPI["flows"][i]["ingressPort"] = str(inflow['match']['in_port']) if 'in_port' in inflow['match'] else "0"
-                    flowstatsReplyAPI["flows"][i]["dstMac"] = inflow['match']['dl_dst'] if 'dl_dst' in inflow['match'] else "0"
-                    flowstatsReplyAPI["flows"][i]["srcMac"] = inflow['match']['dl_src'] if 'dl_src' in inflow['match'] else "0"
+                    flowstatsReplyAPI["flows"][i]["dstMac"] = inflow['match']['dl_dst'] if 'dl_dst' in inflow['match'] else "00:00:00:00:00:00"
+                    flowstatsReplyAPI["flows"][i]["srcMac"] = inflow['match']['dl_src'] if 'dl_src' in inflow['match'] else "00:00:00:00:00:00"
                     flowstatsReplyAPI["flows"][i]["dstIP"] = inflow['match']['nw_dst'] if 'nw_dst' in inflow['match'] else "0.0.0.0"
                     flowstatsReplyAPI["flows"][i]["dstIPMask"] = "0" # not support in ryu
                     flowstatsReplyAPI["flows"][i]["srcIP"] = inflow['match']['nw_src'] if 'nw_src' in inflow['match'] else "0.0.0.0"
                     flowstatsReplyAPI["flows"][i]["srcIPMask"] = "0" # not support in ryu
-                    flowstatsReplyAPI["flows"][i]["netProtocol"] = hex(inflow['match']['nw_proto']) if 'nw_proto' in inflow['match'] else "0"
+                    flowstatsReplyAPI["flows"][i]["netProtocol"] = hex(inflow['match']['nw_proto']) if 'nw_proto' in inflow['match'] else "0x00"
                     flowstatsReplyAPI["flows"][i]["dstPort"] = str(inflow['match']['tp_dst']) if 'tp_dst' in inflow['match'] else "0"
                     flowstatsReplyAPI["flows"][i]["srcPort"] = str(inflow['match']['tp_src']) if 'tp_src' in inflow['match'] else "0"
                     flowstatsReplyAPI["flows"][i]["vlan"] = str(inflow['match']['dl_vlan']) if 'dl_vlan' in inflow['match'] else "0"
@@ -563,7 +563,7 @@ class OmniUI(app_manager.RyuApp):
                     flowstatsReplyAPI["flows"][i]["hardTimeout"] = str(inflow['hard_timeout'])
                     flowstatsReplyAPI["flows"][i]["priority"] = str(inflow['priority'])
                     flowstatsReplyAPI["flows"][i]["duration"] = str(inflow['duration_sec'])
-                    flowstatsReplyAPI["flows"][i]["dlType"] = hex(inflow['match']['dl_type']) if 'dl_type' in inflow['match'] else "0"
+                    flowstatsReplyAPI["flows"][i]["dlType"] = hex(inflow['match']['dl_type']) if 'dl_type' in inflow['match'] else "0x0000"
 
                     flowstatsReplyAPI["flows"][i]["actions"] = []
                     for action in inflow['actions']:
@@ -710,9 +710,9 @@ class RestController(ControllerBase):
                 'dl_dst': flows.get('dstMac', '00:00:00:00:00:00'),
                 'dl_vlan': int(flows.get('vlan', 0)),
                 'dl_vlan_pcp': int(flows.get('vlanP', 0)),
-                'dl_type': int(flows.get('dlType', 0)),
+                'dl_type': int(flows.get('dlType', '0x0000'), 16),
                 'nw_tos': int(flows.get('tosBits', 0)),
-                'nw_proto': int(flows.get('netProtocol', 0)),
+                'nw_proto': int(flows.get('netProtocol', '0x00'), 16),
                 'nw_src': flows.get('srcIP', '0.0.0.0').split('/')[0],
                 'nw_dst': flows.get('dstIP', '0.0.0.0').split('/')[0],
                 'tp_src': int(flows.get('srcPort', 0)),
@@ -725,6 +725,9 @@ class RestController(ControllerBase):
             for act in actions:
                 action = self.to_action_v1_0(dp, act)
                 ryuFlow['actions'].append(action)
+        for matchfield in ryuFlow['match'].copy():
+            if (ryuFlow['match'][matchfield] == 0) | (ryuFlow['match'][matchfield] == '0.0.0.0') | (ryuFlow['match'][matchfield] == '00:00:00:00:00:00'):
+                del ryuFlow['match'][matchfield]
 
         return ryuFlow
 
@@ -842,15 +845,15 @@ class RestController(ControllerBase):
             'srcMac': ['dl_src', str],
             'eth_dst': ['eth_dst', str],
             'eth_src': ['eth_src', str],
-            'dlType': ['dl_type', int],
-            'eth_type': ['eth_type', int],
+            'dlType': ['dl_type', int, 16],
+            'eth_type': ['eth_type', int, 16],
             'vlan': ['dl_vlan', str],
             'vlan_vid': ['vlan_vid', str],
             'vlanP': ['vlan_pcp', int],
             'ip_dscp': ['ip_dscp', int],
             'ip_ecn': ['ip_ecn', int],
-            'netProtocol': ['nw_proto', int],
-            'ip_proto': ['ip_proto', int],
+            'netProtocol': ['nw_proto', int, 16],
+            'ip_proto': ['ip_proto', int, 16],
             'srcIP': ['nw_src', str],
             'dstIP': ['nw_dst', str],
             'ipv4_src': ['ipv4_src', str],
@@ -886,8 +889,15 @@ class RestController(ControllerBase):
             'ipv6_exthdr': ['ipv6_exthdr', int]
         }
 
+        if (omniFlow.get(omni_key) == '0') | (omniFlow.get(omni_key) == '0.0.0.0') | (omniFlow.get(omni_key) == '00:00:00:00:00:00') | (omniFlow.get(omni_key) == '0x00') | (omniFlow.get(omni_key) == '0x0000'):
+            return None
         for key, value in convert.items():
             if omni_key == key:
+                if len(value) == 3:
+                    ryuMatch = {
+                        value[0]: value[1](omniFlow.get(omni_key), value[2])
+                    }
+                    return ryuMatch
                 ryuMatch = {
                     value[0]: value[1](omniFlow.get(omni_key))
                 }
