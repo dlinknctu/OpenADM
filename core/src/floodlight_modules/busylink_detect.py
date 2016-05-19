@@ -141,10 +141,10 @@ class BusyLink_Detect:
             destp = self.links[link_id]['targetPort']
 
             # Check if needed information all arrived
-            if (src not in self.switches) | (dest not in self.switches):
+            if (src not in self.switches) or (dest not in self.switches):
                 print 'Not Ready'
                 return
-            elif (srcp not in self.switches[src]) | (destp not in self.switches[dest]):
+            elif (srcp not in self.switches[src]) or (destp not in self.switches[dest]):
                 print 'Not Ready'
                 return
 
