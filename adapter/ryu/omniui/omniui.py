@@ -441,7 +441,7 @@ class OmniUI(app_manager.RyuApp):
                 packetIn["ip_dst"] = p.dst_ip
 
             if hasattr(p, 'proto'):
-                packetIn["protocol"] = 'x0'.join(hex(p.proto).split('x')) if ((len(hex(p.proto)) < 4) | (len(hex(p.proto)) == 5)) else hex(p.proto)
+                packetIn["protocol"] = 'x0'.join(hex(p.proto).split('x')) if ((len(hex(p.proto)) < 4) or (len(hex(p.proto)) == 5)) else hex(p.proto)
 
             if hasattr(p, 'src_port'):
                 packetIn["port_src"] = str(p.src_port)
@@ -726,7 +726,7 @@ class RestController(ControllerBase):
                 action = self.to_action_v1_0(dp, act)
                 ryuFlow['actions'].append(action)
         for matchfield in ryuFlow['match'].copy():
-            if (ryuFlow['match'][matchfield] == 0) | (ryuFlow['match'][matchfield] == '0.0.0.0') | (ryuFlow['match'][matchfield] == '00:00:00:00:00:00'):
+            if (ryuFlow['match'][matchfield] == 0) or (ryuFlow['match'][matchfield] == '0.0.0.0') or (ryuFlow['match'][matchfield] == '00:00:00:00:00:00'):
                 del ryuFlow['match'][matchfield]
 
         return ryuFlow
@@ -889,7 +889,7 @@ class RestController(ControllerBase):
             'ipv6_exthdr': ['ipv6_exthdr', int]
         }
 
-        if (omniFlow.get(omni_key) == '0') | (omniFlow.get(omni_key) == '0.0.0.0') | (omniFlow.get(omni_key) == '00:00:00:00:00:00') | (omniFlow.get(omni_key) == '0x00') | (omniFlow.get(omni_key) == '0x0000'):
+        if (omniFlow.get(omni_key) == '0') or (omniFlow.get(omni_key) == '0.0.0.0') or (omniFlow.get(omni_key) == '00:00:00:00:00:00') or (omniFlow.get(omni_key) == '0x00') or (omniFlow.get(omni_key) == '0x0000'):
             return None
         for key, value in convert.items():
             if omni_key == key:
