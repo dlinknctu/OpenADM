@@ -826,7 +826,7 @@ class RestController(ControllerBase):
                 ryuFlow['match'].update(match) 
 
         # handle mutiple actions
-        acts = omniFlow.get('actions').split(',')
+        acts = omniFlow.get('actions', '').split(',')
         for a in acts:
             action = self.to_action_v1_3(dp, a)
             if action is not None:
