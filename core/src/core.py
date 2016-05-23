@@ -200,6 +200,21 @@ class Core:
 				feature = {'ControllerType': str(config['ControllerType'])}
 				emit('feature', {'data' : "omniui(%s);" % json.dumps(feature)} )
 
+			@socketio.on('setting_controller', namespace='/websocket')
+			def settingControllerRequest(message):
+				settings = json.loads(message.data)
+
+				controller_url = settings['controllerURL']
+				core_url = settings['coreURL']
+				controller_name = settings['controllerName']
+				req_body = json.dumps({'core': core_url, 'controller_name': controller_name})
+
+				o = urlparse.urlparse(controller_url)
+				conn = httplib.HTTPConnection(o.hostname, o.port))
+				result = conn.request("POST", "/wm/omniui/controller/core", req_body)
+
+				emit('setting_controller', {'data' : json.dumps(result)} )
+
 			# handler other rest handlers
 			@socketio.on('other', namespace='/websocket')
 			def topLevelRoute(message):
