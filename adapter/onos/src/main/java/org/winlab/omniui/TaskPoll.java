@@ -4,6 +4,7 @@ package org.winlab.omniui;
  */
 
 import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Component;
 import org.onlab.rest.BaseResource;
 import org.onosproject.net.Device;
@@ -28,9 +29,11 @@ import java.util.TimerTask;
 public class TaskPoll extends BaseResource {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     private int time_interval = 5000;
+    private Timer timer_port = new Timer();
+    private Timer timer_flow = new Timer();
+    private Timer timer_controller = new Timer();
     @Activate
     protected void activate() {
-        Timer timer_port = new Timer();
         timer_port.scheduleAtFixedRate(new TimerTask() {
             public void run() {
                 Iterable<org.onosproject.net.Device> devices = get(DeviceService.class).getDevices();
@@ -51,7 +54,6 @@ public class TaskPoll extends BaseResource {
             }
         }, 0, time_interval);
 
-        Timer timer_flow = new Timer();
         timer_flow.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
@@ -96,7 +98,6 @@ public class TaskPoll extends BaseResource {
             }
         }, 0, time_interval);
 
-        Timer timer_controller = new Timer();
         timer_controller.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
@@ -108,5 +109,10 @@ public class TaskPoll extends BaseResource {
             }
         }, 0, time_interval);
     }
-
+    @Deactivate
+    protected void deactivate() {
+        timer_controller.cancel();
+        timer_flow.cancel();
+        timer_port.cancel();
+    }
 }

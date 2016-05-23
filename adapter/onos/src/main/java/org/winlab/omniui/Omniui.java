@@ -40,8 +40,10 @@ public class Omniui extends AbstractWebResource {
             try {
                 ObjectNode jsonTree = (ObjectNode) mapper().readTree(in);
                 JsonNode coreJson = jsonTree.get("core");
-                if(coreJson != null ) {
+                JsonNode controllerJson = jsonTree.get("controller_name");
+                if(coreJson != null && controllerJson != null ) {
                     host = coreJson.asText();
+                    controller_name = controllerJson.asText();
                     return Response.ok("OK").build();
                 }
                 return Response.ok("FAIL").build();
@@ -51,14 +53,6 @@ public class Omniui extends AbstractWebResource {
             }
         }
 	
-        @javax.ws.rs.Path("/controller/{name}")
-	@POST
-	@Produces("application/json")
-	public Response controller_name(@PathParam("name") String name) {
-		controller_name = name;
-		return Response.ok("OK").build();
-	}
- 
 	@javax.ws.rs.Path("/add/json")
 	@POST
 	@Produces("application/json")
