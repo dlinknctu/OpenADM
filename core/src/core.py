@@ -1,8 +1,10 @@
 import json
+import httplib
 import sys
 import os
 import time
 import signal
+import urlparse
 import gevent
 from gevent.wsgi import WSGIServer
 from gevent.queue import Queue
@@ -202,7 +204,7 @@ class Core:
 
 			@socketio.on('setting_controller', namespace='/websocket')
 			def settingControllerRequest(message):
-				settings = json.loads(message.data)
+				settings = message['data']
 
 				controller_url = settings['controllerURL']
 				core_url = settings['coreURL']
@@ -210,8 +212,8 @@ class Core:
 				req_body = json.dumps({'core': core_url, 'controller_name': controller_name})
 
 				o = urlparse.urlparse(controller_url)
-				conn = httplib.HTTPConnection((o.hostname, o.port))
-				result = conn.request("POST", "/wm/omniui/controller/core", req_body)
+				conn = httplib.HTTPConnection(o.hostname, o.port)
+				result = conn.request("POST", "/wm/omniui/core", req_body)
 
 				emit('setting_controller', {'data' : json.dumps(result)} )
 
