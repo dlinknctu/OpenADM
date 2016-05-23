@@ -210,7 +210,7 @@ class Core:
 				req_body = json.dumps({'core': core_url, 'controller_name': controller_name})
 
 				o = urlparse.urlparse(controller_url)
-				conn = httplib.HTTPConnection(o.hostname, o.port))
+				conn = httplib.HTTPConnection((o.hostname, o.port))
 				result = conn.request("POST", "/wm/omniui/controller/core", req_body)
 
 				emit('setting_controller', {'data' : json.dumps(result)} )
