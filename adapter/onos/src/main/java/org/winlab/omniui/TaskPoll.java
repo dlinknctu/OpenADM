@@ -14,6 +14,8 @@ import org.onosproject.net.flow.FlowRuleService;
 import org.onosproject.net.flow.TrafficSelector;
 import org.onosproject.net.flow.criteria.*;
 import org.onosproject.net.flow.instructions.Instruction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Timer;
@@ -24,6 +26,7 @@ import java.util.TimerTask;
  */
 @Component(immediate = true)
 public class TaskPoll extends BaseResource {
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
     private int time_interval = 5000;
     @Activate
     protected void activate() {
@@ -97,8 +100,10 @@ public class TaskPoll extends BaseResource {
         timer_controller.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
+                log.info("controller");
                 Controller controller = new Controller();
                 SendMsg sendMsg = new SendMsg();
+                log.info("30678");
                 sendMsg.PostMsg((Object)(controller), "controller", "Controller");
             }
         }, 0, time_interval);

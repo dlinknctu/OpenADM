@@ -22,20 +22,43 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 @javax.ws.rs.Path("")
 public class Omniui extends AbstractWebResource {
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 	public static String controller_name = "";
 	final FlowRuleService service = get(FlowRuleService.class);
-	@javax.ws.rs.Path("/controller/name")
+        public static String host = "";
+        
+        @javax.ws.rs.Path("/core")
+        @POST
+        @Produces("application/json")
+        public Response setHost(InputStream in) {
+            
+            try {
+                ObjectNode jsonTree = (ObjectNode) mapper().readTree(in);
+                JsonNode coreJson = jsonTree.get("core");
+                if(coreJson != null ) {
+                    host = coreJson.asText();
+                    return Response.ok("OK").build();
+                }
+                return Response.ok("FAIL").build();
+            } catch (Exception e) {
+                log.error(e.toString());
+                return Response.ok("FAIL").build();
+            }
+        }
+	
+        @javax.ws.rs.Path("/controller/{name}")
 	@POST
 	@Produces("application/json")
-	public Response controller_name(@PathParam("name") String name){
+	public Response controller_name(@PathParam("name") String name) {
 		controller_name = name;
 		return Response.ok("OK").build();
 	}
+ 
 	@javax.ws.rs.Path("/add/json")
 	@POST
 	@Produces("application/json")

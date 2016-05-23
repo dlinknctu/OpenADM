@@ -8,6 +8,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Properties;
+import java.io.FileReader;
 
 /**
  *  Copyright Winlab, NCTU
@@ -17,20 +18,7 @@ import java.util.Properties;
  */
 public class SendMsg {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
-    private String host;
     public SendMsg() {
-        Properties properties = new Properties();
-        String configFile = "config.properties";
-        try {
-            properties.load(new FileInputStream(configFile));
-        } catch (FileNotFoundException ex) {
-            ex.printStackTrace();
-            return;
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            return;
-        }
-        host = properties.getProperty("host");
     }
 
     /**
@@ -41,6 +29,11 @@ public class SendMsg {
      * @return true or false
      */
     public boolean PostMsg(Object obj, String action, String type) {
+        if (Omniui.host == "") { 
+            log.info("no IP");
+            return false;
+        }
+        String host = Omniui.host;
         log.error("try post");
         Gson gson = new Gson();
         switch (type) {
@@ -72,7 +65,7 @@ public class SendMsg {
                     log.error("Error PostMsg : " + e.toString());
                     return false;
                 }
-            case "Port":
+            case "PortStatistic":
                 try {
                     return request(new URL(host + action), gson.toJson((PortStatistic)(obj)));
                 } catch (Exception e) {
@@ -94,7 +87,7 @@ public class SendMsg {
                     return false;
                 }
             default:
-                log.error("error type");
+                log.error("error type" + type + ", "+ host);
                 return false;
         }
     }
