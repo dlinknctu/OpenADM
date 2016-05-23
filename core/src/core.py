@@ -1,11 +1,10 @@
 import json
-import httplib
 import sys
 import os
 import time
 import signal
-import urlparse
 import gevent
+import urllib2
 from gevent.wsgi import WSGIServer
 from gevent.queue import Queue
 from importlib import import_module
@@ -209,13 +208,14 @@ class Core:
 				controller_url = settings['controllerURL']
 				core_url = settings['coreURL']
 				controller_name = settings['controllerName']
-				req_body = json.dumps({'core': core_url, 'controller_name': controller_name})
+				req_body = json.dumps({'coreURL': core_url, 'controllerName': controller_name})
 
-				o = urlparse.urlparse(controller_url)
-				conn = httplib.HTTPConnection(o.hostname, o.port)
-				result = conn.request("POST", "/wm/omniui/core", req_body)
+				req = urllib2.Request(controller_url + '/wm/omniui/core')
+				req.add_header('Content-Type', 'application/json')
+				response = urllib2.urlopen(req, req_body)
+				result = response.read()
 
-				emit('setting_controller', {'data' : json.dumps(result)} )
+				emit('setting_controller', {'data' : result})
 
 			# handler other rest handlers
 			@socketio.on('other', namespace='/websocket')
