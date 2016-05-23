@@ -22,5 +22,5 @@
 1. ` mn --mac --topo=linear,2 --controller remote,ip=0.0.0.0,port=32842`
 
 ## Set OpenADM ip in adapter
-1. ` curl -d '{"core":"http://{openadm ip}/publish/"}' https://0.0.0.0:32840/wm/omniui/core`    
+1. ` curl -d '{"core":"http://{openadm ip}/publish/","controller_name":"what's your name"}' http://0.0.0.0:32840/wm/omniui/core`    
 Return "OK" means success
