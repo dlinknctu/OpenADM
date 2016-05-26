@@ -15,6 +15,9 @@ module.exports = {
     filename: 'bundle.js',
     publicPath: '/'
   },
+  externals: {
+    'nx': 'window.nx',
+  },
   // require without Filename Extension
   /*resolve: {
       extensions: ['', '.js', '.jsx'],

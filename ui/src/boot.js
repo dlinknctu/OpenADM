@@ -3,7 +3,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { syncHistoryWithStore } from 'react-router-redux';
 import { browserHistory } from 'react-router';
-import { fromJS } from 'immutable';
+import Immutable from 'seamless-immutable';
 import configureStore from './js/stores/configureStore';
 import { ioInit } from './js/middlewares/socket';
 import Root from './js/Root.js';
@@ -11,7 +11,7 @@ import Root from './js/Root.js';
 import injectTapEventPlugin from 'react-tap-event-plugin';
 injectTapEventPlugin();
 
-const initialState = fromJS({
+const initialState = Immutable({
   counter: { count: 0, name: 'default' },
   routing: { locationBeforeTransitions: null },
   layout: [
@@ -41,7 +41,7 @@ const store = configureStore(initialState, browserHistory);
 const history = syncHistoryWithStore(
   browserHistory,
   store,
-  { selectLocationState: state => state.get('routing').toJS() }
+  { selectLocationState: state => state.routing }
 );
 
 if (typeof(document) !== 'undefined' && window) {

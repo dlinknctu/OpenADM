@@ -4,26 +4,11 @@ import Topology from '../components/Topology/Topology';
 import * as TopologyAction from '../actions/TopologyAction';
 
 class TopologyContainer extends Component {
-  componentDidMount() {
-    this.props.getMockData();
-  }
   render() {
-    const {
-      nodes,
-      links,
-      selectNodes,
-      chooseTopologyNode,
-      cancelTopologyNode,
-      updateTopology,
-    } = this.props
     return (
       <div>
         <Topology
-          nodes={nodes}
-          links={links}
-          chooseTopologyNode={chooseTopologyNode}
-          cancelTopologyNode={cancelTopologyNode}
-          updateTopology={updateTopology}
+          {...this.props}
         />
       </div>
     );
@@ -31,25 +16,21 @@ class TopologyContainer extends Component {
 }
 
 const mapStateToProps = (state) => ({
-  nodes: state.getIn(['topology', 'nodes']),
-  links: state.getIn(['topology', 'links']),
-  selectNodes: state.getIn(['topology', 'selectNodes']),
+  nodes: state.topology.nodes,
+  links: state.topology.links,
+  selectNodes: state.topology.selectNodes,
 });
 
 const mapDispatchToProps = (dispatch) => ({
-  chooseTopologyNode: (payload) => dispatch(TopologyAction.chooseTopologyNode(payload)),
-  cancelTopologyNode: (payload) => dispatch(TopologyAction.cancelTopologyNode(payload)),
-  updateTopology: (payload) => dispatch(TopologyAction.updateTopology(payload)),
   getMockData: () => dispatch({ type: 'GET_MOCK_DATA', payload: null }),
+  updateNode: p => dispatch({ type: 'UPDATE_NODE', payload: p }),
+  addNode: p => dispatch({ type: 'ADD_NODE', payload: p }),
+  delNode: p => dispatch({ type: 'DEL_NODE', payload: p }),
+  addLink: p => dispatch({ type: 'ADD_LINK', payload: p }),
+  delLink: p => dispatch({ type: 'DEL_LINK', payload: p }),
+  search: p => dispatch({ type: 'SEARCH_NODE', payload: p }),
+  tagChange: p => dispatch({ type: 'TAG_CHANGE', payload: p }),
+  levelChange: p => dispatch({ type: 'LEVEL_CHANGE', payload: p }),
 });
-
-TopologyContainer.propTypes = {
-  nodes: PropTypes.object.isRequired,
-  links: PropTypes.object.isRequired,
-  selectNodes: PropTypes.object.isRequired,
-  chooseTopologyNode: PropTypes.func.isRequired,
-  cancelTopologyNode: PropTypes.func.isRequired,
-  updateTopology: PropTypes.func.isRequired,
-};
 
 export default connect(mapStateToProps, mapDispatchToProps)(TopologyContainer);

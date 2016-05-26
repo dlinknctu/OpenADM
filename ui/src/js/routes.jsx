@@ -11,7 +11,7 @@ const RootRouter = ({ history }) => (
     <Route path="/" component={Master}>
       <IndexRoute component={Home} />
       <Route path="domain" component={Domain} />
-      <Route path="domain/:domainName" component={Domain} />
+      <Route path="domain/:domainName" component={Domain} onLeave={() => console.log('leave route')}/>
       <Route path="setting" component={Setting} />
     </Route>
     <Route path="*" component={NotFound} />

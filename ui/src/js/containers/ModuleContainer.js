@@ -7,25 +7,25 @@ import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import { changeLayout } from '../actions/LayoutAction';
 import { withHandlers, pure, compose } from 'recompose';
-import { fromJS, is } from 'immutable';
+import Immutable from 'seamless-immutable';
 
 const mapStateToProps = (state) => ({
-  layout: state.get('layout'),
+  layout: state.layout,
 });
 
 const ModuleContainer = compose(
   connect(mapStateToProps),
   withHandlers({
     onLayoutChange: ({ layout, dispatch }) => newLayout => {
-      const imLayout = fromJS(newLayout);
-      if (!is(layout, imLayout)) {
+      const imLayout = Immutable(newLayout);
+      if (!layout === imLayout) {
         dispatch(changeLayout(imLayout));
       }
     },
   }),
   pure
 )(({ layout, children, onLayoutChange }) => {
-  const layoutObj = layout.toJS();
+  const layoutObj = layout.asMutable();
   const module = children.map((element, index) => {
     const key = layoutObj[index].i;
     return <Paper key={key}><div>{element}</div></Paper>;

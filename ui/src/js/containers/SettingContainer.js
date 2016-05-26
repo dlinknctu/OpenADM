@@ -8,10 +8,10 @@ const NameTextField = onlyUpdateForKeys(['value'])(
   ({ value, changeName }) => (
     <div>
       <TextField
+        id="textField"
         value={value}
         onChange={(e) => changeName(e.target.value)}
       />
-      <RaisedButton label="變更" />
     </div>
   )
 );
@@ -32,8 +32,8 @@ const changeName = (name) => ({
 });
 
 const mapStateToProps = (state) => ({
-  topology: state.get('topology').toJS(),
-  counter: state.get('counter'),
+  topology: state.topology,
+  counter: state.counter,
 });
 
 const mapDispatchToProps = (dispatch) => ({
@@ -54,9 +54,9 @@ const SettingContainer = compose(
     <pre>{JSON.stringify(props, undefined, 2)}</pre>
     <RaisedButton label="增加" secondary onClick={props.handleIncrease} />
     <RaisedButton label="減少" primary onClick={props.handleDecrease} />
-    <NameTextField value={props.counter.get('name')} changeName={props.changeName} />
-    <h4>name: {props.counter.get('name')}</h4>
-    <h4>count: {props.counter.get('count')}</h4>
+    <NameTextField value={props.counter.name} changeName={props.changeName} />
+    <h4>name: {props.counter.name}</h4>
+    <h4>count: {props.counter.count}</h4>
   </div>
   )
 );

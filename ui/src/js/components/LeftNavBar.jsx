@@ -1,14 +1,15 @@
 import React from 'react';
 import AppBar from 'material-ui/AppBar';
 import LeftNav from 'material-ui/Drawer';
+import Paper from 'material-ui/Paper';
 import LeftNavBarItem from './LeftNavBarItem.jsx';
 import { shallowEqual } from 'recompose';
 
 const menuItems = [
-  { route: 'domain', text: 'Domain' },
-  { route: 'domain/three', text: '工三' },
-  { route: 'domain/four', text: '工四' },
-  { route: 'setting', text: 'Setting' },
+  { route: 'domain', text: 'Domain', iconType: 'domain' },
+  { route: 'domain/three', text: '工三', iconType: 'domain' },
+  { route: 'domain/four', text: '工四', iconType: 'domain' },
+  { route: 'setting', text: 'Setting', iconType: 'settings' },
   { route: 'not', text: '404 page' },
 ];
 
@@ -51,6 +52,7 @@ class LeftNavBar extends React.Component {
           key={index}
           primaryText={data.text}
           isActive={isActive}
+          iconType={data.iconType}
           route={data.route}
           handleClick={this.onMenuListTap}
         />);
@@ -62,11 +64,17 @@ class LeftNavBar extends React.Component {
         open={this.state.open}
         onRequestChange={this.handleToggle}
       >
-        <AppBar
-          title="OpenADM"
+        {/*<AppBar
           showMenuIconButton={false}
           onTitleTouchTap={this.onTitleTouchTap}
-        />
+        />*/}
+        {<div
+        style={{
+          backgroundImage: "url('https://cdn.drivenlocal.com/wp-content/uploads/2015/10/Material-design.jpg')",
+          backgroundSize: 'cover',
+          'height': '100px',
+        }}
+        ></div>}
         {menuLists}
       </LeftNav>
     );

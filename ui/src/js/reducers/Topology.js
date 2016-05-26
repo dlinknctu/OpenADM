@@ -1,100 +1,89 @@
-import { handleActions } from 'redux-actions';
-import { fromJS, Map } from 'immutable';
-import mockdata from '../components/Topology/mockdata';
-const initialState = fromJS({});
+import Immutable from 'seamless-immutable';
+import _ from 'lodash';
+import Topo from '../components/Topology/Topo.js';
 
-const findNodeIndex = (topoNodes, nodeType, uuid) => {
-  switch (nodeType) {
-    case 'switch':
-      return topoNodes.findIndex(d => d.type === nodeType && d.dpid === uuid);
-    case 'host':
-      return topoNodes.findIndex(d => d.type === nodeType && d.mac === uuid);
-    default:
-      return null;
-  }
+const initalState = {
+  nodes: [{
+    level: 0,
+    nodeType: 'switch',
+    dpid: '0101',
+    controller: 'ryu1',
+    tags: [],
+  }, {
+    level: 0,
+    nodeType: 'switch',
+    dpid: '0102',
+    controller: 'ryu1',
+    tags: [],
+  }, {
+    level: 0,
+    nodeType: 'host',
+    mac: '00ab',
+    controller: 'ryu1',
+    tags: [],
+  }, {
+    level: 0,
+    nodeType: 'switch',
+    dpid: '0103',
+    controller: 'ryu1',
+    tags: [],
+  }],
+  links: [{
+    source: 0,
+    target: 1,
+    type: 's2s',
+  }, {
+    source: 1,
+    target: 3,
+    type: 's2s',
+  }, {
+    source: 0,
+    target: 2,
+    type: 's2h',
+  }],
+  level: 0,
+  filter: [],
+  select: [],
+  searchNode: '',
+  tag: ''
 };
 
-export default handleActions({
-  GET_MOCK_DATA: (state) => state
-    .set('nodes', fromJS(mockdata.nodes))
-    .set('links', fromJS(mockdata.links)),
 
-  CHOOSE_TOPOLOGY_NODE: (state, { payload }) => state.updateIn(['selectNodes'],
-    arr => arr.push(payload)),
-
-  CANCEL_TOPOLOGY_NODE: (state, { payload }) => state.updateIn(['selectNodes'],
-    arr => arr.filter(d => !(d === payload))),
-
-  UPDATE_TOPOLOGY: (state, { payload }) => state
-    .updateIn(['nodes'], () => fromJS(payload.nodes))
-    .updateIn(['links'], () => fromJS(payload.links)),
-
-  ADD_NODE: (state) => state.updateIn(['nodes'],
-    arr => arr.concat(Map(RandomNode()))),
-
-  ADD_TOPOLOGY_DEVICE: (state, { payload }) => {
-    if (payload.length !== undefined) {
-      payload.map(d => {
-        // push static node
-        // let position = this.state.stickyTopo.get(d.dpid) || null;
-        // if (position)
-          // d = _.assign(d, { x: position.x, y: position.y, fixed: true });
-        return state.get('nodes').push(d);
+export default (state = Immutable(initalState), action) => {
+  switch (action.type) {
+    case 'GET_MOCK_DATA':
+      Topo.setData({
+        nodes: initalState.nodes,
+        links: initalState.links,
+      })
+      return state.merge(initalState);
+    case 'ADD_NODE':
+      Topo.addNode(action.payload);
+      return state.update("nodes", d => {
+        return d.concat(action.payload);
       });
-    }
-    return state.get('nodes').push(payload);
-  },
 
-  DEL_TOPOLOGY_DEVICE: (state, { payload }) => state.updateIn(['nodes'],
-    arr => arr.filter(d => !d.get('dpid') === payload.dpid)
-  ),
-
-  ADD_TOPOLOGY_HOST: (state, { payload }) => {
-    if (payload.length !== undefined) {
-      const mutableState = state.asMutable();
-      payload.forEach(host => {
-          // let position = this.state.stickyTopo.get(host.mac) || null;
-          // if (position)
-          //   host = _.assign(host, { x: position.x, y: position.y, fixed: true });
-          //
-        mutableState.updateIn(['nodes'], arr => arr.push(host))
-          .updateIn(['links'], arr => arr.push({
-            source: findNodeIndex(mutableState.get('nodes'), 'switch', host.location.dpid),
-            target: mutableState.get('nodes').size,
-            sourcePort: host.location.port,
-            type: 's2h',
-            linkId: host.mac,
-          }));
+    case 'DEL_NODE':
+      return state.update("nodes", d => {
+        return d.slice(0, d.length - 1);
       });
-      return mutableState.asImmutable();
-    }
-    return state.updateIn(['nodes'], arr => arr.push(payload))
-      .updateIn(['links'], arr => arr.push({
-        source: findNodeIndex(state.get('nodes'), 'switch', payload.location.dpid),
-        target: arr.size,
-        sourcePort: payload.location.port,
-        type: 's2h',
-        linkId: payload.mac,
-      }));
-  },
-
-  DEL_TOPOLOGY_HOST: (state, { payload }) => state
-    .updateIn(['links'],
-      arr => arr.filter(d => !d.get('linkId') === payload.dpid))
-    .updateIn(['nodes'],
-      arr => arr.filter(d => !d.get('mac') === payload.mac)),
-
-  ADD_TOPOLOGY_PORT: (state, { payload }) => {
-    return state;
-  },
-
-  DEL_TOPOLOGY_PORT: (state, { payload }) => {
-    return state;
-  },
-
-}, initialState);
-const RandomNode = () => ({
-  name: `Random${Math.floor(Math.random() * 10)}`,
-  dpid: '00:00:00:' + Math.floor(Math.random() * 10),
-  type: 'switch'
-});
+    case 'ADD_LINK':
+      return state.update("links", d => {
+        return _.uniqWith(d.concat(action.payload), _.isEqual);
+      });
+    case 'DEL_LINK':
+      return state.update('links', links =>
+        links.filter(link => !(link === action.payload) )
+      );
+    case 'SEARCH_NODE':
+      return state.set('searchNode', action.payload);
+    case 'TAG_CHANGE':
+      return state.set('tag', action.payload);
+    case 'LEVEL_CHANGE':
+      return state.set('level', action.payload);
+    case 'UPDATE_NODE':
+      return state.update('nodes', d => action.payload);
+    default:
+      return state
+  }
+}

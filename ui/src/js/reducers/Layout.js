@@ -1,7 +1,7 @@
 import { handleActions } from 'redux-actions';
-import { fromJS } from 'immutable';
+import Immutable from 'seamless-immutable';
 
-const initialState = fromJS([
+const initialState = Immutable([
   { i: 'flowtable', x: 1, y: 0, w: 3, h: 3 },
   { i: 'controllerStatus', x: 4, y: 0, w: 3, h: 3 },
 ]);

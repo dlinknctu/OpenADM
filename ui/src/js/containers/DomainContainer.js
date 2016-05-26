@@ -38,7 +38,7 @@ class DomainContainer extends Component {
 
 
 const mapStateToProps = (state) => ({
-  layout: state.get("layout"),
+  layout: state.layout,
 });
 
 export default connect(mapStateToProps)(DomainContainer);

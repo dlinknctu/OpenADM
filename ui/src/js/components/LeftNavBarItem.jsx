@@ -1,6 +1,9 @@
 import React, { PropTypes } from 'react';
 import MenuItem from 'material-ui/MenuItem';
 import { onlyUpdateForKeys } from 'recompose';
+import Divider from 'material-ui/Divider';
+import SettingIcon from 'material-ui/svg-icons/action/settings';
+import DomainIcon from 'material-ui/svg-icons/social/domain';
 
 class LeftBavBarItem extends React.Component {
 
@@ -14,21 +17,26 @@ class LeftBavBarItem extends React.Component {
   }
 
   render() {
-    const { primaryText, isActive } = this.props;
+    const { primaryText, isActive, iconType } = this.props;
     return (
-      <MenuItem
-        primaryText={primaryText}
-        disabled={isActive}
-        checked={isActive}
-        onTouchTap={this.onMenuItemTap}
-      />
-  );
+      <div>
+        <Divider inset />
+        <MenuItem
+          primaryText={primaryText}
+          disabled={isActive}
+          checked={isActive}
+          leftIcon={iconType === 'domain' ? <DomainIcon /> : <SettingIcon />}
+          onTouchTap={this.onMenuItemTap}
+        />
+      </div>
+    );
   }
 }
 
 LeftBavBarItem.propTypes = {
   primaryText: PropTypes.string.isRequired,
   isActive: PropTypes.bool.isRequired,
+  iconType: PropTypes.string,
   route: PropTypes.string.isRequired,
   handleClick: PropTypes.func.isRequired,
 };
