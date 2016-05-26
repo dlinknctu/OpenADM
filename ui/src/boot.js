@@ -17,6 +17,7 @@ const initialState = Immutable({
   layout: [
     { i: 'flowtable', x: 1, y: 0, w: 3, h: 3 },
     { i: 'controllerStatus', x: 4, y: 0, w: 3, h: 3 },
+    { i: 'portStatus', x: 4, y: 0, w: 3, h: 3 },
   ],
   setting: {},
   topology: {

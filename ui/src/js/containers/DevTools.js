@@ -13,6 +13,7 @@ export default createDevTools(
     toggleVisibilityKey="ctrl-h"
     changePositionKey="ctrl-q"
     changeMonitorKey="ctrl-m"
+    defaultIsVisible={false}
   >
     <Inspector supportImmutable />
     <ChartMonitor />

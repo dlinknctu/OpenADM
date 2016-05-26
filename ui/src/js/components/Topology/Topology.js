@@ -4,6 +4,13 @@ import _ from 'lodash';
 import topo from './Topo.js';
 import './topology.less';
 
+const topologyStyle = {
+  position: 'absolute',
+  zIndex: 1,
+  width: '100vw',
+  height: '90vh',
+};
+
 class Toplogy extends Component {
   constructor(props) {
     super(props)
@@ -42,17 +49,11 @@ class Toplogy extends Component {
     //   this.changeLevel(level);
 
     return false;
-
   }
 
   render() {
-    return (
-      <div>
-        <div ref="topology"></div>
-      </div>
-    )
+    return <div ref="topology" style={topologyStyle}></div>;
   }
 }
 
-
-export default Toplogy
+export default Toplogy;

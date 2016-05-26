@@ -7,7 +7,17 @@ import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import { changeLayout } from '../actions/LayoutAction';
 import { withHandlers, pure, compose } from 'recompose';
-import Immutable from 'seamless-immutable';
+import _ from 'lodash';
+const styles = {
+  gridStyle: {
+    width: '100vw',
+    height: '90vh',
+  },
+  itemStyle: {
+    zIndex: 5,
+    borderRadius: '5px',
+  },
+};
 
 const mapStateToProps = (state) => ({
   layout: state.layout,
@@ -17,22 +27,24 @@ const ModuleContainer = compose(
   connect(mapStateToProps),
   withHandlers({
     onLayoutChange: ({ layout, dispatch }) => newLayout => {
-      const imLayout = Immutable(newLayout);
-      if (!layout === imLayout) {
-        dispatch(changeLayout(imLayout));
+      const filterLayout = newLayout.map(d => _.omit(d, 'moved'));
+      if (!_.isEqual(layout, filterLayout)) {
+        dispatch(changeLayout(filterLayout));
       }
     },
   }),
   pure
 )(({ layout, children, onLayoutChange }) => {
-  const layoutObj = layout.asMutable();
+  const layoutObj = layout.asMutable({ deep: true });
+
   const module = children.map((element, index) => {
     const key = layoutObj[index].i;
-    return <Paper key={key}><div>{element}</div></Paper>;
+    return <Paper key={key} style={styles.itemStyle}><div>{element}</div></Paper>;
   });
   return (
     <GridLayout
       className="layout"
+      style={styles.gridStyle}
       layout={layoutObj}
       cols={12}
       rowHeight={30}

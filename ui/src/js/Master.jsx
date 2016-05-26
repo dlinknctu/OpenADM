@@ -8,10 +8,17 @@ import LeftNavBar from './components/LeftNavBar.jsx';
 import AppBar from 'material-ui/AppBar';
 import AppCanvas from 'material-ui/internal/AppCanvas';
 import FlatButton from 'material-ui/FlatButton';
-import FullWidthSection from './components/FullWidthSection.jsx';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import Theme from '../theme.js';
 import { resetLayout } from './actions/LayoutAction';
+
+const styles = {
+  paddingTop: '70px',
+  paddingRight: '0px',
+  paddingBottom: '0px',
+  paddingLeft: '0px',
+  height: '92vh',
+};
 
 class Master extends React.Component {
 
@@ -44,9 +51,9 @@ class Master extends React.Component {
           onLeftIconButtonTouchTap={this.onLeftIconButtonTouchTap}
         />
         <LeftNavBar ref="leftNav" />
-        <FullWidthSection style={{ paddingLeft: '0px', paddingRight: '0px' }}>
+        <div style={styles}>
           {this.props.children}
-        </FullWidthSection>
+        </div>
       </AppCanvas>
       );
   }

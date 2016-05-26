@@ -5,13 +5,7 @@ import * as TopologyAction from '../actions/TopologyAction';
 
 class TopologyContainer extends Component {
   render() {
-    return (
-      <div>
-        <Topology
-          {...this.props}
-        />
-      </div>
-    );
+    return <Topology {...this.props} />;
   }
 }
 

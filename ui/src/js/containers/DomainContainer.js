@@ -12,6 +12,7 @@ import TopologyContainer from './TopologyContainer';
 
 const Flowtable = () => <h1>flowtable</h1>;
 const ControllerStatus = () => <h1>Controller Status</h1>;
+const PortStatus = () => <h1>PortStatus Status</h1>;
 
 class DomainContainer extends Component {
   constructor(props) {
@@ -25,11 +26,12 @@ class DomainContainer extends Component {
 
   render() {
     return (
-      <div>
+      <div style={{ overflow: 'hidden' }}>
         <TopologyContainer />
         <ModuleContainer>
           <Flowtable />
           <ControllerStatus />
+          <PortStatus />
         </ModuleContainer>
       </div>
     );
