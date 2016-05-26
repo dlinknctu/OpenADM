@@ -14,11 +14,14 @@ injectTapEventPlugin();
 const initialState = Immutable({
   counter: { count: 0, name: 'default' },
   routing: { locationBeforeTransitions: null },
-  layout: [
-    { i: 'flowtable', x: 1, y: 0, w: 3, h: 3 },
-    { i: 'controllerStatus', x: 4, y: 0, w: 3, h: 3 },
-    { i: 'portStatus', x: 4, y: 0, w: 3, h: 3 },
-  ],
+  layout: {
+    gridLayout: [
+      { i: 'Flowtable', x: 1, y: 0, w: 3, h: 3 },
+      { i: 'ControllerStatus', x: 4, y: 0, w: 3, h: 3 },
+      { i: 'PortStatus', x: 4, y: 0, w: 3, h: 3 },
+    ],
+    hiddenPanel: []
+  },
   setting: {},
   topology: {
     filterType: [

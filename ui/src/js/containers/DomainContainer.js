@@ -1,12 +1,7 @@
 import React, { Component, PropTypes } from 'react';
-import Paper from 'material-ui/Paper';
-import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import ReactGridLayout, { WidthProvider } from 'react-grid-layout';
-const GridLayout = WidthProvider(ReactGridLayout);
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
-import { layoutChange } from '../actions/LayoutAction';
 import ModuleContainer from './ModuleContainer';
 import TopologyContainer from './TopologyContainer';
 
@@ -15,14 +10,6 @@ const ControllerStatus = () => <h1>Controller Status</h1>;
 const PortStatus = () => <h1>PortStatus Status</h1>;
 
 class DomainContainer extends Component {
-  constructor(props) {
-    super(props);
-    this.onLayoutChange = this.onLayoutChange.bind(this);
-  }
-
-  onLayoutChange(layout) {
-    this.props.dispatch(layoutChange(layout));
-  }
 
   render() {
     return (
@@ -39,8 +26,8 @@ class DomainContainer extends Component {
 }
 
 
-const mapStateToProps = (state) => ({
-  layout: state.layout,
+const mapStateToProps = state => ({
+  hiddenPanel: state.layout.hiddenPanel,
 });
 
 export default connect(mapStateToProps)(DomainContainer);
