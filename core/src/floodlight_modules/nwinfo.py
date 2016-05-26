@@ -53,11 +53,14 @@ class NWInfo:
         core.registerEvent('linkbag', self.sendLink, 5)
         core.registerEvent('portbag', self.sendPort, 5)
 
-        # RESTful API for WebUI
-        core.registerRestApi('port', self.getPortCounter)
-        core.registerRestApi('flow', self.getAllFlows)
-        core.registerRestApi('flow/top', self.getTopFlows)
-        core.registerRestApi('reset_datastore', self.resetDatastore)
+        # websocket API for WebUI
+        core.registerURLApi('port', self.getPortCounter)
+        core.registerURLApi('flow', self.getAllFlows)
+        core.registerURLApi('flow/top', self.getTopFlows)
+        core.registerURLApi('reset_datastore', self.resetDatastore)
+
+        # IPC API for other modules
+        core.registerIPC('getAllFlows', self.getAllFlows)
 
         logger.info('Handlers and RESTful APIs registered')
 
@@ -370,7 +373,7 @@ class NWInfo:
         return None
 
 
-    """RESTful API handler
+    """websocket API handler
     """
 
     def getPortCounter(self, req):
@@ -382,8 +385,8 @@ class NWInfo:
             /port?port=<sw_port>
             /port
         """
-        dpid = req.args.get('dpid')
-        port = req.args.get('port')
+        dpid = req.get('dpid', None)
+        port = req.get('port', None)
         if dpid != None and port != None:
             key = (dpid, port)
             try:
@@ -415,7 +418,7 @@ class NWInfo:
             /flow?dpid=<sw_dpid>
             /flow
         """
-        dpid = req.args.get('dpid')
+        dpid = req.get('dpid', None)
         if dpid is not None:
             try:
                 result = json.dumps({'dpid': dpid,
@@ -437,7 +440,7 @@ class NWInfo:
             /flow/top?dpid=<sw_dpid>
             /flow/top
         """
-        dpid = req.args.get('dpid')
+        dpid = req.get('dpid', None)
         if dpid is not None:
             try:
                 result = json.dumps({'dpid': dpid,

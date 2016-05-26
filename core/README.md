@@ -77,11 +77,11 @@ class Hello:
 class Echo:
     def __init__(self,core,parm):
         core.registerEventHandler("saySomething", self.repeat)
-        core.registerRestApi("echo", self.restHandler)
+        core.registerURLApi("echo", self.handler)
     def repeat(self,event):
         self.event = event
         print self.event
-    def restHandler(self):
+    def handler(self):
         return self.event
 ```
 

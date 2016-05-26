@@ -5,13 +5,12 @@ import time
 import signal
 import gevent
 import urllib2
-from gevent.wsgi import WSGIServer
 from gevent.queue import Queue
 from importlib import import_module
 import logging
 import threading
 from threading import Thread
-from flask import Flask, Response, request, abort, render_template
+from flask import Flask, Response, request, abort, copy_current_request_context
 from flask_cors import *
 from flask_socketio import SocketIO, emit, send, disconnect
 from pkg_resources import Requirement, resource_filename
@@ -22,6 +21,7 @@ app.config['CORS_ORIGINS'] = ['*']
 app.config['SECRET_KEY'] = 'omniui'
 socketio = SocketIO(app)
 subscriptions = []
+client_alive = {}
 logger = logging.getLogger(__name__)
 
 # define module state enum
@@ -47,9 +47,6 @@ class ServerSentEvent(object):
 			self.data: 'data'
 		}
 
-		self.eventName = eventName
-		self.handler = handler
-
 class EventHandler:
 	def __init__(self,eventName,handler):
 		self.eventName = eventName
@@ -62,8 +59,8 @@ class Core:
 		self.threads  = []
 		self.events   = []
 		self.ipcHandlers = {}
-		global restHandlers # Necessary for bottle to access restHandlers
-		restHandlers = {}
+		global urlHandlers # Necessary for bottle to access urlHandlers
+		urlHandlers = {}
 		global sseHandlers
 		sseHandlers = {}
 
@@ -146,12 +143,44 @@ class Core:
 	
 			@socketio.on('connect', namespace='/websocket')
 			def do_connect():
-				print('Client connected')
+				def gen():
+					q = Queue()
+					subscriptions.append(q)
+					for e in sseHandlers.keys():
+						rs = sseHandlers[e]('debut')
+						if rs is not None:
+							gevent.spawn(notify, e, rs, q)
+					try:
+						while True:
+							result = q.get()
+							ev = ServerSentEvent(result)
+							yield ev
+					except GeneratorExit:
+						subscriptions.remove(q)
+					except StopIteration:
+						print('get subscription error.')
+						subscriptions.remove(q)
 
-			@socketio.on('leave', namespace='/websocket')
+				@copy_current_request_context
+				def response(sid):
+					responses = gen()
+					client_alive[sid] = True
+					responses = gen()
+					while client_alive[sid]:
+						r = responses.next()
+						emit(r.event, {'data': r.data })
+					responses.close()
+
+				sid = request.sid
+				print('Client ' + request.remote_addr + '(sid:' + str(sid) + ') connected')
+				gevent.spawn(response, sid)
+
+			@socketio.on('disconnect', namespace='/websocket')
 			def do_disconnect():
-				print('Client disconnected')
-				disconnect()
+				sid = request.sid
+				if client_alive.get(sid, False):
+				   client_alive[sid] = False
+				print('Client ' + request.remote_addr + '(sid:' + str(sid) + ') disconnected')
 
 			@socketio.on('debug', namespace='/websocket')
 			def debug():
@@ -177,24 +206,6 @@ class Core:
 
 				return 'OK'
 
-			# For clients to subscribe server-sent events
-			@socketio.on('subscribe', namespace='/websocket')
-			def subscribe():
-				def gen():
-					q = Queue()
-					subscriptions.append(q)
-					for e in sseHandlers.keys():
-						rs = sseHandlers[e]('debut')
-						if rs is not None:
-							gevent.spawn(notify, e, rs, q)
-					for result in q :
-						ev = ServerSentEvent(result)
-						yield ev
-						if q.empty(): break
-					subscriptions.remove(q)
-				for response in gen():
-					emit(response.event, {'data': response.data })
-
 			# handler for feature request
 			@socketio.on('feature', namespace='/websocket')
 			def featureRequest():
@@ -203,7 +214,10 @@ class Core:
 
 			@socketio.on('setting_controller', namespace='/websocket')
 			def settingControllerRequest(message):
-				settings = message['data']
+				settings = message.get('data', None)
+				if settings is None:
+					emit('setting_controller', {'data', 'setting controller error.'} )
+					return
 
 				controller_url = settings['controllerURL']
 				core_url = settings['coreURL']
@@ -217,21 +231,55 @@ class Core:
 
 				emit('setting_controller', {'data' : result})
 
-			# handler other rest handlers
+			# handler other websocket handlers
 			@socketio.on('other', namespace='/websocket')
 			def topLevelRoute(message):
-				url = message['url']
-				if url in restHandlers:
-					emit('other', {'data' : restHandlers[url](request)} )
-				else:
+				url = message.get('url', None)
+				req = message.get('request', None)
+				result = handleRoute(url, rest=False, req=req)
+				if result is None:
 					emit('other', {'data' : "Not found: '/%s'" % url })
+				else:
+					emit('other', {'data' : result} )
 
-			app.debug = True
+			# general top level rest handler
+			@app.route('/<url>', methods=['GET', 'POST', 'OPTIONS', 'PUT'])
+			@cross_origin()
+			def topLevelRoute(url):
+				result = handleRoute(url)
+				if result is None:
+					abort(404, "Not found: '/%s'" % url)
+				else:
+					return result
+
+			# general second level rest handler
+			@app.route('/<prefix>/<suffix>', methods=['GET', 'POST', 'OPTIONS', 'PUT'])
+			@cross_origin()
+			def secondLevelRoute(prefix, suffix):
+				url = prefix + '/' + suffix
+				result = handleRoute(url)
+				if result is None:
+					abort(404, "Not found: '/%s'" % url)
+				else:
+					return result
+
+			def handleRoute(url, rest=True, req=None):
+				if url is None:
+					return None
+				if url in urlHandlers:
+					if rest:
+						return urlHandlers[url](request)
+					else:
+						return urlHandlers[url](req)
+				else:
+					return None
+
+			app.debug = False
 			socketio.run(app, host=handleIP, port=int(handlePort))
 
-	#Register WEBSOCKET API
-	def registerRestApi(self, requestName, handler):
-		restHandlers[requestName] = handler
+	#Register WEBSOCKET and RESTful API
+	def registerURLApi(self, requestName, handler):
+		urlHandlers[requestName] = handler
 
 	# Register SSE
 	def registerSSEHandler(self, sseName, handler):
