@@ -47,9 +47,9 @@ import net.floodlightcontroller.devicemanager.SwitchPort;
 
 import org.json.JSONObject;
 import org.json.JSONArray;
+import org.json.JsonReader;
 import org.restlet.resource.Post;
 import org.restlet.resource.ServerResource;
-import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.resource.ResourceException;
 
 public class OmniUI extends ServerResource implements IFloodlightModule,IOFMessageListener,IOFSwitchListener,ILinkDiscoveryListener {
@@ -66,9 +66,10 @@ public class OmniUI extends ServerResource implements IFloodlightModule,IOFMessa
 	protected static String coreURL;
 
 	@Post("json")
-	public String retrieve(JsonRepresentation value){
+	public String retrieve(String value){
 		try { 
-			JSONObject jsonobject = represent.getJsonObject();
+			JsonReader jsonReader = Json.createReader(value);
+			JSONObject jsonobject = jsonReader.readObject();
 			String name = jsonobject.getString("controllerName");
 			String host = jsonobject.getString("coreURL");
 			controller_name = name;
