@@ -1,6 +1,7 @@
 var Path = require('path');
 var webpack = require('webpack');
 var WebpackNotifierPlugin = require('webpack-notifier');
+var rucksack = require('rucksack-css');
 var config = require('./config.js');
 
 module.exports = {
@@ -42,10 +43,16 @@ module.exports = {
       include: Path.join(__dirname, 'src/')
     }, {
       test: /\.css$/,
-      loader: 'style!css'
+      include: /src/,
+      loaders: [
+        'style-loader',
+        'css-loader?modules&sourceMap&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]',
+        'postcss-loader'
+      ]
     }, {
-      test: /\.less$/,
-      loader: 'style!css?sourceMap!autoprefixer!less'
+        test: /\.css$/,
+        exclude: /src/,
+        loader: 'style!css'
     }, {
       test: /\.json$/,
       loader: 'json'
@@ -57,6 +64,11 @@ module.exports = {
       loader: "file?name=[path][name].[ext]&context=./src"
     }]
   },
+  postcss: [
+    rucksack({
+      autoprefixer: true
+    })
+  ],
   plugins: [
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': '"development"'

@@ -13,7 +13,7 @@ import Theme from '../theme.js';
 import { resetLayout } from './actions/LayoutAction';
 
 const styles = {
-  paddingTop: '70px',
+  paddingTop: '64px',
   paddingRight: '0px',
   paddingBottom: '0px',
   paddingLeft: '0px',

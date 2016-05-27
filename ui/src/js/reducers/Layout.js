@@ -1,5 +1,6 @@
 import { handleActions } from 'redux-actions';
 import Immutable from 'seamless-immutable';
+import _ from 'lodash';
 
 const initialState = Immutable({
   gridLayout: [
@@ -8,6 +9,7 @@ const initialState = Immutable({
     { i: 'PortStatus', x: 4, y: 0, w: 3, h: 3 },
   ],
   hiddenPanel: [],
+  maximumPanel: '',
 });
 
 export default handleActions({
@@ -18,9 +20,17 @@ export default handleActions({
     .update('hiddenPanel', arr => {
       const index = arr.indexOf(payload);
       if (index !== -1) {
-        return arr.slice(index + 1, arr.length);
+        return [
+          ...arr.slice(0, index),
+          ...arr.slice(index + 1),
+        ];
       }
       return arr.concat(payload);
+    }).set('maximumPanel', ''),
+
+  MAXIMIZE_PANEL: (state, { payload }) => state
+    .update('maximumPanel', str => {
+      return str === payload ? '' : payload;
     }),
 
   RESET_LAYOUT: () => initialState,

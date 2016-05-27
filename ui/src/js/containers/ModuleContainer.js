@@ -2,31 +2,21 @@ import React from 'react';
 import Paper from 'material-ui/Paper';
 import { connect } from 'react-redux';
 import ReactGridLayout, { WidthProvider } from 'react-grid-layout';
-import CloseIcon from 'material-ui/svg-icons/Navigation/close';
+import CloseIcon from 'material-ui/svg-icons/navigation/close';
+import MaximizeIcon from 'material-ui/svg-icons/navigation/fullscreen';
 const GridLayout = WidthProvider(ReactGridLayout);
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
-import { changeLayout, togglePanel } from '../actions/LayoutAction';
+import { changeLayout, togglePanel, maximizePanel } from '../actions/LayoutAction';
 import { withHandlers, pure, compose } from 'recompose';
 import _ from 'lodash';
-const styles = {
-  gridStyle: {
-    width: '100vw',
-    height: '90vh',
-  },
-  itemStyle: {
-    zIndex: 5,
-    borderRadius: '5px',
-  },
-  closeStyle: {
-    position: 'absolute',
-    right: '0px',
-  },
-};
+import classNames from 'classnames';
+import styles from '../components/module.css';
 
 const mapStateToProps = (state) => ({
   gridLayout: state.layout.gridLayout,
   hiddenPanel: state.layout.hiddenPanel,
+  maximumPanel: state.layout.maximumPanel,
 });
 
 const ModuleContainer = compose(
@@ -41,26 +31,36 @@ const ModuleContainer = compose(
     onTogglePanel: ({ dispatch }) => index => {
       dispatch(togglePanel(index));
     },
+    onMaximizePanel: ({ dispatch }) => index => {
+      dispatch(maximizePanel(index));
+    },
   }),
   pure
-)(({ gridLayout, hiddenPanel, children, onLayoutChange, onTogglePanel }) => {
+)(({ gridLayout, hiddenPanel, maximumPanel, children,
+  onLayoutChange, onTogglePanel, onMaximizePanel }) => {
   const layoutObj = gridLayout.asMutable({ deep: true });
   const module = children.map((element, index) => {
     const key = layoutObj[index].i;
-    const isHidden = (hiddenPanel.indexOf(key) !== -1);
-    console.log("key",key, isHidden);
+
+    const gridItemStyle = classNames({
+      [styles.gridItem]: true,
+      [styles.hidden]: hiddenPanel.indexOf(key) !== -1,
+      [styles.max]: key === maximumPanel,
+    });
     return (
       <Paper
         key={key}
-        style={isHidden ?
-          Object.assign({}, styles.itemStyle, { visibility: 'hidden' }) :
-          styles.itemStyle
-        }
+        className={gridItemStyle}
       >
         <CloseIcon
-          style={styles.closeStyle}
-          hoverColor={'red'}
+          className={styles.closeIcon}
+          color={'red'}
           onClick={() => onTogglePanel(key)}
+        />
+        <MaximizeIcon
+          className={styles.maxIcon}
+          color={'blue'}
+          onClick={() => onMaximizePanel(key)}
         />
         <div>{element}</div>
       </Paper>
@@ -69,11 +69,11 @@ const ModuleContainer = compose(
 
   return (
     <GridLayout
-      className="layout"
-      style={styles.gridStyle}
+      className={styles.gridLayout}
       layout={layoutObj}
       cols={12}
       rowHeight={30}
+      autoSize={false}
       verticalCompact={false}
       onLayoutChange={onLayoutChange}
     >

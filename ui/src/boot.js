@@ -1,4 +1,3 @@
-import './assets/styles/main.less';
 import React from 'react';
 import { render } from 'react-dom';
 import { syncHistoryWithStore } from 'react-router-redux';
@@ -20,7 +19,8 @@ const initialState = Immutable({
       { i: 'ControllerStatus', x: 4, y: 0, w: 3, h: 3 },
       { i: 'PortStatus', x: 4, y: 0, w: 3, h: 3 },
     ],
-    hiddenPanel: []
+    hiddenPanel: [],
+    maximumPanel: '',
   },
   setting: {},
   topology: {

@@ -1,7 +1,5 @@
 import React from 'react';
-import AppBar from 'material-ui/AppBar';
 import LeftNav from 'material-ui/Drawer';
-import Paper from 'material-ui/Paper';
 import LeftNavBarItem from './LeftNavBarItem.jsx';
 import { shallowEqual } from 'recompose';
 
@@ -64,17 +62,12 @@ class LeftNavBar extends React.Component {
         open={this.state.open}
         onRequestChange={this.handleToggle}
       >
-        {/*<AppBar
-          showMenuIconButton={false}
-          onTitleTouchTap={this.onTitleTouchTap}
-        />*/}
-        {<div
+        <div
         style={{
           backgroundImage: "url('https://cdn.drivenlocal.com/wp-content/uploads/2015/10/Material-design.jpg')",
           backgroundSize: 'cover',
           'height': '100px',
-        }}
-        ></div>}
+        }} />
         {menuLists}
       </LeftNav>
     );

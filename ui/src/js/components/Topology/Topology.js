@@ -2,19 +2,9 @@ import React, { Component, PropTypes } from 'react';
 import { findDOMNode } from 'react-dom';
 import _ from 'lodash';
 import topo from './Topo.js';
-import './topology.less';
-
-const topologyStyle = {
-  position: 'absolute',
-  zIndex: 1,
-  width: '100vw',
-  height: '90vh',
-};
+import styles from './topology.css';
 
 class Toplogy extends Component {
-  constructor(props) {
-    super(props)
-  }
 
   componentDidMount() {
     const renderDom = findDOMNode(this.refs.topology);
@@ -24,6 +14,7 @@ class Toplogy extends Component {
   }
   shouldComponentUpdate(nextProps) {
     const { nodes, links, searchNode, level, tag } = nextProps;
+    return false;
     console.info(`nodes: ${_.isEqual(nodes, this.props.nodes)}`,
       `links: ${links===this.props.links}`,
       `search: ${searchNode===this.props.searchNode}`,
@@ -52,7 +43,7 @@ class Toplogy extends Component {
   }
 
   render() {
-    return <div ref="topology" style={topologyStyle}></div>;
+    return <div ref="topology" className={styles.topology}></div>;
   }
 }
 
