@@ -658,7 +658,7 @@ class RestController(ControllerBase):
             dpid = self.nospaceDPID(omniDpid.split(':'))    #Split OmniUI dpid into a list
 
         cmd = omniFlow.get('command')                 #Getting OmniUI command from flow
-        dp = self.dpset.get(int(dpid))                #Getting datapath from Ryu dpid
+        dp = self.dpset.get(int(dpid, 16))                #Getting datapath from Ryu dpid
         if dp is None:                                #NB: convert dpid to int first
             return Response(status=404)
 
