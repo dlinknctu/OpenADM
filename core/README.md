@@ -33,13 +33,13 @@ config.json
     * eventNmae: the event you provider.
     * generator: the function which trigger event. 
     * interval: the generator will run every interval seconds.
-- You can use **core.registerRestApi(requestName, handler)** to register REST service
+- You can use **core.registerURLApi(requestName, handler)** to register REST or weboscket service
     * requestName: http://<ip>:<port>/info/<requestName>
-    * handler: the function which handles the REST request
-    * REST service listens on localhost:5567 by default. You can change it by modifying `core/config.json` and `webui/js/omniui.js`
-- You can use **core.registerSSEHandler(sseName, handler)** to register SSE (Server-Sent Event)
-    * sseName: the SSE you interesting.
-    * handler: the function which handles the specific SSE.
+    * handler: the function which handles the REST or websocket request
+    * REST and websocket service listens on localhost:5567 by default. You can change it by modifying `core/config.json` and `webui/js/omniui.js`
+- You can use **core.registerAdapterHandler(sseName, handler)** to register Adapter Event
+    * requestName: the Adapter event you interesting.
+    * handler: the function which handles the specific event.
 
 ####Exapmle####
 Assume you write a module **hello.py** and **echo.py**

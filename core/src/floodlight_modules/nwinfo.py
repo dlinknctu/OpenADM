@@ -30,28 +30,24 @@ class NWInfo:
                 param['adapter_port'], param['controller_name'])
 
     def __registration(self, core):
-        """Registration for SSE handlers and RESTful APIs
+        """Registration for Adapter handlers and websocket APIs
 
         Handle the JSON format data which received from controller adapter and
         HTTP requests from Web UI.
         """
-        # Server-Sent Event handlers handle the requests from the southbound
-        core.registerSSEHandler('controller', self.controllerHandler)
-        core.registerSSEHandler('packet', self.packetHandler)
-        core.registerSSEHandler('addlink', self.addlinkHandler)
-        core.registerSSEHandler('dellink', self.dellinkHandler)
-        core.registerSSEHandler('addport', self.addportHandler)
-        core.registerSSEHandler('delport', self.delportHandler)
-        core.registerSSEHandler('adddevice', self.adddeviceHandler)
-        core.registerSSEHandler('deldevice', self.deldeviceHandler)
-        core.registerSSEHandler('addhost', self.addhostHandler)
-        core.registerSSEHandler('delhost', self.delhostHandler)
-        core.registerSSEHandler('port', self.portHandler)
-        core.registerSSEHandler('flow', self.flowHandler)
-        
-        # Send link and port info for busylink detection
-        core.registerEvent('linkbag', self.sendLink, 5)
-        core.registerEvent('portbag', self.sendPort, 5)
+        # Adapter handlers handle the requests from the southbound
+        core.registerAdapterHandler('controller', self.controllerHandler)
+        core.registerAdapterHandler('packet', self.packetHandler)
+        core.registerAdapterHandler('addlink', self.addlinkHandler)
+        core.registerAdapterHandler('dellink', self.dellinkHandler)
+        core.registerAdapterHandler('addport', self.addportHandler)
+        core.registerAdapterHandler('delport', self.delportHandler)
+        core.registerAdapterHandler('adddevice', self.adddeviceHandler)
+        core.registerAdapterHandler('deldevice', self.deldeviceHandler)
+        core.registerAdapterHandler('addhost', self.addhostHandler)
+        core.registerAdapterHandler('delhost', self.delhostHandler)
+        core.registerAdapterHandler('port', self.portHandler)
+        core.registerAdapterHandler('flow', self.flowHandler)
 
         # websocket API for WebUI
         core.registerURLApi('port', self.getPortCounter)
@@ -473,4 +469,3 @@ class NWInfo:
         result = json.dumps({'status': 'OK'})
 
         return result
-

@@ -11,8 +11,8 @@ class UIPusher:
 	def __init__(self,core,parm):		
 		# register event handler
 		core.registerEventHandler("controlleradapter", self.controllerHandler)
-		# register sse handler
-		core.registerSSEHandler('updateuds', self.udsHandler)
+		# register handler
+		core.registerAdapterHandler('updateuds', self.udsHandler)
 		core.registerURLApi("stat", self.statisticHandler)
 		# save core for ipc use
 		self.core = core

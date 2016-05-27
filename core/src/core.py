@@ -10,7 +10,7 @@ from importlib import import_module
 import logging
 import threading
 from threading import Thread
-from flask import Flask, Response, request, abort, copy_current_request_context
+from flask import Flask, request, abort
 from flask_cors import *
 from flask_socketio import SocketIO, emit, send, disconnect
 from pkg_resources import Requirement, resource_filename
@@ -49,8 +49,8 @@ class Core:
 		self.ipcHandlers = {}
 		global urlHandlers # Necessary for bottle to access urlHandlers
 		urlHandlers = {}
-		global sseHandlers
-		sseHandlers = {}
+		global adapterHandlers
+		adapterHandlers = {}
 		self.count = 0
 
 	def start(self):
@@ -148,8 +148,8 @@ class Core:
 				print('Client ' + request.remote_addr + '(sid:' + str(sid) + ') connected')
 				self.count = self.count + 1
 				# get the first subscription
-				for e in sseHandlers.keys():
-					rs = sseHandlers[e]('debut')
+				for e in adapterHandlers.keys():
+					rs = adapterHandlers[e]('debut')
 					if rs is not None:
 						gevent.spawn(notify, e, rs)
 
@@ -173,13 +173,13 @@ class Core:
 			@app.route('/publish/<event>', methods=['POST'])
 			@cross_origin()
 			def publish(event):
-				if event in sseHandlers:
+				if event in adapterHandlers:
 
 					#
 					# Process data, push event
 					#
 
-					rs = sseHandlers[event](request.json)
+					rs = adapterHandlers[event](request.json)
 					if rs is None:
 						logger.warn('\'%s\' event has been ignored' % event)
 						return 'OK'
@@ -265,9 +265,9 @@ class Core:
 	def registerURLApi(self, requestName, handler):
 		urlHandlers[requestName] = handler
 
-	# Register SSE
-	def registerSSEHandler(self, sseName, handler):
-		sseHandlers[sseName] = handler
+	# Register Adapter API
+	def registerAdapterHandler(self, requestName, handler):
+		adapterHandlers[requestName] = handler
 
 	#Register Event
 	def registerEventHandler(self,eventName,handler):
