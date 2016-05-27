@@ -49,6 +49,8 @@ import org.json.JSONObject;
 import org.json.JSONArray;
 import org.restlet.resource.Post;
 import org.restlet.resource.ServerResource;
+import org.restlet.ext.json.JsonRepresentation;
+import org.restlet.resource.ResourceException;
 
 public class OmniUI extends ServerResource implements IFloodlightModule,IOFMessageListener,IOFSwitchListener,ILinkDiscoveryListener {
 
@@ -61,10 +63,22 @@ public class OmniUI extends ServerResource implements IFloodlightModule,IOFMessa
 	public static final String StaticFlowName = "omniui";
 	protected Timer timer, timer2;
 	protected static String controller_name;
+	protected static String coreURL;
 
-	@Post()
-	public String retrieve(String name){
-		controller_name = name;
+	@Post("json")
+	public String retrieve(JsonRepresentation value){
+		throws ResourceException {
+			Representation rep = null;
+		try { 
+			JSONObject jsonobject = represent.getJsonObject();
+			String name = jsonobject.getString("controllerName");
+			String host = jsonobject.getString("coreURL");
+			controller_name = name;
+			coreURL = host + "/publish";
+		} catch (Exception e) {
+ 			e.printStackTrace();
+ 			return "FAIL";
+ 		}
 		return "OK";
 	}
 
@@ -187,7 +201,7 @@ public class OmniUI extends ServerResource implements IFloodlightModule,IOFMessa
 			OFPacketIn pi = (OFPacketIn) msg;
 			OFMatch match = new OFMatch();
 			match.loadFromPacket(pi.getPacketData(), pi.getInPort());
-			String url = "http://localhost:5567/publish/packet";
+			String url = coreURL + "/packet";
 			String data = String.format("{\"controller\":\"%s\", \"dpid\":\"%s\", \"in_port\":\"%s\", \"mac_src\":\"%s\", \"mac_dst\":\"%s\", \"ether_type\":\"0x%x\", \"ip_src\":\"%s\", \"ip_dst\":\"%s\", \"protocol\":\"0x%x\", \"port_src\":\"%s\", \"port_dst\":\"%s\"}", controller_name, HexString.toHexString(sw.getId()), match.getInputPort(), HexString.toHexString(match.getDataLayerSource()), HexString.toHexString(match.getDataLayerDestination()), match.getDataLayerType(), intToIp(match.getNetworkSource()), intToIp(match.getNetworkDestination()), match.getNetworkProtocol(), match.getTransportSource(), match.getTransportDestination());
 			try{
 				sendPost(url, data);
@@ -208,7 +222,7 @@ public class OmniUI extends ServerResource implements IFloodlightModule,IOFMessa
 	@Override
 	public void switchRemoved(long switchId) {
 		//logger.info("SWITCH REMOVE : {}",HexString.toHexString(switchId));
-		String url = "http://localhost:5567/publish/deldevice";
+		String url = coreURL + "/deldevice";
 		String data = String.format("{\"controller\":\"%s\", \"dpid\":\"%s\"}", controller_name, HexString.toHexString(switchId));
 		try{
 			sendPost(url, data);
@@ -221,7 +235,7 @@ public class OmniUI extends ServerResource implements IFloodlightModule,IOFMessa
 	public void switchActivated(long switchId) {
 		//logger.info("SWITCH ACTIVATED : dpid {}",HexString.toHexString(switchId));
 		FlowModResource.sendEntriesToSwitch(switchId);
-		String url = "http://localhost:5567/publish/adddevice";
+		String url = coreURL + "/adddevice";
 		String data = String.format("{\"controller\":\"%s\", \"dpid\":\"%s\"}", controller_name, HexString.toHexString(switchId));
 		try{
 			sendPost(url, data);
@@ -240,9 +254,9 @@ public class OmniUI extends ServerResource implements IFloodlightModule,IOFMessa
 	public void switchPortChanged(long switchId, ImmutablePort port, IOFSwitch.PortChangeType type) {
 		String url = "";
 		if(type == IOFSwitch.PortChangeType.ADD || type == IOFSwitch.PortChangeType.UP){
-			url = "http://localhost:5567/publish/addport";
+			url = coreURL + "/addport";
 		}else if(type == IOFSwitch.PortChangeType.DELETE || type == IOFSwitch.PortChangeType.DOWN){
-			url = "http://localhost:5567/publish/delport";
+			url = coreURL + "/delport";
 		}else{
 			logger.info("No process IOFSwitch.PortChangeType.OTHER_UPDATE");
 			return;
@@ -263,15 +277,15 @@ public class OmniUI extends ServerResource implements IFloodlightModule,IOFMessa
 			String data = "";
 			switch(updateList.get(i).getOperation()){
 				case LINK_UPDATED:
-					url = "http://localhost:5567/publish/addlink";
+					url = coreURL + "/addlink";
 					data = String.format("{\"controller\":\"%s\", \"link\":[{\"dpid\":\"%s\", \"port\":\"%s\"}, {\"dpid\":\"%s\", \"port\":\"%s\"}]}", controller_name, HexString.toHexString(updateList.get(i).getSrc()), updateList.get(i).getSrcPort(), HexString.toHexString(updateList.get(i).getDst()), updateList.get(i).getDstPort());
 					break;
 				case LINK_REMOVED:
-					url = "http://localhost:5567/publish/dellink";
+					url = coreURL + "/dellink";
 					data = String.format("{\"controller\":\"%s\", \"link\":[{\"dpid\":\"%s\", \"port\":\"%s\"}, {\"dpid\":\"%s\", \"port\":\"%s\"}]}", controller_name, HexString.toHexString(updateList.get(i).getSrc()), updateList.get(i).getSrcPort(), HexString.toHexString(updateList.get(i).getDst()), updateList.get(i).getDstPort());
 					break;
 				case PORT_UP:
-					url = "http://localhost:5567/publish/addport";
+					url = coreURL + "/addport";
 					data = String.format("{\"controller\":\"%s\", \"dpid\":\"%s\", \"port\":\"%s\"}", controller_name, HexString.toHexString(updateList.get(i).getSrc()), updateList.get(i).getSrcPort());
 					break;
 				default:
@@ -296,7 +310,7 @@ public class OmniUI extends ServerResource implements IFloodlightModule,IOFMessa
 		public void deviceAdded(IDevice device) {
 			//logger.info("DEVICE ADD: {}", device);
 			SwitchPort[] sw = device.getAttachmentPoints();
-			String url = "http://localhost:5567/publish/addhost";
+			String url = coreURL + "/addhost";
 			Integer[] ips = device.getIPv4Addresses();
 			String ip_r = "";
 			if(ips.length != 0) ip_r = intToIp(ips[0]);
@@ -314,7 +328,7 @@ public class OmniUI extends ServerResource implements IFloodlightModule,IOFMessa
 		@Override
 		public void deviceRemoved(IDevice device) {
 			//logger.info("DEVICE REMOVED: {}", device);
-			String url = "http://localhost:5567/publish/delhost";
+			String url = coreURL + "/delhost";
 			String data = String.format("{\"controller\":\"%s\", \"mac\":\"%s\"}", controller_name, HexString.toHexString(device.getMACAddress()).substring(6));
 			try{
 				sendPost(url, data);
@@ -329,7 +343,7 @@ public class OmniUI extends ServerResource implements IFloodlightModule,IOFMessa
 			String url, data;
 			SwitchPort[] sw = device.getAttachmentPoints();
 			if( sw.length == 0){
-				url = "http://localhost:5567/publish/delhost";
+				url = coreURL + "/delhost";
 				try{
 					data = String.format("{\"controller\":\"%s\", \"mac\":\"%s\"}", controller_name, HexString.toHexString(device.getMACAddress()).substring(6));
 					sendPost(url, data);
@@ -337,7 +351,7 @@ public class OmniUI extends ServerResource implements IFloodlightModule,IOFMessa
 					logger.info("sendPost failed.");
 				}
 			}else{
-				url = "http://localhost:5567/publish/addhost";
+				url = coreURL + "/addhost";
 				Integer[] ips = device.getIPv4Addresses();
 				String ip_r = "";
 				if(ips.length != 0) ip_r = intToIp(ips[0]);
@@ -356,7 +370,7 @@ public class OmniUI extends ServerResource implements IFloodlightModule,IOFMessa
 		@Override
 		public void deviceIPV4AddrChanged(IDevice device) {
 			//logger.info("DEVICE ADDR CHANGED: {}", device);
-			String url = "http://localhost:5567/publish/addhost";
+			String url = coreURL + "/addhost";
 			SwitchPort[] sw = device.getAttachmentPoints();
 			Integer[] ips = device.getIPv4Addresses();
 			Short[] vlans = device.getVlanId();
@@ -373,7 +387,7 @@ public class OmniUI extends ServerResource implements IFloodlightModule,IOFMessa
 		@Override
 		public void deviceVlanChanged(IDevice device) {
 			//logger.info("DEVICE VLAN CHANGED: {}", device);
-			String url = "http://localhost:5567/publish/addhost";
+			String url = coreURL + "/addhost";
 			SwitchPort[] sw = device.getAttachmentPoints();
 			Integer[] ips = device.getIPv4Addresses();
 			String ip_r = "";
@@ -417,7 +431,7 @@ public class OmniUI extends ServerResource implements IFloodlightModule,IOFMessa
 				BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
 				String data = String.format("{\"controller\":\"%s\", %s}",controller_name, in.readLine());
 				in.close();
-				String url2 = "http://localhost:5567/publish/controller";
+				String url2 = coreURL + "/controller";
 				sendPost(url2, data);
 			}catch(Exception e){
 				e.printStackTrace();
@@ -463,7 +477,7 @@ public class OmniUI extends ServerResource implements IFloodlightModule,IOFMessa
 			}
 		}
 		protected void sendflowmsg(String dpid, JSONArray flows){
-			String url = "http://localhost:5567/publish/flow";
+			String url = coreURL + "/flow";
 			String data = String.format("{\"controller\":\"%s\", \"dpid\":\"%s\", \"flows\":%s}",controller_name , dpid, flows.toString());
 			try{
 				sendPost(url, data);
@@ -472,7 +486,7 @@ public class OmniUI extends ServerResource implements IFloodlightModule,IOFMessa
 			}
 		}
 		protected void sendportmsg(JSONArray ports){
-			String url = "http://localhost:5567/publish/port";
+			String url = coreURL + "/port";
 			for(int j=0 ; j < ports.length() ;j++){
 				try{
 					String data = String.format("%s", ports.getJSONObject(j).toString());
