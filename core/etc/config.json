@@ -11,7 +11,7 @@
 	},
 	"NWInfo": {
 		"controller_ip": "127.0.0.1",
-		"controller_port": "6653",
+		"controller_port": "6633",
 		"controller_name": "foobar",
 		"adapter_port": "8080"
 	},

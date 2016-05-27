@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name = 'omniui',
-    version = '1.0.1',
+    version = '1.0.2',
     description = 'A Diagnosis, Analytic and Management Framework for SDN',
     author = 'D-Link NCTU Joint Research Center',
     url = 'https://github.com/dlinknctu/OpenADM',

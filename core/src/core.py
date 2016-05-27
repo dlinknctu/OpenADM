@@ -19,9 +19,9 @@ rootPath = resource_filename(Requirement.parse("omniui"),"")
 app = Flask(__name__)
 app.config['CORS_ORIGINS'] = ['*']
 app.config['SECRET_KEY'] = 'omniui'
-socketio = SocketIO(app)
-subscriptions = []
-client_alive = {}
+socketio = SocketIO(app, async_mode='gevent') #disconnect with timeout
+#socketio = SocketIO(app) #disconnect with event (better implement), but will have bug
+subscriptions = Queue()
 logger = logging.getLogger(__name__)
 
 # define module state enum
@@ -34,18 +34,6 @@ class Module:
 		self.name = name
 		self.status = status
 		self.dependencies = dependencies
-
-class ServerSentEvent(object):
-
-	def __init__(self, data):
-		self.id = None
-		self.event = data['event']
-		self.data = data['data']
-		self.desc_map = {
-			self.id: 'id',
-			self.event: 'event',
-			self.data: 'data'
-		}
 
 class EventHandler:
 	def __init__(self,eventName,handler):
@@ -63,6 +51,7 @@ class Core:
 		urlHandlers = {}
 		global sseHandlers
 		sseHandlers = {}
+		self.count = 0
 
 	def start(self):
 		#Load config file
@@ -130,61 +119,55 @@ class Core:
 			handleIP = config['WEBSOCKET']['ip']
 			handlePort = config['WEBSOCKET']['port']
 
-			def notify(e, d, q=None):
+			def notify(e, d):
 				msg = {
 					'event': e,
 					'data': d
 				}
-				if q is not None:
-					q.put(msg)
-				else:
-					for sub in subscriptions[:]:
-						sub.put(msg)
+				subscriptions.put(msg)
+
+			def subscribe(): # broardcast subscriptions
+				def gen():
+					try:
+						while True:
+							result = subscriptions.get()
+							yield result
+					except StopIteration:
+						print('get subscription error.')
+
+				responses = gen()
+				while responses is not None: # broadcast forever
+					r = responses.next()
+					socketio.emit( str(r.get('event', '')),
+					               {'data': str(r.get('data', '')) },
+								   namespace='/websocket')
 	
 			@socketio.on('connect', namespace='/websocket')
 			def do_connect():
-				def gen():
-					q = Queue()
-					subscriptions.append(q)
-					for e in sseHandlers.keys():
-						rs = sseHandlers[e]('debut')
-						if rs is not None:
-							gevent.spawn(notify, e, rs, q)
-					try:
-						while True:
-							result = q.get()
-							ev = ServerSentEvent(result)
-							yield ev
-					except GeneratorExit:
-						subscriptions.remove(q)
-					except StopIteration:
-						print('get subscription error.')
-						subscriptions.remove(q)
-
-				@copy_current_request_context
-				def response(sid):
-					responses = gen()
-					client_alive[sid] = True
-					responses = gen()
-					while client_alive[sid]:
-						r = responses.next()
-						emit(r.event, {'data': r.data })
-					responses.close()
-
 				sid = request.sid
 				print('Client ' + request.remote_addr + '(sid:' + str(sid) + ') connected')
-				gevent.spawn(response, sid)
+				self.count = self.count + 1
+				# get the first subscription
+				for e in sseHandlers.keys():
+					rs = sseHandlers[e]('debut')
+					if rs is not None:
+						gevent.spawn(notify, e, rs)
 
 			@socketio.on('disconnect', namespace='/websocket')
 			def do_disconnect():
 				sid = request.sid
-				if client_alive.get(sid, False):
-				   client_alive[sid] = False
 				print('Client ' + request.remote_addr + '(sid:' + str(sid) + ') disconnected')
+				self.count = self.count - 1
+				if self.count < 0 :
+					self.count = 0
+
+			@socketio.on_error()
+			def handle_error(e):
+				print(str(e))
 
 			@socketio.on('debug', namespace='/websocket')
 			def debug():
-				emit('debug', {'data' : 'Currently %d subscriptions' % len(subscriptions) })
+				emit('debug', {'data' : 'Currently %d subscriptions' % self.count })
 
 			# Receive data from SB
 			@app.route('/publish/<event>', methods=['POST'])
@@ -274,8 +257,9 @@ class Core:
 				else:
 					return None
 
-			app.debug = False
-			socketio.run(app, host=handleIP, port=int(handlePort))
+			gevent.spawn(subscribe) # routine for broadcast subscriptions
+			gevent.sleep(0) # won't work if remove this line
+			socketio.run(app, host=handleIP, port=int(handlePort), debug=False)
 
 	#Register WEBSOCKET and RESTful API
 	def registerURLApi(self, requestName, handler):
