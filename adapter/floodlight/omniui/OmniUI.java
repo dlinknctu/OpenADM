@@ -67,8 +67,6 @@ public class OmniUI extends ServerResource implements IFloodlightModule,IOFMessa
 
 	@Post("json")
 	public String retrieve(JsonRepresentation value){
-		throws ResourceException {
-			Representation rep = null;
 		try { 
 			JSONObject jsonobject = represent.getJsonObject();
 			String name = jsonobject.getString("controllerName");
