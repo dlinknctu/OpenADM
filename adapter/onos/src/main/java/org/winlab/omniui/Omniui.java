@@ -39,10 +39,10 @@ public class Omniui extends AbstractWebResource {
             
             try {
                 ObjectNode jsonTree = (ObjectNode) mapper().readTree(in);
-                JsonNode coreJson = jsonTree.get("core");
-                JsonNode controllerJson = jsonTree.get("controller_name");
+                JsonNode coreJson = jsonTree.get("coreURL");
+                JsonNode controllerJson = jsonTree.get("controllerName");
                 if(coreJson != null && controllerJson != null ) {
-                    host = coreJson.asText();
+                    host = coreJson.asText() + "/publish/";
                     controller_name = controllerJson.asText();
                     return Response.ok("OK").build();
                 }
