@@ -5,7 +5,7 @@ import json
 class Flow_mod:
 	def __init__(self,core,parm):
 		self.IP = parm["ip"]
-		self.Port = parm["port"]
+		self.Port = int(parm["port"])
 		self.path = "/wm/omniui/add/json"
 		self.headers = {
 			"Content-type": "application/json",
