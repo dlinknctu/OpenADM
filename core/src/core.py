@@ -232,13 +232,14 @@ class Core:
 			# handler other websocket handlers
 			@socketio.on('OTHER', namespace='/websocket')
 			def topLevelRoute(message):
-				url = message.get('url', None)
-				req = message.get('request', None)
-				result = handleRoute(url, rest=False, req=req)
+				data = message.get('data', None)
+				url = data.get('url', None)
+				req = data.get('request', None)
+				result = handleRoute(url, rest=False, req=json.loads(req))
 				if result is None:
 					emit(url + '_RESP', {'data' : "Websocket API not found: '%s'" % url })
 				else:
-					emit(url + '_RESP', {'data' : result} )
+					emit(url.upper() + '_RESP', {'data' : json.dumps(result)} )
 
 			# general top level rest handler
 			@app.route('/<url>', methods=['GET', 'POST', 'OPTIONS', 'PUT'])
