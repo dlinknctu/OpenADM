@@ -138,7 +138,7 @@ class Core:
 				responses = gen()
 				while responses is not None: # broadcast forever
 					r = responses.next()
-					socketio.emit( str(r.get('event', '')),
+					socketio.emit( str(r.get('event', '')).upper(),
 					               {'data': str(r.get('data', '')) },
 							   namespace='/websocket',
 							   room='ready')
@@ -154,7 +154,7 @@ class Core:
 				#	if rs is not None:
 				#		gevent.spawn(notify, e, rs)
 
-			@socketio.on('subscribe', namespace='/websocket')
+			@socketio.on('SUBSCRIBE', namespace='/websocket')
 			def on_join(data):
 				payload = {'status': 'OK'}
 				for e in adapterHandlers.keys():
@@ -176,9 +176,9 @@ class Core:
 			def handle_error(e):
 				print(str(e))
 
-			@socketio.on('debug', namespace='/websocket')
+			@socketio.on('DEBUG', namespace='/websocket')
 			def debug():
-				emit('debug', {'data' : 'Currently %d subscriptions' % self.count })
+				emit('DEBUG_RESP', {'data' : 'Currently %d subscriptions' % self.count })
 
 			# Receive data from SB
 			@app.route('/publish/<event>', methods=['POST'])
@@ -201,18 +201,18 @@ class Core:
 				return 'OK'
 
 			# handler for feature request
-			@socketio.on('feature', namespace='/websocket')
+			@socketio.on('FEATURE', namespace='/websocket')
 			def featureRequest():
 				feature = {'ControllerType': str(config['ControllerType'])}
-				emit('feature', {'data' : "omniui(%s);" % json.dumps(feature)} )
+				emit('FEATURE_RESP', {'data' : "omniui(%s);" % json.dumps(feature)} )
 
-			@socketio.on('setting_controller', namespace='/websocket')
+			@socketio.on('SETTING_CONTROLLER', namespace='/websocket')
 			def settingControllerRequest(message):
 				settings = message.get('data', None)
 				if settings is None:
 					message = 'Setting controller error.'
 					payload = {'status': 'FAILED', 'message': message}
-					emit('setting_controller', {'data', json.dumps(payload)} )
+					emit('SETTING_CONTROLLER_RESP', {'data', json.dumps(payload)} )
 					return
 
 				controller_url = settings['controllerURL']
@@ -227,18 +227,18 @@ class Core:
 
 				payload = {'status': 'OK', 'message': result}
 
-				emit('setting_controller', {'data' : json.dumps(payload)})
+				emit('SETTING_CONTROLLER_RESP', {'data' : json.dumps(payload)})
 
 			# handler other websocket handlers
-			@socketio.on('other', namespace='/websocket')
+			@socketio.on('OTHER', namespace='/websocket')
 			def topLevelRoute(message):
 				url = message.get('url', None)
 				req = message.get('request', None)
 				result = handleRoute(url, rest=False, req=req)
 				if result is None:
-					emit(url, {'data' : "Websocket API not found: '%s'" % url })
+					emit(url + '_RESP', {'data' : "Websocket API not found: '%s'" % url })
 				else:
-					emit(url, {'data' : result} )
+					emit(url + '_RESP', {'data' : result} )
 
 			# general top level rest handler
 			@app.route('/<url>', methods=['GET', 'POST', 'OPTIONS', 'PUT'])
