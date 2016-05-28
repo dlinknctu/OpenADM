@@ -154,15 +154,15 @@ class Core:
 				#	if rs is not None:
 				#		gevent.spawn(notify, e, rs)
 
-			@socketio.on('join', namespace='/websocket')
-			def on_join():
+			@socketio.on('subscribe', namespace='/websocket')
+			def on_join(data):
 				payload = {'status': 'OK'}
 				for e in adapterHandlers.keys():
 					rs = adapterHandlers[e]('debut')
 					if rs is not None:
 						payload.update(rs)
 				join_room('ready')
-				emit('ALL_DATA', json.dumps(payload))
+				emit('ALL_DATA', {'data': json.dumps(payload)} )
 
 			@socketio.on('disconnect', namespace='/websocket')
 			def do_disconnect():
