@@ -11,8 +11,7 @@ class Flow_mod:
 			"Content-type": "application/json",
 			"Accept": "application/json",
             	}
-		# register websocket api
-		self.Url="http://"+self.IP+":"+self.Port+"/wm/omniui/add/json"
+		# register rest api
 		core.registerURLApi("flowmod", self.flowHandler)
 
 	def flowHandler(self, body):
