@@ -257,7 +257,7 @@ class NWInfo:
         # Update devices datastore
         self.devices[key] = raw
         # Type of the device
-        self.devices[key]['type'] = 'switch'
+        self.devices[key]['nodeType'] = 'switch'
         logger.debug('Total devices after addition: %d' % len(self.devices))
 
         # Tell browser what to add
@@ -305,7 +305,7 @@ class NWInfo:
         # Update hosts datastore
         self.hosts[key] = raw
         # Type of the host
-        self.hosts[key]['type'] = 'host'
+        self.hosts[key]['nodeType'] = 'host'
         logger.debug('Total hosts after addition: %d' % len(self.hosts))
 
         # Tell browser what to add
