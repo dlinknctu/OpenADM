@@ -7,6 +7,7 @@ Ryu adapter module for OmniUI
 $ `git clone git://github.com/osrg/ryu.git`  
 $ `cd OpenADM/adapter/ryu; cp event.py ~/ryu/ryu/topology`  
 $ `cp switches.py ~/ryu/ryu/topology`  
+$ `cp app_manager.py ~/ryu/ryu/base`  
 $ `cd ~/ryu; sudo python ./setup.py install`  
 
 ###Execution###
