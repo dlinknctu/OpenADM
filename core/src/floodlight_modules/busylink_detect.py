@@ -134,7 +134,7 @@ class BusyLink_Detect:
     def busyLinkDetect(self):
         self.BLD_result = []
         # Calculate link's countBytes and capacity
-        for link_id in self.links:
+        for link_id in self.links.copy():
             src = self.links[link_id]['source']
             srcp = self.links[link_id]['sourcePort']
             dest = self.links[link_id]['target']
@@ -155,11 +155,11 @@ class BusyLink_Detect:
         # Initialize self.statistics value
         if len(self.statistics) == 0:
             self.statistics = dict(self.links)
-            for link_id in self.statistics:
+            for link_id in self.statistics.copy():
                 self.statistics[link_id]['state'] = self.baseState
 
         # Check threshold
-        for link_id in self.links:
+        for link_id in self.links.copy():
             if link_id in self.statistics:
                 if (self.links[link_id]['countBytes'] - self.statistics[link_id]['countBytes']) / self.statistics[link_id]['capacity'] >= self.threshold:
                     self.overthreshold(link_id)
