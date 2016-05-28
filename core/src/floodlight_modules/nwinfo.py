@@ -49,6 +49,10 @@ class NWInfo:
         core.registerAdapterHandler('port', self.portHandler)
         core.registerAdapterHandler('flow', self.flowHandler)
 
+        # Send link and port info for busylink detection
+        core.registerEvent('linkbag', self.sendLink, 5)
+        core.registerEvent('portbag', self.sendPort, 5)
+
         # websocket API for WebUI
         core.registerURLApi('port', self.getPortCounter)
         core.registerURLApi('flow', self.getAllFlows)
