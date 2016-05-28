@@ -221,9 +221,9 @@ class Core:
 				req = message.get('request', None)
 				result = handleRoute(url, rest=False, req=req)
 				if result is None:
-					emit('other', {'data' : "Not found: '/%s'" % url })
+					emit(url, {'data' : "Websocket API not found: '%s'" % url })
 				else:
-					emit('other', {'data' : result} )
+					emit(url, {'data' : result} )
 
 			# general top level rest handler
 			@app.route('/<url>', methods=['GET', 'POST', 'OPTIONS', 'PUT'])
@@ -231,7 +231,7 @@ class Core:
 			def topLevelRoute(url):
 				result = handleRoute(url)
 				if result is None:
-					abort(404, "Not found: '/%s'" % url)
+					abort(404, "RESTful API not found: '/%s'" % url)
 				else:
 					return result
 
@@ -242,7 +242,7 @@ class Core:
 				url = prefix + '/' + suffix
 				result = handleRoute(url)
 				if result is None:
-					abort(404, "Not found: '/%s'" % url)
+					abort(404, "RESTful API not found: '/%s'" % url)
 				else:
 					return result
 
