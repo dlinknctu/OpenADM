@@ -34,7 +34,7 @@ public class SendMsg {
             return false;
         }
         String host = Omniui.host;
-        log.error("try post");
+        log.info("try post");
         Gson gson = new Gson();
         switch (type) {
             case "Link":

@@ -101,10 +101,8 @@ public class TaskPoll extends BaseResource {
         timer_controller.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                log.info("controller");
                 Controller controller = new Controller();
                 SendMsg sendMsg = new SendMsg();
-                log.info("30678");
                 sendMsg.PostMsg((Object)(controller), "controller", "Controller");
             }
         }, 0, time_interval);
