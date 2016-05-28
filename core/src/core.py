@@ -210,7 +210,9 @@ class Core:
 			def settingControllerRequest(message):
 				settings = message.get('data', None)
 				if settings is None:
-					emit('setting_controller', {'data', 'setting controller error.'} )
+					message = 'Setting controller error.'
+					payload = {'status': 'FAILED', 'message': message}
+					emit('setting_controller', {'data', json.dumps(payload)} )
 					return
 
 				controller_url = settings['controllerURL']
@@ -223,7 +225,9 @@ class Core:
 				response = urllib2.urlopen(req, req_body)
 				result = response.read()
 
-				emit('setting_controller', {'data' : result})
+				payload = {'status': 'OK', 'message': result}
+
+				emit('setting_controller', {'data' : json.dumps(payload)})
 
 			# handler other websocket handlers
 			@socketio.on('other', namespace='/websocket')
