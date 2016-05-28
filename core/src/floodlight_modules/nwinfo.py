@@ -99,7 +99,10 @@ class NWInfo:
         """
         # First impression, dump all we have
         if raw == 'debut':
-            return json.dumps(self.controllers)
+            result = []
+            for k in self.controllers.keys():
+                result.append(self.controllers[k])
+            return {'controllers': result}
 
         # Update controllers datastore
         key = raw['controller']
@@ -141,7 +144,7 @@ class NWInfo:
         """
         # First impression, dump all we have
         if raw == 'debut':
-            return json.dumps(self.links.values())
+            return {'links': self.links.values()}
 
         # Filter duplicated addlink events
         key = (raw['link'][0]['dpid'], raw['link'][0]['port'],
@@ -198,7 +201,7 @@ class NWInfo:
         """
         # First impression, dump all we have
         if raw == 'debut':
-            return json.dumps(self.ports.values())
+            return {'ports': self.ports.values()}
 
         # Filter duplicated addport events
         key = (raw['dpid'], raw['port'])
@@ -244,7 +247,7 @@ class NWInfo:
         """
         # First impression, dump all we have
         if raw == 'debut':
-            return json.dumps(self.devices.values())
+            return {'devices': self.devices.values()}
 
         # Filter duplicated adddevice events
         key = raw['dpid']
@@ -292,7 +295,7 @@ class NWInfo:
         """
         # First impression, dump all we have
         if raw == 'debut':
-            return json.dumps(self.hosts.values())
+            return {'hosts': self.hosts.values()}
 
         # Filter duplicated addhost events
         key = raw['mac']

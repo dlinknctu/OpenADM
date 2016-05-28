@@ -12,7 +12,7 @@ import threading
 from threading import Thread
 from flask import Flask, request, abort
 from flask_cors import *
-from flask_socketio import SocketIO, emit, send, disconnect
+from flask_socketio import SocketIO, emit, send, disconnect, join_room
 from pkg_resources import Requirement, resource_filename
 rootPath = resource_filename(Requirement.parse("omniui"),"")
 
@@ -140,7 +140,8 @@ class Core:
 					r = responses.next()
 					socketio.emit( str(r.get('event', '')),
 					               {'data': str(r.get('data', '')) },
-								   namespace='/websocket')
+							   namespace='/websocket',
+							   room='ready')
 	
 			@socketio.on('connect', namespace='/websocket')
 			def do_connect():
@@ -148,10 +149,20 @@ class Core:
 				print('Client ' + request.remote_addr + '(sid:' + str(sid) + ') connected')
 				self.count = self.count + 1
 				# get the first subscription
+				#for e in adapterHandlers.keys():
+				#	rs = adapterHandlers[e]('debut')
+				#	if rs is not None:
+				#		gevent.spawn(notify, e, rs)
+
+			@socketio.on('join', namespace='/websocket')
+			def on_join():
+				payload = {'status': 'OK'}
 				for e in adapterHandlers.keys():
 					rs = adapterHandlers[e]('debut')
 					if rs is not None:
-						gevent.spawn(notify, e, rs)
+						payload.update(rs)
+				join_room('ready')
+				emit('ALL_DATA', json.dumps(payload))
 
 			@socketio.on('disconnect', namespace='/websocket')
 			def do_disconnect():
