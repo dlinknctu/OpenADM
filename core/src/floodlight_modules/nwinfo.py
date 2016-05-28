@@ -155,7 +155,7 @@ class NWInfo:
             return None
 
         # Update links datastore
-        self.links[key] = raw['link']
+        self.links[key] = raw
         logger.debug('Total links after addition: %d' % len(self.links))
 
         # Tell browser what to add
@@ -181,11 +181,17 @@ class NWInfo:
         if key in self.links:
             del self.links[key]
             # Craft returned data, tell browser what to delete
-            result = json.dumps([raw['link'][0], raw['link'][1]])
+            result = json.dumps({
+                    'controller': raw['controller'],
+                    'link': [raw['link'][0], raw['link'][1]]
+                })
         elif rkey in self.links:
             del self.links[rkey]
             # Craft returned data, tell browser what to delete
-            result = json.dumps([raw['link'][1], raw['link'][0]])
+            result = json.dumps({
+                    'controller': raw['controller'],
+                    'link': [raw['link'][1], raw['link'][0]]
+                })
         else:
             logger.warn('Key of link down event not found: %s' % str(raw))
             return None
