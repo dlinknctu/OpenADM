@@ -147,9 +147,11 @@ class NWInfo:
             return {'links': self.links.values()}
 
         # Filter duplicated addlink events
-        key = (raw['link'][0]['dpid'], raw['link'][0]['port'],
+        key = (raw['controller'],
+               raw['link'][0]['dpid'], raw['link'][0]['port'],
                raw['link'][1]['dpid'], raw['link'][1]['port'])
-        rkey = (raw['link'][1]['dpid'], raw['link'][1]['port'],
+        rkey = (raw['controller'],
+                raw['link'][1]['dpid'], raw['link'][1]['port'],
                 raw['link'][0]['dpid'], raw['link'][0]['port'])
         if key in self.links or rkey in self.links:
             return None
@@ -174,9 +176,11 @@ class NWInfo:
             return None
 
         # Filter duplicated dellink events
-        key = (raw['link'][0]['dpid'], raw['link'][0]['port'],
+        key = (raw['controller'],
+               raw['link'][0]['dpid'], raw['link'][0]['port'],
                raw['link'][1]['dpid'], raw['link'][1]['port'])
-        rkey = (raw['link'][1]['dpid'], raw['link'][1]['port'],
+        rkey = (raw['controller'],
+                raw['link'][1]['dpid'], raw['link'][1]['port'],
                 raw['link'][0]['dpid'], raw['link'][0]['port'])
         if key in self.links:
             del self.links[key]
@@ -210,7 +214,7 @@ class NWInfo:
             return {'ports': self.ports.values()}
 
         # Filter duplicated addport events
-        key = (raw['dpid'], raw['port'])
+        key = (raw['controller'], raw['dpid'], raw['port'])
         if key in self.ports:
             return None
 
@@ -233,7 +237,7 @@ class NWInfo:
             return None
 
         # Filter duplicated delport events
-        key = (raw['dpid'], raw['port'])
+        key = (raw['controller'], raw['dpid'], raw['port'])
         if key in self.ports:
             del self.ports[key]
         else:
@@ -256,7 +260,7 @@ class NWInfo:
             return {'devices': self.devices.values()}
 
         # Filter duplicated adddevice events
-        key = raw['dpid']
+        key = (raw['controller'], raw['dpid'])
         if key in self.devices:
             return None
 
@@ -281,7 +285,7 @@ class NWInfo:
             return None
 
         # Filter duplicated deldevice events
-        key = raw['dpid']
+        key = (raw['controller'], raw['dpid'])
         if key in self.devices:
             del self.devices[key]
         else:
@@ -304,7 +308,7 @@ class NWInfo:
             return {'hosts': self.hosts.values()}
 
         # Filter duplicated addhost events
-        key = raw['mac']
+        key = (raw['controller'], raw['mac'])
         if key in self.hosts.keys():
             return None
 
@@ -329,7 +333,7 @@ class NWInfo:
             return None
 
         # Filter duplicated delhost events
-        key = raw['mac']
+        key = (raw['controller'], raw['mac'])
         if key in self.hosts:
             del self.hosts[key]
         else:
@@ -354,7 +358,7 @@ class NWInfo:
             return None
 
         # Update portstats datastore
-        key = (raw['dpid'], raw['port'])
+        key = (raw['controller'], raw['dpid'], raw['port'])
         self.portstats[key] = raw
         logger.debug('port statistics number: %d' % len(self.portstats))
 
@@ -373,9 +377,10 @@ class NWInfo:
             return None
 
         # Update portstats datastore
-        key = raw['dpid']
+        key = (raw['controller'], raw['dpid'])
         sorted(raw['flows'], key=lambda k: k['counterByte'], reverse=True)
-        self.flowtables[key] = {'dpid': raw['dpid'],
+        self.flowtables[key] = {'controller': raw['controller'],
+                                'dpid': raw['dpid'],
                                 'flows': raw['flows']}
         logger.debug('flow entries: %d' % len(self.flowtables[key]['flows']))
 
