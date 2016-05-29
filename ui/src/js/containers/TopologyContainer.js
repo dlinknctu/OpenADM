@@ -5,12 +5,15 @@ import * as TopologyAction from '../actions/TopologyAction';
 
 class TopologyContainer extends Component {
   componentDidMount() {
-    setTimeout(() => {
-      this.props.subscribe();
-    }, 2000);
-    setTimeout(() => {
-      this.props.flowtop();
-    }, 4000);
+    // setTimeout(() => {
+    //   this.props.subscribe();
+    // }, 2000);
+    // setTimeout(() => {
+    //   this.props.flowtop();
+    // }, 4000);
+    // setTimeout(() => {
+    //   this.props.flowall();
+    // }, 6000);
   }
   render() {
     return <Topology {...this.props} />;
@@ -33,7 +36,8 @@ const mapDispatchToProps = (dispatch) => ({
   tagChange: p => dispatch({ type: 'TAG_CHANGE', payload: p }),
   levelChange: p => dispatch({ type: 'LEVEL_CHANGE', payload: p }),
   subscribe: p => dispatch({ type: 'SUBSCRIBE', payload: p }),
-  flowtop: p => dispatch({ type: 'OTHER', payload: { 'url': 'flow', request: '{}' } }),
+  flowtop: p => dispatch({ type: 'OTHER', payload: { 'url': 'flow/top', request: '{}' } }),
+  flowall: p => dispatch({ type: 'OTHER', payload: { 'url': 'flow', request: '{}' } }),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(TopologyContainer);

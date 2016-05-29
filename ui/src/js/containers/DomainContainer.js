@@ -18,7 +18,7 @@ const PortStatus = () => <div>
 
 class DomainContainer extends Component {
   render() {
-    const { hiddenPanel, settingController, togglePanel } = this.props;
+    const { hiddenPanel, settingController, subscribe, togglePanel } = this.props;
     return (
       <div>
         <TopologyContainer />
@@ -26,7 +26,7 @@ class DomainContainer extends Component {
           <Flowtable />
           <ControllerContainer />
           <PortStatus />
-          <SettingController settingController={settingController} />
+          <SettingController settingController={settingController} subscribe={subscribe} />
         </ModuleContainer>
         <ModuleButton hiddenPanel={hiddenPanel} togglePanel={togglePanel} />
       </div>
@@ -42,6 +42,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
   togglePanel: p => dispatch({ type: 'TOGGLE_PANEL', payload: p }),
   settingController: p => dispatch({ type: 'SETTING_CONTROLLER', payload: p }),
+  subscribe: () => dispatch({ type: 'SUBSCRIBE', payload: {} }),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(DomainContainer);

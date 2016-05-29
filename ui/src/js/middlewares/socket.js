@@ -31,7 +31,7 @@ export const ioInit = store => {
     'DELDEVICE',
     'ADDHOST',
     'DELHOST',
-    'ADDPORT',
+    // 'ADDPORT',
     'DELPORT',
     'PORT_RESP',
     'FLOW_RESP',
@@ -58,7 +58,13 @@ export const socketIoMiddleware = store => next => action => {
   const result = next(action);
 
   // Send event to Server.
-  const actions = ['SETTING_CONTROLLER', 'SUBSCRIBE', 'OTHER', 'FEATURE', 'DEBUG'];
+  const actions = [
+    'SETTING_CONTROLLER',
+    'SUBSCRIBE', 'OTHER',
+    'FEATURE',
+    'DEBUG',
+    'RESET_DATASTORE',
+  ];
   if (actions.indexOf(action.type) > -1) {
     socket.emit(action.type, {
       data: action.payload,

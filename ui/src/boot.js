@@ -38,7 +38,9 @@ const initialState = Immutable({
   flowtable: {
     filterString: '',
     visibleField: ['ipv4'],
+    flowlist: [],
   },
+  portStatus: {},
 });
 
 const store = configureStore(initialState, browserHistory);

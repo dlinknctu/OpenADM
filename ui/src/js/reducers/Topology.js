@@ -48,14 +48,8 @@ export default (state = Immutable(initalState), { type, payload }) => {
      * location: { port, dpid }
      */
     case 'ADDHOST':
-      if (payload.length) {
-        Topo.insertData({
-          nodes: payload,
-        });
-        payload.forEach(host => {
-          Topo.addLinkById(host.mac, host.location.dpid, 's2h');
-        });
-      }
+      Topo.addNode(payload);
+      Topo.addLinkById(payload.mac, payload.location.dpid, 's2h');
       return state;
     /**
      * { controller, mac }
@@ -68,12 +62,6 @@ export default (state = Immutable(initalState), { type, payload }) => {
      * {controller: "waynesdn", type: "switch", dpid: "00:00:00:00:00:00:00:03"}
      */
     case 'ADDDEVICE':
-      if (payload.length) {
-        Topo.setData({
-          nodes: payload,
-        });
-        return state.update('nodes', () => payload);
-      }
       Topo.addNode(payload);
       return state.update('nodes', d => d.concat(payload));
     /**
@@ -138,6 +126,9 @@ export default (state = Immutable(initalState), { type, payload }) => {
      * 	 protocol, ther_type, in_port, dpid }
      */
     case 'PACKET':
+      return state;
+    case 'SIMULATE_RESP':
+      Topo.addPath(payload);
       return state;
     default:
       return state;

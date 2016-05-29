@@ -111,7 +111,7 @@ class Topo {
       // console.log('clickNode on', node.model().getData())
     })
     topoInstant.on('clickLink', function(topo, link) {
-      console.log('clickLink on', link);
+      console.log('clickLink on', link.id());
     })
     topoInstant.on('selectNode', function(topo, nodes, ii) {
       // console.log('selectNode', nodes);
@@ -208,6 +208,25 @@ class Topo {
     Object.keys(linkIds).forEach(linkId => {
       topoInstant.deleteLink(linkId);
     });
+  }
+
+  addPath(linkCollection) {
+
+    const pathLayer = topoInstant.getLayer('paths');
+    const links = linkCollection.path.map(link => {
+      const linkIds = this.getLinksByNodeUid(
+        link[0].dpid,
+        link[1].dpid,
+        linkCollection.controller
+      );
+      return topoInstant.getLink(Object.keys(linkIds)[0]);
+    });
+
+    const path1 = new nx.graphic.Topology.Path({
+      links,
+      arrow: 'cap',
+    });
+    pathLayer.addPath(path1);
   }
 
   /**
