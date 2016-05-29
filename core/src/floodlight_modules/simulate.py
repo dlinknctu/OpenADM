@@ -203,9 +203,10 @@ class Simulate:
 			logger.info('Now the flows or links are empty.')
 			return []
 		self.links_data = {} #reset
-		for (sid, sp, did, dp) in links:
-			self.links_data[(sid, sp, did, dp)] = True  #the value is useless
-			self.links_data[(did, dp, sid, sp)] = True  #reverse to let it be directional
+		for (lctrl, sid, sp, did, dp) in links:
+			if lctrl == ctrl:
+				self.links_data[(sid, sp, did, dp)] = True  #the value is useless
+				self.links_data[(did, dp, sid, sp)] = True  #reverse to let it be directional
 
 		#Now use BFS-like to visit all related switches
 		p = copy.deepcopy(rule) # simulating a packet through the BFS

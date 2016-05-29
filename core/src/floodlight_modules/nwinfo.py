@@ -408,15 +408,17 @@ class NWInfo:
         """Return port statistics of a specific switch port
 
         Usage:
-            /websocket, socket.on('other',
+            /websocket, emit('OTHER', { data:
                                   { url: 'port',
                                     request:
                                            { dpid: sw_dpid, (may empty)
                                              port: sw_port (may empty)
+                                             controller: ctrl_name (may empty)
                                             }
-                                  })
+                                  }
+                             })
         Return:
-            /websocket, socket.on('port', {data: return json})
+            /websocket, socket.on('PORT_RESP', {data: return json})
         """
         controller = req.get('controller', None)
         dpid = req.get('dpid', None)
@@ -454,14 +456,15 @@ class NWInfo:
         """Return all flow entries of switches
 
         Usage:
-            /websocket, socket.on('other',
+            /websocket, socket.on('OTHER',
                                   { url: 'flow',
                                     request:
-                                           { dpid: sw_dpid (may empty)
+                                           { dpid: sw_dpid, (may empty)
+                                             controller: ctrl_name (may empty)
                                             }
                                   })
         Return:
-            /websocket, socket.on('flow', {data: return json})
+            /websocket, socket.on('FLOW_RESP', {data: return json})
         """
         controller = req.get('controller', None)
         dpid = req.get('dpid', None)
@@ -492,11 +495,12 @@ class NWInfo:
             /websocket, socket.on('other',
                                   { url: 'flow/top',
                                     request:
-                                           { dpid: sw_dpid (may empty)
+                                           { dpid: sw_dpid, (may empty)
+                                             controller: ctrl_name (may empty)
                                             }
                                   })
         Return:
-            /websocket, socket.on('flow/top', {data: return json})
+            /websocket, socket.on('FLOW/TOP_RESP', {data: return json})
         """
         controller = req.get('controller', None)
         dpid = req.get('dpid', None)
