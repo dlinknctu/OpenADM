@@ -154,10 +154,12 @@ class NWInfo:
                 raw['link'][1]['dpid'], raw['link'][1]['port'],
                 raw['link'][0]['dpid'], raw['link'][0]['port'])
         if key in self.links or rkey in self.links:
+            logger.warn('FAILED: duplicated addlink  event -> %s' % str(raw))
             return None
 
         # Update links datastore
         self.links[key] = raw
+        logger.debug('SUCCESS: add link -> %s' % str(raw))
         logger.debug('Total links after addition: %d' % len(self.links))
 
         # Tell browser what to add
@@ -184,6 +186,7 @@ class NWInfo:
                 raw['link'][0]['dpid'], raw['link'][0]['port'])
         if key in self.links:
             del self.links[key]
+            logger.debug('SUCCESS: del link -> %s' % str(raw))
             # Craft returned data, tell browser what to delete
             result = json.dumps({
                     'controller': raw['controller'],
@@ -191,13 +194,14 @@ class NWInfo:
                 })
         elif rkey in self.links:
             del self.links[rkey]
+            logger.debug('SUCCESS: del link -> %s' % str(raw))
             # Craft returned data, tell browser what to delete
             result = json.dumps({
                     'controller': raw['controller'],
                     'link': [raw['link'][1], raw['link'][0]]
                 })
         else:
-            logger.warn('Key of link down event not found: %s' % str(raw))
+            logger.warn('FAILED: key of link down event not found -> %s' % str(raw))
             return None
         logger.debug('Total links after deletion: %d' % len(self.links))
 
@@ -216,10 +220,12 @@ class NWInfo:
         # Filter duplicated addport events
         key = (raw['controller'], raw['dpid'], raw['port'])
         if key in self.ports:
+            logger.warn('FAILED: duplicated addport event -> %s' % str(raw))
             return None
 
         # Update ports datastore
         self.ports[key] = raw
+        logger.debug('SUCCESS: add port -> %s' % str(raw))
         logger.debug('Total ports after addition: %d' % len(self.ports))
 
         # Tell browser what to add
@@ -240,8 +246,9 @@ class NWInfo:
         key = (raw['controller'], raw['dpid'], raw['port'])
         if key in self.ports:
             del self.ports[key]
+            logger.debug('SUCCESS: delete port -> %s' % str(raw))
         else:
-            logger.warn('Key of port down event not found: %s' % str(raw))
+            logger.warn('FAILED: key of port down event not found -> %s' % str(raw))
             return None
         logger.debug('Total ports after deletion: %d' % len(self.ports))
 
@@ -262,12 +269,14 @@ class NWInfo:
         # Filter duplicated adddevice events
         key = (raw['controller'], raw['dpid'])
         if key in self.devices:
+            logger.warn('FAILED: duplicated adddevice event -> %s' % str(raw))
             return None
 
         # Update devices datastore
         self.devices[key] = raw
         # Type of the device
         self.devices[key]['nodeType'] = 'switch'
+        logger.debug('SUCCESS: add device -> %s' % str(raw))
         logger.debug('Total devices after addition: %d' % len(self.devices))
 
         # Tell browser what to add
@@ -288,8 +297,9 @@ class NWInfo:
         key = (raw['controller'], raw['dpid'])
         if key in self.devices:
             del self.devices[key]
+            logger.debug('SUCCESS: delete device -> %s' % str(raw))
         else:
-            logger.warn('Key of device down event not found: %s' % str(raw))
+            logger.warn('FAILED: key of device down event not found -> %s' % str(raw))
             return None
         logger.debug('Total devices after deletion: %d' % len(self.devices))
 
@@ -310,12 +320,14 @@ class NWInfo:
         # Filter duplicated addhost events
         key = (raw['controller'], raw['mac'])
         if key in self.hosts.keys():
+            logger.warn('FAILED: duplicated addhost event -> %s' % str(raw))
             return None
 
         # Update hosts datastore
         self.hosts[key] = raw
         # Type of the host
         self.hosts[key]['nodeType'] = 'host'
+        logger.debug('SUCCESS: add host -> %s' % str(raw))
         logger.debug('Total hosts after addition: %d' % len(self.hosts))
 
         # Tell browser what to add
@@ -336,8 +348,9 @@ class NWInfo:
         key = (raw['controller'], raw['mac'])
         if key in self.hosts:
             del self.hosts[key]
+            logger.debug('SUCCESS: delete host -> %s' % str(raw))
         else:
-            logger.warn('Key of host down event not found: %s' % str(raw))
+            logger.warn('FAILED: key of host down event not found -> %s' % str(raw))
             return None
         logger.debug('Total hosts after deletion: %d' % len(self.hosts))
 
@@ -404,24 +417,21 @@ class NWInfo:
         if dpid != None and port != None:
             key = (dpid, port)
             try:
-                result = json.dumps(self.portstats[key])
+                result = self.portstats[key]
             except KeyError as e:
                 logger.warn('Key of portstats not found: %s' % str(e))
-                result = json.dumps([])
+                result = []
         elif dpid != None:
-            tmp = [self.portstats[(d, p)]
+            result = [self.portstats[(d, p)]
                    for (d, p) in self.portstats.keys()
                        if d == dpid]
-            result = json.dumps(tmp)
         elif port != None:
-            tmp = [self.portstats[(d, p)]
+            result = [self.portstats[(d, p)]
                    for (d, p) in self.portstats.keys()
                        if p == port]
-            result = json.dumps(tmp)
         else:
-            tmp = [self.portstats[(d, p)]
+            result = [self.portstats[(d, p)]
                    for (d, p) in self.portstats.keys()]
-            result = json.dumps(tmp)
 
         return result
 
@@ -435,15 +445,14 @@ class NWInfo:
         dpid = req.get('dpid', None)
         if dpid is not None:
             try:
-                result = json.dumps({'dpid': dpid,
-                                     'flows': self.flowtables[dpid]['flows']})
+                result = {'dpid': dpid,
+                          'flows': self.flowtables[dpid]['flows']}
             except KeyError as e:
                 logger.warn('Key of flows not found: %s' % str(e))
-                result = json.dumps([])
+                result = []
         else:
-            tmp = [{'dpid': id, 'flows': self.flowtables[id]['flows']}
+            result = [{'dpid': id, 'flows': self.flowtables[id]['flows']}
                    for id in self.flowtables.keys()]
-            result = json.dumps(tmp)
 
         return result
 
@@ -457,15 +466,14 @@ class NWInfo:
         dpid = req.get('dpid', None)
         if dpid is not None:
             try:
-                result = json.dumps({'dpid': dpid,
-                                     'flows': self.flowtables[dpid]['flows'][0:10]})
+                result = {'dpid': dpid,
+                          'flows': self.flowtables[dpid]['flows'][0:10]}
             except KeyError as e:
                 logger.warn('Key of flows not found: %s' % str(e))
-                result = json.dumps([])
+                result = []
         else:
-            tmp = [{'dpid': id, 'flows': self.flowtables[id]['flows'][0:10]}
+            result = [{'dpid': id, 'flows': self.flowtables[id]['flows'][0:10]}
                    for id in self.flowtables.keys()]
-            result = json.dumps(tmp)
 
         return result
 
@@ -484,6 +492,6 @@ class NWInfo:
         self.portstats = {}
         self.flowtables = {}
 
-        result = json.dumps({'status': 'OK'})
+        result = {'status': 'OK'}
 
         return result
