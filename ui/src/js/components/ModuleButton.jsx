@@ -5,8 +5,9 @@ import styles from './module.css';
 import { Menu, MainButton, ChildButton } from 'react-mfb';
 
 const ModuleButton = ({ hiddenPanel, togglePanel }) => {
-  const childButtons = hiddenPanel.map(data => (
+  const childButtons = hiddenPanel.map((data, index) => (
     <ChildButton
+      key={index}
       icon="ion-ios-gear"
       label={data}
       onClick={() => togglePanel(data)}

@@ -1,9 +1,10 @@
 import React from 'react';
-import Paper from 'material-ui/Paper';
 import { connect } from 'react-redux';
+import Paper from 'material-ui/Paper';
 import ReactGridLayout, { WidthProvider } from 'react-grid-layout';
 import CloseIcon from 'material-ui/svg-icons/navigation/close';
-import MaximizeIcon from 'material-ui/svg-icons/navigation/fullscreen';
+import FullscreenIcon from 'material-ui/svg-icons/navigation/fullscreen';
+import FullscreenExitIcon from 'material-ui/svg-icons/navigation/fullscreen-exit';
 const GridLayout = WidthProvider(ReactGridLayout);
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
@@ -48,20 +49,29 @@ const ModuleContainer = compose(
       [styles.max]: key === maximumPanel,
     });
     return (
-      <Paper
-        key={key}
-        className={gridItemStyle}
-      >
-        <CloseIcon
-          className={styles.closeIcon}
-          color={'red'}
-          onClick={() => onTogglePanel(key)}
-        />
-        <MaximizeIcon
-          className={styles.maxIcon}
-          color={'blue'}
-          onClick={() => onMaximizePanel(key)}
-        />
+      <Paper key={key} className={gridItemStyle}>
+        <div className={styles.controlPanel}>
+          {(key === maximumPanel) ?
+            <FullscreenExitIcon
+              className={styles.maxIcon}
+              color={'white'}
+              hoverColor={'red'}
+              onClick={() => onMaximizePanel(key)}
+            /> :
+            <FullscreenIcon
+              className={styles.maxIcon}
+              color={'white'}
+              hoverColor={'red'}
+              onClick={() => onMaximizePanel(key)}
+            />
+          }
+          <CloseIcon
+            className={styles.closeIcon}
+            color={'white'}
+            hoverColor={'red'}
+            onClick={() => onTogglePanel(key)}
+          />
+        </div>
         <div>{element}</div>
       </Paper>
     );

@@ -4,6 +4,14 @@ import Topology from '../components/Topology/Topology';
 import * as TopologyAction from '../actions/TopologyAction';
 
 class TopologyContainer extends Component {
+  componentDidMount() {
+    setTimeout(() => {
+      this.props.subscribe();
+    }, 2000);
+    setTimeout(() => {
+      this.props.flowtop();
+    }, 4000);
+  }
   render() {
     return <Topology {...this.props} />;
   }
@@ -16,7 +24,6 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = (dispatch) => ({
-  getMockData: () => dispatch({ type: 'GET_MOCK_DATA', payload: null }),
   updateNode: p => dispatch({ type: 'UPDATE_NODE', payload: p }),
   addNode: p => dispatch({ type: 'ADD_NODE', payload: p }),
   delNode: p => dispatch({ type: 'DEL_NODE', payload: p }),
@@ -25,6 +32,8 @@ const mapDispatchToProps = (dispatch) => ({
   search: p => dispatch({ type: 'SEARCH_NODE', payload: p }),
   tagChange: p => dispatch({ type: 'TAG_CHANGE', payload: p }),
   levelChange: p => dispatch({ type: 'LEVEL_CHANGE', payload: p }),
+  subscribe: p => dispatch({ type: 'SUBSCRIBE', payload: p }),
+  flowtop: p => dispatch({ type: 'OTHER', payload: { 'url': 'flow', request: '{}' } }),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(TopologyContainer);

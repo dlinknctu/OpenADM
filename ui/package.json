@@ -38,6 +38,7 @@
     "socket.io-client": "^1.4.6",
     "style-loader": "^0.13.1",
     "url-loader": "^0.5.7",
+    "victory": "^0.7.0",
     "webpack": "^1.13.1"
   },
   "devDependencies": {

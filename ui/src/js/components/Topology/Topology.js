@@ -9,8 +9,6 @@ class Toplogy extends Component {
   componentDidMount() {
     const renderDom = findDOMNode(this.refs.topology);
     topo.initalTopo(renderDom);
-
-    this.props.getMockData();
   }
   shouldComponentUpdate(nextProps) {
     const { nodes, links, searchNode, level, tag } = nextProps;

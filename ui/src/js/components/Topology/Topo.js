@@ -1,4 +1,6 @@
 import d3 from 'd3';
+import Helper from '../../utils/TopoHelper';
+
 const color10 = d3.scale.category10();
 
 let topoInstant;
@@ -6,6 +8,9 @@ let topoInstant;
 class Topo {
   initalTopo(renderDom) {
     topoInstant = new nx.graphic.Topology({
+      // style: {
+      //   'background-color': '#EEEEEE',
+      // },
       adaptive: true,
       scalable: true,
       showIcon: true,
@@ -14,41 +19,28 @@ class Topo {
       enableSmartNode: true,
       enableGradualScaling: true,
       supportMultipleLink: true,
-      autoLayout: true,
-      // dataProcessor: 'nextforce',
+      // autoLayout: true,
+      dataProcessor: 'force',
       // layoutType: 'hierarchicalLayout',
       // nodeInstanceClass: 'ExtendedNode',
       // linkInstanceClass: 'ExtendedLink',
       nodeConfig: {
-        iconType: vertex => {
-          switch (vertex.get('nodeType')) {
-            case 'switch':
-              return 'switch';
-            case 'host':
-              return 'host';
-            case 'wlc':
-              return 'wlc';
-            default:
-              return 'unknown';
-          }
-        },
-        label: vertex => {
-          switch (vertex.get('nodeType')) {
-            case 'switch':
-              return vertex.get('dpid');
-            case 'host':
-              return vertex.get('mac');
-            case 'wlc':
-              return vertex.get('ip');
-            default:
-              return vertex.get('id');
-          }
-        },
-        color: vertex => color10(vertex.get('id')),
+        iconType: vertex => vertex.get('nodeType'),
+        label: vertex => Helper.nodeSwitcher(vertex).uid,
+        // color: vertex => color10(vertex.get('id')),
       },
       linkConfig: {
-        width: 5,
-        linkType: 'curve'
+        width: vertex => {
+          if (vertex.get('linkType') === 's2s')
+            return 6;
+          return 4;
+        },
+        linkType: 'curve',
+        style: vertex => {
+          if (vertex.get('linkType') !== 's2s') {
+            return { 'stroke-dasharray': '1 , 1' };
+          }
+        },
       },
       nodeSetConfig: {
         iconType: 'model.iconType',
@@ -116,16 +108,16 @@ class Topo {
       topoInstant.expandAll();
     });
     topoInstant.on('clickNode', function(topo, node) {
-      console.log('clickNode on', node.model().getData())
+      // console.log('clickNode on', node.model().getData())
     })
     topoInstant.on('clickLink', function(topo, link) {
-      console.log('clickLink on', link.model().getData())
+      console.log('clickLink on', link);
     })
     topoInstant.on('selectNode', function(topo, nodes, ii) {
-      console.log('selectNode', nodes);
+      // console.log('selectNode', nodes);
     });
     topoInstant.on('clickStage', function(topo, stage) {
-      console.log('clickStage', topo, stage);
+      // console.log('clickStage', topo, stage);
     });
     topoInstant.on('pressA', function(topo, stage) {
       console.log('pressA', topo, stage);
@@ -157,7 +149,7 @@ class Topo {
   }
 
   addNode(data) {
-    if (!data.x) {
+    if (!Array.isArray(data) && !data.x) {
       topoInstant.addNode({
         ...data,
         x: Math.random() * 200,
@@ -168,8 +160,73 @@ class Topo {
     }
   }
 
-  addLink(data) {
-    topoInstant.addLink(data);
+  delNode(data) {
+    const nodeId = topoInstant.data().nodes.findIndex(node =>
+      (node.controller === data.controller) && (() => {
+        const { uid, nodeType } = Helper.nodeSwitcher(node);
+        return uid === data[nodeType];
+      })
+    );
+    topoInstant.removeNode(nodeId);
+  }
+
+  // getNodeByUid(sourceId, targetId) {
+  //   const nodes = topoInstant.data().nodes;
+  //
+  //   const source = nodes.findIndex(node => node.dpid === sourceId);
+  //   const target = nodes.findIndex(node => node.dpid === targetId);
+  //
+  //   topoInstant.getLinksByNode(source, target);
+  // }
+
+  addLinkById(sourceId, targetId, linkType) {
+    /**
+     * input node_id (dpid, mac...),
+     */
+    const nodes = topoInstant.data().nodes;
+    let source;
+    let target;
+    switch (linkType) {
+      case 's2s':
+        source = nodes.findIndex(node => node.dpid === sourceId);
+        target = nodes.findIndex(node => node.dpid === targetId);
+        topoInstant.addLink({ source, target, linkType });
+        break;
+      case 's2h':
+        source = nodes.findIndex(node => node.mac === sourceId);
+        target = nodes.findIndex(node => node.dpid === targetId);
+        topoInstant.addLink({ source, target, linkType });
+        break;
+      default:
+        return;
+    }
+  }
+
+  delLinkById({ controller, link }) {
+    const linkIds = this.getLinksByNodeUid(link[0], link[1], controller);
+
+    Object.keys(linkIds).forEach(linkId => {
+      topoInstant.deleteLink(linkId);
+    });
+  }
+
+  /**
+   * [getLinksByNodeUid description]
+   * @param  {[type]} sourceId   [description]
+   * @param  {[type]} targetId   [description]
+   * @param  {[type]} controller [description]
+   * @return {[type]}            [description]
+   */
+  getLinksByNodeUid(sourceId, targetId, controller) {
+    const nodes = topoInstant.data().nodes;
+
+    const source = nodes.findIndex(node =>
+      node.dpid === sourceId.dpid && node.controller === controller
+    );
+    const target = nodes.findIndex(node =>
+      node.dpid === targetId.dpid && node.controller === controller
+    );
+    return topoInstant.getLinksByNode(source, target);
   }
 
   getTopo() {

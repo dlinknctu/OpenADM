@@ -11,3 +11,5 @@ export const addTopologyHost = createAction('ADD_TOPOLOGY_HOST');
 export const delTopologyHost = createAction('DEL_TOPOLOGY_HOST');
 export const addTopologyPort = createAction('ADD_TOPOLOGY_PORT');
 export const delTopologyPort = createAction('DEL_TOPOLOGY_PORT');
+
+export const packet = createAction('PACKET');

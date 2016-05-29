@@ -1,30 +1,20 @@
 import { coreURL } from '../../../config';
 import io from 'socket.io-client';
-import {
-  ADD_TOPOLOGY_DEVICE,
-  DEL_TOPOLOGY_DEVICE,
-  ADD_TOPOLOGY_HOST,
-  DEL_TOPOLOGY_HOST,
-  ADD_TOPOLOGY_PORT,
-  DEL_TOPOLOGY_PORT,
-} from '../actions/TopologyAction';
 
 let socket = null;
 
 export const ioInit = store => {
   // socket = io('http://docker.cs.nctu.edu.tw:32773/websocket', { origins: '*' });
   // socket = io('http://cswwwdev.cs.nctu.edu.tw:5000/zylin', { origins: '*' });
+  socket = io.connect('http://docker.cs.nctu.edu.tw:32785/websocket');
+  socket.on('connect', () => {
+    console.info('websocket connected!');
+  });
+  window.socket = socket;
 
-  socket.on('subscribes', function(d){
-    console.log("subscribes ", d);
+  socket.on('error', (d) => {
+    console.info('websocket error!', d);
   });
-  socket.on('feature', function(d){
-    console.log("feature ", d);
-  });
-  socket.on('other', function(d){
-    console.log("other ", d);
-  });
-  window.gg = socket;
 
   socket.on('disconnect', () => {
     console.warn('Server disconnected');
@@ -34,19 +24,31 @@ export const ioInit = store => {
   });
   // Listen event from Server.
   const actions = [
-    ADD_TOPOLOGY_DEVICE,
-    DEL_TOPOLOGY_DEVICE,
-    ADD_TOPOLOGY_HOST,
-    DEL_TOPOLOGY_HOST,
-    ADD_TOPOLOGY_PORT,
-    DEL_TOPOLOGY_PORT,
+    'CONTROLLER',
+    'ADDLINK',
+    'DELLINK',
+    'ADDDEVICE',
+    'DELDEVICE',
+    'ADDHOST',
+    'DELHOST',
+    'ADDPORT',
+    'DELPORT',
+    'PORT_RESP',
+    'FLOW_RESP',
+    'FLOW/TOP_RESP',
+    'FEATURE_RESP',
+    'RESET_DATASTORE',
+    'DEBUG_RESP',
+    'SETTING_CONTROLLER_RESP',
+    'ALL_DATA',
+    // 'PACKET',
   ];
 
   actions.forEach(action => {
     socket.on(action, payload => {
       store.dispatch({
         type: action,
-        payload,
+        payload: JSON.parse(payload.data),
       });
     });
   });
@@ -56,14 +58,10 @@ export const socketIoMiddleware = store => next => action => {
   const result = next(action);
 
   // Send event to Server.
-  const actions = [];
-
+  const actions = ['SETTING_CONTROLLER', 'SUBSCRIBE', 'OTHER', 'FEATURE', 'DEBUG'];
   if (actions.indexOf(action.type) > -1) {
-    const state = store.getState();
-    const sessionId = state.session.id;
     socket.emit(action.type, {
-      sessionId,
-      payload: action.payload,
+      data: action.payload,
     });
   }
 
