@@ -148,11 +148,6 @@ class Core:
 				sid = request.sid
 				print('Client ' + request.remote_addr + '(sid:' + str(sid) + ') connected')
 				self.count = self.count + 1
-				# get the first subscription
-				#for e in adapterHandlers.keys():
-				#	rs = adapterHandlers[e]('debut')
-				#	if rs is not None:
-				#		gevent.spawn(notify, e, rs)
 
 			@socketio.on('SUBSCRIBE', namespace='/websocket')
 			def on_join(data):

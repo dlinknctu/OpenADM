@@ -1,4 +1,3 @@
-import httplib
 import logging
 import json
 import copy
@@ -20,15 +19,6 @@ matchingList = { #key: entry field.  value: don't care value.
 'tosBits': '0'
 }
 
-class Req:
-	"""Because Simulate uses websocket, NWInfo uses REST API,
-	so have to use this Object to convert a websocket request to
-	HTTP type.
-	"""
-	def __init__(self, req):
-		self.args = {}
-		self.args['dpid'] = req
-
 class Simulate:
 	"""To simulate a switch's flows and retrun the path tree
 
@@ -41,7 +31,7 @@ class Simulate:
 		self.getAllFlows = core.ipcHandlers['getAllFlows']
 		self.getAllLinks = core.ipcHandlers['getAllLinks']
 		self.flows_data = []
-		self.links_data = {}
+		self.links_data = []
 		self.__registration(core)
 
 	def __registration(self, core):
@@ -61,16 +51,26 @@ class Simulate:
 		"""Return path tree of a switch
 
 		Usage:
-			socket on 'other', namespace='/websocket'
-			message['ur'] = 'simulate'
-			message['request'] = switch dpid and flow
-
-		return: list
-			"[ # path list
+			emit websocket on 'OTHER', namespace='/websocket'
+			data: {
+					url: 'simulate',
+					request: {
+							controller: ctrl_name,
+							dpid: the starting simulated sw,
+							flow: the rule to match
+						}
+					}
+			this function return:
+			{ controller: ctrl_name,
+				path: [
 					[{'dpid': src, 'port': src},
 					 {'dpid': dst, 'port': dst} ],  #one path
 					.....
-			]"
+				]
+			}
+			client side:
+				socket on 'SIMULATE_RESP'
+				{ data : json type of this function return }
 		"""
 
 		def match(packet, entry):
@@ -111,7 +111,7 @@ class Simulate:
 			and get the next hop list from flow entry
 			if not a regular flowing entry or no next hop, return None
 			"""
-			now_pkt = copy.deepcopy(packet) # the packet that have done the actions
+			now_pkt = copy.deepcopy(packet) # the packet that has to do the actions
 			actions = entry.get('actions', None)
 			if actions is None:
 				logger.warning("Entry doesn't have actions.")
@@ -157,28 +157,28 @@ class Simulate:
 						try:
 							for (src_dpid, src_port, dst_dpid, dst_port) in self.links_data:
 								if src_dpid == now and i_port != int(src_port):
-									logger.debug('Matched a flooding action.')
+									logger.debug('Flood out a port.')
 									nx_pkt = copy.deepcopy(now_pkt)
 									nx_pkt['ingressPort'] = dst_port
 									nexthop.append( ( [ {'dpid': src_dpid,
-												         'port': src_port},
+														 'port': src_port},
 														{'dpid': dst_dpid,
 														 'port': dst_port} ]
-														 , nx_pkt) )
+														, nx_pkt) )
 						except:
 							logger.warning('Get links or ingressPort error!')
 					elif o_port >= 0 :
 						try:
 							for (src_dpid, src_port, dst_dpid, dst_port) in self.links_data:
 								if src_dpid == now and o_port == int(src_port) and i_port != int(src_port):
-									logger.debug('Matched an ouput action.')
+									logger.debug('Output a port.')
 									nx_pkt = copy.deepcopy(now_pkt)
 									nx_pkt['ingressPort'] = dst_port
 									nexthop.append( ( [ {'dpid': src_dpid,
-												         'port': src_port},
+														 'port': src_port},
 														{'dpid': dst_dpid,
 														 'port': dst_port} ]
-														 , nx_pkt) )
+														, nx_pkt) )
 									break
 						except:
 							logger.warning('Get links or ingressPort error!')
@@ -202,16 +202,16 @@ class Simulate:
 		if len(self.flows_data) <= 0 or len(links) <= 0: # get failed
 			logger.info('Now the flows or links are empty.')
 			return []
-		self.links_data = {} #reset
+		self.links_data = [] #reset
 		for (lctrl, sid, sp, did, dp) in links:
 			if lctrl == ctrl:
-				self.links_data[(sid, sp, did, dp)] = True  #the value is useless
-				self.links_data[(did, dp, sid, sp)] = True  #reverse to let it be directional
+				self.links_data.append( (sid, sp, did, dp) )
+				self.links_data.append( (did, dp, sid, sp) ) #reverse to let it be directional
 
 		#Now use BFS-like to visit all related switches
 		p = copy.deepcopy(rule) # simulating a packet through the BFS
 		q = [ (dpid, p) ] # waiting queue
-        #v = {} # visitted nodes   ### loop should be avoided by controller app, not this file
+		#v = {} # visitted nodes   ### loop should be avoided by controller app, not this file
 		paths = [] # return paths 
 
 		flows = {}
@@ -220,12 +220,12 @@ class Simulate:
 			key = node.get('dpid', None)
 			if value is not None and key is not None:
 				flows[key] = value
-                #v[key] = False
+				#v[key] = False
 
 		while len(q) > 0: # BFS-like
 			now_p = q.pop(0)
 			now = now_p[0]
-            #v[now] = True
+			#v[now] = True
 			pkt = now_p[1]
 			entries = flows.get(now, None)
 			if entries is None or pkt is None:

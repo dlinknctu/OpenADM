@@ -15,12 +15,12 @@
 		"controller_name": "foobar",
 		"adapter_port": "8080"
 	},
-	"BusyLink_Detect": {
-		"ip": "localhost",
-		"port": "5567",
-		"controller_name": "foobar",
-		"interval": "5",
-		"version": "1.0"
-	},
-	"Simulate": { }
+    "BusyLink_Detect": {
+        "ip": "localhost",
+        "port": "5567",
+        "controller_name": "foobar",
+        "interval": "5",
+        "version": "1.0"
+    },
+    "Simulate": {}
 }
