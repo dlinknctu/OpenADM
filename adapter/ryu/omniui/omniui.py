@@ -656,7 +656,7 @@ class RestController(ControllerBase):
             LOG.debug('Invalid syntax %s', req.body)
             return Response(status=400)
 
-        omniDpid = omniFlow.get('switch')             #Getting OmniUI dpid from flow    
+        omniDpid = omniFlow.get('switch')             #Getting OmniUI dpid from flow
         if omniDpid is None:
             return Response(status=404)
         else:
@@ -828,7 +828,7 @@ class RestController(ControllerBase):
         for key in omniFlow:
             match = self.to_match_v1_3(dp, key, omniFlow)
             if match is not None:
-                ryuFlow['match'].update(match) 
+                ryuFlow['match'].update(match)
 
         # handle mutiple actions
         acts = omniFlow.get('actions', '').split(',')
@@ -909,7 +909,7 @@ class RestController(ControllerBase):
                 return ryuMatch
 
         return None
-        
+
     # repack 1.3 actions
     def to_action_v1_3(self, dp, dic):
         action_type = dic.split('=')[0]
@@ -973,23 +973,23 @@ class RestController(ControllerBase):
             ryuAction = {
                 'type': action_type
             }
-        elif action_type == 'SET_FIELD':  
+        elif action_type == 'SET_FIELD':
             ryuAction = {
                 'type': action_type,
                 'field': dic.split('=')[1].split(':')[0],
                 'value': dic.split('=')[1].split(':')[1]
-            }  
+            }
         elif action_type == 'PUSH_PBB':
             ryuAction = {
                 'type': action_type,
                 'ethertype': dic.split('=')[1]
-            }  
+            }
         elif action_type == 'POP_PBB':
             ryuAction = {
                 'type': action_type
-            } 
+            }
         else:
-            ryuAction = None 
+            ryuAction = None
 
         return ryuAction
 
