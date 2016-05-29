@@ -417,8 +417,8 @@ class NWInfo:
         port = req.get('port', None)
 
         if controller is None:
-            return [self.portstats[(d, p)]
-                   for (d, p) in self.portstats.keys()]
+            return [self.portstats[(c, d, p)]
+                   for (c, d, p) in self.portstats.keys()]
         if dpid != None and port != None:
             key = (controller, dpid, port)
             try:
