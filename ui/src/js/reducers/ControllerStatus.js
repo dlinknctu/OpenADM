@@ -14,7 +14,7 @@ export default handleActions({
    */
   ALL_DATA:  (state, { payload }) => state.concat(payload.controllers),
 
-  controller: (state, { payload }) => state.map(d => (
+  CONTROLLER: (state, { payload }) => state.map(d => (
     d.controller === payload.controller ? payload : d
   )),
 

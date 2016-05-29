@@ -37,7 +37,7 @@ export const ioInit = store => {
     'FLOW_RESP',
     'FLOW/TOP_RESP',
     'FEATURE_RESP',
-    'RESET_DATASTORE',
+    'RESET_DATASTORE_RESP',
     'DEBUG_RESP',
     'SETTING_CONTROLLER_RESP',
     'ALL_DATA',
