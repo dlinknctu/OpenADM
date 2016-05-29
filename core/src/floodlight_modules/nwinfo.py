@@ -412,26 +412,31 @@ class NWInfo:
             /port?port=<sw_port>
             /port
         """
+        controller = req.get('controller', None)
         dpid = req.get('dpid', None)
         port = req.get('port', None)
+
+        if controller is None:
+            result = [self.portstats[(d, p)]
+                   for (d, p) in self.portstats.keys()]
         if dpid != None and port != None:
-            key = (dpid, port)
+            key = (controller, dpid, port)
             try:
                 result = self.portstats[key]
             except KeyError as e:
                 logger.warn('Key of portstats not found: %s' % str(e))
                 result = []
         elif dpid != None:
-            result = [self.portstats[(d, p)]
-                   for (d, p) in self.portstats.keys()
-                       if d == dpid]
+            result = [self.portstats[(c, d, p)]
+                   for (c, d, p) in self.portstats.keys()
+                       if c == controller and d == dpid]
         elif port != None:
-            result = [self.portstats[(d, p)]
-                   for (d, p) in self.portstats.keys()
-                       if p == port]
+            result = [self.portstats[(c, d, p)]
+                   for (c, d, p) in self.portstats.keys()
+                       if c == controller and p == port]
         else:
-            result = [self.portstats[(d, p)]
-                   for (d, p) in self.portstats.keys()]
+            result = [self.portstats[(c, d, p)]
+                   for (c, d, p) in self.portstats.keys()]
 
         return result
 
@@ -442,16 +447,22 @@ class NWInfo:
             /flow?dpid=<sw_dpid>
             /flow
         """
+        controller = req.get('controller', None)
         dpid = req.get('dpid', None)
+
+        if controller is None:
+            result = [{'controller': id[0], 'dpid': id[1], 'flows': self.flowtables[id]['flows']}
+                   for id in self.flowtables.keys()]
         if dpid is not None:
             try:
-                result = {'dpid': dpid,
-                          'flows': self.flowtables[dpid]['flows']}
+                result = {'controller': controller,
+                          'dpid': dpid,
+                          'flows': self.flowtables[(controller, dpid)]['flows']}
             except KeyError as e:
                 logger.warn('Key of flows not found: %s' % str(e))
                 result = []
         else:
-            result = [{'dpid': id, 'flows': self.flowtables[id]['flows']}
+            result = [{'controller': id[0], 'dpid': id[1], 'flows': self.flowtables[id]['flows']}
                    for id in self.flowtables.keys()]
 
         return result
@@ -463,16 +474,22 @@ class NWInfo:
             /flow/top?dpid=<sw_dpid>
             /flow/top
         """
+        controller = req.get('controller', None)
         dpid = req.get('dpid', None)
+
+        if controller is None:
+            result = [{'controller': id[0], 'dpid': id[1], 'flows': self.flowtables[id]['flows'][0:10]}
+                   for id in self.flowtables.keys()]
         if dpid is not None:
             try:
-                result = {'dpid': dpid,
-                          'flows': self.flowtables[dpid]['flows'][0:10]}
+                result = {'controller': controller,
+                          'dpid': dpid,
+                          'flows': self.flowtables[(controller, dpid)]['flows'][0:10]}
             except KeyError as e:
                 logger.warn('Key of flows not found: %s' % str(e))
                 result = []
         else:
-            result = [{'dpid': id, 'flows': self.flowtables[id]['flows'][0:10]}
+            result = [{'controller': id[0], 'dpid': id[1], 'flows': self.flowtables[id]['flows'][0:10]}
                    for id in self.flowtables.keys()]
 
         return result
