@@ -29,7 +29,7 @@ from ryu.topology import event, switches
 global controllerName
 controllerName = 'DEFAULT'
 global coreURL
-coreURL = 'http://127.0.0.1:5567'
+coreURL = ''
 
 class OmniUI(app_manager.RyuApp):
     OFP_VERSIONS = [ofproto_v1_0.OFP_VERSION, ofproto_v1_2.OFP_VERSION, ofproto_v1_3.OFP_VERSION]
@@ -90,6 +90,9 @@ class OmniUI(app_manager.RyuApp):
     # try post json to core
     #
     def post_json_to_core(self, url, data):
+        if coreURL == "":
+            print "No Setting Core URL"
+            return
         try:
             resp = requests.post(url, data = data, headers = {'Content-Type': 'application/json'})
             print resp
