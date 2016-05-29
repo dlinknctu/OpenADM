@@ -11,7 +11,7 @@ class Flow_mod:
 			"Content-type": "application/json",
 			"Accept": "application/json",
             	}
-		# register rest api
+		# register weboskcet api
 		core.registerURLApi("flowmod", self.flowHandler)
 
 	def flowHandler(self, body):
