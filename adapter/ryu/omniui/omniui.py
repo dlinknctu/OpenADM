@@ -28,10 +28,8 @@ from ryu.topology import event, switches
 
 global controllerName
 controllerName = 'DEFAULT'
-global coreIP
-coreIP = '127.0.0.1'
-global corePort
-corePort = '5567'
+global coreURL
+coreURL = 'http://127.0.0.1:5567'
 
 class OmniUI(app_manager.RyuApp):
     OFP_VERSIONS = [ofproto_v1_0.OFP_VERSION, ofproto_v1_2.OFP_VERSION, ofproto_v1_3.OFP_VERSION]
@@ -59,8 +57,8 @@ class OmniUI(app_manager.RyuApp):
         mapper.connect('omniui', '/wm/omniui/add/json',
                        controller=RestController, action='mod_flow_entry',
                        conditions=dict(method=['POST']))
-        mapper.connect('omniui', '/wm/omniui/controller/name',
-                       controller=RestController, action='get_controller_name',
+        mapper.connect('omniui', '/wm/omniui/core',
+                       controller=RestController, action='set_openadm',
                        conditions=dict(method=['POST']))
 
     @set_ev_cls([ofp_event.EventOFPFlowStatsReply, ofp_event.EventOFPPortStatsReply], MAIN_DISPATCHER)
@@ -120,7 +118,7 @@ class OmniUI(app_manager.RyuApp):
         self.port_to_feature[addDevice['dpid']] = {}
 
         print json.dumps(addDevice)
-        tmpIP = "http://" + coreIP + ":" + corePort + "/publish/adddevice"
+        tmpIP = coreURL + "/publish/adddevice"
         self.post_json_to_core(tmpIP, json.dumps(addDevice))
 
         # send add port event
@@ -151,7 +149,7 @@ class OmniUI(app_manager.RyuApp):
             del self.port_to_feature[delDevice['dpid']]
 
         print json.dumps(delDevice)
-        tmpIP = "http://" + coreIP + ":" + corePort + "/publish/deldevice"
+        tmpIP = coreURL + "/publish/deldevice"
         self.post_json_to_core(tmpIP, json.dumps(delDevice))
 
     #
@@ -182,7 +180,7 @@ class OmniUI(app_manager.RyuApp):
                     del self.port_to_feature[modPort['dpid']][modPort['port']]
 
             print json.dumps(modPort)
-            tmpIP = "http://" + coreIP + ":" + corePort + "/publish/delport"
+            tmpIP = coreURL + "/publish/delport"
             self.post_json_to_core(tmpIP, json.dumps(modPort))
         else:
             print '***live***'
@@ -203,7 +201,7 @@ class OmniUI(app_manager.RyuApp):
                 self.port_to_feature[modPort['dpid']][modPort['port']] = str(port.currentFeatures)
 
             print json.dumps(modPort)
-            tmpIP = "http://" + coreIP + ":" + corePort + "/publish/addport"
+            tmpIP = coreURL + "/publish/addport"
             self.post_json_to_core(tmpIP, json.dumps(modPort))
 
     #
@@ -230,7 +228,7 @@ class OmniUI(app_manager.RyuApp):
             self.port_to_feature[addPort['dpid']][addPort['port']] = str(port.currentFeatures)
 
         print json.dumps(addPort)
-        tmpIP = "http://" + coreIP + ":" + corePort + "/publish/addport"
+        tmpIP = coreURL + "/publish/addport"
         self.post_json_to_core(tmpIP, json.dumps(addPort))
 
     #
@@ -258,7 +256,7 @@ class OmniUI(app_manager.RyuApp):
                 del self.port_to_feature[delPort['dpid']][delPort['port']]
 
         print json.dumps(delPort)
-        tmpIP = "http://" + coreIP + ":" + corePort + "/publish/delport"
+        tmpIP = coreURL + "/publish/delport"
         self.post_json_to_core(tmpIP, json.dumps(delPort))
 
     #
@@ -295,7 +293,7 @@ class OmniUI(app_manager.RyuApp):
         }
 
         print json.dumps(addLink)
-        tmpIP = "http://" + coreIP + ":" + corePort + "/publish/addlink"
+        tmpIP = coreURL + "/publish/addlink"
         self.post_json_to_core(tmpIP, json.dumps(addLink))
 
     #
@@ -332,7 +330,7 @@ class OmniUI(app_manager.RyuApp):
         }
 
         print json.dumps(delLink)
-        tmpIP = "http://" + coreIP + ":" + corePort + "/publish/dellink"
+        tmpIP = coreURL + "/publish/dellink"
         self.post_json_to_core(tmpIP, json.dumps(delLink))
 
     #
@@ -363,7 +361,7 @@ class OmniUI(app_manager.RyuApp):
         }
 
         print json.dumps(addHost)
-        tmpIP = "http://" + coreIP + ":" + corePort + "/publish/addhost"
+        tmpIP = coreURL + "/publish/addhost"
         self.post_json_to_core(tmpIP, json.dumps(addHost))
 
     #
@@ -380,7 +378,7 @@ class OmniUI(app_manager.RyuApp):
         }
 
         print json.dumps(delHost)
-        tmpIP = "http://" + coreIP + ":" + corePort + "/publish/delhost"
+        tmpIP = coreURL + "/publish/delhost"
         self.post_json_to_core(tmpIP, json.dumps(delHost))
 
     #
@@ -455,7 +453,7 @@ class OmniUI(app_manager.RyuApp):
         packetIn["controller"] = controllerName
 
         print json.dumps(packetIn)
-        tmpIP = "http://" + coreIP + ":" + corePort + "/publish/packet"
+        tmpIP = coreURL + "/publish/packet"
         self.post_json_to_core(tmpIP, json.dumps(packetIn))
 
     #
@@ -505,7 +503,7 @@ class OmniUI(app_manager.RyuApp):
         }
 
         print json.dumps(controllerstatsReply)
-        tmpIP = "http://" + coreIP + ":" + corePort + "/publish/controller"
+        tmpIP = coreURL + "/publish/controller"
         self.post_json_to_core(tmpIP, json.dumps(controllerstatsReply))
 
     #
@@ -582,7 +580,7 @@ class OmniUI(app_manager.RyuApp):
                     i += 1
 
         print json.dumps(flowstatsReplyAPI)
-        tmpIP = "http://" + coreIP + ":" + corePort + "/publish/flow"
+        tmpIP = coreURL + "/publish/flow"
         self.post_json_to_core(tmpIP, json.dumps(flowstatsReplyAPI))
         return flows
 
@@ -624,7 +622,7 @@ class OmniUI(app_manager.RyuApp):
                 portstatsReplyAPI["capacity"] = self.port_to_feature[portstatsReplyAPI['dpid']][portstatsReplyAPI['port']] if portstatsReplyAPI['port'] in self.port_to_feature[portstatsReplyAPI['dpid']] else '0'
 
                 print json.dumps(portstatsReplyAPI)
-                tmpIP = "http://" + coreIP + ":" + corePort + "/publish/port"
+                tmpIP = coreURL + "/publish/port"
                 self.post_json_to_core(tmpIP, json.dumps(portstatsReplyAPI))
         return ports
 
@@ -634,11 +632,15 @@ class RestController(ControllerBase):
         super(RestController, self).__init__(req, link, data, **config)
         self.dpset = data['dpset']
 
-    def get_controller_name(self, req, **kwargs):
+    def set_openadm(self, req, **kwargs):
         try:
             global controllerName
-            controllerName = req.body
+            global coreURL
+            data = ast.literal_eval(req.body)
+            controllerName = data["controllerName"]
+            coreURL = data["coreURL"]
             print '*****NAME: ' + controllerName + '*****'
+            print '*****COREURL: ' + coreURL + '*****'
         except SyntaxError:
             return Response(status=400)
 
