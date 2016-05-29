@@ -234,7 +234,7 @@ class Core:
 			def topLevelRoute(message):
 				data = message.get('data', None)
 				url = data.get('url', None)
-				req = data.get('request', None)
+				req = data.get('request', {})
 				result = handleRoute(url, rest=False, req=req)
 				if result is None:
 					emit(url + '_RESP', {'data' : "Websocket API not found: '%s'" % url })
