@@ -417,9 +417,8 @@ class NWInfo:
         port = req.get('port', None)
 
         if controller is None:
-            result = [self.portstats[(d, p)]
+            return [self.portstats[(d, p)]
                    for (d, p) in self.portstats.keys()]
-            logger.info('Return all ports statistics.')
         if dpid != None and port != None:
             key = (controller, dpid, port)
             try:
@@ -456,7 +455,7 @@ class NWInfo:
         dpid = req.get('dpid', None)
 
         if controller is None:
-            result = [{'controller': id[0], 'dpid': id[1], 'flows': self.flowtables[id]['flows']}
+            return [{'controller': id[0], 'dpid': id[1], 'flows': self.flowtables[id]['flows']}
                    for id in self.flowtables.keys()]
         if dpid is not None:
             try:
@@ -485,7 +484,7 @@ class NWInfo:
         dpid = req.get('dpid', None)
 
         if controller is None:
-            result = [{'controller': id[0], 'dpid': id[1], 'flows': self.flowtables[id]['flows'][0:10]}
+            return [{'controller': id[0], 'dpid': id[1], 'flows': self.flowtables[id]['flows'][0:10]}
                    for id in self.flowtables.keys()]
         if dpid is not None:
             try:
