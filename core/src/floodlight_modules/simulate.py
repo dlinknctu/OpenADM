@@ -65,7 +65,7 @@ class Simulate:
 			message['ur'] = 'simulate'
 			message['request'] = switch dpid and flow
 
-		return: JSON format
+		return: list
 			"[ # path list
 					[{'dpid': src, 'port': src},
 					 {'dpid': dst, 'port': dst} ],  #one path
@@ -192,15 +192,16 @@ class Simulate:
 		#======== start from here ========
 		dpid = request.get('dpid', None) # the simulation starting switch
 		rule = request.get('flow', None) # the rule to match
-		if dpid is None or rule is None :
+		ctrl = request.get('controller', None)
+		if dpid is None or rule is None or ctrl is None:
 			logger.warning('Simulate request format error.')
-			return json.dumps( [] )
+			return []
 			
 		self.flows_data = json.loads(self.getAllFlows( {} ) ) # get all switches' flow tables
 		links = self.getAllLinks() # be aware that these links are non-directional
 		if len(self.flows_data) <= 0 or len(links) <= 0: # get failed
 			logger.info('Now the flows or links are empty.')
-			return json.dumps( [] )
+			return []
 		self.links_data = {} #reset
 		for (sid, sp, did, dp) in links:
 			self.links_data[(sid, sp, did, dp)] = True  #the value is useless
@@ -257,5 +258,5 @@ class Simulate:
 							#	q.append((dst_dpid, nx_pkt))
 							q.append( (dst_dpid, nx_pkt) )
 
-		return json.dumps(paths)
+		return {'controller': ctrl, 'path': paths}
 

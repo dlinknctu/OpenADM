@@ -237,7 +237,7 @@ class Core:
 				req = data.get('request', {})
 				result = handleRoute(url, rest=False, req=req)
 				if result is None:
-					emit(url + '_RESP', {'data' : "Websocket API not found: '%s'" % url })
+					emit(url.upper() + '_RESP', {'data' : "Websocket API not found: '%s'" % url })
 				else:
 					emit(url.upper() + '_RESP', {'data' : json.dumps(result)} )
 
