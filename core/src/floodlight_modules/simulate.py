@@ -197,7 +197,7 @@ class Simulate:
 			logger.warning('Simulate request format error.')
 			return []
 			
-		self.flows_data = json.loads(self.getAllFlows( {} ) ) # get all switches' flow tables
+		self.flows_data = self.getAllFlows( {'controller':ctrl} ) # get all switches' flow tables
 		links = self.getAllLinks() # be aware that these links are non-directional
 		if len(self.flows_data) <= 0 or len(links) <= 0: # get failed
 			logger.info('Now the flows or links are empty.')
