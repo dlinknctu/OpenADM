@@ -419,24 +419,29 @@ class NWInfo:
         if controller is None:
             result = [self.portstats[(d, p)]
                    for (d, p) in self.portstats.keys()]
+            logger.info('Return all ports statistics.')
         if dpid != None and port != None:
             key = (controller, dpid, port)
             try:
                 result = self.portstats[key]
+                logger.info('Return specific controller, DPID and port\'s port statistics.')
             except KeyError as e:
-                logger.warn('Key of portstats not found: %s' % str(e))
+                logger.warn('FAILED: key of portstats not found -> %s' % str(e))
                 result = []
         elif dpid != None:
             result = [self.portstats[(c, d, p)]
                    for (c, d, p) in self.portstats.keys()
                        if c == controller and d == dpid]
+            logger.info('Return specific controller and DPID port statistics.')
         elif port != None:
             result = [self.portstats[(c, d, p)]
                    for (c, d, p) in self.portstats.keys()
                        if c == controller and p == port]
+            logger.info('Return specific controller and port\'s port statistics.')
         else:
             result = [self.portstats[(c, d, p)]
                    for (c, d, p) in self.portstats.keys()]
+            logger.info('Return all controllers, DPID and port\'s port statistics.')
 
         return result
 
@@ -458,12 +463,14 @@ class NWInfo:
                 result = {'controller': controller,
                           'dpid': dpid,
                           'flows': self.flowtables[(controller, dpid)]['flows']}
+                logger.info('Return specific controller and DPID flows.')
             except KeyError as e:
-                logger.warn('Key of flows not found: %s' % str(e))
+                logger.warn('FAILED: key of flows not found -> %s' % str(e))
                 result = []
         else:
             result = [{'controller': id[0], 'dpid': id[1], 'flows': self.flowtables[id]['flows']}
                    for id in self.flowtables.keys()]
+            logger.info('Return controllers and DPID flows.')
 
         return result
 
@@ -485,12 +492,14 @@ class NWInfo:
                 result = {'controller': controller,
                           'dpid': dpid,
                           'flows': self.flowtables[(controller, dpid)]['flows'][0:10]}
+                logger.info('Return specific controller and DPID top flows.')
             except KeyError as e:
-                logger.warn('Key of flows not found: %s' % str(e))
+                logger.warn('FAILED: key of flows not found -> %s' % str(e))
                 result = []
         else:
             result = [{'controller': id[0], 'dpid': id[1], 'flows': self.flowtables[id]['flows'][0:10]}
                    for id in self.flowtables.keys()]
+            logger.info('Return controllers and DPID top flows.')
 
         return result
 
