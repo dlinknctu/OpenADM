@@ -86,13 +86,13 @@ class Topo {
             return false;
           }
         }
-      },
-      layoutType: 'WorldMap',
-      layoutConfig: {
-        longitude: 'model.longitude',
-        latitude: 'model.latitude',
-        worldTopoJson: 'js/world.js',
-      },
+      }
+      // layoutType: 'WorldMap',
+      //   layoutConfig: {
+      //       longitude: 'model.longitude',
+      //       latitude: 'model.latitude',
+      //       worldTopoJson: 'js/world.js'
+      // },
       // tooltipManagerConfig: {
       //   nodeTooltipContentClass: 'MyNodeTooltip'
       // },
