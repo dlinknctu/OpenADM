@@ -152,7 +152,7 @@ export default (state = Immutable(initalState), { type, payload }) => {
         }))
       );
       const topoNodeSet = controllers.map(c => ({
-        name: c.controller,
+        controller: c.controller,
         nodes: topoNodes
           .filter(d => d.controller === c.controller)
           .map(d => d.uid),

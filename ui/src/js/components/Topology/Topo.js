@@ -45,11 +45,12 @@ class Topo {
             return { 'stroke-dasharray': '1 , 1' };
           }
         },
+        color: vertex => getColorWithController(vertex.get('controller')),
       },
       nodeSetConfig: {
         iconType: 'cloud',
-        label: 'model.name',
-        color: vertex => getColorWithController(vertex.get('name')),
+        label: 'model.controller',
+        color: vertex => getColorWithController(vertex.get('controller')),
       }
       ,vertexPositionGetter: function() {
         // if this is node, use original position
@@ -85,13 +86,13 @@ class Topo {
             return false;
           }
         }
-      }
-      // layoutType: 'WorldMap',
-      //   layoutConfig: {
-      //       longitude: 'model.longitude',
-      //       latitude: 'model.latitude',
-      //       worldTopoJson: 'js/world.js'
-      // },
+      },
+      layoutType: 'WorldMap',
+      layoutConfig: {
+        longitude: 'model.longitude',
+        latitude: 'model.latitude',
+        worldTopoJson: 'js/world.js',
+      },
       // tooltipManagerConfig: {
       //   nodeTooltipContentClass: 'MyNodeTooltip'
       // },

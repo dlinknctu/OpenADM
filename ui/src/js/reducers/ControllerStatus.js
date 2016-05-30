@@ -12,7 +12,7 @@ export default handleActions({
   /**
    * { controller, type, os, cpu, mem_used, mem_total, mem_free }
    */
-  ALL_DATA: (state, { payload }) => state.concat(payload.controllers),
+  ALL_DATA: (state, { payload }) => payload.controllers,
 
   CONTROLLER: (state, { payload }) => state.map(d => (
     d.controller === payload.controller ? payload : d
