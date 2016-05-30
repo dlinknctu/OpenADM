@@ -18,7 +18,7 @@ const initialState = Immutable({
       { i: 'Flowtable', x: 1, y: 0, w: 3, h: 3 },
       { i: 'ControllerStatus', x: 4, y: 0, w: 5, h: 3 },
       { i: 'PortStatus', x: 4, y: 0, w: 5, h: 3 },
-      { i: 'SettingContainer', x: 4, y: 0, w: 5, h: 7 },
+      { i: 'SettingContainer', x: 4, y: 0, w: 4, h: 8 },
     ],
     hiddenPanel: [],
     maximumPanel: '',
@@ -32,7 +32,9 @@ const initialState = Immutable({
     selectNodes: [],
     level: 0,
     nodes: [],
+    fixedNode: {},
     links: [],
+    controllerList: [],
   },
   controllerStatus: [],
   flowtable: {

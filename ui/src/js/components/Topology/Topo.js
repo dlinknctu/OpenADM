@@ -2,6 +2,9 @@ import d3 from 'd3';
 import Helper from '../../utils/TopoHelper';
 
 const color10 = d3.scale.category10();
+// save controller to choose color
+let clist = [];
+const getColorWithController = cname => color10(clist.indexOf(cname));
 
 let topoInstant;
 
@@ -19,6 +22,7 @@ class Topo {
       enableSmartNode: true,
       enableGradualScaling: true,
       supportMultipleLink: true,
+      identityKey: 'uid',
       // autoLayout: true,
       dataProcessor: 'force',
       // layoutType: 'hierarchicalLayout',
@@ -27,7 +31,7 @@ class Topo {
       nodeConfig: {
         iconType: vertex => vertex.get('nodeType'),
         label: vertex => Helper.nodeSwitcher(vertex).uid,
-        // color: vertex => color10(vertex.get('id')),
+        color: vertex => getColorWithController(vertex.get('controller')),
       },
       linkConfig: {
         width: vertex => {
@@ -45,7 +49,43 @@ class Topo {
       nodeSetConfig: {
         iconType: 'model.iconType',
         label: 'model.name',
+        color: vertex => getColorWithController(vertex.get('name')),
+      }
+      ,vertexPositionGetter: function() {
+        // if this is node, use original position
+        if (this.type() == "vertex") {
+          return {
+            x: nx.path(this._data, 'x') || 0,
+            y: nx.path(this._data, 'y') || 0
+          };
+        } else {
+          // if this is a nodeSet, use the firNode's position
+          var graph = this.graph();
+          var firstVertex = graph.getVertex(this.get('nodes').slice(0).shift());
+
+          if (firstVertex) {
+            return firstVertex.position();
+          } else {
+            return {
+              x: Math.random() * 500,
+              y: Math.random() * 500
+            }
+          }
+        }
       },
+      vertexPositionSetter: function(position) {
+        if (this._data) {
+          var x = nx.path(this._data, 'x');
+          var y = nx.path(this._data, 'y');
+          if (position.x !== x || position.y !== y) {
+            nx.path(this._data, 'x', position.x);
+            nx.path(this._data, 'y', position.y);
+            return true;
+          } else {
+            return false;
+          }
+        }
+      }
       // layoutType: 'WorldMap',
       //   layoutConfig: {
       //       longitude: 'model.longitude',
@@ -103,27 +143,14 @@ class Topo {
       }
     });
 
-    topoInstant.on('topologyGenerated', function(sender, event) {
+    topoInstant.on('topologyGenerated', (sender, event) => {
       topoInstant.adaptToContainer();
-      topoInstant.expandAll();
+
+      // topoInstant.expandAll();
     });
-    topoInstant.on('clickNode', function(topo, node) {
-      // console.log('clickNode on', node.model().getData())
-    })
-    topoInstant.on('clickLink', function(topo, link) {
-      console.log('clickLink on', link.id());
-    })
-    topoInstant.on('selectNode', function(topo, nodes, ii) {
-      // console.log('selectNode', nodes);
-    });
-    topoInstant.on('clickStage', function(topo, stage) {
-      // console.log('clickStage', topo, stage);
-    });
-    topoInstant.on('pressA', function(topo, stage) {
-      console.log('pressA', topo, stage);
-    });
+
     var app = new nx.ui.Application();
-    app.on('resize', function() {
+    app.on('resize', () => {
       topoInstant.adaptToContainer();
     });
     app.container(renderDom);
@@ -131,7 +158,44 @@ class Topo {
     window.topo = topoInstant;
   }
 
+  bindEvent(props) {
+    topoInstant.on('clickNode', (topo, node) => {
+      props.clickNode(node.model().getData());
+    });
+    topoInstant.on('clickLink', (topo, link) => {
+      props.clickLink(link.model().getData());
+    });
+    topoInstant.on('selectNode', (topo, nodes) => {
+      props.selectNode(nodes.model().getData());
+    });
+
+    topoInstant.on('dragNodeEnd', (topo, target) => {
+      props.dragNode({
+        [target.id()]: target.position(),
+      });
+    });
+    topoInstant.on('keypress', (topo, e) => {
+      switch (e.code) {
+        case 'KeyC':
+          props.togglePanel('ControllerStatus');
+          break;
+        case 'KeyF':
+          props.togglePanel('Flowtable');
+          break;
+        case 'KeyS':
+          props.togglePanel('SettingContainer');
+          break;
+        case 'KeyP':
+          props.togglePanel('PortStatus');
+          break;
+        default:
+          return;
+      }
+    });
+  }
+
   setData(data) {
+    clist = data.nodeSet.map(d => d.name);
     topoInstant.data(data);
   }
 
@@ -161,65 +225,30 @@ class Topo {
   }
 
   delNode(data) {
-    const nodeId = topoInstant.data().nodes.findIndex(node =>
-      (node.controller === data.controller) && (() => {
-        const { uid, nodeType } = Helper.nodeSwitcher(node);
-        return uid === data[nodeType];
-      })
-    );
+    const nodeId = topoInstant.data().nodes.findIndex(node => node.uid === data.uid);
     topoInstant.removeNode(nodeId);
   }
 
-  // getNodeByUid(sourceId, targetId) {
-  //   const nodes = topoInstant.data().nodes;
-  //
-  //   const source = nodes.findIndex(node => node.dpid === sourceId);
-  //   const target = nodes.findIndex(node => node.dpid === targetId);
-  //
-  //   topoInstant.getLinksByNode(source, target);
-  // }
-
-  addLinkById(sourceId, targetId, linkType) {
-    /**
-     * input node_id (dpid, mac...),
-     */
-    const nodes = topoInstant.data().nodes;
-    let source;
-    let target;
-    switch (linkType) {
-      case 's2s':
-        source = nodes.findIndex(node => node.dpid === sourceId);
-        target = nodes.findIndex(node => node.dpid === targetId);
-        topoInstant.addLink({ source, target, linkType });
-        break;
-      case 's2h':
-        source = nodes.findIndex(node => node.mac === sourceId);
-        target = nodes.findIndex(node => node.dpid === targetId);
-        topoInstant.addLink({ source, target, linkType });
-        break;
-      default:
-        return;
-    }
+  addLinkById(source, target, linkType) {
+    topoInstant.addLink({ source, target, linkType });
   }
 
-  delLinkById({ controller, link }) {
-    const linkIds = this.getLinksByNodeUid(link[0], link[1], controller);
+  delLinkById({ link }) {
+    const linkIds = this.getLinksByNodeUid(link[0].uid, link[1].uid);
 
-    Object.keys(linkIds).forEach(linkId => {
+    linkIds.forEach(linkId => {
       topoInstant.deleteLink(linkId);
     });
   }
 
   addPath(linkCollection) {
-
     const pathLayer = topoInstant.getLayer('paths');
     const links = linkCollection.path.map(link => {
       const linkIds = this.getLinksByNodeUid(
-        link[0].dpid,
-        link[1].dpid,
-        linkCollection.controller
+        `${linkCollection.controller}-${link[0].dpid}`,
+        `${linkCollection.controller}-${link[1].dpid}`
       );
-      return topoInstant.getLink(Object.keys(linkIds)[0]);
+      return topoInstant.getLink(linkIds[0]);
     });
 
     const path1 = new nx.graphic.Topology.Path({
@@ -228,7 +257,6 @@ class Topo {
     });
     pathLayer.addPath(path1);
   }
-
   /**
    * [getLinksByNodeUid description]
    * @param  {[type]} sourceId   [description]
@@ -236,16 +264,22 @@ class Topo {
    * @param  {[type]} controller [description]
    * @return {[type]}            [description]
    */
-  getLinksByNodeUid(sourceId, targetId, controller) {
-    const nodes = topoInstant.data().nodes;
+  getLinksByNodeUid(sourceUid, targetUid) {
+    const linkClasses = topoInstant.getLinksByNode(sourceUid, targetUid);
+    return Object.keys(linkClasses);
+  }
 
-    const source = nodes.findIndex(node =>
-      node.dpid === sourceId.dpid && node.controller === controller
-    );
-    const target = nodes.findIndex(node =>
-      node.dpid === targetId.dpid && node.controller === controller
-    );
-    return topoInstant.getLinksByNode(source, target);
+  addMockPath(paths) {
+    const pathLayer = topoInstant.getLayer('paths');
+    const links = paths.map(link => {
+      return topoInstant.getLink(link);
+    });
+
+    const path1 = new nx.graphic.Topology.Path({
+      links,
+      arrow: 'end',
+    });
+    pathLayer.addPath(path1);
   }
 
   getTopo() {

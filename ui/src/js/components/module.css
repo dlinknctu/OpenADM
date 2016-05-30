@@ -10,7 +10,8 @@
     border-radius: 5px !important;
     padding: 10px 10px 10px 10px;
     box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23) !important;
-    overflow: scroll;
+    overflow: auto;
+    display: table !important;
 }
 
 .gridItem:hover {
@@ -31,7 +32,7 @@
 }
 
 .controlPanel {
-    position: absolute;
+    position: fixed;
     right: 0;
     top: 0;
     width: 100%;

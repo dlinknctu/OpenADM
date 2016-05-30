@@ -8,25 +8,19 @@ class Toplogy extends Component {
 
   componentDidMount() {
     const renderDom = findDOMNode(this.refs.topology);
+    console.log('componentDidMount', this.props);
     topo.initalTopo(renderDom);
+    topo.bindEvent(this.props);
   }
   shouldComponentUpdate(nextProps) {
-    const { nodes, links, searchNode, level, tag } = nextProps;
-    return false;
-    console.info(`nodes: ${_.isEqual(nodes, this.props.nodes)}`,
-      `links: ${links===this.props.links}`,
-      `search: ${searchNode===this.props.searchNode}`,
-      `tag: ${tag===this.props.tag}`,
-      `level: ${level===this.props.level}`);
-
-    if (!_.isEqual(nextProps.nodes, this.props.nodes)) {
-      setTimeout(() => {
-        // topo.data({
-        //   nodes: nextProps.nodes.asMutable({deep: true}),
-        //   links: nextProps.links.asMutable({deep: true}),
-        // })
-      }, 1000);
-    }
+    // const { nodes, links, searchNode, level, tag } = nextProps;
+    // return false;
+    // console.info(`nodes: ${_.isEqual(nodes, this.props.nodes)}`,
+    //   `links: ${links===this.props.links}`,
+    //   `search: ${searchNode===this.props.searchNode}`,
+    //   `tag: ${tag===this.props.tag}`,
+    //   `level: ${level===this.props.level}`);
+    // }
     //   this.updateNode(nodes);
     // else if (nextProps.links !== this.props.links)
     //   this.updateLink(links);
