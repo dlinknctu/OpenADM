@@ -6,12 +6,11 @@
 }
 
 .gridItem {
-    z-index: 5;
+    z-index: 1200;
     border-radius: 5px !important;
     padding: 10px 10px 10px 10px;
     box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23) !important;
     overflow: auto;
-    display: table !important;
 }
 
 .gridItem:hover {
@@ -28,7 +27,7 @@
     height: 92% !important;
     width: 99% !important;
     position: fixed !important;
-    z-index: 10;
+    z-index: 1210;
 }
 
 .controlPanel {
@@ -39,6 +38,7 @@
     height: 24px;
     border-radius: 3px;
     background-color: rgba(33, 150, 243, 1);
+    z-index: 1211;
 }
 
 .closeIcon {
@@ -55,11 +55,14 @@
     position: absolute;
     right: 25px;
     bottom: 10px;
-    z-index: 11;
+    z-index: 1209;
 }
 
 .paperPanel {
     margin: 25px;
     padding: 25px;
     width: 400px;
+}
+
+.dialogAction {
 }

@@ -174,6 +174,10 @@ class Topo {
         [target.id()]: target.position(),
       });
     });
+    const pathLayer = topoInstant.getLayer('paths');
+    pathLayer.ondragend = (d,a) => {
+      console.log('path dragend', d, a);
+    };
     topoInstant.on('keypress', (topo, e) => {
       switch (e.code) {
         case 'KeyC':
@@ -187,6 +191,9 @@ class Topo {
           break;
         case 'KeyP':
           props.togglePanel('PortStatus');
+          break;
+        case 'KeyR':
+          props.resetLayout();
           break;
         default:
           return;
@@ -241,7 +248,10 @@ class Topo {
     });
   }
 
-  addPath(linkCollection) {
+  addPath(linkCollection = {}) {
+    if (linkCollection.path && !linkCollection.path.length) {
+      return;
+    }
     const pathLayer = topoInstant.getLayer('paths');
     const links = linkCollection.path.map(link => {
       const linkIds = this.getLinksByNodeUid(
@@ -253,9 +263,14 @@ class Topo {
 
     const path1 = new nx.graphic.Topology.Path({
       links,
-      arrow: 'cap',
+      arrow: 'end',
     });
     pathLayer.addPath(path1);
+  }
+
+  clearAllPath() {
+    const pathLayer = topoInstant.getLayer('paths');
+    pathLayer.clear();
   }
   /**
    * [getLinksByNodeUid description]
@@ -267,19 +282,6 @@ class Topo {
   getLinksByNodeUid(sourceUid, targetUid) {
     const linkClasses = topoInstant.getLinksByNode(sourceUid, targetUid);
     return Object.keys(linkClasses);
-  }
-
-  addMockPath(paths) {
-    const pathLayer = topoInstant.getLayer('paths');
-    const links = paths.map(link => {
-      return topoInstant.getLink(link);
-    });
-
-    const path1 = new nx.graphic.Topology.Path({
-      links,
-      arrow: 'end',
-    });
-    pathLayer.addPath(path1);
   }
 
   getTopo() {

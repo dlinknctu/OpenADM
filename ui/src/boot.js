@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from 'react-dom';
+import ReactDOM from 'react-dom';
 import { syncHistoryWithStore } from 'react-router-redux';
 import { browserHistory } from 'react-router';
 import Immutable from 'seamless-immutable';
@@ -15,12 +15,12 @@ const initialState = Immutable({
   routing: { locationBeforeTransitions: null },
   layout: {
     gridLayout: [
-      { i: 'Flowtable', x: 1, y: 0, w: 3, h: 3 },
+      { i: 'Flowtable', x: 1, y: 5, w: 8, h: 7 },
       { i: 'ControllerStatus', x: 4, y: 0, w: 5, h: 3 },
       { i: 'PortStatus', x: 4, y: 0, w: 5, h: 3 },
-      { i: 'SettingContainer', x: 4, y: 0, w: 4, h: 8 },
+      { i: 'SettingContainer', x: 1, y: 0, w: 5, h: 8 },
     ],
-    hiddenPanel: [],
+    hiddenPanel: ['Flowtable', 'ControllerStatus', 'PortStatus', 'SettingContainer'],
     maximumPanel: '',
   },
   setting: {},
@@ -29,7 +29,7 @@ const initialState = Immutable({
       { type: 'type', filter: 'switch' },
       { type: 'id', filter: '00:0a:00:00:00:51:85:91' },
     ],
-    selectNodes: [],
+    selectNodes: {},
     level: 0,
     nodes: [],
     fixedNode: {},
@@ -40,9 +40,10 @@ const initialState = Immutable({
   flowtable: {
     filterString: '',
     visibleField: ['ipv4'],
-    flowlist: [],
+    flowlist: [{ controller: '', flows: [] }],
+    selectFlow: {},
   },
-  portStatus: {},
+  portStatus: [],
 });
 
 const store = configureStore(initialState, browserHistory);
@@ -53,11 +54,9 @@ const history = syncHistoryWithStore(
   { selectLocationState: state => state.routing }
 );
 
-if (typeof(document) !== 'undefined' && window) {
-  window.onload = () => render(
-    <Root store={store} history={history} />,
-    document.getElementById('app')
-  );
-}
+ReactDOM.render(
+  <Root store={store} history={history} />,
+  document.getElementById('app')
+);
 
 export default store;

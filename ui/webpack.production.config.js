@@ -7,6 +7,7 @@
 var webpack = require('webpack');
 var Path = require('path');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
+var rucksack = require('rucksack-css');
 
 module.exports = {
     entry:{
@@ -39,39 +40,44 @@ module.exports = {
         // },
     },
     module: {
+      loaders: [{
+        test: /\.(jsx|js)$/,
+        exclude: /node_modules/,
+        loaders: ['babel-loader'],
+        include: Path.join(__dirname, 'src/')
+      }, {
+        test: /\.css$/,
+        include: /src/,
         loaders: [
-            {
-                test: /\.(jsx|js)$/,
-                exclude: /node_modules/,
-                loader: 'babel-loader',
-                noParse: "/node_modules/",
-                include: Path.join(__dirname, 'src/')
-            },
-            {
-                test: /\.css$/,
-                loader: 'style-loader!css-loader'
-            },
-            {
-                test: /\.less$/,
-                loader: 'style-loader!css-loader!autoprefixer-loader!less-loader'
-            },
-            {
-                test: /\.json$/,
-                loader: 'json'
-            },
-            {
-                test: /\.(ttf|eot|png|gif|jpg|woff|woff2|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-                loader: "url-loader?limit=8192"
-            },
-            {
-                test: /\.png$/,
-                loader: "file?name=[path][name].[ext]&context=./src"
-            }
+          'style-loader',
+          'css-loader?modules&sourceMap&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]',
+          'postcss-loader'
         ]
+      }, {
+          test: /\.css$/,
+          exclude: /src/,
+          loader: 'style!css'
+      }, {
+        test: /\.json$/,
+        loader: 'json'
+      }, {
+        test: /\.(ttf|eot|png|gif|jpg|woff|woff2|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+        loader: "url-loader?limit=8192"
+      }, {
+        test: /\.(png|html)$/,
+        loader: "file?name=[path][name].[ext]&context=./src"
+      }]
     },
+    postcss: [
+      rucksack({
+        autoprefixer: true
+      })
+    ],
     plugins: [
         new webpack.DefinePlugin({
-          'process.env.NODE_ENV': '"production"'
+          'process.env': {
+              NODE_ENV: JSON.stringify('production')
+          }
         }),
         new webpack.optimize.DedupePlugin(),
         new webpack.optimize.UglifyJsPlugin(),

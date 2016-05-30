@@ -8,7 +8,6 @@ const menuItems = [
   { route: 'domain/three', text: '工三', iconType: 'domain' },
   { route: 'domain/four', text: '工四', iconType: 'domain' },
   { route: 'setting', text: 'Setting', iconType: 'settings' },
-  { route: 'not', text: '404 page' },
 ];
 
 class LeftNavBar extends React.Component {

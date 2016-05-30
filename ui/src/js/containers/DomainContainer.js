@@ -4,17 +4,11 @@ import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import ModuleContainer from './ModuleContainer';
 import TopologyContainer from './TopologyContainer';
+import FlowtableContainer from './FlowtableContainer';
 import ControllerContainer from './ControllerContainer';
 import ModuleButton from '../components/ModuleButton.jsx';
 import SettingController from '../components/SettingController.jsx';
-import TextField from 'material-ui/TextField';
-const Flowtable = () => <div>
-  <h1 style={{ color: 'rgb(228,10,93)'}}>Flowtable</h1>
-  <TextField hintText="Hint Text" />
-</div>;
-const PortStatus = () => <div>
-  <h1>PortStatus Status</h1>
-</div>;
+import PortStatusContainer from './PortStatusContainer';
 
 class DomainContainer extends Component {
   render() {
@@ -23,9 +17,9 @@ class DomainContainer extends Component {
       <div>
         <TopologyContainer />
         <ModuleContainer>
-          <Flowtable />
+          <FlowtableContainer />
           <ControllerContainer />
-          <PortStatus />
+          <PortStatusContainer />
           <SettingController settingController={settingController} subscribe={subscribe} />
         </ModuleContainer>
         <ModuleButton hiddenPanel={hiddenPanel} togglePanel={togglePanel} />
@@ -42,7 +36,6 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
   togglePanel: p => dispatch({ type: 'TOGGLE_PANEL', payload: p }),
   settingController: p => dispatch({ type: 'SETTING_CONTROLLER', payload: p }),
-  subscribe: () => dispatch({ type: 'SUBSCRIBE', payload: {} }),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(DomainContainer);

@@ -7,10 +7,17 @@ import { connect } from 'react-redux';
 import LeftNavBar from './components/LeftNavBar.jsx';
 import AppBar from 'material-ui/AppBar';
 import AppCanvas from 'material-ui/internal/AppCanvas';
-import FlatButton from 'material-ui/FlatButton';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import Theme from '../theme.js';
 import { resetLayout } from './actions/LayoutAction';
+import SyncIcon from 'material-ui/svg-icons/notification/sync';
+import RestoreIcon from 'material-ui/svg-icons/action/restore';
+import RemoveIcon from 'material-ui/svg-icons/content/remove-circle';
+import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
+import IconButton from 'material-ui/IconButton';
+import IconMenu from 'material-ui/IconMenu';
+import MenuItem from 'material-ui/MenuItem';
+
 
 const styles = {
   paddingTop: '64px',
@@ -26,6 +33,8 @@ class Master extends React.Component {
     super(props);
     this.onLeftIconButtonTouchTap = this.onLeftIconButtonTouchTap.bind(this);
     this.handleReset = this.handleReset.bind(this);
+    this.handleSubscribe = this.handleSubscribe.bind(this);
+    this.handleClearPath = this.handleClearPath.bind(this);
   }
 
   getChildContext() {
@@ -42,12 +51,42 @@ class Master extends React.Component {
     this.props.resetLayout();
   }
 
+  handleSubscribe() {
+    this.props.subscribe();
+  }
+
+  handleClearPath() {
+    this.props.clearAllPath();
+  }
+
   render() {
     return (
       <AppCanvas>
         <AppBar
           title="OpenADM"
-          iconElementRight={<FlatButton onClick={this.handleReset} label="Reset layout" />}
+          iconElementRight={
+            <IconMenu
+              iconButtonElement={<IconButton><MoreVertIcon /></IconButton>}
+              targetOrigin={{ horizontal: 'right', vertical: 'top' }}
+              anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
+            >
+              <MenuItem
+                leftIcon={<RestoreIcon />}
+                primaryText="Reset layout"
+                onClick={this.handleReset}
+              />
+              <MenuItem
+                leftIcon={<SyncIcon />}
+                primaryText="Sync data"
+                onClick={this.handleSubscribe}
+              />
+              <MenuItem
+                leftIcon={<RemoveIcon />}
+                primaryText="Clear Path"
+                onClick={this.handleClearPath}
+              />
+            </IconMenu>
+          }
           onLeftIconButtonTouchTap={this.onLeftIconButtonTouchTap}
         />
         <LeftNavBar ref="leftNav" />
@@ -61,6 +100,9 @@ class Master extends React.Component {
 
 Master.propTypes = {
   children: PropTypes.object.isRequired,
+  resetLayout: PropTypes.func.isRequired,
+  subscribe: PropTypes.func.isRequired,
+  clearAllPath: PropTypes.func.isRequired,
 };
 
 Master.childContextTypes = {
@@ -69,6 +111,8 @@ Master.childContextTypes = {
 
 const mapDispatchToProps = (dispatch) => ({
   resetLayout: () => dispatch(resetLayout()),
+  subscribe: () => dispatch({ type: 'SUBSCRIBE', payload: {} }),
+  clearAllPath: () => dispatch({ type: 'CLEAR_ALL_PATH', payload: {} }),
 });
 
 export default connect(null, mapDispatchToProps)(Master);

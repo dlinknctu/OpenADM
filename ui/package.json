@@ -12,6 +12,7 @@
     "classnames": "^2.2.5",
     "css-loader": "^0.23.1",
     "file-loader": "^0.8.5",
+    "griddle-react": "^0.5.1",
     "html-webpack-plugin": "^2.8.2",
     "isomorphic-fetch": "^2.2.1",
     "json-loader": "^0.5.4",

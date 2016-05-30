@@ -9,8 +9,8 @@ import NotFound from './pages/NotFound.jsx';
 const RootRouter = ({ history }) => (
   <Router history={history}>
     <Route path="/" component={Master}>
-      <IndexRoute component={Home} />
-      <Route path="domain" component={Domain} />
+      <Route path="home" component={Home} />
+      <IndexRoute path="domain" component={Domain} />
       <Route path="domain/:domainName" component={Domain} onLeave={() => console.log('leave route')}/>
       <Route path="setting" component={Setting} />
     </Route>

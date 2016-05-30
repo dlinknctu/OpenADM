@@ -9,10 +9,9 @@ const initalState = {
   fixedNode: {},
   level: 0,
   filter: [],
-  select: [],
-  searchNode: '',
+  selectNodes: {},
   tag: '',
-  controllerList:[],
+  controllerList: [],
 };
 
 
@@ -53,7 +52,10 @@ export default (state = Immutable(initalState), { type, payload }) => {
       return state;
 
     case 'SELECT_NODE':
-      return state;
+      return state.update('selectNodes', nodes => {
+        return (nodes.uid !== payload.uid) ?
+          payload : {};
+      });
 
     /**
      * { ip, vlan, mac, controller, type, location }
@@ -170,8 +172,8 @@ export default (state = Immutable(initalState), { type, payload }) => {
      */
     case 'PACKET':
       return state;
-    case 'ADD_MOCK_PATH':
-      Topo.addMockPath(payload);
+    case 'CLEAR_ALL_PATH':
+      Topo.clearAllPath();
       return state;
     case 'SIMULATE_RESP':
       Topo.addPath(payload);

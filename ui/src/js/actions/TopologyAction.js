@@ -18,10 +18,7 @@ export const simulate = (payload) => ({
   type: 'OTHER',
   payload: {
     url: 'simulate',
-    request: {
-      dpid: payload.dpid,
-      flow: payload.flow,
-    },
+    request: payload,
   },
 });
 
@@ -33,12 +30,21 @@ export const simulate = (payload) => ({
  * @param  {[type]} payload [description]
  * @return {[type]}         [description]
  */
-export const getAllFlow = () => ({
-  type: 'OTHER',
-  payload: {
-    url: 'flow',
-  },
-});
+export const getAllFlow = (payload) => {
+  return (payload.controller) ? {
+    type: 'OTHER',
+    payload: {
+      url: 'flow',
+      request: payload,
+    },
+  } : {
+    type: 'OTHER',
+    payload: {
+      url: 'flow',
+    },
+  };
+};
+
 export const getFlowBy = (payload) => ({
   type: 'OTHER',
   payload: {

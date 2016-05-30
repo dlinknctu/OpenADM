@@ -9,6 +9,7 @@ import { withHandlers, withState, compose } from 'recompose';
 
 const styles = {
   panelBtn: {
+    marginLeft: '180px',
   },
   textIcon: {
     padding: '0 20 0 0',
@@ -30,9 +31,6 @@ const enhance = compose(
     onControllerNameChange: props => event => {
       props.setControllerName(event.target.value);
     },
-    onSubscribe: ({ subscribe }) => event => {
-      subscribe();
-    },
     onSubmit: ({ coreURL, controllerURL, controllerName, settingController }) =>
     event => {
       event.preventDefault();
@@ -48,7 +46,6 @@ const SettingController = ({
   onCoreURLChange,
   onControllerURLChange,
   onControllerNameChange,
-  onSubscribe,
   onSubmit,
 }) => (
   <div>
@@ -78,13 +75,6 @@ const SettingController = ({
     <div>
       <RaisedButton
         style={styles.panelBtn}
-        label="subscribe"
-        primary labelPosition="before"
-        icon={<SendIcon />}
-        onClick={onSubscribe}
-      />
-      <RaisedButton
-        style={styles.panelBtn}
         label="Setting"
         primary labelPosition="before"
         icon={<SendIcon />}
@@ -98,7 +88,6 @@ SettingController.propTypes = {
   onCoreURLChange: PropTypes.func.isRequired,
   onControllerURLChange: PropTypes.func.isRequired,
   onControllerNameChange: PropTypes.func.isRequired,
-  onSubscribe: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
 };
 

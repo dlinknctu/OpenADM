@@ -8,7 +8,6 @@ class Toplogy extends Component {
 
   componentDidMount() {
     const renderDom = findDOMNode(this.refs.topology);
-    console.log('componentDidMount', this.props);
     topo.initalTopo(renderDom);
     topo.bindEvent(this.props);
   }
