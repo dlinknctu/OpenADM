@@ -51,8 +51,8 @@ class Topo {
         iconType: 'cloud',
         label: 'model.controller',
         color: vertex => getColorWithController(vertex.get('controller')),
-      }
-      ,vertexPositionGetter: function() {
+      },
+      vertexPositionGetter: function() {
         // if this is node, use original position
         if (this.type() == "vertex") {
           return {
@@ -86,12 +86,12 @@ class Topo {
             return false;
           }
         }
-      }
+      },
       // layoutType: 'WorldMap',
-      //   layoutConfig: {
-      //       longitude: 'model.longitude',
-      //       latitude: 'model.latitude',
-      //       worldTopoJson: 'js/world.js'
+      // layoutConfig: {
+      //   longitude: 'model.longitude',
+      //   latitude: 'model.latitude',
+      //   worldTopoJson: 'js/world.js',
       // },
       // tooltipManagerConfig: {
       //   nodeTooltipContentClass: 'MyNodeTooltip'
