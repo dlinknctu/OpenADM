@@ -14,7 +14,7 @@ class Flow_mod:
 		# register weboskcet api
 		core.registerURLApi("flowmod", self.flowHandler)
 
-	def flowHandler(self, body):
+	def flowHandler(self, data):
 		# return JSONP format
 		conn = httplib.HTTPConnection(self.IP,self.Port)
 		conn.request('POST',self.path,body,self.headers)
