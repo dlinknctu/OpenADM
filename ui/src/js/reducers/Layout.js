@@ -7,7 +7,7 @@ const initialState = Immutable({
     { i: 'Flowtable', x: 1, y: 5, w: 8, h: 7 },
     { i: 'ControllerStatus', x: 4, y: 0, w: 5, h: 3 },
     { i: 'PortStatus', x: 4, y: 0, w: 5, h: 3 },
-    { i: 'SettingContainer', x: 1, y: 0, w: 5, h: 8 },
+    { i: 'SettingContainer', x: 1, y: 0, w: 6, h: 8 },
   ],
   hiddenPanel: [],
   maximumPanel: '',

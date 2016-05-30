@@ -47,7 +47,7 @@ class Topo {
         },
       },
       nodeSetConfig: {
-        iconType: 'model.iconType',
+        iconType: 'cloud',
         label: 'model.name',
         color: vertex => getColorWithController(vertex.get('name')),
       }
