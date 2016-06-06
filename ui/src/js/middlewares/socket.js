@@ -4,9 +4,7 @@ import io from 'socket.io-client';
 let socket = null;
 
 export const ioInit = store => {
-  // socket = io('http://docker.cs.nctu.edu.tw:32773/websocket', { origins: '*' });
-  // socket = io('http://cswwwdev.cs.nctu.edu.tw:5000/zylin', { origins: '*' });
-  socket = io.connect('http://docker.cs.nctu.edu.tw:32812/websocket');
+  socket = io.connect(`${coreURL}/websocket`);
   socket.on('connect', () => {
     console.info('websocket connected!');
   });
