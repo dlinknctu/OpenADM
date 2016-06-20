@@ -43,6 +43,7 @@
     "webpack": "^1.13.1"
   },
   "devDependencies": {
+    "ava": "^0.15.2",
     "babel-plugin-react-transform": "^2.0.0",
     "babel-preset-react-hmre": "^1.1.0",
     "enzyme": "^2.3.0",
@@ -56,7 +57,6 @@
     "express": "^4.13.3",
     "html-webpack-plugin": "^2.17.0",
     "jsdom": "^9.2.0",
-    "mocha": "^2.5.3",
     "react-transform-catch-errors": "^1.0.2",
     "react-transform-hmr": "^1.0.2",
     "redbox-react": "^1.2.6",
@@ -71,9 +71,20 @@
     "webpack-hot-middleware": "^2.10.0",
     "webpack-notifier": "^1.2.1"
   },
+  "ava": {
+    "babel": "inherit",
+    "require": [
+      "babel-register",
+      "babel-polyfill",
+      "./test/setup.js"
+    ],
+    "files": [
+      "./src/**/__tests__/*.js"
+    ]
+  },
   "scripts": {
-    "test": "NODE_ENV=test mocha './src/**/__tests__/*.js' --require ./test/setup.js --compilers js:babel-core/register --recursive",
-    "test:watch": "npm test -- --watch",
+    "test": "NODE_ENV=test ava --verbose",
+    "test:watch": "NODE_ENV=test ava --verbose --watch;true",
     "lint": "eslint --ignore-pattern 'src/**/__tests__' src;true",
     "build": "NODE_ENV=production webpack -p --progress  --config ./webpack.production.config.js",
     "dev": "NODE_ENV=development node devServer.js"

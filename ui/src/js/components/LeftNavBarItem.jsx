@@ -1,16 +1,17 @@
-import React, { PropTypes } from 'react';
+import React, { Component, PropTypes } from 'react';
 import MenuItem from 'material-ui/MenuItem';
 import { onlyUpdateForKeys } from 'recompose';
 import Divider from 'material-ui/Divider';
 import SettingIcon from 'material-ui/svg-icons/action/settings';
 import DomainIcon from 'material-ui/svg-icons/social/domain';
 
-class LeftBavBarItem extends React.Component {
+export class LeftNavBarItem extends Component {
 
   constructor(props) {
     super(props);
     this.onMenuItemTap = this.onMenuItemTap.bind(this);
   }
+
   onMenuItemTap() {
     const { handleClick, route } = this.props;
     handleClick(route);
@@ -33,7 +34,7 @@ class LeftBavBarItem extends React.Component {
   }
 }
 
-LeftBavBarItem.propTypes = {
+LeftNavBarItem.propTypes = {
   primaryText: PropTypes.string.isRequired,
   isActive: PropTypes.bool.isRequired,
   iconType: PropTypes.string,
@@ -41,4 +42,4 @@ LeftBavBarItem.propTypes = {
   handleClick: PropTypes.func.isRequired,
 };
 
-export default onlyUpdateForKeys(['isActive'])(LeftBavBarItem);
+export default onlyUpdateForKeys(['isActive'])(LeftNavBarItem);
