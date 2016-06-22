@@ -1,6 +1,4 @@
 import Immutable from 'seamless-immutable';
-import _ from 'lodash';
-import Helper from '../utils/TopoHelper';
 import Topo from '../components/Topology/Topo.js';
 
 const initalState = {

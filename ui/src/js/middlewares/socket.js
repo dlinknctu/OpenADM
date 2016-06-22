@@ -59,7 +59,8 @@ export const socketIoMiddleware = store => next => action => {
   // Send event to Server.
   const actions = [
     'SETTING_CONTROLLER',
-    'SUBSCRIBE', 'OTHER',
+    'SUBSCRIBE',
+    'OTHER',
     'FEATURE',
     'DEBUG',
     'RESET_DATASTORE',

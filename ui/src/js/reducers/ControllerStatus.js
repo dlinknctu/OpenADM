@@ -18,4 +18,9 @@ export default handleActions({
     d.controller === payload.controller ? payload : d
   )),
 
+  RESET_DATASTORE_RESP: (state, { payload }) => {
+    console.log('RESET_DATASTORE_RESP', payload);
+    return state;
+  },
+
 }, initialState);

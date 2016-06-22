@@ -253,6 +253,9 @@ class Topo {
     if (linkCollection.path && !linkCollection.path.length) {
       return;
     }
+    if (linkCollection.length === 0) {
+      return;
+    }
     const pathLayer = topoInstant.getLayer('paths');
     const links = linkCollection.path.map(link => {
       const linkIds = this.getLinksByNodeUid(

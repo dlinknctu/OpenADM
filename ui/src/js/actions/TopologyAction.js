@@ -30,7 +30,7 @@ export const simulate = (payload) => ({
  * @param  {[type]} payload [description]
  * @return {[type]}         [description]
  */
-export const getAllFlow = (payload) => {
+export const getAllFlow = payload => {
   return (payload.controller) ? {
     type: 'OTHER',
     payload: {

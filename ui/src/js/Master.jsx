@@ -35,6 +35,7 @@ class Master extends React.Component {
     this.handleReset = this.handleReset.bind(this);
     this.handleSubscribe = this.handleSubscribe.bind(this);
     this.handleClearPath = this.handleClearPath.bind(this);
+    this.handleRestoreCore = this.handleRestoreCore.bind(this);
   }
 
   getChildContext() {
@@ -57,6 +58,10 @@ class Master extends React.Component {
 
   handleClearPath() {
     this.props.clearAllPath();
+  }
+
+  handleRestoreCore() {
+    this.props.restoreCore();
   }
 
   render() {
@@ -85,6 +90,11 @@ class Master extends React.Component {
                 primaryText="Clear Path"
                 onClick={this.handleClearPath}
               />
+              <MenuItem
+                leftIcon={<RemoveIcon />}
+                primaryText="Restore core"
+                onClick={this.handleRestoreCore}
+              />
             </IconMenu>
           }
           onLeftIconButtonTouchTap={this.onLeftIconButtonTouchTap}
@@ -103,6 +113,7 @@ Master.propTypes = {
   resetLayout: PropTypes.func.isRequired,
   subscribe: PropTypes.func.isRequired,
   clearAllPath: PropTypes.func.isRequired,
+  restoreCore: PropTypes.func.isRequired,
 };
 
 Master.childContextTypes = {
@@ -113,6 +124,7 @@ const mapDispatchToProps = (dispatch) => ({
   resetLayout: () => dispatch(resetLayout()),
   subscribe: () => dispatch({ type: 'SUBSCRIBE', payload: {} }),
   clearAllPath: () => dispatch({ type: 'CLEAR_ALL_PATH', payload: {} }),
+  restoreCore: () => dispatch({ type: 'OTHER', payload: { url: 'reset_datastore' } }),
 });
 
 export default connect(null, mapDispatchToProps)(Master);
