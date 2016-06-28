@@ -1,11 +1,12 @@
-### NCTUCS frontend template
+### OpenADM
 ---
  - React
  - Webpack
  - Babel
  - ES6
- - Alt (flux implementation)
+ - Redux
  - Material-ui
+ - Next
 
  ### How to use
 ---
@@ -16,4 +17,3 @@
 ---
  - npm install
  - npm run build
-

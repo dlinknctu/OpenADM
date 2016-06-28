@@ -49,6 +49,7 @@ const SettingController = ({
   onSubmit,
 }) => (
   <div>
+    <h2 style={{ marginBottom: '0px' }}>Controller Setting</h2>
     <div>
       <SettingIcon style={styles.textIcon} />
       <TextField

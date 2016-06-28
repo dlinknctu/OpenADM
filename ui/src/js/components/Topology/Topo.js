@@ -17,7 +17,6 @@ class Topo {
       adaptive: true,
       scalable: true,
       showIcon: true,
-      theme: 'blue',
       enableSmartLabel: true,
       enableSmartNode: true,
       enableGradualScaling: true,
@@ -203,7 +202,7 @@ class Topo {
   }
 
   setData(data) {
-    clist = data.nodeSet.map(d => d.name);
+    clist = data.nodeSet.map(d => d.controller);
     topoInstant.data(data);
   }
 
