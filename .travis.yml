@@ -1,5 +1,8 @@
 script: ./run.sh test
 sudo: false
+language: node_js
+node_js:
+    - "node"
 cache:
     directories:
         - $HOME/.local/lib/python2.7/site-packages/
