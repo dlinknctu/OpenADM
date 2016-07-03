@@ -10,16 +10,16 @@ class CoreTestCase(unittest.TestCase):
     def setUp(self):
         self.coreInstance = core.Core()
 
-    def test_registerRestApi(self):
-        self.coreInstance.registerRestApi('rest', self.handler)
+    def test_registerURLApi(self):
+        self.coreInstance.registerURLApi('rest', self.handler)
         expected = self.handler
-        result = core.restHandlers['rest']
+        result = core.urlHandlers['rest']
         self.assertEquals(expected, result)
 
-    def test_registerSSEHandler(self):
-        self.coreInstance.registerSSEHandler('sse', self.handler)
+    def test_registerAdapterHandler(self):
+        self.coreInstance.registerAdapterHandler('sse', self.handler)
         expected = self.handler
-        result = core.sseHandlers['sse']
+        result = core.adapterHandlers['sse']
         self.assertEquals(expected, result)
 
     def test_registerEventHandler(self):
