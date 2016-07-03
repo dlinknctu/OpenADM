@@ -12,8 +12,8 @@ RUN echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true 
     apt-get install -y oracle-java7-installer ant && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /var/cache/oracle-jdk7-installer && \
-    wget -qO- https://deb.nodesource.com/setup_5.x | bash - && \
-    apt-get install -y nodejs
+    git clone https://github.com/tj/n.git && \
+    cd n && make install && n stable
 
 # Setup environment variable
 ENV HOME /root
