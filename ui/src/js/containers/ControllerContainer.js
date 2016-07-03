@@ -1,6 +1,5 @@
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
-import { VictoryPie } from 'victory';
 import { Tabs, Tab } from 'material-ui/Tabs';
 import InfoIcon from 'material-ui/svg-icons/action/info';
 import { List, ListItem } from 'material-ui/List';
