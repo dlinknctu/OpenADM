@@ -1,6 +1,8 @@
+/* eslint-disable no-underscore-dangle,  */
 import d3 from 'd3';
 import Helper from '../../utils/TopoHelper';
 
+const nx = global.nx;
 const color10 = d3.scale.category10();
 // save controller to choose color
 let clist = [];
@@ -33,17 +35,11 @@ class Topo {
         color: vertex => getColorWithController(vertex.get('controller')),
       },
       linkConfig: {
-        width: vertex => {
-          if (vertex.get('linkType') === 's2s')
-            return 6;
-          return 4;
-        },
+        width: vertex => ((vertex.get('linkType') === 's2s') ? 6 : 4),
         linkType: 'curve',
-        style: vertex => {
-          if (vertex.get('linkType') !== 's2s') {
-            return { 'stroke-dasharray': '1 , 1' };
-          }
-        },
+        style: vertex => ((vertex.get('linkType') !== 's2s') ?
+          { 'stroke-dasharray': '1 , 1' } : {}
+        ),
         color: vertex => getColorWithController(vertex.get('controller')),
       },
       nodeSetConfig: {
@@ -51,40 +47,38 @@ class Topo {
         label: 'model.controller',
         color: vertex => getColorWithController(vertex.get('controller')),
       },
-      vertexPositionGetter: function() {
+      vertexPositionGetter() {
         // if this is node, use original position
-        if (this.type() == "vertex") {
+        if (this.type() === 'vertex') {
           return {
             x: nx.path(this._data, 'x') || 0,
-            y: nx.path(this._data, 'y') || 0
+            y: nx.path(this._data, 'y') || 0,
           };
-        } else {
-          // if this is a nodeSet, use the firNode's position
-          var graph = this.graph();
-          var firstVertex = graph.getVertex(this.get('nodes').slice(0).shift());
-
-          if (firstVertex) {
-            return firstVertex.position();
-          } else {
-            return {
-              x: Math.random() * 500,
-              y: Math.random() * 500
-            }
-          }
         }
+        // if this is a nodeSet, use the firNode's position
+        const graph = this.graph();
+        const firstVertex = graph.getVertex(this.get('nodes').slice(0).shift());
+
+        if (firstVertex) {
+          return firstVertex.position();
+        }
+        return {
+          x: Math.random() * 500,
+          y: Math.random() * 500,
+        };
       },
-      vertexPositionSetter: function(position) {
+      vertexPositionSetter(position) {
         if (this._data) {
-          var x = nx.path(this._data, 'x');
-          var y = nx.path(this._data, 'y');
+          const x = nx.path(this._data, 'x');
+          const y = nx.path(this._data, 'y');
           if (position.x !== x || position.y !== y) {
             nx.path(this._data, 'x', position.x);
             nx.path(this._data, 'y', position.y);
             return true;
-          } else {
-            return false;
           }
+          return false;
         }
+        return false;
       },
       // layoutType: 'WorldMap',
       // layoutConfig: {
@@ -99,48 +93,49 @@ class Topo {
 
 
     nx.define('ExtendedNode', nx.graphic.Topology.Node, {
-      view: function(view) {
-        view.content[2].events.click = "{#_nodeClick}"
+      view(view) {
+        const newView = view;
+        newView.content[2].events.click = '{#_nodeClick}';
           // console.log('view ', view.content[0])
-        return view;
+        return newView;
       },
 
-      'methods': {
-        init: function(args) {
+      methods: {
+        init(args) {
           this.inherited(args);
-          var stageScale = this.topology().stageScale();
+          const stageScale = this.topology().stageScale();
           this.view('label').setStyle('font-size', 14 * stageScale);
         },
-        setModel: function(model) {
+        setModel(model) {
           this.inherited(model);
         },
-        applyChanges: function() {
+        applyChanges() {
           // var type = $scope.getNodeTypeById(this.id());
           // if ($scope.colorTable.nodeTypes.hasOwnProperty(type)) {
           //   this.color($scope.colorTable.nodeTypes[type]);
           // }
         },
-        _nodeClick: function(sender, event) {
+        _nodeClick(sender, event) {
           console.log('node clicked', this.id());
         },
-        _dragstart: function(sender, event) {
+        _dragstart(sender, event) {
           console.log('drag start', this.model().get('dpid'));
         },
-      }
+      },
     });
 
     nx.define('ExtendedLink', nx.graphic.Topology.Link, {
       methods: {
-        init: function(args) {
+        init(args) {
           this.inherited(args);
           // fixme: third parameter should be false
           // topo.fit(undefined, undefined, true);
         },
-        setModel: function(model) {
+        setModel(model) {
           this.inherited(model);
         },
-        applyChanges: function() {}
-      }
+        applyChanges() {},
+      },
     });
 
     topoInstant.on('topologyGenerated', (sender, event) => {
@@ -149,7 +144,7 @@ class Topo {
       // topoInstant.expandAll();
     });
 
-    var app = new nx.ui.Application();
+    const app = new nx.ui.Application();
     app.on('resize', () => {
       topoInstant.adaptToContainer();
     });
@@ -175,7 +170,7 @@ class Topo {
       });
     });
     const pathLayer = topoInstant.getLayer('paths');
-    pathLayer.ondragend = (d,a) => {
+    pathLayer.ondragend = (d, a) => {
       console.log('path dragend', d, a);
     };
     topoInstant.on('keypress', (topo, e) => {
@@ -294,3 +289,4 @@ class Topo {
 
 const topology = new Topo();
 export default topology;
+/* eslint-enable no-underscore-dangle,  */

@@ -1,7 +1,7 @@
 import { handleActions } from 'redux-actions';
 import Immutable from 'seamless-immutable';
 
-const initialState = Immutable({ count: 0, name: 'default' });
+const initialState = Immutable.from({ count: 0, name: 'default' });
 
 export default handleActions({
   COUNTER_INCREASE: (state, { payload = 1 }) => state.merge({

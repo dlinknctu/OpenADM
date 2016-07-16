@@ -1,7 +1,6 @@
 import { combineReducers } from 'redux';
 import { LOCATION_CHANGE } from 'react-router-redux';
 import Immutable from 'seamless-immutable';
-// import Immutable, { fromJS } from 'immutable';
 import topology from './Topology';
 import controllerStatus from './ControllerStatus';
 import flowtable from './Flowtable';
@@ -11,7 +10,7 @@ import portStatus from './PortStatus';
 import counter from './Counter';
 
 
-const routeInitialState = Immutable({
+const routeInitialState = Immutable.from({
   locationBeforeTransitions: null,
 });
 

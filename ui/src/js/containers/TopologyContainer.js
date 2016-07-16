@@ -1,7 +1,6 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 import Topology from '../components/Topology/Topology';
-import * as TopologyAction from '../actions/TopologyAction';
 
 const TopologyContainer = (props) => <Topology {...props} />;
 

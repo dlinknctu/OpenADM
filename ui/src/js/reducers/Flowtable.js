@@ -1,7 +1,7 @@
 import { handleActions } from 'redux-actions';
 import Immutable from 'seamless-immutable';
 
-const initialState = Immutable({
+const initialState = Immutable.from({
   filterString: '',
   visibleField: [],
   flowlist: [{ controller: '', flows: [] }],

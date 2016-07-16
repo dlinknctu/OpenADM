@@ -1,7 +1,4 @@
-import React, { Component, PropTypes } from 'react';
-import FloatingActionButton from 'material-ui/FloatingActionButton';
-import ContentAdd from 'material-ui/svg-icons/content/add-circle-outline';
-import styles from './module.css';
+import React, { PropTypes } from 'react';
 import { Menu, MainButton, ChildButton } from 'react-mfb';
 
 const ModuleButton = ({ hiddenPanel, togglePanel }) => {

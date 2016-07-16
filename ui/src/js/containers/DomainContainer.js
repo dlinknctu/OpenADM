@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
@@ -10,23 +10,23 @@ import ModuleButton from '../components/ModuleButton.jsx';
 import SettingController from '../components/SettingController.jsx';
 import PortStatusContainer from './PortStatusContainer';
 
-class DomainContainer extends Component {
-  render() {
-    const { hiddenPanel, settingController, subscribe, togglePanel } = this.props;
-    return (
-      <div>
-        <TopologyContainer />
-        <ModuleContainer>
-          <FlowtableContainer />
-          <ControllerContainer />
-          <PortStatusContainer />
-          <SettingController settingController={settingController} subscribe={subscribe} />
-        </ModuleContainer>
-        <ModuleButton hiddenPanel={hiddenPanel} togglePanel={togglePanel} />
-      </div>
-    );
-  }
-}
+const DomainContainer = ({
+  hiddenPanel,
+  settingController,
+  subscribe,
+  togglePanel,
+}) => (
+  <div>
+    <TopologyContainer />
+    <ModuleContainer>
+      <FlowtableContainer />
+      <ControllerContainer />
+      <PortStatusContainer />
+      <SettingController settingController={settingController} subscribe={subscribe} />
+    </ModuleContainer>
+    <ModuleButton hiddenPanel={hiddenPanel} togglePanel={togglePanel} />
+  </div>
+);
 
 
 const mapStateToProps = state => ({
@@ -37,5 +37,12 @@ const mapDispatchToProps = dispatch => ({
   togglePanel: p => dispatch({ type: 'TOGGLE_PANEL', payload: p }),
   settingController: p => dispatch({ type: 'SETTING_CONTROLLER', payload: p }),
 });
+
+DomainContainer.propTypes = {
+  hiddenPanel: PropTypes.array,
+  settingController: PropTypes.func,
+  subscribe: PropTypes.func,
+  togglePanel: PropTypes.func,
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(DomainContainer);

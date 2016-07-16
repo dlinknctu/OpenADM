@@ -1,7 +1,7 @@
 import { handleActions } from 'redux-actions';
 import Immutable from 'seamless-immutable';
 
-const initialState = Immutable([]);
+const initialState = Immutable.from([]);
 
 export default handleActions({
   USER_LOGGED_IN: (state, action) => ({

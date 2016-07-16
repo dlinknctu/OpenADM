@@ -1,7 +1,7 @@
 import Immutable from 'seamless-immutable';
 import Topo from '../components/Topology/Topo.js';
 
-const initalState = {
+const initalState = Immutable.from({
   nodes: [],
   links: [],
   fixedNode: {},
@@ -10,10 +10,9 @@ const initalState = {
   selectNodes: {},
   tag: '',
   controllerList: [],
-};
+});
 
-
-export default (state = Immutable(initalState), { type, payload }) => {
+export default (state = initalState, { type, payload }) => {
   switch (type) {
     // case 'ADD_NODE':
     //   Topo.addNode(payload);
@@ -50,16 +49,15 @@ export default (state = Immutable(initalState), { type, payload }) => {
       return state;
 
     case 'SELECT_NODE':
-      return state.update('selectNodes', nodes => {
-        return (nodes.uid !== payload.uid) ?
-          payload : {};
-      });
+      return state.update('selectNodes', nodes => (
+        (nodes.uid !== payload.uid) ? payload : {})
+      );
 
     /**
      * { ip, vlan, mac, controller, type, location }
      * location: { port, dpid }
      */
-    case 'ADDHOST':
+    case 'ADDHOST': {
       const uid = `${payload.controller}-${payload.mac}`;
       Topo.addNode({
         ...payload,
@@ -68,48 +66,53 @@ export default (state = Immutable(initalState), { type, payload }) => {
       const suid = `${payload.controller}-${payload.location.dpid}`;
       Topo.addLinkById(suid, uid, 's2h');
       return state;
+    }
     /**
      * { controller, mac }
      */
-    case 'DELHOST':
+    case 'DELHOST': {
       Topo.delNode({
         ...payload,
         uid: `${payload.controller}-${payload.mac}`,
       });
       return state;
+    }
     /**
      * { controller, type, dpid }
      * {controller: "waynesdn", type: "switch", dpid: "00:00:00:00:00:00:00:03"}
      */
-    case 'ADDDEVICE':
+    case 'ADDDEVICE': {
       Topo.addNode({
         ...payload,
         uid: `${payload.controller}-${payload.dpid}`,
       });
       return state;
+    }
     /**
      * { controller, dpid }
      */
-    case 'DELDEVICE':
+    case 'DELDEVICE': {
       Topo.delNode({
         ...payload,
         uid: `${payload.controller}-${payload.dpid}`,
       });
       return state;
+    }
     /**
      * { controller, link: [{dpid, port},{dpid, port}]}
      */
-    case 'ADDLINK':
+    case 'ADDLINK': {
       Topo.addLinkById(
         `${payload.controller}-${payload.link[0].dpid}`,
         `${payload.controller}-${payload.link[1].dpid}`,
         's2s'
       );
       return state;
+    }
     /**
      * { controller, link: [{dpid, port},{dpid, port}] }
      */
-    case 'DELLINK':
+    case 'DELLINK': {
       const ulink = payload.link.map(l => ({
         ...l,
         uid: `${payload.controller}-${l.dpid}`,
@@ -119,11 +122,11 @@ export default (state = Immutable(initalState), { type, payload }) => {
         link: ulink,
       });
       return state;
-
+    }
     /**
      * { controller, adddevice, addlink, addhost, addport }
      */
-    case 'ALL_DATA':
+    case 'ALL_DATA': {
       const { devices, links, hosts, ports, controllers } = payload;
 
       const topoNodes = devices.map(d => {
@@ -166,18 +169,22 @@ export default (state = Immutable(initalState), { type, payload }) => {
       return state.update('controllerList',
         () => controllers.map(d => d.controller)
       );
+    }
     /**
      * { controller, mac_src, mac_dst , port_src, port_dst, ip_src, ip_dst
      * 	 protocol, ther_type, in_port, dpid }
      */
-    case 'PACKET':
+    case 'PACKET': {
       return state;
-    case 'CLEAR_ALL_PATH':
+    }
+    case 'CLEAR_ALL_PATH': {
       Topo.clearAllPath();
       return state;
-    case 'SIMULATE_RESP':
+    }
+    case 'SIMULATE_RESP': {
       Topo.addPath(payload);
       return state;
+    }
     default:
       return state;
   }

@@ -1,8 +1,7 @@
 import { handleActions } from 'redux-actions';
 import Immutable from 'seamless-immutable';
-import _ from 'lodash';
 
-const initialState = Immutable({
+const initialState = Immutable.from({
   gridLayout: [
     { i: 'Flowtable', x: 1, y: 5, w: 8, h: 7 },
     { i: 'ControllerStatus', x: 4, y: 0, w: 5, h: 3 },
@@ -15,7 +14,7 @@ const initialState = Immutable({
 
 export default handleActions({
   CHANGE_LAYOUT: (state, action) =>
-    state.set('gridLayout', Immutable(action.payload)),
+    state.set('gridLayout', Immutable.from(action.payload)),
 
   TOGGLE_PANEL: (state, { payload }) => state
     .update('hiddenPanel', arr => {
@@ -30,9 +29,7 @@ export default handleActions({
     }).set('maximumPanel', ''),
 
   MAXIMIZE_PANEL: (state, { payload }) => state
-    .update('maximumPanel', str => {
-      return str === payload ? '' : payload;
-    }),
+    .update('maximumPanel', str => (str === payload ? '' : payload)),
 
   RESET_LAYOUT: () => initialState,
 }, initialState);

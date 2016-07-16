@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
 import { findDOMNode } from 'react-dom';
 import topo from './Topo.js';
 import styles from './topology.css';
@@ -10,7 +10,7 @@ class Toplogy extends Component {
     topo.initalTopo(renderDom);
     topo.bindEvent(this.props);
   }
-  shouldComponentUpdate(nextProps) {
+  shouldComponentUpdate() {
     return false;
   }
 

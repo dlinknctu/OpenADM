@@ -7,7 +7,7 @@ import Setting from './pages/Setting.jsx';
 import NotFound from './pages/NotFound.jsx';
 
 const handleLeave = () => {
-  console.log('leave route');
+  // console.log('leave route');
 };
 
 const RootRouter = ({ history }) => (

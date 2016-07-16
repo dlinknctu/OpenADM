@@ -10,6 +10,12 @@ const menuItems = [
   { route: 'setting', text: 'Setting', iconType: 'settings' },
 ];
 
+const header = {
+  backgroundImage: "url('https://cdn.drivenlocal.com/wp-content/uploads/2015/10/Material-design.jpg')",
+  backgroundSize: 'cover',
+  height: '100px',
+};
+
 class LeftNavBar extends React.Component {
 
   constructor(props) {
@@ -54,19 +60,13 @@ class LeftNavBar extends React.Component {
           handleClick={this.onMenuListTap}
         />);
     });
-
     return (
       <LeftNav
         docked={false}
         open={this.state.open}
         onRequestChange={this.handleToggle}
       >
-        <div
-        style={{
-          backgroundImage: "url('https://cdn.drivenlocal.com/wp-content/uploads/2015/10/Material-design.jpg')",
-          backgroundSize: 'cover',
-          'height': '100px',
-        }} />
+        <div style={header}></div>
         {menuLists}
       </LeftNav>
     );

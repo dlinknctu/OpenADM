@@ -6,7 +6,6 @@ import LogMonitor from 'redux-devtools-log-monitor';
 import Inspector from 'redux-devtools-inspector';
 import ChartMonitor from 'redux-devtools-chart-monitor';
 import Dispatcher from 'redux-devtools-dispatch';
-import * as Actions from '../actions/GithubAction.js';
 
 export default createDevTools(
   <DockMonitor
@@ -19,7 +18,7 @@ export default createDevTools(
     <ChartMonitor />
     <MultipleMonitors>
       <LogMonitor />
-      <Dispatcher actionCreators={Actions} />
+      <Dispatcher />
     </MultipleMonitors>
   </DockMonitor>
 );

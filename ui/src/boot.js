@@ -10,7 +10,7 @@ import Root from './js/Root.js';
 import injectTapEventPlugin from 'react-tap-event-plugin';
 injectTapEventPlugin();
 
-const initialState = Immutable({
+const initialState = Immutable.from({
   counter: { count: 0, name: 'default' },
   routing: { locationBeforeTransitions: null },
   layout: {

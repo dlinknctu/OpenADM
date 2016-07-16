@@ -1,5 +1,4 @@
-import React, { PropTypes } from 'react'
-import { withHandlers, withState, compose } from 'recompose';
+import React, { PropTypes } from 'react';
 import Dialog from 'material-ui/Dialog';
 import RaisedButton from 'material-ui/RaisedButton';
 
@@ -43,13 +42,16 @@ const Flowmod = ({ isOpen, flowmode, canelSelectFlow, handleSimulate }) => {
       open={isOpen}
       autoScrollBodyContent
     >
-    <h2>Flow mod</h2>
+      <h2>Flow mod</h2>
     </Dialog>
   );
 };
 
 Flowmod.propTypes = {
-  PROPS_NAME: PropTypes.string,
+  isOpen: PropTypes.bool.isRequired,
+  flowmode: PropTypes.func.isRequired,
+  canelSelectFlow: PropTypes.func.isRequired,
+  handleSimulate: PropTypes.func.isRequired,
 };
 
 export default Flowmod;

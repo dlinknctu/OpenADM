@@ -1,11 +1,11 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import Paper from 'material-ui/Paper';
-import ReactGridLayout, { WidthProvider } from 'react-grid-layout';
+import ReactGridLayout, { WidthProvider as widthProvider } from 'react-grid-layout';
 import CloseIcon from 'material-ui/svg-icons/navigation/close';
 import FullscreenIcon from 'material-ui/svg-icons/navigation/fullscreen';
 import FullscreenExitIcon from 'material-ui/svg-icons/navigation/fullscreen-exit';
-const GridLayout = WidthProvider(ReactGridLayout);
+const GridLayout = widthProvider(ReactGridLayout);
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import { changeLayout, togglePanel, maximizePanel } from '../actions/LayoutAction';

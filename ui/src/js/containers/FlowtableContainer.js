@@ -58,7 +58,7 @@ const FlowtableContainer = ({
       <RenewIcon color={'green'} hoverColor={'red'} />
     </IconButton>
     <Flowmod
-      isOpen={(selectFlow.srcIP) ? true : false}
+      isOpen={Boolean(selectFlow.srcIP)}
       canelSelectFlow={canelSelectFlow}
       flowmode={flowmode}
       selectNode={selectNode}
@@ -91,12 +91,11 @@ const filterFlowList = (flowlist) => {
           actions: JSON.stringify(flow.actions),
         }))
     ), []);
-  } else {
-    return flowlist.flows.map(flow => ({
-      ...flow,
-      actions: JSON.stringify(flow.actions),
-    }));
   }
+  return flowlist.flows.map(flow => ({
+    ...flow,
+    actions: JSON.stringify(flow.actions),
+  }));
 };
 
 const mapStateToProps = state => ({

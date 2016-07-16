@@ -39,7 +39,7 @@ export const ioInit = store => {
     'DEBUG_RESP',
     'SETTING_CONTROLLER_RESP',
     'ALL_DATA',
-    'SIMULATE_RESP'
+    'SIMULATE_RESP',
     // 'PACKET',
   ];
 

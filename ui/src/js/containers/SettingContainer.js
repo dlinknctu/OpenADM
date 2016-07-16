@@ -86,9 +86,9 @@ const SettingContainer = compose(
       />
     </PaperPanel>
 
-    {/*<RaisedButton label="增加" secondary onClick={props.handleIncrease} />
-    <RaisedButton label="減少" primary onClick={props.handleDecrease} />
     <NameTextField value={props.counter.name} changeName={props.changeName} />
+    {/* <RaisedButton label="增加" secondary onClick={props.handleIncrease} />
+    <RaisedButton label="減少" primary onClick={props.handleDecrease} />
     <h4>name: {props.counter.name}</h4>
     <h4>count: {props.counter.count}</h4>*/}
     <pre>{JSON.stringify(props, undefined, 2)}</pre>

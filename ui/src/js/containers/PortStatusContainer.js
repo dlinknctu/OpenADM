@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
 
 const PortStatusContainer = ({ portStatus, getPorts }) => (
@@ -21,5 +21,10 @@ const mapDispatchToProps = dispatch => ({
     },
   }),
 });
+
+PortStatusContainer.propTypes = {
+  portStatus: PropTypes.array,
+  getPorts: PropTypes.func,
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(PortStatusContainer);
