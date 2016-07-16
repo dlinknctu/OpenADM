@@ -17,10 +17,10 @@ app.get('*', function(req, res) {
   res.sendFile(path.join(__dirname, '/src/index.html'));
 });
 
-app.listen(8080, '0.0.0.0', function(err) {
+app.listen(8000, '0.0.0.0', function(err) {
   if (err) {
         console.log(err);
         return;
       }
-  console.log('Listening at http://0.0.0.0:8080');
+  console.log('Listening at http://0.0.0.0:8000');
 });
