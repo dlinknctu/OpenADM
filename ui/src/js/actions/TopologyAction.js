@@ -12,62 +12,16 @@ export const delTopologyHost = createAction('DEL_TOPOLOGY_HOST');
 export const addTopologyPort = createAction('ADD_TOPOLOGY_PORT');
 export const delTopologyPort = createAction('DEL_TOPOLOGY_PORT');
 
+
+export const clickNode = createAction('CLICK_NODE');
+export const clickLink = createAction('CLICK_LINK');
+export const selectNode = createAction('SELECT_NODE');
+export const dragNode = createAction('DRAG_NODE');
+export const togglePanel = createAction('TOGGLE_PANEL');
+export const resetLayout = createAction('RESET_LAYOUT');
+
+export const search = createAction('SEARCH_NODE');
+export const tagChange = createAction('TAG_CHANGE');
+export const levelChange = createAction('LEVEL_CHANGE');
+
 export const packet = createAction('PACKET');
-
-export const simulate = (payload) => ({
-  type: 'OTHER',
-  payload: {
-    url: 'simulate',
-    request: payload,
-  },
-});
-
-/**
- * request: {
-   dpid: payload.dpid,
-   flow: payload.flow,
- },
- * @param  {[type]} payload [description]
- * @return {[type]}         [description]
- */
-export const getAllFlow = payload => (payload.controller ? {
-  type: 'OTHER',
-  payload: {
-    url: 'flow',
-    request: payload,
-  },
-} : {
-  type: 'OTHER',
-  payload: {
-    url: 'flow',
-  },
-});
-
-export const getFlowBy = (payload) => ({
-  type: 'OTHER',
-  payload: {
-    url: 'flow',
-    request: {
-      controller: payload.controller,
-      dpid: payload.dpid,
-    },
-  },
-});
-
-export const getTopFlow = () => ({
-  type: 'OTHER',
-  payload: {
-    url: 'flow/top',
-  },
-});
-
-export const getTopFlowBy = (payload) => ({
-  type: 'OTHER',
-  payload: {
-    url: 'flow/top',
-    request: {
-      controller: payload.controller,
-      dpid: payload.dpid,
-    },
-  },
-});

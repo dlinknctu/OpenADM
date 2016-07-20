@@ -7,8 +7,6 @@ import flowtable from './Flowtable';
 import layout from './Layout';
 import setting from './Setting';
 import portStatus from './PortStatus';
-import counter from './Counter';
-
 
 const routeInitialState = Immutable.from({
   locationBeforeTransitions: null,
@@ -26,7 +24,6 @@ const routing = (state = routeInitialState, action) => {
 
 export default combineReducers({
   routing,
-  counter,
   layout,
   topology,
   controllerStatus,

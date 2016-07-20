@@ -8,6 +8,10 @@ const PortStatusContainer = ({ portStatus, getPorts }) => (
   </div>
 );
 
+PortStatusContainer.propTypes = {
+  portStatus: PropTypes.array,
+  getPorts: PropTypes.func,
+};
 
 const mapStateToProps = state => ({
   portStatus: state.portStatus,
@@ -21,10 +25,5 @@ const mapDispatchToProps = dispatch => ({
     },
   }),
 });
-
-PortStatusContainer.propTypes = {
-  portStatus: PropTypes.array,
-  getPorts: PropTypes.func,
-};
 
 export default connect(mapStateToProps, mapDispatchToProps)(PortStatusContainer);

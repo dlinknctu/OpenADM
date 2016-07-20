@@ -1,9 +1,10 @@
 import React, { PropTypes } from 'react';
+import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import Griddle from 'griddle-react';
 import { withHandlers } from 'recompose';
-import * as Actions from '../actions/TopologyAction';
-import Flowmod from '../components/Flowmod';
+import * as FlowActions from '../actions/FlowAction';
+import Flowmod from '../components/Flowmod.jsx';
 import IconButton from 'material-ui/IconButton';
 import RenewIcon from 'material-ui/svg-icons/action/autorenew';
 
@@ -106,22 +107,7 @@ const mapStateToProps = state => ({
   flowlist: filterFlowList(state.flowtable.flowlist),
 });
 
-const mapDispatchToProps = dispatch => ({
-  getAllFlow: payload => dispatch(Actions.getAllFlow(payload)),
-  simulate: payload => dispatch(Actions.simulate(payload)),
-  flowmode: (payload) => dispatch({
-    type: 'FLOWMODE',
-    payload,
-  }),
-  canelSelectFlow: () => dispatch({
-    type: 'FLOWTABLE_CLICK',
-    payload: {},
-  }),
-  flowtableClick: (payload) => dispatch({
-    type: 'FLOWTABLE_CLICK',
-    payload,
-  }),
-});
+const mapDispatchToProps = dispatch => bindActionCreators(FlowActions, dispatch);
 
 FlowtableContainer.propTypes = {
   flowlist: PropTypes.array.isRequired,

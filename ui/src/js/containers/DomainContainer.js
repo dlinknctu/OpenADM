@@ -1,4 +1,5 @@
 import React, { PropTypes } from 'react';
+import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
@@ -9,12 +10,15 @@ import ControllerContainer from './ControllerContainer';
 import ModuleButton from '../components/ModuleButton.jsx';
 import SettingController from '../components/SettingController.jsx';
 import PortStatusContainer from './PortStatusContainer';
+import { togglePanel } from '../actions/LayoutAction';
+
+import { settingController } from '../actions/CoreAction';
 
 const DomainContainer = ({
   hiddenPanel,
-  settingController,
   subscribe,
-  togglePanel,
+  handleSettingController,
+  handleTogglePanel,
 }) => (
   <div>
     <TopologyContainer />
@@ -22,27 +26,26 @@ const DomainContainer = ({
       <FlowtableContainer />
       <ControllerContainer />
       <PortStatusContainer />
-      <SettingController settingController={settingController} subscribe={subscribe} />
+      <SettingController settingController={handleSettingController} subscribe={subscribe} />
     </ModuleContainer>
-    <ModuleButton hiddenPanel={hiddenPanel} togglePanel={togglePanel} />
+    <ModuleButton hiddenPanel={hiddenPanel} togglePanel={handleTogglePanel} />
   </div>
 );
 
+DomainContainer.propTypes = {
+  hiddenPanel: PropTypes.array,
+  subscribe: PropTypes.func,
+  handleSettingController: PropTypes.func,
+  handleTogglePanel: PropTypes.func,
+};
 
 const mapStateToProps = state => ({
   hiddenPanel: state.layout.hiddenPanel,
 });
 
-const mapDispatchToProps = dispatch => ({
-  togglePanel: p => dispatch({ type: 'TOGGLE_PANEL', payload: p }),
-  settingController: p => dispatch({ type: 'SETTING_CONTROLLER', payload: p }),
-});
-
-DomainContainer.propTypes = {
-  hiddenPanel: PropTypes.array,
-  settingController: PropTypes.func,
-  subscribe: PropTypes.func,
-  togglePanel: PropTypes.func,
-};
+const mapDispatchToProps = dispatch => bindActionCreators({
+  handleTogglePanel: togglePanel,
+  handleSettingController: settingController,
+}, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(DomainContainer);

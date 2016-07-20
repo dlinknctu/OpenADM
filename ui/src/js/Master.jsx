@@ -3,6 +3,7 @@
  * the root component
  */
 import React, { PropTypes } from 'react';
+import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import LeftNavBar from './components/LeftNavBar.jsx';
 import AppBar from 'material-ui/AppBar';
@@ -10,6 +11,7 @@ import AppCanvas from 'material-ui/internal/AppCanvas';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import Theme from '../theme.js';
 import { resetLayout } from './actions/LayoutAction';
+import * as CoreAction from './actions/CoreAction';
 import SyncIcon from 'material-ui/svg-icons/notification/sync';
 import RestoreIcon from 'material-ui/svg-icons/action/restore';
 import RemoveIcon from 'material-ui/svg-icons/content/remove-circle';
@@ -17,7 +19,6 @@ import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
 import IconButton from 'material-ui/IconButton';
 import IconMenu from 'material-ui/IconMenu';
 import MenuItem from 'material-ui/MenuItem';
-
 
 const styles = {
   paddingTop: '64px',
@@ -120,11 +121,9 @@ Master.childContextTypes = {
   muiTheme: PropTypes.object,
 };
 
-const mapDispatchToProps = (dispatch) => ({
-  resetLayout: () => dispatch(resetLayout()),
-  subscribe: () => dispatch({ type: 'SUBSCRIBE', payload: {} }),
-  clearAllPath: () => dispatch({ type: 'CLEAR_ALL_PATH', payload: {} }),
-  restoreCore: () => dispatch({ type: 'OTHER', payload: { url: 'reset_datastore' } }),
-});
+const mapDispatchToProps = (dispatch) => bindActionCreators({
+  resetLayout,
+  ...CoreAction,
+}, dispatch);
 
 export default connect(null, mapDispatchToProps)(Master);

@@ -4,14 +4,12 @@ import { syncHistoryWithStore } from 'react-router-redux';
 import { browserHistory } from 'react-router';
 import Immutable from 'seamless-immutable';
 import configureStore from './js/stores/configureStore';
-import { ioInit } from './js/middlewares/socket';
 import Root from './js/Root.js';
 
 import injectTapEventPlugin from 'react-tap-event-plugin';
 injectTapEventPlugin();
 
 const initialState = Immutable.from({
-  counter: { count: 0, name: 'default' },
   routing: { locationBeforeTransitions: null },
   layout: {
     gridLayout: [
@@ -23,7 +21,11 @@ const initialState = Immutable.from({
     hiddenPanel: ['Flowtable', 'ControllerStatus', 'PortStatus', 'SettingContainer'],
     maximumPanel: '',
   },
-  setting: {},
+  setting: {
+    coreURL: '',
+    controllerURL: '',
+    controllerName: '',
+  },
   topology: {
     filterType: [
       { type: 'type', filter: 'switch' },
@@ -47,7 +49,6 @@ const initialState = Immutable.from({
 });
 
 const store = configureStore(initialState, browserHistory);
-ioInit(store);
 const history = syncHistoryWithStore(
   browserHistory,
   store,

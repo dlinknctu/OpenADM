@@ -67,13 +67,12 @@ const ControllerContainer = ({ controllerStatus }) => {
 //   );
 // };
 
-const mapStateToProps = (state) => ({
-  controllerStatus: state.controllerStatus,
-});
-
-
 ControllerContainer.propTypes = {
   controllerStatus: PropTypes.array.isRequired,
 };
+
+const mapStateToProps = (state) => ({
+  controllerStatus: state.controllerStatus,
+});
 
 export default connect(mapStateToProps)(ControllerContainer);
