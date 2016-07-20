@@ -1,12 +1,47 @@
-import { coreURL } from '../../../config';
 import io from 'socket.io-client';
 
 let socket = null;
+// Send event to Server.
+const SendActions = [
+  'SETTING_CONTROLLER',
+  'SUBSCRIBE',
+  'OTHER',
+  'FEATURE',
+  'DEBUG',
+  'RESET_DATASTORE',
+];
+// Listen event from Server.
+const ReceiveActions = [
+  'CONTROLLER',
+  'ADDLINK',
+  'DELLINK',
+  'ADDDEVICE',
+  'DELDEVICE',
+  'ADDHOST',
+  'DELHOST',
+  // 'ADDPORT',
+  'DELPORT',
+  'PORT_RESP',
+  'FLOW_RESP',
+  'FLOW/TOP_RESP',
+  'FEATURE_RESP',
+  'RESET_DATASTORE_RESP',
+  'DEBUG_RESP',
+  'SETTING_CONTROLLER_RESP',
+  'ALL_DATA',
+  'SIMULATE_RESP',
+  // 'PACKET',
+];
 
-export const ioInit = store => {
-  socket = io.connect(`${coreURL}/websocket`);
+const createSocket = (store, coreURL) => {
+  socket = io.connect(`${coreURL}/websocket`, {
+    forceNew: true,
+    reconnection: false,
+  });
   socket.on('connect', () => {
     console.info('websocket connected!');
+    // after connected turn reconnection on
+    socket.io._reconnection = true;  // eslint-disable-line no-underscore-dangle
   });
   window.socket = socket;
 
@@ -20,30 +55,8 @@ export const ioInit = store => {
       type: 'LEAVE_SESSION',
     });
   });
-  // Listen event from Server.
-  const actions = [
-    'CONTROLLER',
-    'ADDLINK',
-    'DELLINK',
-    'ADDDEVICE',
-    'DELDEVICE',
-    'ADDHOST',
-    'DELHOST',
-    // 'ADDPORT',
-    'DELPORT',
-    'PORT_RESP',
-    'FLOW_RESP',
-    'FLOW/TOP_RESP',
-    'FEATURE_RESP',
-    'RESET_DATASTORE_RESP',
-    'DEBUG_RESP',
-    'SETTING_CONTROLLER_RESP',
-    'ALL_DATA',
-    'SIMULATE_RESP',
-    // 'PACKET',
-  ];
 
-  actions.forEach(action => {
+  ReceiveActions.forEach(action => {
     socket.on(action, payload => {
       store.dispatch({
         type: action,
@@ -56,16 +69,16 @@ export const ioInit = store => {
 export const socketIoMiddleware = store => next => action => {
   const result = next(action);
 
-  // Send event to Server.
-  const actions = [
-    'SETTING_CONTROLLER',
-    'SUBSCRIBE',
-    'OTHER',
-    'FEATURE',
-    'DEBUG',
-    'RESET_DATASTORE',
-  ];
-  if (actions.indexOf(action.type) > -1) {
+  if (action.type === 'CONNECT_SOCKET') {
+    createSocket(store, (action.payload ?
+      action.payload.coreURL : store.getState().setting.coreURL
+    ));
+  }
+  if (!socket) {
+    return result;
+  }
+
+  if (SendActions.indexOf(action.type) > -1) {
     socket.emit(action.type, {
       data: action.payload,
     });

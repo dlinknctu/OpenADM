@@ -5,6 +5,7 @@ import { routerMiddleware } from 'react-router-redux';
 import rootReducer from '../reducers';
 import { socketIoMiddleware } from '../middlewares/socket';
 import { persistState } from 'redux-devtools';
+import localstorage from 'redux-localstorage';
 import DevTools from '../containers/DevTools';
 
 export default function configureStore(initialState, history) {
@@ -17,6 +18,7 @@ export default function configureStore(initialState, history) {
     initialState,
     compose(
       applyMiddleware(...middleware),
+      localstorage('setting', { key: 'openadm' }),
       DevTools.instrument(),
       persistState(
         window.location.href.match(

@@ -1,14 +1,15 @@
-import React, { Component } from 'react';
+import React, { PropTypes, Component } from 'react';
 import { findDOMNode } from 'react-dom';
 import topo from './Topo.js';
 import styles from './topology.css';
 
-class Toplogy extends Component {
+class Topology extends Component {
 
   componentDidMount() {
     const renderDom = findDOMNode(this.refs.topology);
     topo.initalTopo(renderDom);
     topo.bindEvent(this.props);
+    this.props.connectSocket();
   }
   shouldComponentUpdate() {
     return false;
@@ -19,4 +20,7 @@ class Toplogy extends Component {
   }
 }
 
-export default Toplogy;
+Topology.propTypes = {
+  connectSocket: PropTypes.func.isRequired,
+};
+export default Topology;
