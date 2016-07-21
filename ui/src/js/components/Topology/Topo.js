@@ -226,9 +226,8 @@ class Topo {
     }
   }
 
-  delNode(data) {
-    const nodeId = topoInstant.data().nodes.findIndex(node => node.uid === data.uid);
-    topoInstant.removeNode(nodeId);
+  delNode({ uid }) {
+    topoInstant.removeNode(uid);
   }
 
   addLinkById(source, target, linkType) {
