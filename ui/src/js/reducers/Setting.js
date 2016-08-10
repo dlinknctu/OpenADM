@@ -13,7 +13,7 @@ export default handleActions({
     ...action.payload,
   }),
 
-  SETTING_CONTROLLER:  (state, { payload }) => state.merge(payload),
+  SETTING_CONTROLLER: (state, { payload }) => state.merge(payload),
 
   SETTING_CONTROLLER_RESP: (state, action) => {
     console.log('SETTING_CONTROLLER_RESP', action);

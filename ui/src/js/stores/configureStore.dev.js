@@ -6,7 +6,13 @@ import rootReducer from '../reducers';
 import { socketIoMiddleware } from '../middlewares/socket';
 import { persistState } from 'redux-devtools';
 import localstorage from 'redux-localstorage';
+import Immutable from 'seamless-immutable';
 import DevTools from '../containers/DevTools';
+
+const localStorageConfig = {
+  deserialize: (serializedData) => Immutable.from(JSON.parse(serializedData)),
+  key: 'openadm',
+};
 
 export default function configureStore(initialState, history) {
   const middleware = [
@@ -18,7 +24,7 @@ export default function configureStore(initialState, history) {
     initialState,
     compose(
       applyMiddleware(...middleware),
-      localstorage('setting', { key: 'openadm' }),
+      localstorage('setting', localStorageConfig),
       DevTools.instrument(),
       persistState(
         window.location.href.match(

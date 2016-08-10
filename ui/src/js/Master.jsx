@@ -5,6 +5,8 @@
 import React, { PropTypes } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
+import ReduxToastr from 'react-redux-toastr';
+import 'react-redux-toastr/lib/css/react-redux-toastr.min.css';
 import LeftNavBar from './components/LeftNavBar.jsx';
 import AppBar from 'material-ui/AppBar';
 import AppCanvas from 'material-ui/internal/AppCanvas';
@@ -101,6 +103,11 @@ class Master extends React.Component {
           onLeftIconButtonTouchTap={this.onLeftIconButtonTouchTap}
         />
         <LeftNavBar ref="leftNav" />
+        <ReduxToastr
+          timeOut={4000}
+          newestOnTop={false}
+          position="top-right"
+        />
         <div style={styles}>
           {this.props.children}
         </div>

@@ -1,5 +1,6 @@
 import { combineReducers } from 'redux';
 import { LOCATION_CHANGE } from 'react-router-redux';
+import { reducer as toastr } from 'react-redux-toastr';
 import Immutable from 'seamless-immutable';
 import topology from './Topology';
 import controllerStatus from './ControllerStatus';
@@ -23,6 +24,7 @@ const routing = (state = routeInitialState, action) => {
 };
 
 export default combineReducers({
+  toastr,
   routing,
   layout,
   topology,

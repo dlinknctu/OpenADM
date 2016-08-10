@@ -1,4 +1,5 @@
 import io from 'socket.io-client';
+import { toastr } from 'react-redux-toastr';
 
 let socket = null;
 // Send event to Server.
@@ -19,7 +20,7 @@ const ReceiveActions = [
   'DELDEVICE',
   'ADDHOST',
   'DELHOST',
-  // 'ADDPORT',
+  'ADDPORT',
   'DELPORT',
   'PORT_RESP',
   'FLOW_RESP',
@@ -39,18 +40,21 @@ const createSocket = (store, coreURL) => {
     reconnection: false,
   });
   socket.on('connect', () => {
-    console.info('websocket connected!');
     // after connected turn reconnection on
     socket.io._reconnection = true;  // eslint-disable-line no-underscore-dangle
+    toastr.success('websocket', 'connected');
   });
   window.socket = socket;
-
+  socket.on('connect_error', d => {
+    toastr.error('websocket connect error', d);
+  });
   socket.on('error', (d) => {
-    console.info('websocket error!', d);
+    toastr.error('websocket error', d);
   });
 
-  socket.on('disconnect', () => {
-    console.warn('Server disconnected');
+  socket.on('disconnect', (d) => {
+    console.warn('Server disconnected', d);
+    toastr.error('websocket', 'Server disconnected');
     store.dispatch({
       type: 'LEAVE_SESSION',
     });
@@ -75,10 +79,15 @@ export const socketIoMiddleware = store => next => action => {
     ));
   }
   if (!socket) {
+    toastr.warning('websocket', "socket doesn't inital");
     return result;
   }
 
   if (SendActions.indexOf(action.type) > -1) {
+    if (!socket.connected && action.type !== 'SETTING_CONTROLLER') {
+      toastr.warning('websocket', 'Not connected');
+      return result;
+    }
     socket.emit(action.type, {
       data: action.payload,
     });
