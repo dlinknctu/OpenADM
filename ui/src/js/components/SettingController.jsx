@@ -62,7 +62,7 @@ const SettingController = ({
       <DonutIcon style={styles.textIcon} />
       <TextField
         hintText="http://ip:port"
-        floatingLabelText="Controller URL"
+        floatingLabelText="Controller Adapter URL"
         onChange={onControllerURLChange}
       />
     </div>
