@@ -1,12 +1,12 @@
 import { createStore, applyMiddleware, compose } from 'redux';
+import Immutable from 'seamless-immutable';
 import thunk from 'redux-thunk';
 import promiseMiddleware from 'redux-promise';
+import localstorage from 'redux-localstorage';
 import { routerMiddleware } from 'react-router-redux';
 import rootReducer from '../reducers';
 import { socketIoMiddleware } from '../middlewares/socket';
 import { persistState } from 'redux-devtools';
-import localstorage from 'redux-localstorage';
-import Immutable from 'seamless-immutable';
 import DevTools from '../containers/DevTools';
 
 const localStorageConfig = {
@@ -24,7 +24,7 @@ export default function configureStore(initialState, history) {
     initialState,
     compose(
       applyMiddleware(...middleware),
-      localstorage('setting', localStorageConfig),
+      localstorage('', localStorageConfig),
       DevTools.instrument(),
       persistState(
         window.location.href.match(

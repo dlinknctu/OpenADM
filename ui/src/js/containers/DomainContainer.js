@@ -8,16 +8,12 @@ import TopologyContainer from './TopologyContainer';
 import FlowtableContainer from './FlowtableContainer';
 import ControllerContainer from './ControllerContainer';
 import ModuleButton from '../components/ModuleButton.jsx';
-import SettingController from '../components/SettingController.jsx';
+import SettingContainer from './SettingContainer.js';
 import PortStatusContainer from './PortStatusContainer';
 import { togglePanel } from '../actions/LayoutAction';
 
-import { settingController } from '../actions/CoreAction';
-
 const DomainContainer = ({
   hiddenPanel,
-  subscribe,
-  handleSettingController,
   handleTogglePanel,
 }) => (
   <div>
@@ -26,7 +22,7 @@ const DomainContainer = ({
       <FlowtableContainer />
       <ControllerContainer />
       <PortStatusContainer />
-      <SettingController settingController={handleSettingController} subscribe={subscribe} />
+      <SettingContainer />
     </ModuleContainer>
     <ModuleButton hiddenPanel={hiddenPanel} togglePanel={handleTogglePanel} />
   </div>
@@ -34,8 +30,6 @@ const DomainContainer = ({
 
 DomainContainer.propTypes = {
   hiddenPanel: PropTypes.array,
-  subscribe: PropTypes.func,
-  handleSettingController: PropTypes.func,
   handleTogglePanel: PropTypes.func,
 };
 
@@ -45,7 +39,6 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   handleTogglePanel: togglePanel,
-  handleSettingController: settingController,
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(DomainContainer);

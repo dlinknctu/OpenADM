@@ -18,9 +18,9 @@ const styles = {
 };
 
 const enhance = compose(
-  withState('coreURL', 'setCoreURL', ''),
-  withState('controllerURL', 'setControllerURL', ''),
-  withState('controllerName', 'setControllerName', ''),
+  withState('coreURL', 'setCoreURL', ({ setting }) => setting.coreURL),
+  withState('controllerURL', 'setControllerURL', ({ setting }) => setting.controllerURL),
+  withState('controllerName', 'setControllerName', ({ setting }) => setting.controllerName),
   withHandlers({
     onCoreURLChange: props => event => {
       props.setCoreURL(event.target.value);
@@ -43,6 +43,9 @@ const enhance = compose(
   })
 );
 const SettingController = ({
+  coreURL,
+  controllerURL,
+  controllerName,
   onCoreURLChange,
   onControllerURLChange,
   onControllerNameChange,
@@ -56,6 +59,7 @@ const SettingController = ({
         hintText="http://ip:port"
         floatingLabelText="Core URL"
         onChange={onCoreURLChange}
+        defaultValue={coreURL}
       />
     </div>
     <div>
@@ -64,6 +68,7 @@ const SettingController = ({
         hintText="http://ip:port"
         floatingLabelText="Controller Adapter URL"
         onChange={onControllerURLChange}
+        defaultValue={controllerURL}
       />
     </div>
     <div>
@@ -71,6 +76,7 @@ const SettingController = ({
       <TextField
         floatingLabelText="Custom Controller Name"
         onChange={onControllerNameChange}
+        defaultValue={controllerName}
       />
     </div>
     <div>
@@ -86,6 +92,10 @@ const SettingController = ({
 );
 
 SettingController.propTypes = {
+  setting: PropTypes.object.isRequired,
+  coreURL: PropTypes.string.isRequired,
+  controllerURL: PropTypes.string.isRequired,
+  controllerName: PropTypes.string.isRequired,
   onCoreURLChange: PropTypes.func.isRequired,
   onControllerURLChange: PropTypes.func.isRequired,
   onControllerNameChange: PropTypes.func.isRequired,
