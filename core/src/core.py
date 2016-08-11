@@ -148,6 +148,13 @@ class Core:
 				sid = request.sid
 				print('Client ' + request.remote_addr + '(sid:' + str(sid) + ') connected')
 				self.count = self.count + 1
+				payload = {'status': 'OK'}
+				for e in adapterHandlers.keys():
+					rs = adapterHandlers[e]('debut')
+					if rs is not None:
+						payload.update(rs)
+				join_room('ready')
+				emit('ALL_DATA', {'data': json.dumps(payload)} )
 
 			@socketio.on('SUBSCRIBE', namespace='/websocket')
 			def on_join(data):
