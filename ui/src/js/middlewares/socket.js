@@ -31,6 +31,8 @@ const ReceiveActions = [
   'SETTING_CONTROLLER_RESP',
   'ALL_DATA',
   'SIMULATE_RESP',
+  'ADDTAGS_RESP',
+  'DELTAGS_RESP',
   // 'PACKET',
 ];
 

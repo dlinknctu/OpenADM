@@ -2,6 +2,8 @@ import httplib
 import logging
 import json
 
+from copy import deepcopy
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
@@ -24,6 +26,7 @@ class NWInfo:
         self.hosts = {}
         self.portstats = {}
         self.flowtables = {}
+        self.tags = {}
 
         self.__registration(core)
         self.__trigger(param['controller_ip'], param['controller_port'],
@@ -58,6 +61,8 @@ class NWInfo:
         core.registerURLApi('flow', self.getAllFlows)
         core.registerURLApi('flow/top', self.getTopFlows)
         core.registerURLApi('reset_datastore', self.resetDatastore)
+        core.registerURLApi('addtags', self.addTags)
+        core.registerURLApi('deltags', self.delTags)
 
         # IPC API for other modules
         core.registerIPC('getAllFlows', self.getAllFlows)
@@ -257,6 +262,15 @@ class NWInfo:
         result = json.dumps(raw)
         return result
 
+    def insertTags(self, node):
+        if node['nodeType'] is 'switch':
+            uid = node['controller'] + '@' + node['dpid']
+        elif node['nodeType'] is 'host':
+            uid = node['controller'] + '@' + node['mac']
+
+        if uid in self.tags.keys():
+            node['tags'] = list(self.tags[uid])
+
     def adddeviceHandler(self, raw):
         """Add device event
 
@@ -265,7 +279,10 @@ class NWInfo:
         """
         # First impression, dump all we have
         if raw == 'debut':
-            return {'devices': self.devices.values()}
+            devices = deepcopy(self.devices.values())
+            for d in devices:
+                self.insertTags(d)
+            return {'devices': devices}
 
         # Filter duplicated adddevice events
         key = (raw['controller'], raw['dpid'])
@@ -281,7 +298,9 @@ class NWInfo:
         logger.debug('Total devices after addition: %d' % len(self.devices))
 
         # Tell browser what to add
-        result = json.dumps(self.devices[key])
+        device = deepcopy(self.devices[key])
+        self.insertTags(device)
+        result = json.dumps(device)
         return result
 
     def deldeviceHandler(self, raw):
@@ -316,7 +335,10 @@ class NWInfo:
         """
         # First impression, dump all we have
         if raw == 'debut':
-            return {'hosts': self.hosts.values()}
+            hosts = deepcopy(self.hosts.values())
+            for h in hosts:
+                self.insertTags(h)
+            return {'hosts': hosts}
 
         # Filter duplicated addhost events
         key = (raw['controller'], raw['mac'])
@@ -332,7 +354,9 @@ class NWInfo:
         logger.debug('Total hosts after addition: %d' % len(self.hosts))
 
         # Tell browser what to add
-        result = json.dumps(self.hosts[key])
+        host = deepcopy(self.hosts[key])
+        self.insertTags(host)
+        result = json.dumps(host)
         return result
 
     def delhostHandler(self, raw):
@@ -547,3 +571,63 @@ class NWInfo:
         result = {'status': 'OK'}
 
         return result
+
+    def addTags(self, req):
+        """Add tags for switches or hosts
+
+        Usage:
+            /websocket, socket.on('other',
+                                  {
+                                      url: 'addtags',
+                                      request: {
+                                          selectors: ['controller1@00:00:00:00:00:00:00:01'],
+                                          tags: ['core', 'aggregate']
+                                      }
+                                  })
+        Return:
+            /websocket, socket.on('ADDTAGS_RESP', {data: return json})
+        """
+        selectors = req.get('selectors', [])
+        tags = req.get('tags', [])
+
+        # Iterate all selectors and set tags for them
+        for s in selectors:
+            # New selector in tags dict
+            if not s in self.tags.keys():
+                self.tags.update({s: set(tags)})
+                continue
+
+            # Add tag for the node
+            for t in tags:
+                self.tags[s].add(t)
+
+        return {'status': 'OK'}
+
+    def delTags(self, req):
+        """Delete tags for switches or hosts
+
+        Usage:
+            /websocket, socket.on('other',
+                                  {
+                                      url: 'deltags',
+                                      requeset: {
+                                          selectors: ['controller1@00:00:00:00:00:00:00:01'],
+                                          tags: ['core', 'aggregate']
+                                      }
+                                  })
+        Return:
+            /websocket, socket.on('DELTAGS_RESP', {data: return json})
+        """
+        selectors = req.get('selectors', [])
+        tags = req.get('tags', [])
+
+        # Iterate all selectors and set tags for them
+        for s in selectors:
+            # Add tag for the node
+            for t in tags:
+                try:
+                    self.tags[s].remove(t)
+                except KeyError:
+                    logger.debug('%s tag does not exist in %s node' % (t, s))
+
+        return {'status': 'OK'}
