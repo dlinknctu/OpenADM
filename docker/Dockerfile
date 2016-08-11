@@ -32,6 +32,9 @@ RUN ./run.sh install
 # 5567 - Core REST
 EXPOSE 6633 8000 5567
 
+# For dev purposes
+VOLUME ["/root/openadm"]
+
 # Define default command
 WORKDIR $HOME
 CMD ["bash"]
