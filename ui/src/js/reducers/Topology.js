@@ -58,12 +58,12 @@ export default (state = initalState, { type, payload }) => {
      * location: { port, dpid }
      */
     case 'ADDHOST': {
-      const uid = `${payload.controller}-${payload.mac}`;
+      const uid = `${payload.controller}@${payload.mac}`;
       Topo.addNode({
         ...payload,
         uid,
       });
-      const suid = `${payload.controller}-${payload.location.dpid}`;
+      const suid = `${payload.controller}@${payload.location.dpid}`;
       Topo.addLinkById(suid, uid, 's2h');
       return state;
     }
@@ -73,7 +73,7 @@ export default (state = initalState, { type, payload }) => {
     case 'DELHOST': {
       Topo.delNode({
         ...payload,
-        uid: `${payload.controller}-${payload.mac}`,
+        uid: `${payload.controller}@${payload.mac}`,
       });
       return state;
     }
@@ -84,7 +84,7 @@ export default (state = initalState, { type, payload }) => {
     case 'ADDDEVICE': {
       Topo.addNode({
         ...payload,
-        uid: `${payload.controller}-${payload.dpid}`,
+        uid: `${payload.controller}@${payload.dpid}`,
       });
       return state;
     }
@@ -94,7 +94,7 @@ export default (state = initalState, { type, payload }) => {
     case 'DELDEVICE': {
       Topo.delNode({
         ...payload,
-        uid: `${payload.controller}-${payload.dpid}`,
+        uid: `${payload.controller}@${payload.dpid}`,
       });
       return state;
     }
@@ -103,8 +103,8 @@ export default (state = initalState, { type, payload }) => {
      */
     case 'ADDLINK': {
       Topo.addLinkById(
-        `${payload.controller}-${payload.link[0].dpid}`,
-        `${payload.controller}-${payload.link[1].dpid}`,
+        `${payload.controller}@${payload.link[0].dpid}`,
+        `${payload.controller}@${payload.link[1].dpid}`,
         's2s'
       );
       return state;
@@ -115,7 +115,7 @@ export default (state = initalState, { type, payload }) => {
     case 'DELLINK': {
       const ulink = payload.link.map(l => ({
         ...l,
-        uid: `${payload.controller}-${l.dpid}`,
+        uid: `${payload.controller}@${l.dpid}`,
       }));
       Topo.delLinkById({
         ...payload,
@@ -130,26 +130,26 @@ export default (state = initalState, { type, payload }) => {
       const { devices, links, hosts, ports, controllers } = payload;
 
       const topoNodes = devices.map(d => {
-        const uid = `${d.controller}-${d.dpid}`;
+        const uid = `${d.controller}@${d.dpid}`;
         return (state.fixedNode[uid]) ?
           { ...d, uid, ...state.fixedNode[uid], fixed: true } :
           { ...d, uid };
       }).concat(hosts.map(d => {
-        const uid = `${d.controller}-${d.mac}`;
+        const uid = `${d.controller}@${d.mac}`;
         return (state.fixedNode[uid]) ?
           { ...d, uid, ...state.fixedNode[uid], fixed: true } :
           { ...d, uid };
       }));
 
       const topolinks = links.map(l => ({
-        source: `${l.controller}-${l.link[0].dpid}`,
-        target: `${l.controller}-${l.link[1].dpid}`,
+        source: `${l.controller}@${l.link[0].dpid}`,
+        target: `${l.controller}@${l.link[1].dpid}`,
         linkType: 's2s',
         controller: l.controller,
       })).concat(
         hosts.map(h => ({
-          source: `${h.controller}-${h.location.dpid}`,
-          target: `${h.controller}-${h.mac}`,
+          source: `${h.controller}@${h.location.dpid}`,
+          target: `${h.controller}@${h.mac}`,
           linkType: 's2s',
           controller: h.controller,
         }))

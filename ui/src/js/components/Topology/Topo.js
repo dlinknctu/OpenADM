@@ -252,8 +252,8 @@ class Topo {
     const pathLayer = topoInstant.getLayer('paths');
     const links = linkCollection.path.map(link => {
       const linkIds = this.getLinksByNodeUid(
-        `${linkCollection.controller}-${link[0].dpid}`,
-        `${linkCollection.controller}-${link[1].dpid}`
+        `${linkCollection.controller}@${link[0].dpid}`,
+        `${linkCollection.controller}@${link[1].dpid}`
       );
       return topoInstant.getLink(linkIds[0]);
     });
