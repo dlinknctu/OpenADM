@@ -17,10 +17,10 @@ public class Flow {
                         String srcIP, String srcIPMask, String netProtocol, String dstPort, String srcPort,
                         String vlan, String vlanP, String wildcards, String tosBits, String counterByte,
                         String counterPacket, String idleTimeout, String hardTimeout, String priority,
-                        String duration, String dlType,List<Instruction> action ) {
+                        String duration, String dlType,List<Action> action ) {
         flows.add(new Flows(ingressPort, dstMac, srcMac, dstIP, dstIPMask, srcIP, srcIPMask, netProtocol,
                 dstPort, srcPort, vlan, vlanP, wildcards, tosBits, counterByte, counterPacket, idleTimeout,
-                hardTimeout, priority, duration, dlType, action_type, action_value));
+                hardTimeout, priority, duration, dlType, action));
     }
     public void setDpid(String dpid) {this.dpid = dpid;}
     private class Flows {
@@ -45,24 +45,13 @@ public class Flow {
         public String priority = "";
         public String duration = "";
         public String dlType = "";
-        public actions actions;
-        /*
-        private class action {
-            public String type = "";
-            public String value = "";
-            public actions (String type, String value) {
-                this.type = type;
-                this.value = value;
-            }
-        }
-        */
-        public List<Instruction> action = new List<Instruction>();
+        public List<Action> action = new ArrayList<Action>();
         
         public Flows( String ingressPort, String dstMac, String srcMac, String dstIP, String dstIPMask,
                      String srcIP, String srcIPMask, String netProtocol, String dstPort, String srcPort,
                      String vlan, String vlanP, String wildcards, String tosBits, String counterByte,
                      String counterPacket, String idleTimeout, String hardTimeout, String priority,
-                     String duration, String dlType, List<Instruction> action){
+                     String duration, String dlType, List<Action> action){
             this.ingressPort = ingressPort;
             this.dstMac = dstMac;
             this.srcMac = srcMac;

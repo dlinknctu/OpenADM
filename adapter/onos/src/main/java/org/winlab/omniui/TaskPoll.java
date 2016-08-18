@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.ArrayList;
 
 /**  Create By Ze-Yan Lin on 2016/1/30.
  *  This class send info to OpenADM core regular
@@ -87,11 +88,15 @@ public class TaskPoll extends BaseResource {
                         String duration = String.valueOf(f.life());
                         String dlType = "x";
                         List<Instruction> action = f.treatment().allInstructions();
-                        String action_type = action.get(0).type().toString();
-                        String action_value = action.get(0).toString().replace(action_type.toString(),"");
+                        List<Action> actions = new ArrayList<Action>();
+			for(int i=0;i<action.size();i++){
+				Action a = new Action();
+				a.type = action.get(i).type().toString();
+				a.value = action.get(i).toString().replace(a.type.toString(),"");
+			}
                         flow.addFlow(ingressPort, dstMac, srcMac, dstIP, dstIPMask, srcIP, srcIPMask, netProtocol,
                                 dstPort, srcPort, vlan, vlanP, wildcards, tosBits, counterByte, counterPacket, idleTimeout,
-                                hardTimeout, priority, duration, dlType, action);
+                                hardTimeout, priority, duration, dlType, actions);
                     }
                     sendMsg.PostMsg((Object)(flow), "flow", "Flow");
                 }
