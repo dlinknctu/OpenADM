@@ -2,7 +2,7 @@ package org.winlab.omniui;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import org.onosproject.net.flow.instructions.Instruction;
 /**
  *  Copyright Winlab, NCTU
  *  @author Ze-Yan LIn
@@ -17,7 +17,7 @@ public class Flow {
                         String srcIP, String srcIPMask, String netProtocol, String dstPort, String srcPort,
                         String vlan, String vlanP, String wildcards, String tosBits, String counterByte,
                         String counterPacket, String idleTimeout, String hardTimeout, String priority,
-                        String duration, String dlType,String action_type, String action_value ) {
+                        String duration, String dlType,List<Instruction> action ) {
         flows.add(new Flows(ingressPort, dstMac, srcMac, dstIP, dstIPMask, srcIP, srcIPMask, netProtocol,
                 dstPort, srcPort, vlan, vlanP, wildcards, tosBits, counterByte, counterPacket, idleTimeout,
                 hardTimeout, priority, duration, dlType, action_type, action_value));
@@ -46,7 +46,8 @@ public class Flow {
         public String duration = "";
         public String dlType = "";
         public actions actions;
-        private class actions {
+        /*
+        private class action {
             public String type = "";
             public String value = "";
             public actions (String type, String value) {
@@ -54,11 +55,14 @@ public class Flow {
                 this.value = value;
             }
         }
+        */
+        public List<Instruction> action = new List<Instruction>();
+        
         public Flows( String ingressPort, String dstMac, String srcMac, String dstIP, String dstIPMask,
                      String srcIP, String srcIPMask, String netProtocol, String dstPort, String srcPort,
                      String vlan, String vlanP, String wildcards, String tosBits, String counterByte,
                      String counterPacket, String idleTimeout, String hardTimeout, String priority,
-                     String duration, String dlType,String action_type, String action_value ){
+                     String duration, String dlType, List<Instruction> action){
             this.ingressPort = ingressPort;
             this.dstMac = dstMac;
             this.srcMac = srcMac;
@@ -80,7 +84,7 @@ public class Flow {
             this.priority = priority;
             this.duration = duration;
             this.dlType = dlType;
-            actions = new actions(action_type ,action_value);
+            this.action = action;
         }
     }
 }

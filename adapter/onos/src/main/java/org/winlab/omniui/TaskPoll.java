@@ -91,7 +91,7 @@ public class TaskPoll extends BaseResource {
                         String action_value = action.get(0).toString().replace(action_type.toString(),"");
                         flow.addFlow(ingressPort, dstMac, srcMac, dstIP, dstIPMask, srcIP, srcIPMask, netProtocol,
                                 dstPort, srcPort, vlan, vlanP, wildcards, tosBits, counterByte, counterPacket, idleTimeout,
-                                hardTimeout, priority, duration, dlType, action_type, action_value);
+                                hardTimeout, priority, duration, dlType, action);
                     }
                     sendMsg.PostMsg((Object)(flow), "flow", "Flow");
                 }
