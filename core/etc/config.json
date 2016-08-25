@@ -1,7 +1,7 @@
 {
 	"ControllerType":"floodlight",
 	"LogFile": "/tmp/omniui.log",
-	"REST": {
+	"WEBSOCKET": {
 		"ip": "0.0.0.0",
 		"port": "5567"
 	},
@@ -10,9 +10,17 @@
 		"port":"8080"
 	},
 	"NWInfo": {
-		"controller_ip": "localhost",
+		"controller_ip": "127.0.0.1",
 		"controller_port": "6633",
 		"controller_name": "foobar",
 		"adapter_port": "8080"
-	}
+	},
+    "BusyLink_Detect": {
+        "ip": "localhost",
+        "port": "5567",
+        "controller_name": "foobar",
+        "interval": "5",
+        "version": "1.0"
+    },
+    "Simulate": {}
 }

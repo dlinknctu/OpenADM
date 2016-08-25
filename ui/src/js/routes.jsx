@@ -1,22 +1,29 @@
-/*eslint-disable no-unused-vars */
+import React, { PropTypes } from 'react';
+import { Router, Route, IndexRoute } from 'react-router';
+import Master from './Master.jsx';
+import Home from './pages/Home.jsx';
+import Domain from './pages/Domain.jsx';
+import Setting from './pages/Setting.jsx';
+import NotFound from './pages/NotFound.jsx';
 
-import React from "react";
-import { Route, DefaultRoute, NotFoundRoute } from "react-router";
+const handleLeave = () => {
+  // console.log('leave route');
+};
 
-import Master from "./Master.jsx";
-import Home from "./components/Home.jsx";
-import Domain from "./components/Domain.jsx";
-import UDS from "./components/UDS.jsx";
-import NotFound from "./components/NotFound.jsx";
-
-
-module.exports = (
-  <Route path="/" handler={Master}>
-    <DefaultRoute name="home" handler={Home} />
-    <Route name="domain" path="domain/:domainId?" handler={Domain} />
-    <Route name="uds" path="uds" handler={UDS} />
-    <NotFoundRoute handler={NotFound}/>
-  </Route>
+const RootRouter = ({ history }) => (
+  <Router history={history}>
+    <Route path="/" component={Master}>
+      <Route path="home" component={Home} />
+      <IndexRoute component={Domain} />
+      <Route path="domain/:domainName" component={Domain} onLeave={handleLeave} />
+      <Route path="setting" component={Setting} />
+    </Route>
+    <Route path="*" component={NotFound} />
+  </Router>
 );
 
-/*eslint-enable no-unused-vars */
+RootRouter.propTypes = {
+  history: PropTypes.object.isRequired,
+};
+
+export default RootRouter;

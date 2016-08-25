@@ -1,28 +1,32 @@
-import React from "react";
-import objectAssign from "object-assign";
-let { Styles, Paper } = require('material-ui');
-var ThemeManager = Styles.ThemeManager();
-class Module extends React.Component {
-    constructor(props){
-        super(props);
-    }
+import React, { PropTypes } from 'react';
+import Paper from 'material-ui/Paper';
+import CloseIcon from 'material-ui/svg-icons/navigation/close';
+import classNames from 'classnames';
+import styles from './module.css';
 
-  render() {
+const Module = () => {
+  const { identify, isHidden, element, onTogglePanel } = this.props;
+  const gridItemStyle = classNames({
+    [styles.gridItem]: true,
+    [styles.hidden]: isHidden,
+  });
+  return (
+    <Paper className={gridItemStyle}>
+      <CloseIcon
+        className={styles.gridClose}
+        hoverColor={'red'}
+        onClick={() => onTogglePanel(identify)}
+      />
+      <div>{element}</div>
+    </Paper>
+  );
+};
 
-    let moduleStyle = {
-        "style": {
-            "height": "100%",
-            "width": "100%"
-        }
-    }
-    return (
-        <Paper zDepth={2} rounded={true} style={moduleStyle.style} {...this.props}>
-            {this.props.children}
-        </Paper>
-    );
-  }
-}
-Module.contextTypes = {
-  muiTheme: React.PropTypes.object
-}
+Module.propTypes = {
+  identify: PropTypes.string.isRequired,
+  isHidden: PropTypes.bool.isRequired,
+  element: PropTypes.element.isRequired,
+  onTogglePanel: PropTypes.func.isRequired,
+};
+
 export default Module;

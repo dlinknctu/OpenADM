@@ -1,0 +1,68 @@
+.gridLayout {
+    width: 100vw;
+    height: 92vh;
+    overflow: hidden;
+    background-color: #EEEEEE;
+}
+
+.gridItem {
+    z-index: 1200;
+    border-radius: 5px !important;
+    padding: 10px 10px 10px 10px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23) !important;
+    overflow: auto;
+}
+
+.gridItem:hover {
+    box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22) !important;
+}
+
+.gridItem.hidden{
+    transform: translate(100vw,100vh) rotate(90deg) scale(0.1) !important;
+}
+
+.gridItem.max {
+    transform: translate(0,0) !important;
+    opacity: 0.99;
+    height: 92% !important;
+    width: 99% !important;
+    position: fixed !important;
+    z-index: 1210;
+}
+
+.controlPanel {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 100%;
+    height: 24px;
+    border-radius: 3px;
+    background-color: rgba(33, 150, 243, 1);
+    z-index: 1211;
+}
+
+.closeIcon {
+    position: absolute;
+    right: 0px;
+}
+
+.maxIcon {
+    position: absolute;
+    right: 25px;
+}
+
+.floatBtn {
+    position: absolute;
+    right: 25px;
+    bottom: 10px;
+    z-index: 1209;
+}
+
+.paperPanel {
+    margin: 25px;
+    padding: 25px;
+    width: 400px;
+}
+
+.dialogAction {
+}

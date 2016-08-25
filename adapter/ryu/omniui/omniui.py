@@ -7,7 +7,7 @@ from ryu.app.wsgi import ControllerBase, WSGIApplication, route
 from ryu.base import app_manager
 from ryu.controller import ofp_event
 from ryu.controller import dpset
-from ryu.controller.handler import MAIN_DISPATCHER
+from ryu.controller.handler import MAIN_DISPATCHER, CONFIG_DISPATCHER, DEAD_DISPATCHER
 from ryu.controller.handler import set_ev_cls
 from ryu.lib import dpid as dpid_lib
 from ryu.ofproto import ofproto_v1_0
@@ -18,8 +18,22 @@ from ryu.lib import ofctl_v1_2
 from ryu.lib import ofctl_v1_3
 from ryu.lib.dpid import dpid_to_str
 from ryu.topology.api import get_switch, get_link
+import requests
+import subprocess
+from operator import attrgetter
+from ryu.ofproto.ether import ETH_TYPE_LLDP, ETH_TYPE_IPV6
+from ryu.lib import hub
+from ryu.lib.packet import *
+from ryu.topology import event, switches
+
+global controllerName
+controllerName = 'DEFAULT'
+global coreURL
+coreURL = ''
 
 class OmniUI(app_manager.RyuApp):
+    OFP_VERSIONS = [ofproto_v1_0.OFP_VERSION, ofproto_v1_2.OFP_VERSION, ofproto_v1_3.OFP_VERSION]
+    _EVENTS = [event.EventPortAdd]
     _CONTEXTS = {
         'wsgi': WSGIApplication,
         'dpset': dpset.DPSet
@@ -33,17 +47,18 @@ class OmniUI(app_manager.RyuApp):
         self.data['dpset'] = kwargs['dpset']
         self.data['waiters'] = self.waiters
         self.data['omniui'] = self
+        self.port_to_feature = {}
+        self.datapaths = {}
+        self.monitor_thread = hub.spawn(self.monitor)
+        self.dpset = self.data['dpset']
         mapper = wsgi.mapper
         wsgi.registory['RestController'] = self.data
 
-        mapper.connect('omniui', '/wm/omniui/switch/json',
-                       controller=RestController, action='switches',
-                       conditions=dict(method=['GET']))
-        mapper.connect('omniui', '/wm/omniui/link/json',
-                       controller=RestController, action='links',
-                       conditions=dict(method=['GET']))
         mapper.connect('omniui', '/wm/omniui/add/json',
                        controller=RestController, action='mod_flow_entry',
+                       conditions=dict(method=['POST']))
+        mapper.connect('omniui', '/wm/omniui/core',
+                       controller=RestController, action='set_openadm',
                        conditions=dict(method=['POST']))
 
     @set_ev_cls([ofp_event.EventOFPFlowStatsReply, ofp_event.EventOFPPortStatsReply], MAIN_DISPATCHER)
@@ -71,19 +86,433 @@ class OmniUI(app_manager.RyuApp):
         del self.waiters[dp.id][msg.xid]
         lock.set()
 
-class RestController(ControllerBase):
-    def __init__(self, req, link, data, **config):
-        super(RestController, self).__init__(req, link, data, **config)
-        self.omniui = data['omniui']
-        self.dpset = data['dpset']
-        self.waiters = data['waiters']
+    #
+    # try post json to core
+    #
+    def post_json_to_core(self, url, data):
+        if coreURL == "":
+            print "No Setting Core URL"
+            return
+        try:
+            resp = requests.post(url, data = data, headers = {'Content-Type': 'application/json'})
+            print resp
+        except Exception, e:
+            print(str(e))
 
-    # return dpid of all nodes
-    def getNodes(self):
-        return self.dpset.dps.keys()
+    #
+    # handle add switch event
+    #
+    @set_ev_cls(event.EventSwitchEnter)
+    def add_device_handler(self, ev):
+        switch = ev.switch
+        print '*****add device*****'
 
-    # return flow table of specific dpid
-    def getFlows(self, dpid):
+        # format dpid
+        temp = "%016x" %switch.dp.id
+        temp = map(str, temp)
+        for i in range(2, 23, 3):
+            temp.insert(i, ':')
+
+        addDevice = {
+            'dpid': ''.join(temp),
+            'controller': controllerName
+        }
+
+        self.port_to_feature[addDevice['dpid']] = {}
+
+        print json.dumps(addDevice)
+        tmpIP = coreURL + "/publish/adddevice"
+        self.post_json_to_core(tmpIP, json.dumps(addDevice))
+
+        # send add port event
+        for port in switch.ports:
+            n_ev = event.EventPortAdd(port)
+            self.send_event_to_observers(n_ev)
+
+    #
+    # handle delete switch event
+    #
+    @set_ev_cls(event.EventSwitchLeave)
+    def del_device_handler(self, ev):
+        switch = ev.switch
+        print '*****del device*****'
+
+        # format dpid
+        temp = "%016x" %switch.dp.id
+        temp = map(str, temp)
+        for i in range(2, 23, 3):
+            temp.insert(i, ':')
+
+        delDevice = {
+            'dpid': ''.join(temp),
+            'controller': controllerName
+        }
+
+        if delDevice['dpid'] in self.port_to_feature:
+            del self.port_to_feature[delDevice['dpid']]
+
+        print json.dumps(delDevice)
+        tmpIP = coreURL + "/publish/deldevice"
+        self.post_json_to_core(tmpIP, json.dumps(delDevice))
+
+    #
+    # handle modify port event
+    #
+    @set_ev_cls(event.EventPortModify)
+    def mod_port_handler(self, ev):
+        port = ev.port
+        print '*****mod port*****'
+
+        if port.is_down():
+            print '***down***'
+
+            # format dpid
+            temp = "%016x" %port.dpid
+            temp = map(str, temp)
+            for i in range(2, 23, 3):
+                temp.insert(i, ':')
+
+            modPort = {
+                'dpid': ''.join(temp),
+                'port': str(port.port_no),
+                'controller': controllerName
+            }
+
+            if modPort['dpid'] in self.port_to_feature:
+                if modPort['port'] in self.port_to_feature[modPort['dpid']]:
+                    del self.port_to_feature[modPort['dpid']][modPort['port']]
+
+            print json.dumps(modPort)
+            tmpIP = coreURL + "/publish/delport"
+            self.post_json_to_core(tmpIP, json.dumps(modPort))
+        else:
+            print '***live***'
+
+            # format dpid
+            temp = "%016x" %port.dpid
+            temp = map(str, temp)
+            for i in range(2, 23, 3):
+                temp.insert(i, ':')
+
+            modPort = {
+                'dpid': ''.join(temp),
+                'port': str(port.port_no),
+                'controller': controllerName
+            }
+
+            if modPort['dpid'] in self.port_to_feature:
+                self.port_to_feature[modPort['dpid']][modPort['port']] = str(port.currentFeatures)
+
+            print json.dumps(modPort)
+            tmpIP = coreURL + "/publish/addport"
+            self.post_json_to_core(tmpIP, json.dumps(modPort))
+
+    #
+    # handle add port event
+    #
+    @set_ev_cls(event.EventPortAdd)
+    def add_port_handler(self, ev):
+        port = ev.port
+        print '*****add port*****'
+
+        # format dpid
+        temp = "%016x" %port.dpid
+        temp = map(str, temp)
+        for i in range(2, 23, 3):
+            temp.insert(i, ':')
+
+        addPort = {
+            'dpid': ''.join(temp),
+            'port': str(port.port_no),
+            'controller': controllerName
+        }
+
+        if addPort['dpid'] in self.port_to_feature:
+            self.port_to_feature[addPort['dpid']][addPort['port']] = str(port.currentFeatures)
+
+        print json.dumps(addPort)
+        tmpIP = coreURL + "/publish/addport"
+        self.post_json_to_core(tmpIP, json.dumps(addPort))
+
+    #
+    # handle delete port event
+    #
+    @set_ev_cls(event.EventPortDelete)
+    def del_port_handler(self, ev):
+        port = ev.port
+        print '*****del port*****'
+
+        # format dpid
+        temp = "%016x" %port.dpid
+        temp = map(str, temp)
+        for i in range(2, 23, 3):
+            temp.insert(i, ':')
+
+        delPort = {
+            'dpid': ''.join(temp),
+            'port': str(port.port_no),
+            'controller': controllerName
+        }
+
+        if delPort['dpid'] in self.port_to_feature:
+            if delPort['port'] in self.port_to_feature[delPort['dpid']]:
+                del self.port_to_feature[delPort['dpid']][delPort['port']]
+
+        print json.dumps(delPort)
+        tmpIP = coreURL + "/publish/delport"
+        self.post_json_to_core(tmpIP, json.dumps(delPort))
+
+    #
+    # handle add link event
+    #
+    @set_ev_cls(event.EventLinkAdd)
+    def add_link_handler(self, ev):
+        link = ev.link
+        print '*****add link*****'
+
+        # format src dpid
+        temp = "%016x" %link.src.dpid
+        temp = map(str, temp)
+        for i in range(2, 23, 3):
+            temp.insert(i, ':')
+        nodesrc = {
+            'dpid': ''.join(temp),
+            'port': str(link.src.port_no)
+        }
+
+        # format dst dpid
+        temp = "%016x" %link.dst.dpid
+        temp = map(str, temp)
+        for i in range(2, 23, 3):
+            temp.insert(i, ':')
+        nodedst = {
+            'dpid': ''.join(temp),
+            'port': str(link.dst.port_no)
+        }
+
+        addLink = {
+            'link': [nodesrc, nodedst],
+            'controller': controllerName
+        }
+
+        print json.dumps(addLink)
+        tmpIP = coreURL + "/publish/addlink"
+        self.post_json_to_core(tmpIP, json.dumps(addLink))
+
+    #
+    # handle delete link event
+    #
+    @set_ev_cls(event.EventLinkDelete)
+    def del_link_handler(self, ev):
+        link = ev.link
+        print '*****del link*****'
+
+        # format src dpid
+        temp = "%016x" %link.src.dpid
+        temp = map(str, temp)
+        for i in range(2, 23, 3):
+            temp.insert(i, ':')
+        nodesrc = {
+            'dpid': ''.join(temp),
+            'port': str(link.src.port_no)
+        }
+
+        # format dst dpid
+        temp = "%016x" %link.dst.dpid
+        temp = map(str, temp)
+        for i in range(2, 23, 3):
+            temp.insert(i, ':')
+        nodedst = {
+            'dpid': ''.join(temp),
+            'port': str(link.dst.port_no)
+        }
+
+        delLink = {
+            'link': [nodesrc, nodedst],
+            'controller': controllerName
+        }
+
+        print json.dumps(delLink)
+        tmpIP = coreURL + "/publish/dellink"
+        self.post_json_to_core(tmpIP, json.dumps(delLink))
+
+    #
+    # handle add host event
+    #
+    @set_ev_cls(event.EventHostAdd)
+    def add_host_handler(self, ev):
+        host = ev.host
+        print '*****add host*****'
+
+        # format dpid
+        temp = "%016x" %host.port.dpid
+        temp = map(str, temp)
+        for i in range(2, 23, 3):
+            temp.insert(i, ':')
+        nodeloc = {
+            'dpid': ''.join(temp),
+            'port': str(host.port.port_no)
+        }
+
+        addHost = {
+            'mac': host.mac,
+            'type': 'wired',
+            'location': nodeloc,
+            'vlan': str(host.vlan[len(host.vlan)-1]) if host.vlan else "0",
+            'ip': str(host.ipv4[len(host.ipv4)-1]) if host.ipv4 else "0.0.0.0",
+            'controller': controllerName
+        }
+
+        print json.dumps(addHost)
+        tmpIP = coreURL + "/publish/addhost"
+        self.post_json_to_core(tmpIP, json.dumps(addHost))
+
+    #
+    # handle delete host event
+    #
+    @set_ev_cls(event.EventHostDelete)
+    def del_host_handler(self, ev):
+        host = ev.host
+        print '*****del host*****'
+
+        delHost = {
+            'mac': host.mac,
+            'controller': controllerName
+        }
+
+        print json.dumps(delHost)
+        tmpIP = coreURL + "/publish/delhost"
+        self.post_json_to_core(tmpIP, json.dumps(delHost))
+
+    #
+    # handle packet in event
+    #
+    @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
+    def packet_in_handler(self, ev):
+        msg = ev.msg
+        datapath = msg.datapath
+        ofproto = datapath.ofproto
+        parser = datapath.ofproto_parser
+
+        dpid = datapath.id
+
+        if ofproto.OFP_VERSION == ofproto_v1_0.OFP_VERSION:
+            in_port = msg.in_port
+        else:
+            in_port = msg.match['in_port']
+
+        pkt = packet.Packet(msg.data)
+        eth = pkt.get_protocols(ethernet.ethernet)[0]
+
+        # ignore lldp packet & ipv6
+        if (eth.ethertype == ETH_TYPE_LLDP) | (eth.ethertype == ETH_TYPE_IPV6):
+            return
+
+        src = eth.src
+        dst = eth.dst
+
+        print '*****packet in*****'
+
+        packetIn = {}
+
+        # format dpid
+        temp = "%016x" %dpid
+        temp = map(str, temp)
+        for i in range(2, 23, 3):
+            temp.insert(i, ':')
+        packetIn["dpid"] = ''.join(temp)
+
+        packetIn["in_port"] = str(in_port)
+
+        pkt_ethernet = pkt.get_protocol(ethernet.ethernet)
+        if not pkt_ethernet:
+            return
+        else:
+            packetIn["mac_src"] = pkt_ethernet.src
+            packetIn["mac_dst"] = pkt_ethernet.dst
+            packetIn["ether_type"] = 'x0'.join(hex(pkt_ethernet.ethertype).split('x')) if len(hex(pkt_ethernet.ethertype)) < 6 else hex(pkt_ethernet.ethertype)
+
+        for p in pkt.protocols:
+            if hasattr(p, 'src'):
+                packetIn["ip_src"] = p.src
+                packetIn["ip_dst"] = p.dst
+
+            if hasattr(p, 'src_ip'):
+                packetIn["ip_src"] = p.src_ip
+                packetIn["ip_dst"] = p.dst_ip
+
+            if hasattr(p, 'proto'):
+                packetIn["protocol"] = 'x0'.join(hex(p.proto).split('x')) if ((len(hex(p.proto)) < 4) or (len(hex(p.proto)) == 5)) else hex(p.proto)
+
+            if hasattr(p, 'src_port'):
+                packetIn["port_src"] = str(p.src_port)
+                packetIn["port_dst"] = str(p.dst_port)
+
+        packetIn["protocol"] = '0' if 'protocol' not in packetIn else packetIn["protocol"]
+        packetIn["ip_src"] = '0.0.0.0' if 'ip_src' not in packetIn else packetIn["ip_src"]
+        packetIn["ip_dst"] = '0.0.0.0' if 'ip_dst' not in packetIn else packetIn["ip_dst"]
+        packetIn["port_src"] = '0' if 'port_src' not in packetIn else packetIn["port_src"]
+        packetIn["port_dst"] = '0' if 'port_dst' not in packetIn else packetIn["port_dst"]
+        packetIn["controller"] = controllerName
+
+        print json.dumps(packetIn)
+        tmpIP = coreURL + "/publish/packet"
+        self.post_json_to_core(tmpIP, json.dumps(packetIn))
+
+    #
+    # for datapath
+    #
+    @set_ev_cls(ofp_event.EventOFPStateChange, [MAIN_DISPATCHER, DEAD_DISPATCHER])
+    def state_change_handler(self, ev):
+        datapath = ev.datapath
+        if ev.state == MAIN_DISPATCHER:
+            if not datapath.id in self.datapaths:
+                self.logger.debug('register datapath: %016x', datapath.id)
+                self.datapaths[datapath.id] = datapath
+        elif ev.state == DEAD_DISPATCHER:
+            if datapath.id in self.datapaths:
+                self.logger.debug('unregister datapath: %016x', datapath.id)
+                del self.datapaths[datapath.id]
+
+    #
+    # for polling
+    #
+    def monitor(self):
+        while True:
+            for dp in self.datapaths.values():
+                tempflow = self.flow_stats_reply_handler_API(dp.id) # from OpenADM
+                tempport = self.port_stats_reply_handler_API(dp.id) # from OpenADM
+            self.controller_stats_reply_handler()
+
+            hub.sleep(5)
+
+    #
+    # polling controller
+    #
+    def controller_stats_reply_handler(self):
+        print '----------------------controller----------------------'
+
+        os = subprocess.check_output("cat /etc/issue".split())
+        mem = subprocess.check_output("free -h", shell=True)
+        cpu = subprocess.check_output("cat /proc/loadavg".split())
+        controllerstatsReply = {
+            'controller': controllerName,
+            'type': 'ryu',
+            'os': ' '.join(os.split()),
+            'mem_total': mem.split()[7],
+            'mem_used': mem.split()[8],
+            'mem_free': mem.split()[9],
+            'cpu': cpu.split()[0]
+        }
+
+        print json.dumps(controllerstatsReply)
+        tmpIP = coreURL + "/publish/controller"
+        self.post_json_to_core(tmpIP, json.dumps(controllerstatsReply))
+
+    #
+    # polling flows
+    #
+    def flow_stats_reply_handler_API(self, dpid):
         flow = {}
         dp = self.dpset.get(int(dpid))
         if dp is None:
@@ -97,10 +526,71 @@ class RestController(ControllerBase):
         else:
             LOG.debug('Unsupported OF protocol')
             return None
+
+        print '----------------------flowAPI----------------------'
+
+        flowstatsReplyAPI = {}
+        flowstatsReplyAPI["controller"] = controllerName
+
+        for key in flows:
+            temp = "%016x" %int(key)
+            temp = map(str, temp)
+            for i in range(2, 23, 3):
+                temp.insert(i, ':')
+            flowstatsReplyAPI["dpid"] = ''.join(temp)
+
+            flowstatsReplyAPI["flows"] = []
+            i = 0
+            for inflow in flows[key]:
+                if 'priority' in inflow:
+                    flowstatsReplyAPI["flows"].append({})
+                    flowstatsReplyAPI["flows"][i]["ingressPort"] = str(inflow['match']['in_port']) if 'in_port' in inflow['match'] else "0"
+                    flowstatsReplyAPI["flows"][i]["dstMac"] = inflow['match']['dl_dst'] if 'dl_dst' in inflow['match'] else "00:00:00:00:00:00"
+                    flowstatsReplyAPI["flows"][i]["srcMac"] = inflow['match']['dl_src'] if 'dl_src' in inflow['match'] else "00:00:00:00:00:00"
+                    flowstatsReplyAPI["flows"][i]["dstIP"] = inflow['match']['nw_dst'] if 'nw_dst' in inflow['match'] else "0.0.0.0"
+                    flowstatsReplyAPI["flows"][i]["dstIPMask"] = "0" # not support in ryu
+                    flowstatsReplyAPI["flows"][i]["srcIP"] = inflow['match']['nw_src'] if 'nw_src' in inflow['match'] else "0.0.0.0"
+                    flowstatsReplyAPI["flows"][i]["srcIPMask"] = "0" # not support in ryu
+                    flowstatsReplyAPI["flows"][i]["netProtocol"] = hex(inflow['match']['nw_proto']) if 'nw_proto' in inflow['match'] else "0x00"
+                    flowstatsReplyAPI["flows"][i]["dstPort"] = str(inflow['match']['tp_dst']) if 'tp_dst' in inflow['match'] else "0"
+                    flowstatsReplyAPI["flows"][i]["srcPort"] = str(inflow['match']['tp_src']) if 'tp_src' in inflow['match'] else "0"
+                    flowstatsReplyAPI["flows"][i]["vlan"] = str(inflow['match']['dl_vlan']) if 'dl_vlan' in inflow['match'] else "0"
+                    flowstatsReplyAPI["flows"][i]["vlanP"] = str(inflow['match']['dl_vlan_pcp']) if 'dl_vlan_pcp' in inflow['match'] else "0"
+                    flowstatsReplyAPI["flows"][i]["wildcards"] = str(inflow['match']['wildcards']) if 'wildcards' in inflow['match'] else "0"
+                    flowstatsReplyAPI["flows"][i]["tosBits"] = str(inflow['match']['nw_tos']) if 'nw_tos' in inflow['match'] else "0"
+                    flowstatsReplyAPI["flows"][i]["counterByte"] = str(inflow['byte_count'])
+                    flowstatsReplyAPI["flows"][i]["counterPacket"] = str(inflow['packet_count'])
+                    flowstatsReplyAPI["flows"][i]["idleTimeout"] = str(inflow['idle_timeout'])
+                    flowstatsReplyAPI["flows"][i]["hardTimeout"] = str(inflow['hard_timeout'])
+                    flowstatsReplyAPI["flows"][i]["priority"] = str(inflow['priority'])
+                    flowstatsReplyAPI["flows"][i]["duration"] = str(inflow['duration_sec'])
+                    flowstatsReplyAPI["flows"][i]["dlType"] = hex(inflow['match']['dl_type']) if 'dl_type' in inflow['match'] else "0x0000"
+
+                    flowstatsReplyAPI["flows"][i]["actions"] = []
+                    for action in inflow['actions']:
+                        if len(action.split(':')) == 1:
+                            act = {
+                                "value": "0",
+                                "type": action
+                            }
+                        else:
+                            act = {
+                                "value": action.split(':')[1],
+                                "type": action.split(':')[0]
+                            }
+                        flowstatsReplyAPI["flows"][i]["actions"].append(act)
+
+                    i += 1
+
+        print json.dumps(flowstatsReplyAPI)
+        tmpIP = coreURL + "/publish/flow"
+        self.post_json_to_core(tmpIP, json.dumps(flowstatsReplyAPI))
         return flows
 
-    # return port information of specific dpid
-    def getPorts(self, dpid):
+    #
+    # polling ports
+    #
+    def port_stats_reply_handler_API(self, dpid):
         dp = self.dpset.get(int(dpid))
         if dp is None:
             return None
@@ -113,105 +603,51 @@ class RestController(ControllerBase):
         else:
             LOG.debug('Unsupported OF protocol')
             return None
+
+        print '----------------------portAPI----------------------'
+
+        for key in ports:
+            for port in ports[key]:
+                portstatsReplyAPI = {
+                    'controller': controllerName,
+                    'port': str(port['port_no']),
+                    'rxbyte': str(port['rx_bytes']),
+                    'rxpacket': str(port['rx_packets']),
+                    'txbyte': str(port['tx_bytes']),
+                    'txpacket': str(port['tx_packets'])
+                }
+
+                temp = "%016x" %int(key)
+                temp = map(str, temp)
+                for i in range(2, 23, 3):
+                    temp.insert(i, ':')
+                portstatsReplyAPI["dpid"] = ''.join(temp)
+                portstatsReplyAPI["capacity"] = self.port_to_feature[portstatsReplyAPI['dpid']][portstatsReplyAPI['port']] if portstatsReplyAPI['port'] in self.port_to_feature[portstatsReplyAPI['dpid']] else '0'
+
+                print json.dumps(portstatsReplyAPI)
+                tmpIP = coreURL + "/publish/port"
+                self.post_json_to_core(tmpIP, json.dumps(portstatsReplyAPI))
         return ports
 
-    # return links in network topology
-    # notice: --observe-link is needed when running ryu-manager
-    def getLinks(self):
-        dpid = None
-        links = get_link(self.omniui, dpid)
-        return links
 
-    # repack switch information
-    def switches(self, req, **kwargs):
-        result = []
-        nodes = self.getNodes()
-        for node in nodes:
-            omniNode = {
-                'dpid': self.colonDPID(dpid_to_str(node)),
-                'flows':[],
-                'ports':[]
-            }
-            # repack flow information
-            flows = self.getFlows(node)
-            for key in flows:
-                for flow in flows[key]:
-                    omniFlow = {
-                        'ingressPort': flow['match']['in_port'] if 'in_port' in flow['match'] else 0,
-                        'srcMac': flow['match']['dl_src'] if 'dl_src' in flow['match'] else 0,
-                        'dstMac': flow['match']['dl_dst'] if 'dl_dst' in flow['match'] else 0,
-                        'dstIP': flow['match']['nw_dst'] if 'nw_dst' in flow['match'] else 0,
-                        'dstIPMask': '-', # not support in ryu
-                        'netProtocol': flow['match']['nw_proto'] if 'nw_proto' in flow['match'] else 0,
-                        'srcIP': flow['match']['nw_src'] if 'nw_src' in flow['match'] else 0,
-                        'srcIPMask': '-', # not support in ryu
-                        'dstPort': flow['match']['tp_dst'] if 'tp_dst' in flow['match'] else 0,
-                        'srcPort': flow['match']['tp_src'] if 'tp_src' in flow['match'] else 0,
-                        'vlan': flow['match']['dl_vlan'] if 'dl_vlan' in flow['match'] else 0,
-                        'vlanP': flow['match']['dl_vlan_pcp'] if 'dl_vlan_pcp' in flow['match'] else 0,
-                        'wildcards': flow['match']['wildcards'] if 'wildcards' in flow['match'] else '-',
-                        'tosBits': flow['match']['nw_tos'] if 'nw_tos' in flow['match'] else 0,
-                        'counterByte': flow['byte_count'],
-                        'counterPacket': flow['packet_count'],
-                        'idleTimeout': flow['idle_timeout'],
-                        'hardTimeout': flow['hard_timeout'],
-                        'priority': flow['priority'],
-                        'duration': flow['duration_sec'],
-                        'dlType': flow['match']['dl_type'] if 'dl_type' in flow['match'] else 0,
-                        'actions': []
-                    }
-                    # repack action field
-                    for action in flow['actions']:
-                        if (len(action.split(':')) == 1):
-                            omniAction = {
-                                'type': action,
-                            }
-                            omniFlow['actions'].append(omniAction)
-                        else:
-                            omniAction = {
-                                'type': action.split(':')[0],
-                                'value': action.split(':')[1]
-                            }
-                            omniFlow['actions'].append(omniAction)
-                    omniNode['flows'].append(omniFlow)
-            # repack port information
-            ports = self.getPorts(node)
-            for key in ports:
-                for port in ports[key]:
-                    omniPort = {
-                        'PortNumber': port['port_no'],
-                        'recvPackets': port['rx_packets'],
-                        'transmitPackets': port['tx_packets'],
-                        'recvBytes': port['rx_bytes'],
-                        'transmitBytes': port['tx_bytes']
-                    }
-                    omniNode['ports'].append(omniPort)
-            result.append(omniNode)
-        body = json.dumps(result)
-        return Response(content_type='application/json', body=body)
+class RestController(ControllerBase):
+    def __init__(self, req, link, data, **config):
+        super(RestController, self).__init__(req, link, data, **config)
+        self.dpset = data['dpset']
 
-    # repack link information
-    def links(self, req, **kwargs):
-        result = []
-        links = self.getLinks()
-        for link in links:
-            omniLink = {
-                'src-switch': self.colonDPID(link.to_dict()['src']['dpid']),
-                'dst-switch': self.colonDPID(link.to_dict()['dst']['dpid']),
-                'src-port': (int)(link.to_dict()['src']['port_no']),
-                'dst-port': (int)(link.to_dict()['dst']['port_no'])
-            }
-            # remove bi-direction link
-            reverse = False
-            for link in result:
-                if (link['src-switch'] == omniLink['dst-switch'] and
-                        link['dst-switch'] == omniLink['src-switch'] and
-                        link['src-port'] == omniLink['dst-port'] and
-                        link['dst-port'] == omniLink['src-port']):
-                    reverse = True
-            result.append(omniLink) if reverse is False else None
-        body = json.dumps(result)
-        return Response(content_type='application/json', body=body)
+    def set_openadm(self, req, **kwargs):
+        try:
+            global controllerName
+            global coreURL
+            data = ast.literal_eval(req.body)
+            controllerName = data["controllerName"]
+            coreURL = data["coreURL"]
+            print '*****NAME: ' + controllerName + '*****'
+            print '*****COREURL: ' + coreURL + '*****'
+        except SyntaxError:
+            return Response(status=400)
+
+        return Response(status=200)
 
     def mod_flow_entry(self, req, **kwargs):
         try:
@@ -220,14 +656,14 @@ class RestController(ControllerBase):
             LOG.debug('Invalid syntax %s', req.body)
             return Response(status=400)
 
-        omniDpid = omniFlow.get('switch')             #Getting OmniUI dpid from flow    
+        omniDpid = omniFlow.get('switch')             #Getting OmniUI dpid from flow
         if omniDpid is None:
             return Response(status=404)
         else:
             dpid = self.nospaceDPID(omniDpid.split(':'))    #Split OmniUI dpid into a list
 
         cmd = omniFlow.get('command')                 #Getting OmniUI command from flow
-        dp = self.dpset.get(int(dpid))                #Getting datapath from Ryu dpid
+        dp = self.dpset.get(int(dpid, 16))                #Getting datapath from Ryu dpid
         if dp is None:                                #NB: convert dpid to int first
             return Response(status=404)
 
@@ -275,15 +711,15 @@ class RestController(ControllerBase):
             'match': {
                 'wildcards': wildcards,
                 'in_port': int(flows.get('ingressPort', 0)),
-                'dl_src': flows.get('srcMac'),
-                'dl_dst': flows.get('dstMac'),
+                'dl_src': flows.get('srcMac', '00:00:00:00:00:00'),
+                'dl_dst': flows.get('dstMac', '00:00:00:00:00:00'),
                 'dl_vlan': int(flows.get('vlan', 0)),
                 'dl_vlan_pcp': int(flows.get('vlanP', 0)),
-                'dl_type': int(flows.get('dlType', 0)),
+                'dl_type': int(flows.get('dlType', '0x0000'), 16),
                 'nw_tos': int(flows.get('tosBits', 0)),
-                'nw_proto': int(flows.get('netProtocol', 0)),
-                'nw_src': flows.get('srcIP').split('/')[0],
-                'nw_dst': flows.get('dstIP').split('/')[0],
+                'nw_proto': int(flows.get('netProtocol', '0x00'), 16),
+                'nw_src': flows.get('srcIP', '0.0.0.0').split('/')[0],
+                'nw_dst': flows.get('dstIP', '0.0.0.0').split('/')[0],
                 'tp_src': int(flows.get('srcPort', 0)),
                 'tp_dst': int(flows.get('dstPort', 0))
             }
@@ -294,6 +730,9 @@ class RestController(ControllerBase):
             for act in actions:
                 action = self.to_action_v1_0(dp, act)
                 ryuFlow['actions'].append(action)
+        for matchfield in ryuFlow['match'].copy():
+            if (ryuFlow['match'][matchfield] == 0) or (ryuFlow['match'][matchfield] == '0.0.0.0') or (ryuFlow['match'][matchfield] == '00:00:00:00:00:00'):
+                del ryuFlow['match'][matchfield]
 
         return ryuFlow
 
@@ -303,18 +742,18 @@ class RestController(ControllerBase):
         if actions_type == 'OUTPUT':
             ryuAction = {
                 'type': actions_type,
-                'port': actions.split('=')[1],
+                'port': int(actions.split('=')[1]),
                 'max_len': 0xffe5
             }
         elif actions_type == 'SET_VLAN_VID':
             ryuAction = {
                 'type': actions_type,
-                'vlan_vid': actions.split('=')[1]
+                'vlan_vid': int(actions.split('=')[1])
             }
         elif actions_type == 'SET_VLAN_PCP':
             ryuAction = {
                 'type': actions_type,
-                'vlan_pcp': actions.split('=')[1]
+                'vlan_pcp': int(actions.split('=')[1])
             }
         elif actions_type == 'STRIP_VLAN':
             ryuAction = {
@@ -343,25 +782,25 @@ class RestController(ControllerBase):
         elif actions_type == 'SET_NW_TOS':
             ryuAction = {
                 'type': actions_type,
-                'nw_tos': actions.split('=')[1]
+                'nw_tos': int(actions.split('=')[1])
             }
         elif actions_type == 'SET_TP_SRC':
             ryuAction = {
                 'type': actions_type,
-                'tp_src': actions.split('=')[1]
+                'tp_src': int(actions.split('=')[1])
             }
         elif actions_type == 'SET_TP_DST':
             ryuAction = {
                 'type': actions_type,
-                'tp_dst': actions.split('=')[1]
+                'tp_dst': int(actions.split('=')[1])
             }
         elif actions_type == 'ENQUEUE':
             actions_port = actions.split('=')[1].split(':')[0]
             actions_qid = actions.split('=')[1].split(':')[1]
             ryuAction = {
                 'type': actions_type,
-                'port': actions_port,
-                'queue_id': actions_qid
+                'port': int(actions_port),
+                'queue_id': int(actions_qid)
             }
         else:
             LOG.debug('Unknown action type')
@@ -389,10 +828,10 @@ class RestController(ControllerBase):
         for key in omniFlow:
             match = self.to_match_v1_3(dp, key, omniFlow)
             if match is not None:
-                ryuFlow['match'].update(match) 
+                ryuFlow['match'].update(match)
 
         # handle mutiple actions
-        acts = omniFlow.get('actions').split(',')
+        acts = omniFlow.get('actions', '').split(',')
         for a in acts:
             action = self.to_action_v1_3(dp, a)
             if action is not None:
@@ -411,15 +850,15 @@ class RestController(ControllerBase):
             'srcMac': ['dl_src', str],
             'eth_dst': ['eth_dst', str],
             'eth_src': ['eth_src', str],
-            'dlType': ['dl_type', int],
-            'eth_type': ['eth_type', int],
+            'dlType': ['dl_type', int, 16],
+            'eth_type': ['eth_type', int, 16],
             'vlan': ['dl_vlan', str],
             'vlan_vid': ['vlan_vid', str],
             'vlanP': ['vlan_pcp', int],
             'ip_dscp': ['ip_dscp', int],
             'ip_ecn': ['ip_ecn', int],
-            'netProtocol': ['nw_proto', int],
-            'ip_proto': ['ip_proto', int],
+            'netProtocol': ['nw_proto', int, 16],
+            'ip_proto': ['ip_proto', int, 16],
             'srcIP': ['nw_src', str],
             'dstIP': ['nw_dst', str],
             'ipv4_src': ['ipv4_src', str],
@@ -455,22 +894,29 @@ class RestController(ControllerBase):
             'ipv6_exthdr': ['ipv6_exthdr', int]
         }
 
+        if (omniFlow.get(omni_key) == '0') or (omniFlow.get(omni_key) == '0.0.0.0') or (omniFlow.get(omni_key) == '00:00:00:00:00:00') or (omniFlow.get(omni_key) == '0x00') or (omniFlow.get(omni_key) == '0x0000'):
+            return None
         for key, value in convert.items():
             if omni_key == key:
+                if len(value) == 3:
+                    ryuMatch = {
+                        value[0]: value[1](omniFlow.get(omni_key), value[2])
+                    }
+                    return ryuMatch
                 ryuMatch = {
                     value[0]: value[1](omniFlow.get(omni_key))
                 }
                 return ryuMatch
 
         return None
-        
+
     # repack 1.3 actions
     def to_action_v1_3(self, dp, dic):
         action_type = dic.split('=')[0]
         if action_type == 'OUTPUT':
             ryuAction = {
                 'type': action_type,
-                'port': dic.split('=')[1]
+                'port': int(dic.split('=')[1])
             }
         elif action_type == 'COPY_TTL_OUT':
             ryuAction = {
@@ -527,30 +973,26 @@ class RestController(ControllerBase):
             ryuAction = {
                 'type': action_type
             }
-        elif action_type == 'SET_FIELD':  
+        elif action_type == 'SET_FIELD':
             ryuAction = {
                 'type': action_type,
                 'field': dic.split('=')[1].split(':')[0],
                 'value': dic.split('=')[1].split(':')[1]
-            }  
+            }
         elif action_type == 'PUSH_PBB':
             ryuAction = {
                 'type': action_type,
                 'ethertype': dic.split('=')[1]
-            }  
+            }
         elif action_type == 'POP_PBB':
             ryuAction = {
                 'type': action_type
-            } 
+            }
         else:
-            ryuAction = None 
+            ryuAction = None
 
         return ryuAction
 
     # restore Ryu-format dpid
     def nospaceDPID(self, dpid):
         return "".join(dpid)
-
-    # repack dpid
-    def colonDPID(self, dpid):
-        return ':'.join(a+b for a,b in zip(dpid[::2], dpid[1::2]))

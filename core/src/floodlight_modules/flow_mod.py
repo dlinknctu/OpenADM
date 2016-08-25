@@ -3,22 +3,19 @@ import json
 
 
 class Flow_mod:
-	def __init__(self,core,parm):		
-		
-		self.IP = "localhost"
-		self.Port = "8080"
-		self.path = '/wm/omniui/add/json'
+	def __init__(self,core,parm):
+		self.IP = parm["ip"]
+		self.Port = int(parm["port"])
+		self.path = "/wm/omniui/add/json"
 		self.headers = {
-            		'Content-type': 'application/json',
-            		'Accept': 'application/json',
+			"Content-type": "application/json",
+			"Accept": "application/json",
             	}
-		# register rest api
-		self.Url="http://"+self.IP+":"+self.Port+"/wm/omniui/add/json"
-		core.registerRestApi("flowmod", self.flowHandler)
+		# register weboskcet api
+		core.registerURLApi("flowmod", self.flowHandler)
 
-	def flowHandler(self,data):
+	def flowHandler(self, data):
 		# return JSONP format
-		body = json.dumps(data.get_json(force=True))
 		conn = httplib.HTTPConnection(self.IP,self.Port)
 		conn.request('POST',self.path,body,self.headers)
 		response = conn.getresponse()

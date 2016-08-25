@@ -11,9 +11,9 @@ class UIPusher:
 	def __init__(self,core,parm):		
 		# register event handler
 		core.registerEventHandler("controlleradapter", self.controllerHandler)
-		# register sse handler
-		core.registerSSEHandler('updateuds', self.udsHandler)
-		core.registerRestApi("stat", self.statisticHandler)
+		# register handler
+		core.registerAdapterHandler('updateuds', self.udsHandler)
+		core.registerURLApi("stat", self.statisticHandler)
 		# save core for ipc use
 		self.core = core
 
@@ -112,12 +112,10 @@ class UIPusher:
 			key['duration'] = self.tmpcache[hashkey][3]
 			self.db[self.intervalList[0]].save(key)
 
-	def statisticHandler(self,request):
+	def statisticHandler(self, data):
 		if self.enable == False:
 			return "Time\t1\n"
 		
-		#parse json data
-		data = request.get_json(force=True)
 		#declare variable
 		multiGroup = {}
 		output = "Time"

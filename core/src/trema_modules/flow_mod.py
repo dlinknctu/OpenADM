@@ -15,15 +15,14 @@ class Flow_mod:
 				self.IP = parm['ip']
 			if parm.has_key("port"):
 				self.Port = str(parm['port'])
-		# register rest api
+		# register websocket api
 		self.addUrl="/uds/add"
 		self.delUrl="/uds/del"
-		core.registerRestApi("uds/add", self.udsAddHandler)
-		core.registerRestApi("uds/del", self.udsDelHandler)
+		core.registerURLApi("uds/add", self.udsAddHandler)
+		core.registerURLApi("uds/del", self.udsDelHandler)
 
-	def udsAddHandler(self,request):
+	def udsAddHandler(self,entity):
 		url = self.addUrl
-		entity = request.get_json(force=True)
 		if not entity:
 			print "No get data from WEBUI"
 			return
@@ -45,9 +44,8 @@ class Flow_mod:
 		msg = json.dumps(ret)
 		return msg
 
-	def udsDelHandler(self,request):
+	def udsDelHandler(self,entity):
 		url = self.delUrl
-		entity = request.get_json(force=True)
 		if not entity:
 			print "No get data from WEBUI"
 			return

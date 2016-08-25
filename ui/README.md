@@ -1,18 +1,19 @@
 ### OpenADM
 ---
-### Usage
-
-Setting OpenADM core host ip and port in config/config.json (default: http://127.0.0.1:5567/)
-
-### Contains
  - React
  - Webpack
  - Babel
  - ES6
- - Alt (flux implementation)
+ - Redux
  - Material-ui
+ - Next
 
-### How to use
+ ### How to use
 ---
  - npm install
  - npm run dev
+
+### Production
+---
+ - npm install
+ - npm run build

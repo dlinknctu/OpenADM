@@ -31,3 +31,5 @@ $ `sudo mn --controller=remote --topo tree,depth=2`
 3. Start-up OmniUI Web UI (Using a 4th Terminal)  
 $ `firefox ~/OmniUI/webui/index.html`
 
+4. Setting ControllerName and OpenADM coreURL   
+`curl --header "Content-type:application/json"-d '{"controllerName":"controllerName", "coreURL":"http://openadmIP"}' http://floodlightip:8080/wm/omniui/core`

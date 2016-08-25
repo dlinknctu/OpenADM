@@ -1,99 +1,136 @@
-"use strict";
 /**
  * Master Component
  * the root component
  */
-let React = require("react");
-let { Link, RouteHandler } = require("react-router");
-let mui = require("material-ui");
-let { AppCanvas, AppBar, IconButton, Styles } = mui;
-let { Colors, Typography } = Styles;
-let ThemeManager = new mui.Styles.ThemeManager();
-let LeftNavBar = require("./components/LeftNavBar.jsx");
-let ControllerAction = require("./actions/ControllerAction");
-let ControllerStore = require("./stores/ControllerStore");
-let SvgIcon = require("material-ui/lib/svg-icon");
+import React, { PropTypes } from 'react';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
+import ReduxToastr from 'react-redux-toastr';
+import 'react-redux-toastr/lib/css/react-redux-toastr.min.css';
+import LeftNavBar from './components/LeftNavBar.jsx';
+import AppBar from 'material-ui/AppBar';
+import AppCanvas from 'material-ui/internal/AppCanvas';
+import getMuiTheme from 'material-ui/styles/getMuiTheme';
+import Theme from '../theme.js';
+import { resetLayout } from './actions/LayoutAction';
+import * as CoreAction from './actions/CoreAction';
+import SyncIcon from 'material-ui/svg-icons/notification/sync';
+import RestoreIcon from 'material-ui/svg-icons/action/restore';
+import RemoveIcon from 'material-ui/svg-icons/content/remove-circle';
+import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
+import IconButton from 'material-ui/IconButton';
+import IconMenu from 'material-ui/IconMenu';
+import MenuItem from 'material-ui/MenuItem';
+
+const styles = {
+  paddingTop: '64px',
+  paddingRight: '0px',
+  paddingBottom: '0px',
+  paddingLeft: '0px',
+  height: '92vh',
+};
 
 class Master extends React.Component {
 
-    constructor(props) {
-        super(props);
-        this._onLeftIconButtonTouchTap = this._onLeftIconButtonTouchTap.bind(this);
+  constructor(props) {
+    super(props);
+    this.onLeftIconButtonTouchTap = this.onLeftIconButtonTouchTap.bind(this);
+    this.handleReset = this.handleReset.bind(this);
+    this.handleSubscribe = this.handleSubscribe.bind(this);
+    this.handleClearPath = this.handleClearPath.bind(this);
+    this.handleRestoreCore = this.handleRestoreCore.bind(this);
+  }
 
-        this.state = {
-            isThemeDark: false,
-            lists: ControllerStore.getState().controllerList
-        };
-    }
+  getChildContext() {
+    return {
+      muiTheme: getMuiTheme(Theme),
+    };
+  }
 
-    getChildContext() {
-        return {
-          muiTheme: ThemeManager.getCurrentTheme()
-        };
-    }
+  onLeftIconButtonTouchTap() {
+    this.refs.leftNav.handleToggle();
+  }
 
-    componentDidMount() {
-        ControllerStore.listen(this.onChange);
-    }
+  handleReset() {
+    this.props.resetLayout();
+  }
 
-    componentWillUnmount() {
-        ControllerStore.unlisten(this.onChnage);
-    }
+  handleSubscribe() {
+    this.props.subscribe();
+  }
 
-    _onLeftIconButtonTouchTap() {
-        this.refs.leftNav.toggle();
-    }
+  handleClearPath() {
+    this.props.clearAllPath();
+  }
 
-    onChange(state) {
-        this.setState(state);
-    }
+  handleRestoreCore() {
+    this.props.restoreCore();
+  }
 
-    changeTheme(){
-        if (this.state.isThemeDark) {
-          ThemeManager.setTheme(ThemeManager.types.LIGHT);
-            }
-        else {
-          ThemeManager.setTheme(ThemeManager.types.DARK);
-        }
-        this.setState({ isThemeDark: !this.state.isThemeDark });
-    }
-
-    render() {
-        var themeButton = (
-              <IconButton tooltip="theme" iconStyle={{ color: "white" }} onClick={this.changeTheme.bind(this)}>
-                  <SvgIcon {...this.props}>
-                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path>
-                </SvgIcon>
-              </IconButton>
-        );
-        return (
-            <AppCanvas>
-              <AppBar
-                onLeftIconButtonTouchTap={this._onLeftIconButtonTouchTap}
-                title="OpenADM"
-                zDepth={0}
-                iconElementRight={themeButton}/>
-
-              <LeftNavBar ref="leftNav" />
-
-              <RouteHandler {...this.props} />
-
-            </AppCanvas>
-        );
-    }
+  render() {
+    return (
+      <AppCanvas>
+        <AppBar
+          title="OpenADM"
+          iconElementRight={
+            <IconMenu
+              iconButtonElement={<IconButton><MoreVertIcon /></IconButton>}
+              targetOrigin={{ horizontal: 'right', vertical: 'top' }}
+              anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
+            >
+              <MenuItem
+                leftIcon={<RestoreIcon />}
+                primaryText="Reset layout"
+                onClick={this.handleReset}
+              />
+              <MenuItem
+                leftIcon={<SyncIcon />}
+                primaryText="Sync data"
+                onClick={this.handleSubscribe}
+              />
+              <MenuItem
+                leftIcon={<RemoveIcon />}
+                primaryText="Clear Path"
+                onClick={this.handleClearPath}
+              />
+              <MenuItem
+                leftIcon={<RemoveIcon />}
+                primaryText="Restore core"
+                onClick={this.handleRestoreCore}
+              />
+            </IconMenu>
+          }
+          onLeftIconButtonTouchTap={this.onLeftIconButtonTouchTap}
+        />
+        <LeftNavBar ref="leftNav" />
+        <ReduxToastr
+          timeOut={4000}
+          newestOnTop={false}
+          position="top-right"
+        />
+        <div style={styles}>
+          {this.props.children}
+        </div>
+      </AppCanvas>
+      );
+  }
 }
 
 Master.propTypes = {
-    params: React.PropTypes.object.isRequired,
-    query: React.PropTypes.object.isRequired
-};
-
-Master.contextTypes = {
-    router: React.PropTypes.func.isRequired
+  children: PropTypes.object.isRequired,
+  resetLayout: PropTypes.func.isRequired,
+  subscribe: PropTypes.func.isRequired,
+  clearAllPath: PropTypes.func.isRequired,
+  restoreCore: PropTypes.func.isRequired,
 };
 
 Master.childContextTypes = {
-  muiTheme: React.PropTypes.object
+  muiTheme: PropTypes.object,
 };
 
-export default Master;
+const mapDispatchToProps = (dispatch) => bindActionCreators({
+  resetLayout,
+  ...CoreAction,
+}, dispatch);
+
+export default connect(null, mapDispatchToProps)(Master);

@@ -63,17 +63,17 @@ public class DeviceInfo {
                                 device.setDpid(deviceEvent.subject().id().toString());
                                 sendMsg.PostMsg((Object)(device), "adddevice", "Device");
                                 break;
-			    case DEVICE_AVAILABILITY_CHANGED:
-				if(deviceService.isAvailable(deviceEvent.subject().id())){
-					device = new Device();
-					device.setDpid(deviceEvent.subject().id().toString());	
-					sendMsg.PostMsg((Object)(device), "adddevice", "Device");
-				} else{
-					device = new Device();
-                                        device.setDpid(deviceEvent.subject().id().toString());
-                                        sendMsg.PostMsg((Object)(device), "deldevice", "Device");
-				}
-				break;
+			                case DEVICE_AVAILABILITY_CHANGED:
+			                	if(deviceService.isAvailable(deviceEvent.subject().id())){
+			                		device = new Device();
+			                		device.setDpid(deviceEvent.subject().id().toString());	
+			                		sendMsg.PostMsg((Object)(device), "adddevice", "Device");
+			                	} else{
+			                		device = new Device();
+                                    device.setDpid(deviceEvent.subject().id().toString());
+                                    sendMsg.PostMsg((Object)(device), "deldevice", "Device");
+			                	}
+			                	break;
                             case DEVICE_REMOVED:
                                 device = new Device();
                                 device.setDpid(deviceEvent.subject().id().toString());

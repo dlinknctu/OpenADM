@@ -24,14 +24,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 @javax.ws.rs.Path("")
 public class Omniui extends AbstractWebResource {
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 	public static String controller_name = "";
 	final FlowRuleService service = get(FlowRuleService.class);
         public static String host = "";
-        
         @javax.ws.rs.Path("/core")
         @POST
         @Produces("application/json")

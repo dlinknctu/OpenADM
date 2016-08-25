@@ -21,6 +21,7 @@ Temporary Items
 .apdisk
 ### SublimeText ###
 # cache files for sublime text
+.tern-project
 *.tmlanguage.cache
 *.tmPreferences.cache
 *.stTheme.cache
