@@ -14,10 +14,10 @@ class Flow_mod:
 		# register weboskcet api
 		core.registerURLApi("flowmod", self.flowHandler)
 
-	def flowHandler(self, data):
+	def flowHandler(self, req):
 		# return JSONP format
 		conn = httplib.HTTPConnection(self.IP,self.Port)
-		conn.request('POST',self.path,body,self.headers)
+                conn.request('POST',self.path,json.dumps(req),self.headers)
 		response = conn.getresponse()
 		ret = (response.status, response.reason, response.read())
 		ret[0] == 200

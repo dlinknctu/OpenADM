@@ -556,7 +556,6 @@ class OmniUI(app_manager.RyuApp):
                     flowstatsReplyAPI["flows"][i]["srcPort"] = str(inflow['match']['tp_src']) if 'tp_src' in inflow['match'] else "0"
                     flowstatsReplyAPI["flows"][i]["vlan"] = str(inflow['match']['dl_vlan']) if 'dl_vlan' in inflow['match'] else "0"
                     flowstatsReplyAPI["flows"][i]["vlanP"] = str(inflow['match']['dl_vlan_pcp']) if 'dl_vlan_pcp' in inflow['match'] else "0"
-                    flowstatsReplyAPI["flows"][i]["wildcards"] = str(inflow['match']['wildcards']) if 'wildcards' in inflow['match'] else "0"
                     flowstatsReplyAPI["flows"][i]["tosBits"] = str(inflow['match']['nw_tos']) if 'nw_tos' in inflow['match'] else "0"
                     flowstatsReplyAPI["flows"][i]["counterByte"] = str(inflow['byte_count'])
                     flowstatsReplyAPI["flows"][i]["counterPacket"] = str(inflow['packet_count'])
@@ -656,7 +655,7 @@ class RestController(ControllerBase):
             LOG.debug('Invalid syntax %s', req.body)
             return Response(status=400)
 
-        omniDpid = omniFlow.get('switch')             #Getting OmniUI dpid from flow
+        omniDpid = omniFlow.get('dpid')             #Getting OmniUI dpid from flow
         if omniDpid is None:
             return Response(status=404)
         else:
@@ -694,11 +693,6 @@ class RestController(ControllerBase):
 
     # restore to Ryu Openflow v1.0 flow format
     def ryuFlow_v1_0(self, dp, flows):
-        if flows.get('wildcards') == '-':
-            wildcards = 0
-        else:
-            wildcards = flows.get('wildcards')
-
         ryuFlow = {
             'cookie': int(flows.get('cookie', 0)),
             'priority': int(flows.get('priority', dp.ofproto.OFP_DEFAULT_PRIORITY)),
@@ -709,7 +703,6 @@ class RestController(ControllerBase):
             'hard_timeout': int(flows.get('hardTimeout', 0)),
             'actions': [],
             'match': {
-                'wildcards': wildcards,
                 'in_port': int(flows.get('ingressPort', 0)),
                 'dl_src': flows.get('srcMac', '00:00:00:00:00:00'),
                 'dl_dst': flows.get('dstMac', '00:00:00:00:00:00'),
@@ -740,9 +733,11 @@ class RestController(ControllerBase):
     def to_action_v1_0(self, dp, actions):
         actions_type = actions.split('=')[0]
         if actions_type == 'OUTPUT':
+            port = actions.split('=')[1];
+            port = 65533 if port.upper() == 'CONTROLLER' else int(actions.split('=')[1])
             ryuAction = {
                 'type': actions_type,
-                'port': int(actions.split('=')[1]),
+                'port': port,
                 'max_len': 0xffe5
             }
         elif actions_type == 'SET_VLAN_VID':

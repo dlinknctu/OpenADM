@@ -93,7 +93,7 @@ public class FlowModMethod {
             if (jp.getText().equals("")) 
                 continue;
             
-            if (n == "switch")
+            if (n == "dpid")
                 entry.put(FlowModResource.COLUMN_SWITCH, jp.getText());
             else if (n == "actions")
                 entry.put(FlowModResource.COLUMN_ACTIONS, jp.getText());
