@@ -2,7 +2,6 @@ var Path = require('path');
 var webpack = require('webpack');
 var WebpackNotifierPlugin = require('webpack-notifier');
 var rucksack = require('rucksack-css');
-var config = require('./config.js');
 
 module.exports = {
   devtool: 'cheap-module-eval-source-map',
@@ -19,23 +18,7 @@ module.exports = {
   externals: {
     'nx': 'window.nx',
   },
-  // require without Filename Extension
-  /*resolve: {
-      extensions: ['', '.js', '.jsx'],
-      // if you require something in library module, you can alias it
-      //  and require without path
-       alias: {
-            'angular': 'angular/angular',
-            'lodash': 'lodash/dist/lodash'
-       },
-  },*/
   module: {
-    // preLoaders:[{
-    //       test:    /\.jsx?$/,
-    //       exclude: /node_modules/,
-    //       include: Path.resolve(__dirname, 'src'),
-    //       loaders: ['eslint-loader']
-    // }],
     loaders: [{
       test: /\.(jsx|js)$/,
       exclude: /node_modules/,

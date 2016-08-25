@@ -87,7 +87,7 @@
     "test": "NODE_ENV=test ava --verbose",
     "test:watch": "NODE_ENV=test ava --verbose --watch;true",
     "lint": "eslint --ignore-pattern 'src/**/__tests__' src;true",
-    "build": "NODE_ENV=production webpack -p --progress  --config ./webpack.production.config.js",
+    "build": "NODE_ENV=production webpack -p --progress  --config ./webpack.production.config.js && NODE_ENV=production node devServer.js",
     "dev": "NODE_ENV=development node devServer.js"
   },
   "author": "wnlee",
