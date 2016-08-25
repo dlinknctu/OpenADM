@@ -4,7 +4,7 @@ export const flowmode = createAction('FLOWMODE');
 export const canelSelectFlow = createAction('CANEL_SELECT_FLOW');
 export const flowtableClick = createAction('FLOWTABLE_CLICK');
 
-export const simulate = payload => ({
+export const simulatePath = payload => ({
   type: 'OTHER',
   payload: {
     url: 'simulate',
@@ -59,5 +59,20 @@ export const getTopFlowBy = payload => ({
       controller: payload.controller,
       dpid: payload.dpid,
     },
+  },
+});
+
+export const addFilter = createAction('ADD_FILTER');
+export const deleteFilter = createAction('DELETE_FILTER');
+export const toggleSearch = createAction('TOGGLE_SEARCH');
+export const toggleSetting = createAction('TOGGLE_SETTING');
+export const toggleAction = createAction('TOGGLE_ACTION');
+export const showColumnSetting = createAction('SHOW_COLUMN_SETTING');
+export const selectFlow = createAction('SELECT_FLOW');
+export const submiteFlowmod = payload => ({
+  type: 'OTHER',
+  payload: {
+    url: 'flowmod',
+    request: payload,
   },
 });

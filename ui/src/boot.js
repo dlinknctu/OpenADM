@@ -3,10 +3,10 @@ import ReactDOM from 'react-dom';
 import { syncHistoryWithStore } from 'react-router-redux';
 import { browserHistory } from 'react-router';
 import Immutable from 'seamless-immutable';
+import injectTapEventPlugin from 'react-tap-event-plugin';
 import configureStore from './js/stores/configureStore';
 import Root from './js/Root.js';
 
-import injectTapEventPlugin from 'react-tap-event-plugin';
 injectTapEventPlugin();
 
 const initialState = Immutable.from({
@@ -14,9 +14,9 @@ const initialState = Immutable.from({
   layout: {
     gridLayout: [
       { i: 'Flowtable', x: 1, y: 5, w: 8, h: 7 },
-      { i: 'ControllerStatus', x: 4, y: 0, w: 5, h: 3 },
+      { i: 'ControllerStatus', x: 4, y: 1, w: 5, h: 3 },
       { i: 'PortStatus', x: 4, y: 0, w: 5, h: 3 },
-      { i: 'SettingContainer', x: 1, y: 0, w: 5, h: 8 },
+      { i: 'SettingContainer', x: 1, y: 0, w: 3, h: 9 },
     ],
     hiddenPanel: ['Flowtable', 'ControllerStatus', 'PortStatus', 'SettingContainer'],
     maximumPanel: '',
@@ -40,10 +40,18 @@ const initialState = Immutable.from({
   },
   controllerStatus: [],
   flowtable: {
-    filterString: '',
-    visibleField: ['ipv4'],
-    flowlist: [{ controller: '', flows: [] }],
-    selectFlow: {},
+    flowlist: [],
+    selectedFlow: {},
+    selectedSwitch: [],
+    selectedController: '',
+    showSearch: false,
+    filters: [
+      { category: 'flowId', operator: '!=', value: '0' },
+      { category: 'counterByte', operator: '>', value: '0' },
+    ],
+    showSetting: false,
+    showColumn: ['flowId', 'controller', 'dpid', 'actions', 'counterByte'],
+    showAction: false,
   },
   portStatus: [],
 });

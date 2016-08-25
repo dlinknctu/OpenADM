@@ -1,125 +1,159 @@
 import React, { PropTypes } from 'react';
-import { bindActionCreators } from 'redux';
+import { bindActionCreators, compose } from 'redux';
 import { connect } from 'react-redux';
-import Griddle from 'griddle-react';
 import { withHandlers } from 'recompose';
+import {
+  Table, TableBody, TableHeader, TableHeaderColumn,
+  TableRow, TableRowColumn,
+} from 'material-ui/Table';
 import * as FlowActions from '../actions/FlowAction';
-import Flowmod from '../components/Flowmod.jsx';
-import IconButton from 'material-ui/IconButton';
-import RenewIcon from 'material-ui/svg-icons/action/autorenew';
+import FlowtableSetting from '../components/Flowtable/FlowtableSetting.jsx';
+import Flowmod from '../components/Flowtable/Flowmod.jsx';
+import FlowtableFilter from '../components/Flowtable/FlowtableFilter.jsx';
+import FlowtableControl from '../components/Flowtable/FlowtableControl.jsx';
 
-const styles = {
-  large: {
-    width: 120,
-    height: 120,
-    padding: 30,
-    right: '20px',
-    top: '0px',
-    marginRight: '25px',
-    position: 'absolute',
-  },
-  largeIcon: {
-    width: 60,
-    height: 60,
-  },
-};
+const filterManipulate = (row, filterRule) => {
+  const data = row[filterRule.category];
+  switch (filterRule.operator) {
+    case '==':
+      return data == filterRule.value;
+    case '!=':
+      return data != filterRule.value;
+    case '>':
+      return Number(data) > filterRule.value;
+    case '<':
+      return Number(data) < filterRule.value;
+    case 'contains':
+      return data.toString().includes(filterRule.value);
+    case '!contains':
+      return !data.toString().includes(filterRule.value);
+    default:
+      return false;
 
-const enhance = withHandlers({
-  handleGetAllFlow: ({ getAllFlow }) =>
-    ({ controller, dpid }) =>
-      getAllFlow({ controller, dpid }),
-  handleSimulate: ({ selectNode, selectFlow, simulate }) => () => {
-    const payload = {
-      controller: selectNode.controller,
-      dpid: selectNode.dpid,
-      flow: selectFlow,
-    };
-    simulate(payload);
-  },
-  onRowClick: ({ flowtableClick }) => (row) => flowtableClick(row.props.data),
-});
-
-const FlowtableContainer = ({
-  flowlist,
-  handleSimulate,
-  selectFlow,
-  selectNode,
-  flowmode,
-  handleGetAllFlow,
-  canelSelectFlow,
-  onRowClick,
-}) => (
-  <div>
-    <h2>Flowtable: {selectNode.uid}</h2>
-    <IconButton
-      iconStyle={styles.largeIcon}
-      style={styles.large}
-      onClick={() => handleGetAllFlow(selectNode)}
-    >
-      <RenewIcon color={'green'} hoverColor={'red'} />
-    </IconButton>
-    <Flowmod
-      isOpen={Boolean(selectFlow.srcIP)}
-      canelSelectFlow={canelSelectFlow}
-      flowmode={flowmode}
-      selectNode={selectNode}
-      handleSimulate={handleSimulate}
-    />
-    <div className="griddle-container">
-      <Griddle
-        results={flowlist}
-        tableClassName="table"
-        showFilter
-        showSettings
-        enableInfiniteScroll
-        useFixedHeader
-        bodyHeight={200}
-        columns={['srcIP', 'dstIP', 'dstMac', 'dstPort']}
-        onRowClick={onRowClick}
-      />
-    </div>
-  </div>
-);
-
-
-const filterFlowList = (flowlist) => {
-  if (flowlist.length) {
-    return flowlist
-    .reduce((previous, current) => previous.concat(
-      current.flows
-        .map(flow => ({
-          ...flow,
-          actions: JSON.stringify(flow.actions),
-        }))
-    ), []);
   }
-  return flowlist.flows.map(flow => ({
-    ...flow,
-    actions: JSON.stringify(flow.actions),
-  }));
 };
 
-const mapStateToProps = state => ({
-  selectNode: state.topology.selectNodes,
-  filterString: state.flowtable.filterString,
-  visibleField: state.flowtable.visibleField,
-  selectFlow: state.flowtable.selectFlow,
-  flowlist: filterFlowList(state.flowtable.flowlist),
+const enhance = compose(
+  withHandlers({
+    handleSimulatePath: ({ simulatePath, selectedFlow }) => () => {
+      simulatePath({
+        controller: selectedFlow.controller,
+        dpid: selectedFlow.dpid,
+        flow: { ...selectedFlow },
+      });
+    },
+  })
+);
+const Flowtable = enhance(({
+  getAllFlow,
+  showSetting,
+  showColumn = [],
+  showSearch,
+  showAction,
+  filters,
+  flowlist = [],
+  selectFlow,
+  selectedFlow,
+  addFilter,
+  showColumnSetting,
+  deleteFilter,
+  handleSimulatePath,
+  submiteFlowmod,
+  toggleAction,
+  toggleSearch,
+  toggleSetting,
+}) => {
+  const display = flowlist.filter(row => {
+    const result = filters.map(f => filterManipulate(row, f))
+    .reduce((pre, cur) => pre.concat(cur), []);
+    return result.every(d => d === true);
+  });
+  const header = (display.length !== 0) ? Object.keys(display[0]) : [];
+
+  return (
+    <div>
+      <FlowtableSetting
+        header={header}
+        showSetting={showSetting}
+        showColumn={showColumn}
+        showColumnSetting={showColumnSetting}
+        toggleSetting={toggleSetting}
+      />
+      <Flowmod
+        field={display[0]}
+        selectedFlow={selectedFlow}
+        showAction={showAction}
+        toggleAction={toggleAction}
+        submiteFlowmod={submiteFlowmod}
+      />
+      <Table
+        fixedHeader
+        onRowSelection={(i) => selectFlow(display[i])}
+        onCellClick={(a, b, c) => c.preventDefault()}
+      >
+        <TableHeader displaySelectAll={false} adjustForCheckbox={false}>
+         {(showSearch) ?
+           <FlowtableFilter
+             showColumn={showColumn}
+             filters={filters}
+             addFilter={addFilter}
+             deleteFilter={deleteFilter}
+             toggleSearch={toggleSearch}
+           /> :
+           <FlowtableControl
+             getAllFlow={getAllFlow}
+             showColumn={showColumn}
+             simulatePath={handleSimulatePath}
+             toggleAction={toggleAction}
+             toggleSearch={toggleSearch}
+             toggleSetting={toggleSetting}
+           />
+        }
+        <TableRow>
+          {showColumn.map((col, i) =>
+            <TableHeaderColumn style={{ width: 100 }} key={i}>{col}</TableHeaderColumn>
+          )}
+        </TableRow>
+        </TableHeader>
+        <TableBody
+          showRowHover
+          preScanRows={false}
+          displayRowCheckbox={false}
+          deselectOnClickaway={false}
+        >
+         {display.map((row, i) => (
+           <TableRow key={i}>
+             {showColumn.map((col, j) =>
+               <TableRowColumn style={{ width: 100 }} key={j}>{row[col]}</TableRowColumn>
+             )}
+           </TableRow>
+         ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
 });
+
+Flowtable.propTypes = {
+  getAllFlow: PropTypes.func.isRequired,
+  showColumn: PropTypes.array.isRequired,
+  showSetting: PropTypes.bool.isRequired,
+  showSearch: PropTypes.bool.isRequired,
+  showAction: PropTypes.bool.isRequired,
+  filters: PropTypes.array.isRequired,
+  flowlist: PropTypes.array.isRequired,
+  selectFlow: PropTypes.func.isRequired,
+  selectedFlow: PropTypes.object,
+  addFilter: PropTypes.func.isRequired,
+  showColumnSetting: PropTypes.func.isRequired,
+  deleteFilter: PropTypes.func.isRequired,
+  simulatePath: PropTypes.func.isRequired,
+  submiteFlowmod: PropTypes.func.isRequired,
+  toggleAction: PropTypes.func.isRequired,
+  toggleSearch: PropTypes.func.isRequired,
+  toggleSetting: PropTypes.func.isRequired,
+};
 
 const mapDispatchToProps = dispatch => bindActionCreators(FlowActions, dispatch);
 
-FlowtableContainer.propTypes = {
-  flowlist: PropTypes.array.isRequired,
-  selectFlow: PropTypes.object.isRequired,
-  selectNode: PropTypes.object.isRequired,
-  flowtableClick: PropTypes.func.isRequired,
-  simulate: PropTypes.func.isRequired,
-  flowmode: PropTypes.func.isRequired,
-  handleGetAllFlow: PropTypes.func.isRequired,
-  handleSimulate: PropTypes.func.isRequired,
-  canelSelectFlow: PropTypes.func.isRequired,
-  onRowClick: PropTypes.func.isRequired,
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(enhance(FlowtableContainer));
+export default connect(s => s.flowtable, mapDispatchToProps)(Flowtable);

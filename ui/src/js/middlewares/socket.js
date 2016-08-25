@@ -33,6 +33,7 @@ const ReceiveActions = [
   'SIMULATE_RESP',
   'ADDTAGS_RESP',
   'DELTAGS_RESP',
+  'FLOWMOD_RESP',
   // 'PACKET',
 ];
 
