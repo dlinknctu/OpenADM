@@ -1,10 +1,10 @@
 /* eslint-disable no-underscore-dangle,  */
-import d3 from 'd3';
+import { scaleOrdinal, schemeCategory10 } from 'd3';
 import Helper from '../../utils/TopoHelper';
 import { keyMap } from '../../constant/moduleMapping';
 
 const nx = global.nx;
-const color10 = d3.scale.category10();
+const color10 = scaleOrdinal(schemeCategory10);
 // save controller to choose color
 let clist = [];
 const getColorWithController = cname => color10(clist.indexOf(cname));

@@ -12,6 +12,7 @@
     "babel-preset-stage-0": "^6.5.0",
     "classnames": "^2.2.5",
     "css-loader": "^0.24.0",
+    "d3": "^4.2.2",
     "file-loader": "^0.9.0",
     "griddle-react": "^0.6.1",
     "html-webpack-plugin": "^2.8.2",
