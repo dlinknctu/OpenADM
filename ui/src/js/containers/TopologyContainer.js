@@ -7,10 +7,9 @@ import {
   clickNode,
   clickLink,
   selectNode,
-  togglePanel,
 } from '../actions/TopologyAction';
-import { resetLayout } from '../actions/LayoutAction';
 import { connectSocket } from '../actions/CoreAction';
+import { toggleModule, resetLayout } from '../actions/LayoutAction';
 
 const TopologyContainer = (props) => <Topology {...props} />;
 
@@ -25,7 +24,7 @@ const mapDispatchToProps = (dispatch) => bindActionCreators({
   clickNode,
   clickLink,
   selectNode,
-  togglePanel,
+  toggleModule,
   resetLayout,
   connectSocket,
 }, dispatch);

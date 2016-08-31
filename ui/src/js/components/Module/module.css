@@ -6,8 +6,9 @@
 }
 
 .gridItem {
-    z-index: 1200;
+    z-index: 15;
     border-radius: 5px !important;
+    height: 100%;
     padding: 10px 10px 10px 10px;
     box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23) !important;
     overflow: auto;
@@ -31,7 +32,7 @@
 }
 
 .controlPanel {
-    position: fixed;
+    position: absolute;
     right: 0;
     top: 0;
     width: 100%;
@@ -51,18 +52,20 @@
     right: 25px;
 }
 
-.floatBtn {
-    position: absolute;
-    right: 25px;
-    bottom: 10px;
-    z-index: 1209;
+.moduleWrap-enter {
+  opacity: 0.01;
 }
 
-.paperPanel {
-    margin: 25px;
-    padding: 25px;
-    width: 400px;
+.moduleWrap-enter.moduleWrap-enter-active {
+  opacity: 1;
+  transition: opacity 500ms ease-in;
 }
 
-.dialogAction {
+.moduleWrap-leave {
+  opacity: 1;
+}
+
+.moduleWrap-leave.moduleWrap-leave-active {
+  opacity: 0.01;
+  transition: opacity 300ms ease-in;
 }

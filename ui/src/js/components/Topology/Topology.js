@@ -1,7 +1,7 @@
 import React, { PropTypes, Component } from 'react';
 import { findDOMNode } from 'react-dom';
 import topo from './Topo.js';
-import styles from './topology.css';
+import './topology.css';
 
 class Topology extends Component {
 
@@ -16,7 +16,7 @@ class Topology extends Component {
   }
 
   render() {
-    return <div ref="topology" className={styles.topology}></div>;
+    return <div ref="topology" className="topology"></div>;
   }
 }
 

@@ -1,35 +1,106 @@
 import { handleActions } from 'redux-actions';
+import { combineReducers } from 'redux';
 import Immutable from 'seamless-immutable';
 
 const initialState = Immutable.from({
-  gridLayout: [
-    { i: 'Flowtable', x: 1, y: 5, w: 8, h: 7 },
-    { i: 'ControllerStatus', x: 4, y: 0, w: 5, h: 3 },
-    { i: 'PortStatus', x: 4, y: 0, w: 5, h: 3 },
-    { i: 'SettingContainer', x: 1, y: 0, w: 6, h: 8 },
+  layout: [
+    { x: 50, y: 10, width: 320, height: 320, name: 'SettingController', zIndex: 10 },
+    { x: 400, y: 10, width: 200, height: 100, name: 'ControllerStatus', zIndex: 10 },
+    { x: 400, y: 130, width: 500, height: 200, name: 'PortStatus', zIndex: 10 },
+    { x: 50, y: 350, width: 800, height: 200, name: 'Flowtable', zIndex: 10 },
   ],
-  hiddenPanel: [],
-  maximumPanel: '',
+  hidden: ['shortcuts'],
 });
 
-export default handleActions({
-  CHANGE_LAYOUT: (state, action) =>
-    state.set('gridLayout', Immutable.from(action.payload)),
+const layout = handleActions({
+  RESET_LAYOUT: () => initialState.layout,
+  CHANGE_POSITION: (state, { payload }) => state
+    .map(d =>
+      (d.name === payload.name) ?
+      ({
+        ...d,
+        x: payload.position.left,
+        y: payload.position.top,
+      }) : d
+    ),
+  CHANGE_SIZE: (state, { payload }) => {
+    const { name, size, direction, delta } = payload;
 
-  TOGGLE_PANEL: (state, { payload }) => state
-    .update('hiddenPanel', arr => {
-      const index = arr.indexOf(payload);
-      if (index !== -1) {
-        return [
-          ...arr.slice(0, index),
-          ...arr.slice(index + 1),
-        ];
-      }
-      return arr.concat(payload);
-    }).set('maximumPanel', ''),
+    if (direction === 'topRight') {
+      return state.map(d =>
+        (d.name === name) ?
+        ({
+          ...d,
+          y: d.y - delta.height,
+          ...size,
+        }) : d
+      );
+    } else if (direction === 'topLeft') {
+      return state.map(d =>
+        (d.name === name) ?
+        ({
+          ...d,
+          x: d.x - delta.width,
+          y: d.y - delta.height,
+          ...size,
+        }) : d
+      );
+    } else if (direction === 'bottomLeft') {
+      return state.map(d =>
+        (d.name === name) ?
+        ({
+          ...d,
+          x: d.x - delta.width,
+          ...size,
+        }) : d
+      );
+    } else {
+      return state.map(d =>
+        (d.name === name) ?
+        ({
+          ...d,
+          ...payload.size,
+        }) : d
+      );
+    };
+  },
+  MAXIMIZE_WINDOW: (state, { payload }) => state
+    .map( (d, i) =>
+      (d.name === payload) ?
+      ({
+        ...d,
+        width: '95%',
+        height: '80%',
+        x: 0,
+        y: 0,
+        zIndex: 10,
+      }) : ({ ...d, zIndex: 10 - i })
+    ),
+  MINIMUM_WINDOW: (state, { payload }) => state
+    .map( d =>
+      (d.name === payload) ?
+      ({
+        ...d,
+        width: 10,
+        height: 10,
+        zIndex: -1,
+      }) : d
+    ),
+  CHANGEZ_INDEX: (state, { payload }) => state
+    .map((d, i) =>
+      (d.name === payload) ?
+      ({
+        ...d,
+        zIndex: 10,
+      }) : ({ ...d, zIndex: 10 - i })
+    ),
+}, initialState.layout);
 
-  MAXIMIZE_PANEL: (state, { payload }) => state
-    .update('maximumPanel', str => (str === payload ? '' : payload)),
+const hidden = handleActions({
+  TOGGLE_MODULE: (state, { payload }) => (state.indexOf(payload) == -1) ?
+    state.concat(payload) :
+    state.filter(d => d != payload),
+  RESET_LAYOUT: () => initialState.hidden,
+}, initialState.hidden);
 
-  RESET_LAYOUT: () => initialState,
-}, initialState);
+export default combineReducers({ layout, hidden });

@@ -1,6 +1,12 @@
 import { createAction } from 'redux-actions';
 
-export const changeLayout = createAction('CHANGE_LAYOUT');
+export const changePosition = createAction('CHANGE_POSITION');
+export const changeSize = createAction('CHANGE_SIZE');
+export const maximizeWindow = createAction('MAXIMIZE_WINDOW');
+export const toggleModule = createAction('TOGGLE_MODULE');
+export const changezIndex = createAction('CHANGEZ_INDEX');
 export const resetLayout = createAction('RESET_LAYOUT');
-export const togglePanel = createAction('TOGGLE_PANEL');
-export const maximizePanel = createAction('MAXIMIZE_PANEL');
+export const closeShortcuts = () => ({
+  type: 'TOGGLE_MODULE',
+  payload: 'shortcuts',
+});

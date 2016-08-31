@@ -17,8 +17,6 @@ export const clickNode = createAction('CLICK_NODE');
 export const clickLink = createAction('CLICK_LINK');
 export const selectNode = createAction('SELECT_NODE');
 export const dragNode = createAction('DRAG_NODE');
-export const togglePanel = createAction('TOGGLE_PANEL');
-export const resetLayout = createAction('RESET_LAYOUT');
 
 export const search = createAction('SEARCH_NODE');
 export const tagChange = createAction('TAG_CHANGE');

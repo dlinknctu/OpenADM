@@ -12,14 +12,13 @@ injectTapEventPlugin();
 const initialState = Immutable.from({
   routing: { locationBeforeTransitions: null },
   layout: {
-    gridLayout: [
-      { i: 'Flowtable', x: 1, y: 5, w: 8, h: 7 },
-      { i: 'ControllerStatus', x: 4, y: 1, w: 5, h: 3 },
-      { i: 'PortStatus', x: 4, y: 0, w: 5, h: 3 },
-      { i: 'SettingContainer', x: 1, y: 0, w: 3, h: 9 },
+    layout: [
+      { x: 50, y: 10, width: 320, height: 320, name: 'SettingController', zIndex: 10 },
+      { x: 400, y: 10, width: 200, height: 100, name: 'ControllerStatus', zIndex: 10 },
+      { x: 400, y: 130, width: 500, height: 200, name: 'PortStatus', zIndex: 10 },
+      { x: 50, y: 350, width: 800, height: 200, name: 'Flowtable', zIndex: 10 },
     ],
-    hiddenPanel: ['Flowtable', 'ControllerStatus', 'PortStatus', 'SettingContainer'],
-    maximumPanel: '',
+    hidden: ['shortcuts'],
   },
   setting: {
     coreURL: '',
