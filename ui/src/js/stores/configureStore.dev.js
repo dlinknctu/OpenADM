@@ -6,8 +6,6 @@ import localstorage from 'redux-localstorage';
 import { routerMiddleware } from 'react-router-redux';
 import rootReducer from '../reducers';
 import { socketIoMiddleware } from '../middlewares/socket';
-import { persistState } from 'redux-devtools';
-import DevTools from '../containers/DevTools';
 
 const localStorageConfig = {
   deserialize: (serializedData) => Immutable.from(JSON.parse(serializedData)),
@@ -25,12 +23,7 @@ export default function configureStore(initialState, history) {
     compose(
       applyMiddleware(...middleware),
       localstorage('', localStorageConfig),
-      DevTools.instrument(),
-      persistState(
-        window.location.href.match(
-          /[?&]debug_session=([^&#]+)\b/
-        )
-      )
+      window.devToolsExtension ? window.devToolsExtension() : f => f
     )
   );
 

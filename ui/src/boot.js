@@ -5,7 +5,7 @@ import { browserHistory } from 'react-router';
 import Immutable from 'seamless-immutable';
 import injectTapEventPlugin from 'react-tap-event-plugin';
 import configureStore from './js/stores/configureStore';
-import Root from './js/Root.js';
+import Root from './js/Root.jsx';
 
 injectTapEventPlugin();
 
