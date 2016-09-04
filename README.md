@@ -1,4 +1,4 @@
-OpenADM [![Build Status](https://travis-ci.org/dlinknctu/OpenADM.svg?branch=dev)](https://travis-ci.org/dlinknctu/OpenADM)
+OpenADM [![Build Status](https://travis-ci.org/dlinknctu/OpenADM.svg?branch=dev)](https://travis-ci.org/dlinknctu/OpenADM) [![](https://images.microbadger.com/badges/version/dlinknctu/openadm.svg)](http://microbadger.com/images/dlinknctu/openadm "Get your own version badge on microbadger.com")
 ------
 An opensource Aanalytic, Diagnosis and Management framework for SDN.
 http://www.slideshare.net/rascov/20140824-omni-ui
