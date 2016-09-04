@@ -3,21 +3,37 @@ package org.winlab.omniui;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
+import java.util.Properties;
+import java.io.FileReader;
 
 /**
- * Created by zylin on 2016/1/25.
+ *  Copyright Winlab, NCTU
+ *  @author Ze-Yan LIn
+ *  Created on 2016/1/24.
+ *  This is class handle send message.
  */
 public class SendMsg {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
-    private String host = "http://127.0.0.1/publish/";
+    public SendMsg() {
+    }
+
+    /**
+     *
+     * @param obj : Link, Device, Host, Packet, Port, Flow, Controller
+     * @param action: addlink, dellink, addhost, delhost...etc
+     * @param type: String of obj class name.
+     * @return true or false
+     */
     public boolean PostMsg(Object obj, String action, String type) {
-        log.error("try post");
+        if (Omniui.host == "") { 
+            log.info("no IP");
+            return false;
+        }
+        String host = Omniui.host;
+        log.info("try post");
         Gson gson = new Gson();
         switch (type) {
             case "Link":
@@ -48,7 +64,7 @@ public class SendMsg {
                     log.error("Error PostMsg : " + e.toString());
                     return false;
                 }
-            case "Port":
+            case "PortStatistic":
                 try {
                     return request(new URL(host + action), gson.toJson((PortStatistic)(obj)));
                 } catch (Exception e) {
@@ -70,7 +86,7 @@ public class SendMsg {
                     return false;
                 }
             default:
-                log.error("error type");
+                log.error("error type" + type + ", "+ host);
                 return false;
         }
     }

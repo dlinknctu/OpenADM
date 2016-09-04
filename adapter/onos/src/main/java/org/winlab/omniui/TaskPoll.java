@@ -1,4 +1,7 @@
 package org.winlab.omniui;
+/** Copyright WinLab, NCTU
+ *  @author Ze-Yan Lin
+ */
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
@@ -12,16 +15,20 @@ import org.onosproject.net.flow.FlowRuleService;
 import org.onosproject.net.flow.TrafficSelector;
 import org.onosproject.net.flow.criteria.*;
 import org.onosproject.net.flow.instructions.Instruction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.ArrayList;
 
-/**
- * Created by zylin on 2016/1/30.
+/**  Create By Ze-Yan Lin on 2016/1/30.
+ *  This class send info to OpenADM core regular
  */
 @Component(immediate = true)
 public class TaskPoll extends BaseResource {
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
     private int time_interval = 5000;
     private Timer timer_port = new Timer();
     private Timer timer_flow = new Timer();
@@ -81,11 +88,15 @@ public class TaskPoll extends BaseResource {
                         String duration = String.valueOf(f.life());
                         String dlType = "x";
                         List<Instruction> action = f.treatment().allInstructions();
-                        String action_type = action.get(0).type().toString();
-                        String action_value = action.get(0).toString().replace(action_type.toString(),"");
+                        List<Action> actions = new ArrayList<Action>();
+			for(int i=0;i<action.size();i++){
+				Action a = new Action();
+				a.type = action.get(i).type().toString();
+				a.value = action.get(i).toString().replace(a.type.toString(),"");
+			}
                         flow.addFlow(ingressPort, dstMac, srcMac, dstIP, dstIPMask, srcIP, srcIPMask, netProtocol,
                                 dstPort, srcPort, vlan, vlanP, wildcards, tosBits, counterByte, counterPacket, idleTimeout,
-                                hardTimeout, priority, duration, dlType, action_type, action_value);
+                                hardTimeout, priority, duration, dlType, actions);
                     }
                     sendMsg.PostMsg((Object)(flow), "flow", "Flow");
                 }

@@ -11,7 +11,10 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * Created by zylin on 2016/1/24.
+ *  Copyright Winlab, NCTU
+ *  @author Ze-Yan LIn
+ *  Created on 2016/1/24.
+ *  This is class listen link event and post to OpenADM
  */
 @Component(immediate = true)
 public class LinkInfo {
@@ -58,7 +61,6 @@ public class LinkInfo {
                 switch (linkEvent.type()) {
                     case LINK_UPDATED:
                     case LINK_ADDED:
-
                         send.PostMsg(((Object) link), "addlink", "Link");
                         log.info("Post Success");
                         break;

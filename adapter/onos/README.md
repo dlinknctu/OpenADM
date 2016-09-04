@@ -18,7 +18,7 @@
 3. `docker exec -ti maven bash -c "cd OpenADM/adapter/onos && mvn clean install"`
 4. `docker cp maven:/OpenADM/adapter/onos/target/omniui-1.0-SNAPSHOT.oar .`, you can "cp" to anywhere then install and run by web.
 
-## Start Mininet
+## Start Mininet 
 1. ` mn --mac --topo=linear,2 --controller remote,ip=0.0.0.0,port=32842`
 
 ## Set OpenADM ip in adapter

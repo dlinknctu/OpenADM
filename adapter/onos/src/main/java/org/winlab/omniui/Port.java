@@ -1,7 +1,10 @@
 package org.winlab.omniui;
 
 /**
- * Created by zylin on 2016/1/30.
+ *  Copyright Winlab, NCTU
+ *  @author Ze-Yan LIn
+ *  Created on 2016/1/24.
+ *  Abstraction of port
  */
 public class Port {
     private String controller = Omniui.controller_name;
