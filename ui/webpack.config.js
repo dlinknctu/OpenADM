@@ -58,6 +58,7 @@ module.exports = {
     }),
     new webpack.NoErrorsPlugin(),
     new webpack.HotModuleReplacementPlugin(),
+    new webpack.EvalSourceMapDevToolPlugin(),
     new WebpackNotifierPlugin(),
   ],
 };
