@@ -27,7 +27,7 @@
     "react-mfb": "^0.3.0",
     "react-redux": "^4.4.2",
     "react-redux-toastr": "^3.6.3",
-    "react-resizable-and-movable": "^3.0.0",
+    "react-rnd": "^4.0.0",
     "react-router": "^2.6.1",
     "react-router-redux": "^4.0.4",
     "react-tap-event-plugin": "^1.0.0",

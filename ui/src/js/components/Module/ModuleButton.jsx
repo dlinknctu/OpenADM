@@ -7,7 +7,7 @@ const ModuleButton = onlyUpdateForKeys(['hidden'])(
   ({ hidden, togglePanel }) => {
     const childButtons = hidden.map((data, index) => (
       <ChildButton
-        key={index}
+        key={`child-${index}`}
         icon={iconMap[data]}
         label={data}
         onClick={() => togglePanel(data)}

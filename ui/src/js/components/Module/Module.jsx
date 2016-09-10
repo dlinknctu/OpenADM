@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react';
 import { compose } from 'redux';
 import { onlyUpdateForKeys, withHandlers } from 'recompose';
-import ResizableAndMovable from 'react-resizable-and-movable';
+import Rnd from 'react-rnd';
 import CloseIcon from 'material-ui/svg-icons/navigation/close';
 import FullscreenIcon from 'material-ui/svg-icons/navigation/fullscreen';
 import Paper from 'material-ui/Paper';
@@ -60,17 +60,17 @@ const Module = enhance(
     handlezIndex, handleDragStop, handleResizeStop,
     handleMinimumWindow, handleMaximizeWindow, children,
   }) =>
-    <ResizableAndMovable
-      x={x}
-      y={y}
-      width={width}
-      height={height}
+    <Rnd
+      initial={{
+        x,
+        y,
+        width,
+        height,
+      }}
       onResizeStart={handlezIndex}
       onDragStart={handlezIndex}
       onDragStop={handleDragStop}
       onResizeStop={handleResizeStop}
-      canUpdateSizeByParent
-      canUpdatePositionByParent
       zIndex={zIndex}
     >
       <ModuleController
@@ -80,7 +80,7 @@ const Module = enhance(
       <Paper className="gridItem">
         {children}
       </Paper>
-    </ResizableAndMovable>
+    </Rnd>
 );
 
 export default Module;
