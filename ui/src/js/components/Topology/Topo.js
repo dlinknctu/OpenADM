@@ -188,6 +188,9 @@ class Topo {
         case 'p':
           props.toggleModule(keyMap[e.key]);
           break;
+        case 'd':
+          props.toggleModule(keyMap[e.key]);
+          break;
         case 'r':
           props.resetLayout();
           break;

@@ -10,8 +10,9 @@ import TopologyContainer from './TopologyContainer';
 
 import FlowtableContainer from './FlowtableContainer';
 import ControllerContainer from './ControllerContainer';
-import SettingContainer from './SettingContainer.js';
+import SettingContainer from './SettingContainer';
 import PortStatusContainer from './PortStatusContainer';
+import DetailContainer from './DetailContainer';
 import * as LayoutAction from '../actions/LayoutAction';
 import '../components/Module/module.css';
 
@@ -27,6 +28,9 @@ class DomainContainer extends Component {
   }
   renderSettingController(props) {
     return <SettingContainer {...props} />;
+  }
+  renderDetail(props) {
+    return <DetailContainer {...props} />;
   }
   renderComponent(props) {
     return this[`render${props.name}`](props);

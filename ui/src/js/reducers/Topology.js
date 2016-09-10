@@ -7,7 +7,7 @@ const initalState = Immutable.from({
   fixedNode: {},
   level: 0,
   filter: [],
-  selectNodes: {},
+  selectNodes: [],
   tag: '',
   controllerList: [],
 });
@@ -46,13 +46,16 @@ export default (state = initalState, { type, payload }) => {
       return state;
 
     case 'CLICK_LINK':
+      console.info('CLICK_LINK: ', payload);
       return state;
 
     case 'SELECT_NODE':
-      return state.update('selectNodes', nodes => (
-        (nodes.uid !== payload.uid) ? payload : {})
-      );
-
+      return state.update('selectNodes', nodes => {
+        const ni = nodes.findIndex(n => n.uid === payload.uid);
+        return (ni !== -1) ?
+          nodes.slice(0, ni).concat(nodes.slice(ni + 1, nodes.length)) :
+          nodes.concat(payload);
+      });
     /**
      * { ip, vlan, mac, controller, type, location }
      * location: { port, dpid }
@@ -150,7 +153,7 @@ export default (state = initalState, { type, payload }) => {
         hosts.map(h => ({
           source: `${h.controller}@${h.location.dpid}`,
           target: `${h.controller}@${h.mac}`,
-          linkType: 's2s',
+          linkType: 's2h',
           controller: h.controller,
         }))
       );

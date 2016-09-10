@@ -19,7 +19,7 @@ class FlowtableFilter extends React.PureComponent {
     const { showColumn, filters, addFilter, deleteFilter, toggleSearch } = this.props;
     return (
       <TableRow>
-       <TableHeaderColumn colSpan={showColumn.length} style={{ position: 'inherit' }}>
+       <TableHeaderColumn colSpan={showColumn.length} style={{ position: 'inherit', paddingTop: '10px' }}>
          <IconButton><SearchIcon {...iconStyle} /></IconButton>
          <AutoComplete
            style={{ width: '20%', margin: 5 }}

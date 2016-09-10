@@ -8,6 +8,7 @@ const initialState = Immutable.from({
     { x: 400, y: 10, width: 200, height: 100, name: 'ControllerStatus', zIndex: 10 },
     { x: 400, y: 130, width: 500, height: 200, name: 'PortStatus', zIndex: 10 },
     { x: 50, y: 350, width: 800, height: 200, name: 'Flowtable', zIndex: 10 },
+    { x: 50, y: 400, width: 800, height: 200, name: 'Detail', zIndex: 10 },
   ],
   hidden: ['shortcuts'],
 });

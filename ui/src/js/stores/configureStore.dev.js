@@ -10,6 +10,13 @@ import { socketIoMiddleware } from '../middlewares/socket';
 const localStorageConfig = {
   deserialize: (serializedData) => Immutable.from(JSON.parse(serializedData)),
   key: 'openadm',
+  slicer: path => state => ({
+    ...state,
+    topology: {
+      ...state.topology,
+      selectNodes: [],
+    },
+  }),
 };
 
 export default function configureStore(initialState, history) {

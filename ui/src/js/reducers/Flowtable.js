@@ -32,7 +32,7 @@ export default handleActions({
         ...flow,
         actions: flow.actions
           .map(d => (d.value) ? `${d.type}=${d.value}` :  d.type )
-          .reduce((pre,cur) => `${pre},${cur}`),
+          .reduce((pre, cur) => `${pre},${cur}`, ''),
         controller: d.controller,
         dpid: d.dpid,
       })
@@ -81,4 +81,22 @@ export default handleActions({
     .update('selectFlow', () => payload),
   SIMULATE_RESP: (state) => state
     .set('selectFlow', {}),
+  SELECT_NODE: (state, { payload }) => {
+    if (!payload.dpid) {
+      return state;
+    }
+    const filter = {
+      category: 'dpid',
+      operator: '==',
+      value: payload.dpid,
+    };
+    const inFilter = state.filters
+      .findIndex(f => f.category === 'dpid' && f.value === payload.dpid);
+    if (inFilter === -1) {
+      return state.update('filters', f => f.concat(filter));
+    }
+    return state.update('filters',
+      f => f.filter(d => d.category !== 'dpid' && d.value !== payload.dpid)
+    );
+  },
 }, initialState);
