@@ -36,12 +36,12 @@ class Topo {
         color: vertex => getColorWithController(vertex.get('controller')),
       },
       linkConfig: {
-        width: vertex => ((vertex.get('linkType') === 's2s') ? 6 : 4),
+        width: vertex => ((vertex.get('linkType') === 's2s') ? 4 : 2),
         linkType: 'curve',
-        style: vertex => ((vertex.get('linkType') !== 's2s') ?
-          { 'stroke-dasharray': '1 , 1' } : {}
-        ),
-        color: vertex => getColorWithController(vertex.get('controller')),
+        style: vertex => {
+          return (vertex.get('linkType') !== 's2s') ? { 'stroke-dasharray': '1 , 1' } : {};
+        },
+        color: vertex => getColorWithController(vertex._sourceID.split('@')[0]),
       },
       nodeSetConfig: {
         iconType: 'cloud',
@@ -206,6 +206,7 @@ class Topo {
   setData(data) {
     clist = data.nodeSet.map(d => d.controller);
     topoInstant.data(data);
+    topoInstant.expandAll();
   }
 
   insertData(data) {
@@ -259,8 +260,8 @@ class Topo {
     const pathLayer = topoInstant.getLayer('paths');
     const links = linkCollection.path.map(link => {
       const linkIds = this.getLinksByNodeUid(
-        `${linkCollection.controller}@${link[0].dpid}`,
-        `${linkCollection.controller}@${link[1].dpid}`
+        `${linkCollection.controller}@${link[0].dpid || link[0].mac}`,
+        `${linkCollection.controller}@${link[1].dpid || link[1].mac}`
       );
       return topoInstant.getLink(linkIds[0]);
     });
