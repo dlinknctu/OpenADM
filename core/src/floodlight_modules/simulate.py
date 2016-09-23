@@ -30,8 +30,10 @@ class Simulate:
 	def __init__(self, core, param):
 		self.getAllFlows = core.ipcHandlers['getAllFlows']
 		self.getAllLinks = core.ipcHandlers['getAllLinks']
+		self.getAllHosts = core.ipcHandlers['getAllHosts']
 		self.flows_data = []
 		self.links_data = []
+		self.hosts_data = []
 		self.__registration(core)
 
 	def __registration(self, core):
@@ -155,9 +157,10 @@ class Simulate:
 
 					if o_port == -5 : # flood
 						try:
+							#flood to switches
 							for (src_dpid, src_port, dst_dpid, dst_port) in self.links_data:
 								if src_dpid == now and i_port != int(src_port):
-									logger.debug('Flood out a port.')
+									logger.debug('Flood out a port to switch.')
 									nx_pkt = copy.deepcopy(now_pkt)
 									nx_pkt['ingressPort'] = dst_port
 									nexthop.append( ( [ {'dpid': src_dpid,
@@ -165,10 +168,26 @@ class Simulate:
 														{'dpid': dst_dpid,
 														 'port': dst_port} ]
 														, nx_pkt) )
+							#flood to hosts
+							for pair in self.hosts_data:
+								host = self.hosts_data[pair]
+								mac = pair[1]
+								sw = host.get('location', None)
+								if sw is not None and (sw.get('dpid', None) == now or\
+													sw.get('elementId', None) == now):
+									logger.debug('Flood out a port to host.')
+									#to host, so don't need to copy packet
+									nexthop.append( ( [ {'dpid': now,
+														 'port': sw.get('port', '-1')},
+														 {'mac': mac} ]
+														, None) )
+									break
 						except:
 							logger.warning('Get links or ingressPort error!')
 					elif o_port >= 0 :
 						try:
+							found = False
+							#output to switches
 							for (src_dpid, src_port, dst_dpid, dst_port) in self.links_data:
 								if src_dpid == now and o_port == int(src_port) and i_port != int(src_port):
 									logger.debug('Output a port.')
@@ -179,7 +198,24 @@ class Simulate:
 														{'dpid': dst_dpid,
 														 'port': dst_port} ]
 														, nx_pkt) )
+									found = True
 									break
+							#output to hosts
+							if not found:
+								for pair in self.hosts_data:
+									host = self.hosts_data[pair]
+									mac = pair[1]
+									sw = host.get('location', None)
+									if sw is not None and (sw.get('dpid', None) == now or\
+														sw.get('elementId', None) == now) and \
+														int(sw.get('port', -5566)) == o_port:
+										logger.debug('Flood out a port to host.')
+										#to host, so don't need to copy packet
+										nexthop.append( ( [ {'dpid': now,
+															 'port': str(o_port)},
+															 {'mac': mac} ]
+															, None) )
+										break
 						except:
 							logger.warning('Get links or ingressPort error!')
 					else:
@@ -206,7 +242,8 @@ class Simulate:
 		for (lctrl, sid, sp, did, dp) in links:
 			if lctrl == ctrl:
 				self.links_data.append( (sid, sp, did, dp) )
-				self.links_data.append( (did, dp, sid, sp) ) #reverse to let it be directional
+				#self.links_data.append( (did, dp, sid, sp) ) #reverse to let it be directional
+		self.hosts_data = self.getAllHosts()
 
 		#Now use BFS-like to visit all related switches
 		p = copy.deepcopy(rule) # simulating a packet through the BFS
@@ -252,12 +289,13 @@ class Simulate:
 					for nx in pathl: # use list because maybe it floods
 						path = nx[0]
 						nx_pkt = nx[1]
-						dst_dpid = path[1].get('dpid', None) if len(path) > 1 else None
-						if dst_dpid is not None:
+						if len(path) > 1:
 							paths.append(path)
-							#if not v.get(dst_dpid, True):
-							#	q.append((dst_dpid, nx_pkt))
-							q.append( (dst_dpid, nx_pkt) )
+							dst_dpid = path[1].get('dpid', None)
+							if dst_dpid is not None: #to sw
+								#if not v.get(dst_dpid, True):
+								#	q.append((dst_dpid, nx_pkt))
+								q.append( (dst_dpid, nx_pkt) )
 
 		return {'controller': ctrl, 'path': paths}
 

@@ -67,11 +67,15 @@ class NWInfo:
         # IPC API for other modules
         core.registerIPC('getAllFlows', self.getAllFlows)
         core.registerIPC('getAllLinks', self.sendLink)
+        core.registerIPC('getAllHosts', self.sendHosts)
 
         logger.info('Handlers and websocket APIs registered')
 
     def sendLink(self):
         return self.links
+
+    def sendHosts(self):
+        return self.hosts
 
     def sendPort(self):
         return self.portstats
