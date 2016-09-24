@@ -114,7 +114,7 @@
                         </Bundle-SymbolicName>
                         <Import-Package>
                             !com.google.gson,
-                       		org.slf4j,
+                            org.slf4j,
                             org.osgi.framework,
                             javax.ws.rs,javax.ws.rs.core,
                             org.glassfish.jersey,
