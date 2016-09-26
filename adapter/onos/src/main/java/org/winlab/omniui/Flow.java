@@ -45,7 +45,7 @@ public class Flow {
         public String priority = "";
         public String duration = "";
         public String dlType = "";
-        public List<Action> action = new ArrayList<Action>();
+        public List<Action> actions = new ArrayList<Action>();
         
         public Flows( String ingressPort, String dstMac, String srcMac, String dstIP, String dstIPMask,
                      String srcIP, String srcIPMask, String netProtocol, String dstPort, String srcPort,
@@ -73,7 +73,7 @@ public class Flow {
             this.priority = priority;
             this.duration = duration;
             this.dlType = dlType;
-            this.action = action;
+            this.actions = action;
         }
     }
 }
